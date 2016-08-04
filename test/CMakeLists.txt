@@ -17,6 +17,7 @@ add_definitions (-DBOOST_TEST_DYN_LINK)
 set(TESTAPPS
   test1
   checkS2nodata
+  check2tif
   )
 
 set(JIPLIBS 

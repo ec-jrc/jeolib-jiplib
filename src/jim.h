@@ -45,7 +45,7 @@ public:
   ///get MIA representation of multiband image: we need to allocate and duplicate the memory
   ///use only for mia operations that operate on 3D input images
   ///for band wise operations, better loop over getMIA(band) to avoid duplicate memory
-  IMAGE getMIA();
+  // IMAGE getMIA();
   // IMAGE* getMIA();
   ///set memory from MIA representation
   CPLErr setMIA(IMAGE& mia);

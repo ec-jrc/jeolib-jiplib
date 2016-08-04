@@ -30,20 +30,20 @@ IMAGE Jim::getMIA(unsigned int band){
   return mia;
 }
 
-IMAGE Jim::getMIA(){
-  if(getBlockSize()!=nrOfRow()){
-    std::ostringstream s;
-    s << "Error: increase memory to support MIA library functions (now at " << 100.0*getBlockSize()/nrOfRow() << "%)";
-    throw(s.str());
-  }
-  IMAGE* mia_out=create_image(GDAL2LIIARDataType(getDataType()),nrOfCol(),nrOfRow(),nrOfBand());
-  for(int iband=0;iband<nrOfBand();++iband){
-    IMAGE mia_in=getMIA(iband);
-    //imputop(&mia_in,mia_out,0,0,iband,OR_op);
-    imputop(&mia_in,mia_out,0,0,iband,11);
-  }
-  return *mia_out;
-}
+// IMAGE Jim::getMIA(){
+//   if(getBlockSize()!=nrOfRow()){
+//     std::ostringstream s;
+//     s << "Error: increase memory to support MIA library functions (now at " << 100.0*getBlockSize()/nrOfRow() << "%)";
+//     throw(s.str());
+//   }
+//   IMAGE* mia_out=create_image(GDAL2LIIARDataType(getDataType()),nrOfCol(),nrOfRow(),nrOfBand());
+//   for(int iband=0;iband<nrOfBand();++iband){
+//     IMAGE mia_in=getMIA(iband);
+//     //imputop(&mia_in,mia_out,0,0,iband,OR_op);
+//     imputop(&mia_in,mia_out,0,0,iband,11);
+//   }
+//   return *mia_out;
+// }
 
 CPLErr Jim::setMIA(IMAGE& mia){
   m_gds=0;
@@ -115,8 +115,8 @@ CPLErr Jim::arith(Jim& imgRaster, int theOperation){
 }
 
 CPLErr Jim::rdil(Jim& mask, int graph, int flag){
-  IMAGE maskMIA=mask.getMIA();
-  IMAGE markMIA=this->getMIA();
+  IMAGE maskMIA=mask.getMIA(0);
+  IMAGE markMIA=this->getMIA(0);
   ::rdil(&markMIA,&maskMIA,graph,flag);
 }
 
