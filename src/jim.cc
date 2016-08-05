@@ -15,13 +15,12 @@ IMAGE Jim::getMIA(unsigned int band){
     throw(s.str());
   }    
   IMAGE mia;
-  // assert(band<m_data.size());
-  mia.p_im=m_data[band];//[band];    /* Pointer to image data */
+  mia.p_im=m_data[band];/* Pointer to image data */
   mia.DataType=GDAL2LIIARDataType(getDataType());
   mia.nx=nrOfCol();
   mia.ny=nrOfRow();
   mia.nz=1;
-  mia.NByte=GDALGetDataTypeSize(getDataType())>>3;//todo: check /* Number of bytes for image data */
+  mia.NByte=mia.nx*mia.ny*mia.nz*GDALGetDataTypeSize(getDataType())>>3;//assumes image data type is not of bit type!!!
   //todo: remove mia.vol and only rely on the getVolume function
   mia.vol=0;//not used.
   mia.lut=0;
@@ -45,24 +44,20 @@ IMAGE Jim::getMIA(unsigned int band){
 //   return *mia_out;
 // }
 
-CPLErr Jim::setMIA(IMAGE& mia){
-  m_gds=0;
-  m_ncol = mia.nx;
-  m_nrow = mia.ny;
-  m_nband=mia.nz;
-  m_dataType = LIIAR2GDALDataType(mia.DataType);
-  initMem(0);
-  for(unsigned int iband=0;iband<m_nband;++iband){
-    m_data[iband]=mia.p_im+iband*nrOfRow()*nrOfCol()*(GDALGetDataTypeSize(getDataType())>>3);
-    m_begin[iband]=0;
-    m_end[iband]=m_begin[iband]+getBlockSize();
-  }
-  // if(m_filename!=""){
-  //   m_writeMode=true;
-  //   registerDriver();
-  // }
-  return(CE_None);
-}
+// CPLErr Jim::setMIA(IMAGE& mia){
+//   m_gds=0;
+//   m_ncol = mia.nx;
+//   m_nrow = mia.ny;
+//   m_nband=mia.nz;
+//   m_dataType = LIIAR2GDALDataType(mia.DataType);
+//   initMem(0);
+//   for(unsigned int iband=0;iband<m_nband;++iband){
+//     m_data[iband]=mia.p_im+iband*nrOfRow()*nrOfCol()*(GDALGetDataTypeSize(getDataType())>>3);
+//     m_begin[iband]=0;
+//     m_end[iband]=m_begin[iband]+getBlockSize();
+//   }
+//   return(CE_None);
+// }
 
 CPLErr Jim::setMIA(IMAGE& mia, unsigned int band){
   if(mia.nz>1){
@@ -118,6 +113,8 @@ CPLErr Jim::rdil(Jim& mask, int graph, int flag){
   IMAGE maskMIA=mask.getMIA(0);
   IMAGE markMIA=this->getMIA(0);
   ::rdil(&markMIA,&maskMIA,graph,flag);
+  if(flag)//rdil reallocates data pointer
+    mask.setMIA(maskMIA,0);
 }
 
 CPLErr Jim::imequalp(Jim& ref){
@@ -131,6 +128,35 @@ CPLErr Jim::imequalp(Jim& ref){
       return(CE_Failure);
   }
   return(result);
+}
+
+
+/**
+ * @param imgSrc Use this source image as the reference image
+ **/
+bool Jim::operator==(Jim& refImg)
+{
+  bool isEqual=true;
+  if(nrOfBand()!=refImg.nrOfBand())
+    return(false);
+  if(nrOfRow()!=refImg.nrOfRow())
+    return(false);
+  if(nrOfCol()!=refImg.nrOfCol())
+    return(false);
+
+  for(int iband=0;iband<nrOfBand();++iband){
+    if(getDataType(iband)!=refImg.getDataType(iband)){
+      isEqual=false;
+      break;
+    }
+    IMAGE refMIA=refImg.getMIA(iband);
+    IMAGE thisMIA=this->getMIA(iband);
+    if(::imequalp(&thisMIA,&refMIA)){
+      isEqual=false;
+      break;
+    }
+  }
+  return(isEqual);
 }
 
 

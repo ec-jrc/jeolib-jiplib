@@ -48,9 +48,9 @@ public:
   // IMAGE getMIA();
   // IMAGE* getMIA();
   ///set memory from MIA representation
-  CPLErr setMIA(IMAGE& mia);
+  // CPLErr setMIA(IMAGE& mia);
   ///set memory from MIA representation for particular band
-  CPLErr setMIA(IMAGE& mia, unsigned int band=0);
+  CPLErr setMIA(IMAGE& mia, unsigned int band);
 
   GDALDataType LIIAR2GDALDataType(int aLIIARDataType)
   {
@@ -79,6 +79,10 @@ public:
       return GDT_Unknown;
     }
   };
+  ///relational == operator
+  bool operator==(Jim& refImg);
+  ///relational != operator
+  bool operator!=(Jim& refImg){ return !(this->operator==(refImg)); };
 
   CPLErr arith(Jim& imgRaster, int theOperation);
   CPLErr rdil(Jim& mask, int graph, int flag);

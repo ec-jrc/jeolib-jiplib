@@ -43,45 +43,42 @@ int main(int argc, char *argv[])
       exit(1);
     }
   }
-
   try{
     Jim inputImg(input_opt[0]);
     Jim mask(inputImg,true);
+    mask.writeData(nodata_opt[0],1500,1500,0);
     mask.setThreshold(nodata_opt[0],nodata_opt[0],0,1);
     Jim marker(inputImg,false);
-    int theValue=1;
-    marker.writeData(theValue,static_cast<unsigned int>(1),static_cast<unsigned int>(1),static_cast<unsigned int>(0));
+    unsigned int theValue=1;
+    std::vector<unsigned short> lineBuffer(marker.nrOfCol());
+    std::vector<unsigned short> zeroBuffer(marker.nrOfCol());
+    marker.writeData(zeroBuffer,0,0);
+    for(int icol=0;icol<marker.nrOfCol();++icol){
+      if(icol<1||icol>marker.nrOfCol()-2)
+        lineBuffer[icol]=0;
+      else
+        lineBuffer[icol]=1;
+    }
+    for(int irow=1;irow<marker.nrOfRow()-1;++irow)
+      marker.writeData(lineBuffer,irow,0);
+    marker.writeData(zeroBuffer,marker.nrOfRow()-1,0);
+
     marker.rdil(mask,8,1);
-    CPLErr imagesDiffer=marker.imequalp(mask);
-    mask.close();
-    marker.close();
-    if(imagesDiffer!=CE_None)
+    marker.setFile("/tmp/marker.tif",oformat_opt[0],memory_opt[0],option_opt);
+    mask.setFile("/tmp/mask.tif",oformat_opt[0],memory_opt[0],option_opt);
+    if(marker!=mask)
       std::cout << "Error: check not passed for image " << input_opt[0] << std::endl;
     else{
-      std::cout << "Converting " << input_opt[0] << std::endl;
-      // Jim outputImg(inputImg,true);
-      //test
-      Jim outputImg(inputImg,false);
-      IMAGE inputIM=inputImg.getMIA(0);
-      IMAGE outputIM=outputImg.getMIA(0);
-      //bug: imequalp does not seem to work...
-      std::cout << "image equal?: " << imequalp(&inputIM,&outputIM) << std::endl;
-      std::cout << "image equal?: " << imequalp(&inputIM,&inputIM) << std::endl;
-      //test
-      iminfo(&inputIM);
-      dumpxyz(&inputIM,1500,1500,0,5,5);
-      
-      if(inputImg.imequalp(outputImg)!=CE_None)
-        std::cout << "input != output" << std::endl;
-      else
-        std::cout << "input = output" << std::endl;
-      std::cout << "outputImg.nrOfCol(): " << outputImg.nrOfCol() << std::endl;
-      std::cout << "outputImg.nrOfRow(): " << outputImg.nrOfRow() << std::endl;
-      outputImg.readData(theValue,1500,1500,0);
-      std::cout << "theValue: " << theValue << std::endl;
+      Jim outputImg(inputImg,true);
       outputImg.setFile(output_opt[0],oformat_opt[0],memory_opt[0],option_opt);
+      if(inputImg==outputImg)
+        cout << "created image identical to input image" << endl;
+      else
+        cout << "Error: created image different then input image" << endl;
       outputImg.close();
     }
+    mask.close();
+    marker.close();
     inputImg.close();
   }
   catch(string helpString){//help was invoked
