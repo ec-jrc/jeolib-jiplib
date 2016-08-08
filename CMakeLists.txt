@@ -25,6 +25,8 @@ set (PROJECT_SOURCE_DIR src)
 set(JIPLIB_LIB_NAME jiplib)
 set(MIALISP_LIB_NAME jip_generic)
 
+option (BUILD_SHARED_LIBS "Build with shared library" ON)
+
 # Platform and compiler specific settings
 
 include(CheckCXXCompilerFlag)
@@ -37,6 +39,23 @@ if(COMPILER_SUPPORTS_CXX11)
 else(COMPILER_SUPPORTS_CXX11)
   message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
+
+if(WIN32)
+else()
+  # Recommended C++ compilation flags
+  # -Weffc++
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pg")
+  set(JIPLIB_COMMON_CXX_FLAGS
+    "-Wall -Wpointer-arith -Wcast-align -Wcast-qual -Wredundant-decls -Wno-long-long")
+
+  if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${JIPLIB_COMMON_CXX_FLAGS}")
+
+  elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR "${CMAKE_CXX_COMPILER}" MATCHES "clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${JIPLIB_COMMON_CXX_FLAGS}")
+  endif()
+endif(WIN32)
 
 # Make sure pktools version 3.0.0 is found
 set(PKTOOLS_INCLUDE_DIR /usr/local/include/pktools CACHE PATH "Include PATH for PKTOOLS")

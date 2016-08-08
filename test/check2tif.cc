@@ -46,10 +46,10 @@ int main(int argc, char *argv[])
   try{
     Jim inputImg(input_opt[0]);
     Jim mask(inputImg,true);
-    mask.writeData(nodata_opt[0],1500,1500,0);
-    mask.setThreshold(nodata_opt[0],nodata_opt[0],0,1);
+    // mask.writeData(nodata_opt[0],1500,1500,0);
+    if(mask.setThreshold(nodata_opt[0],nodata_opt[0],0,1)==CE_Failure)
+      cerr<< "Error: could not set threshold" << endl;
     Jim marker(inputImg,false);
-    unsigned int theValue=1;
     std::vector<unsigned short> lineBuffer(marker.nrOfCol());
     std::vector<unsigned short> zeroBuffer(marker.nrOfCol());
     marker.writeData(zeroBuffer,0,0);
@@ -63,9 +63,7 @@ int main(int argc, char *argv[])
       marker.writeData(lineBuffer,irow,0);
     marker.writeData(zeroBuffer,marker.nrOfRow()-1,0);
 
-    marker.rdil(mask,8,1);
-    marker.setFile("/tmp/marker.tif",oformat_opt[0],memory_opt[0],option_opt);
-    mask.setFile("/tmp/mask.tif",oformat_opt[0],memory_opt[0],option_opt);
+    marker.rero(mask,8,1);
     if(marker!=mask)
       std::cout << "Error: check not passed for image " << input_opt[0] << std::endl;
     else{

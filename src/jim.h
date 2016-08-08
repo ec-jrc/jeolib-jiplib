@@ -86,6 +86,7 @@ public:
 
   CPLErr arith(Jim& imgRaster, int theOperation);
   CPLErr rdil(Jim& mask, int graph, int flag);
+  CPLErr rero(Jim& mask, int graph, int flag);
   CPLErr imequalp(Jim& ref);
 
 private:

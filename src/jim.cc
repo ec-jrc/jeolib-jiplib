@@ -117,6 +117,14 @@ CPLErr Jim::rdil(Jim& mask, int graph, int flag){
     mask.setMIA(maskMIA,0);
 }
 
+CPLErr Jim::rero(Jim& mask, int graph, int flag){
+  IMAGE maskMIA=mask.getMIA(0);
+  IMAGE markMIA=this->getMIA(0);
+  ::rero(&markMIA,&maskMIA,graph,flag);
+  if(flag)//rero reallocates data pointer
+    mask.setMIA(maskMIA,0);
+}
+
 CPLErr Jim::imequalp(Jim& ref){
   CPLErr result=CE_None;
   if(ref.nrOfBand()!=this->nrOfBand())
