@@ -16,7 +16,7 @@ set(JIPLIB_IMG_H jim.h)
 add_library( ${JIPLIB_LIB_NAME} ${JIPLIB_IMG_H} ${JIPLIB_IMG_CC})
 target_link_libraries( 
   ${JIPLIB_LIB_NAME} 
-  ${MIALISP_LIB_NAME}
+  ${MIA_LIB_NAME}
   gomp
   ${GDAL_LIBRARIES}
   base

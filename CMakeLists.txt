@@ -23,7 +23,7 @@ set (PROJECT_SOURCE_DIR src)
 
 # Name of C++ library
 set(JIPLIB_LIB_NAME jiplib)
-set(MIALISP_LIB_NAME jip_generic)
+set(MIA_LIB_NAME jip_generic)
 
 option (BUILD_SHARED_LIBS "Build with shared library" ON)
 
@@ -63,15 +63,15 @@ set(PKTOOLS_LIB_PATH /usr/local/lib CACHE PATH "Library PATH for PKTOOLS")
 
 
 
-# Make sure mialisp is found
-# fix: need to copy mialisp/python/jip/swig/jipl_glue.h to mialisp/python/jip/ljip/src
-set(MIALISP_INCLUDE_DIR /home/kempepi/mialisp/python/jip/ljip/src CACHE PATH "Include PATH for MIALISP")
-set(MIALISP_LIB_PATH /home/kempepi/mialisp/python/jip/ljip/lib CACHE PATH "Library PATH for MIALISP")
+# Make sure mia is found
+# fix: need to copy jip/swig/jipl_glue.h to jip/ljip/src
+set(MIA_INCLUDE_DIR /usr/local/include/mia CACHE PATH "Include PATH for MIA")
+set(MIA_LIB_PATH /usr/local/lib CACHE PATH "Library PATH for MIA")
 
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /home/kempepi/mialisp/python/jip/ljip/lib)
+#set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /home/kempepi/mia/python/jip/ljip/lib)
 
-INCLUDE_DIRECTORIES(${MIALISP_INCLUDE_DIR})
-LINK_DIRECTORIES(${MIALISP_LIB_PATH})
+INCLUDE_DIRECTORIES(${MIA_INCLUDE_DIR})
+LINK_DIRECTORIES(${MIA_LIB_PATH})
 
 INCLUDE_DIRECTORIES(${PKTOOLS_INCLUDE_DIR})
 
