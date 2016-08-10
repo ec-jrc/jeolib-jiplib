@@ -15,29 +15,41 @@ extern "C" {
 #include "op.h"
 }
 
-//extern ERROR_TYPE rdil(IMAGE *, IMAGE *, int, int);
-
-namespace jiplib{
 /**
-   Base class for raster dataset (read and write) in a format supported by GDAL. This general raster class is used to store e.g., filename, number of columns, rows and bands of the dataset. 
+   Name space jiplib
 **/
+namespace jiplib{
+
+/** @brief class for raster dataset (read and write).
+    
+    Jim is a class that enables the integration of functionalities from both pktools and mia image processing libraries
+    @author Pieter Kempeneers, Pierre Soille
+    @date 2016
+*/
 class Jim : public ImgRaster
 {
 public:
   ///default constructor
   Jim(void) : ImgRaster(){};
   ///constructor input image
-  Jim(const std::string& filename, unsigned long int memory=0) : ImgRaster(filename,memory){};
+  Jim(const std::string& filename, unsigned long int memory=0) : ImgRaster(filename,memory){m_nplane=1;};
   ///constructor input image
-  Jim(const std::string& filename, const ImgRaster& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename,imgSrc,memory,options){};
+  Jim(const std::string& filename, const ImgRaster& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename,imgSrc,memory,options){m_nplane=1;};
   ///constructor input image
-  Jim(ImgRaster& imgSrc, bool copyData=true) : ImgRaster(imgSrc, copyData){};
+  Jim(ImgRaster& imgSrc, bool copyData=true) : ImgRaster(imgSrc, copyData){m_nplane=1;};
   ///constructor output image
-  Jim(const std::string& filename, unsigned int ncol, unsigned int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){};
+  Jim(const std::string& filename, unsigned int ncol, unsigned int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){m_nplane=1;};
   ///constructor output image
-  Jim(unsigned int ncol, unsigned int nrow, unsigned int nband, const GDALDataType& dataType) : ImgRaster(ncol, nrow, nband, dataType){};
+  Jim(unsigned int ncol, unsigned int nrow, unsigned int nband, const GDALDataType& dataType) : ImgRaster(ncol, nrow, nband, dataType){m_nplane=1;};
   ///destructor
   ~Jim(void){};
+
+  ///Get the number of planes of this dataset
+  unsigned int nrOfPlane(void) const { return m_nplane;};
+  /// convert single plane multiband image to single band image with multiple planes
+  CPLErr band2plane(){};//not implemented yet
+  /// convert single band multiple plane image to single plane multiband image
+  CPLErr plane2band(){};//not implemented yet
   ///get MIA representation for a particular band
   IMAGE getMIA(unsigned int band);
   ///set memory from MIA representation for particular band
@@ -60,10 +72,10 @@ public:
       return GDT_Float32;
     case t_DOUBLE:
       return GDT_Float64;
-      /*   case t_UINT64; *:
-           /*     return GDT_UInt64; */
-      /*   case t_INT64; *:
-           /*     return GDT_Int64; */
+    // case t_UINT64:
+    //   return GDT_UInt64;
+    // case t_INT64:
+    //   return GDT_Int64;
     case t_UNSUPPORTED:
       return GDT_Unknown;
     default:
@@ -81,7 +93,11 @@ public:
   /// perform a morphological erosion for a particular band
   CPLErr rero(Jim& mask, int graph, int flag, unsigned int band=0);
 
+protected:
+  ///number of planes in this dataset
+  unsigned int m_nplane;
 private:
+
 };
 }
 #endif // _JIM_H_
