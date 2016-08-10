@@ -38,23 +38,14 @@ public:
   Jim(unsigned int ncol, unsigned int nrow, unsigned int nband, const GDALDataType& dataType) : ImgRaster(ncol, nrow, nband, dataType){};
   ///destructor
   ~Jim(void){};
-  ///get MIA representation of single band image
+  ///get MIA representation for a particular band
   IMAGE getMIA(unsigned int band);
-  ///get pointer to MIA representation of single band image
-  // IMAGE* getMIA(unsigned int band);
-  ///get MIA representation of multiband image: we need to allocate and duplicate the memory
-  ///use only for mia operations that operate on 3D input images
-  ///for band wise operations, better loop over getMIA(band) to avoid duplicate memory
-  // IMAGE getMIA();
-  // IMAGE* getMIA();
-  ///set memory from MIA representation
-  // CPLErr setMIA(IMAGE& mia);
   ///set memory from MIA representation for particular band
   CPLErr setMIA(IMAGE& mia, unsigned int band);
-
-  GDALDataType LIIAR2GDALDataType(int aLIIARDataType)
+  ///convert a MIA data type to GDAL data type
+  GDALDataType MIA2GDALDataType(int aMIADataType)
   {
-    switch (aLIIARDataType){
+    switch (aMIADataType){
     case t_UCHAR:
       return GDT_Byte;
     case t_USHORT:
@@ -83,11 +74,12 @@ public:
   bool operator==(Jim& refImg);
   ///relational != operator
   bool operator!=(Jim& refImg){ return !(this->operator==(refImg)); };
-
-  CPLErr arith(Jim& imgRaster, int theOperation);
-  CPLErr rdil(Jim& mask, int graph, int flag);
-  CPLErr rero(Jim& mask, int graph, int flag);
-  CPLErr imequalp(Jim& ref);
+  /// perform arithmetic operation for a particular band
+  CPLErr arith(Jim& imgRaster, int theOperation, unsigned int band=0);
+  /// perform a morphological dilation for a particular band
+  CPLErr rdil(Jim& mask, int graph, int flag, unsigned int band=0);
+  /// perform a morphological erosion for a particular band
+  CPLErr rero(Jim& mask, int graph, int flag, unsigned int band=0);
 
 private:
 };

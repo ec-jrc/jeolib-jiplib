@@ -66,15 +66,15 @@ int main(int argc, char *argv[])
     marker.rero(mask,8,1);
     if(marker!=mask)
       std::cout << "Error: check not passed for image " << input_opt[0] << std::endl;
-    else{
-      Jim outputImg(inputImg,true);
-      outputImg.setFile(output_opt[0],oformat_opt[0],memory_opt[0],option_opt);
-      if(inputImg==outputImg)
-        cout << "created image identical to input image" << endl;
-      else
-        cout << "Error: created image different then input image" << endl;
-      outputImg.close();
-    }
+    else
+      std::cout << "Check passed for image " << input_opt[0] << std::endl;
+    Jim outputImg(inputImg,true);
+    outputImg.setFile(output_opt[0],oformat_opt[0],memory_opt[0],option_opt);
+    if(inputImg==outputImg)
+      cout << "created image identical to input image" << endl;
+    else
+      cout << "Error: created image different then input image" << endl;
+    outputImg.close();
     mask.close();
     marker.close();
     inputImg.close();
