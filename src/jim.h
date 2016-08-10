@@ -23,7 +23,7 @@ namespace jiplib{
 /** @brief class for raster dataset (read and write).
     
     Jim is a class that enables the integration of functionalities from both pktools and mia image processing libraries
-    @author Pieter Kempeneers, Pierre Soille
+    @author Pierre Soille, Pieter Kempeneers
     @date 2016
 */
 class Jim : public ImgRaster
