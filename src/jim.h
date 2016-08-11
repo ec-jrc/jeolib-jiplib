@@ -30,7 +30,7 @@ class Jim : public ImgRaster
 {
 public:
   ///default constructor
-  Jim(void) : ImgRaster(){};
+  Jim(void) : ImgRaster(){m_nplane=1;};
   ///constructor input image
   Jim(const std::string& filename, unsigned long int memory=0) : ImgRaster(filename,memory){m_nplane=1;};
   ///constructor input image

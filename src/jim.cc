@@ -81,29 +81,28 @@ CPLErr Jim::setMIA(IMAGE& mia, unsigned int band){
  * @return CE_None if successful
  */
 CPLErr Jim::arith(Jim& imgRaster, int theOperation, unsigned int iband){
-  if(imgRaster.nrOfCol()!=this->nrOfCol()){
-    std::string errorString="Error: dimensions of images do not match";
-    throw(errorString);
-  }
-  if(imgRaster.nrOfRow()!=this->nrOfRow()){
-    std::string errorString="Error: dimensions of images do not match";
-    throw(errorString);
-  }
-  if(imgRaster.nrOfBand()<iband){
-    std::string errorString="Error: band number exceeds number of bands in input image";
-    throw(errorString);
-  }
-  if(nrOfBand()<iband){
-    std::string errorString="Error: band number exceeds number of bands in input image";
-    throw(errorString);
-  }
-  IMAGE mia1=this->getMIA(iband);
-  IMAGE mia2=imgRaster.getMIA(iband);
-  CPLErr success=CE_None;
-  ::arith(&mia1, &mia2, theOperation);
-  setMIA(mia1,iband);
-  imgRaster.setMIA(mia2,iband);
-  return(success);
+  // try{
+  //   if(imgRaster.nrOfBand()<iband){
+  //     std::string errorString="Error: band number exceeds number of bands in input image";
+  //     throw(errorString);
+  //   }
+  //   if(nrOfBand()<iband){
+  //     std::string errorString="Error: band number exceeds number of bands in input image";
+  //     throw(errorString);
+  //   }
+  //   IMAGE mia1=this->getMIA(iband);
+  //   IMAGE mia2=imgRaster.getMIA(iband);
+  //   ::arith(&mia1, &mia2, theOperation);
+  //   setMIA(mia1,iband);
+  //   imgRaster.setMIA(mia2,iband);
+  //   return(CE_None);
+  // }
+  // catch(std::string errorString){
+  //   std::cerr << errorString << std::endl;
+  //   return(CE_Failure);
+  // }
+  //test
+  return(CE_None);
 }
 
 /** 
