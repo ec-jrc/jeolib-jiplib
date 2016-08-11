@@ -101,6 +101,8 @@ public:
       return GDT_Unknown;
     }
   };
+  ///assignment operator
+  Jim& operator=(Jim& imgSrc);
   ///relational == operator
   bool operator==(Jim& refImg);
   ///relational != operator

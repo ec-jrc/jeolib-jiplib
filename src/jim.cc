@@ -146,6 +146,22 @@ CPLErr Jim::rero(Jim& mask, int graph, int flag, unsigned int iband){
   return(success);
 }
 
+/**
+ * @param imgSrc Use this source image as a template to copy image attributes
+ **/
+Jim& Jim::operator=(Jim& imgSrc)
+{
+  bool copyData=true;
+  //check for assignment to self (of the form v=v)
+  if(this==&imgSrc)
+     return *this;
+  else{
+    open(imgSrc,copyData);
+    return *this;
+  }
+}
+
+
 /** 
  * 
  * @param refImg Use this as the reference image
