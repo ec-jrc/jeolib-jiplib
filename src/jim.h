@@ -54,7 +54,26 @@ public:
   IMAGE getMIA(unsigned int band);
   ///set memory from MIA representation for particular band
   CPLErr setMIA(IMAGE& mia, unsigned int band);
+  ///convert a GDAL data type to MIA data type
+  /** 
+   * 
+   * 
+   * @param aGDALDataType 
+   * 
+   * @return MIA data type
+   */  int GDAL2MIADataType(GDALDataType aGDALDataType)
+  {
+    //function exists, but introduced for naming consistency
+    return(GDAL2LIIARDataType(aGDALDataType));
+  }
   ///convert a MIA data type to GDAL data type
+  /** 
+   * 
+   * 
+   * @param aMIADataType the MIA data type to be converted
+   * 
+   * @return GDAL data type (GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GDT_Int32, GDT_Float32, GDT_Float64)
+   */
   GDALDataType MIA2GDALDataType(int aMIADataType)
   {
     switch (aMIADataType){

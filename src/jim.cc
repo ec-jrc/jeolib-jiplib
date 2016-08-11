@@ -76,11 +76,11 @@ CPLErr Jim::setMIA(IMAGE& mia, unsigned int band){
  * 
  * @param imgRaster is operand
  * @param theOperation the operation to be performed
- * @param iband is the band for which the function needs to be performed (default is 0: first band)
+ * @param iband is the band for which the function needs to be performed (default 0 is first band)
  * 
  * @return CE_None if successful
  */
-CPLErr Jim::arith(Jim& imgRaster, int theOperation, unsigned int iband){){
+CPLErr Jim::arith(Jim& imgRaster, int theOperation, unsigned int iband){
   if(imgRaster.nrOfCol()!=this->nrOfCol()){
     std::string errorString="Error: dimensions of images do not match";
     throw(errorString);
@@ -99,7 +99,8 @@ CPLErr Jim::arith(Jim& imgRaster, int theOperation, unsigned int iband){){
   }
   IMAGE mia1=this->getMIA(iband);
   IMAGE mia2=imgRaster.getMIA(iband);
-  CPLErr success=::arith(&mia1, &mia2, theOperation);
+  CPLErr success=CE_None;
+  ::arith(&mia1, &mia2, theOperation);
   setMIA(mia1,iband);
   imgRaster.setMIA(mia2,iband);
   return(success);
@@ -108,16 +109,18 @@ CPLErr Jim::arith(Jim& imgRaster, int theOperation, unsigned int iband){){
 /** 
  * 
  * 
- * @param mask 
- * @param graph 
- * @param flag 
+ * @param mask
+ * @param graph
+ * @param flag
  * @param iband is the band for which the function needs to be performed (default is 0: first band)
  * 
- * @return 
- */CPLErr Jim::rdil(Jim& mask, int graph, int flag, unsigned int iband){
+ * @return CE_None if successful
+ */
+CPLErr Jim::rdil(Jim& mask, int graph, int flag, unsigned int iband){
   IMAGE markMIA=this->getMIA(iband);
   IMAGE maskMIA=mask.getMIA(iband);
-  CPLErr success=::rdil(&markMIA,&maskMIA,graph,flag);
+  CPLErr success=CE_None;
+  ::rdil(&markMIA,&maskMIA,graph,flag);
   setMIA(markMIA,iband);
   mask.setMIA(maskMIA,iband);
   return(success);
@@ -126,16 +129,17 @@ CPLErr Jim::arith(Jim& imgRaster, int theOperation, unsigned int iband){){
 /** 
  * 
  * 
- * @param mask 
- * @param graph 
- * @param flag 
+ * @param mask
+ * @param grap
+ * @param flag
  * @param iband is the band for which the arithmetic operation needs to be performed (default is 0: first band)
  * 
- * @return 
+ * @return CE_None if successful
  */
 CPLErr Jim::rero(Jim& mask, int graph, int flag, unsigned int iband){
   IMAGE markMIA=this->getMIA(0);
   IMAGE maskMIA=mask.getMIA(0);
+  CPLErr success=CE_None;
   ::rero(&markMIA,&maskMIA,graph,flag);
   setMIA(markMIA,iband);
   mask.setMIA(maskMIA,0);

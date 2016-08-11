@@ -53,11 +53,10 @@ Optionpk<string>  input_opt("i", "input", "Input image file(s). If input contain
     int theValue=1;
     marker.writeData(theValue,static_cast<unsigned int>(1),static_cast<unsigned int>(1),static_cast<unsigned int>(0));
     marker.rdil(mask,8,1);
-    CPLErr imagesDiffer=marker.imequalp(mask);
-    if(imagesDiffer!=CE_None)
-      std::cout << "check not passed" << std::endl;
+    if(marker!=mask)
+      std::cout << "Error: check not passed for image " << input_opt[0] << std::endl;
     else
-      std::cout << "check passed" << std::endl;
+      std::cout << "Check passed for image " << input_opt[0] << std::endl;
     inputImg.close();
     mask.close();
     marker.close();
