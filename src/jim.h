@@ -114,6 +114,13 @@ public:
   /// perform a morphological erosion for a particular band
   CPLErr rero(Jim& mask, int graph, int flag, unsigned int band=0);
 
+  //test functions
+  std::string f1(Jim& imgRaster){return("this is function 1");};
+  unsigned int f2(Jim& imgRaster){return(imgRaster.nrOfCol());};
+  unsigned int f3(Jim& imgRaster, unsigned int band=0){return(imgRaster.nrOfCol());};
+  std::string f4(Jim& imgRaster, unsigned int band=0);
+  std::string f5(Jim& imgRaster, unsigned int band=0);
+
 protected:
   ///number of planes in this dataset
   unsigned int m_nplane;

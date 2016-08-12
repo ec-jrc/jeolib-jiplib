@@ -62,8 +62,10 @@ CPLErr Jim::setMIA(IMAGE& mia, unsigned int band){
     throw(errorString);
   }
   if(m_dataType!=MIA2GDALDataType(mia.DataType)){
-    std::string errorString="Error: data types of images do not match";
-    throw(errorString);
+    std::ostringstream s;
+    s << "Error: data types of images do not match: ";
+    s << m_dataType << ", " << MIA2GDALDataType(mia.DataType);
+    throw(s.str());
   }
   m_data[band]=mia.p_im+band*nrOfRow()*nrOfCol()*(GDALGetDataTypeSize(getDataType())>>3);
   m_begin[band]=0;
@@ -136,12 +138,12 @@ CPLErr Jim::rdil(Jim& mask, int graph, int flag, unsigned int iband){
  * @return CE_None if successful
  */
 CPLErr Jim::rero(Jim& mask, int graph, int flag, unsigned int iband){
-  IMAGE markMIA=this->getMIA(0);
-  IMAGE maskMIA=mask.getMIA(0);
+  IMAGE markMIA=this->getMIA(iband);
+  IMAGE maskMIA=mask.getMIA(iband);
   CPLErr success=CE_None;
   ::rero(&markMIA,&maskMIA,graph,flag);
   setMIA(markMIA,iband);
-  mask.setMIA(maskMIA,0);
+  mask.setMIA(maskMIA,iband);
   return(success);
 }
 
@@ -192,4 +194,30 @@ bool Jim::operator==(Jim& refImg)
   return(isEqual);
 }
 
+std::string Jim::f4(Jim& imgRaster, unsigned int band)
+{
+  try{
+    IMAGE markMIA=this->getMIA(band);
+    IMAGE maskMIA=imgRaster.getMIA(band);
+    // ::rero(&markMIA,&maskMIA,8,1);
+    // setMIA(markMIA,band);
+    // imgRaster.setMIA(maskMIA,band);
+  }
+  catch(std::string errorString){
+    return(errorString);
+  }
+}
 
+std::string Jim::f5(Jim& imgRaster, unsigned int band)
+{
+  try{
+    IMAGE markMIA=this->getMIA(band);
+    IMAGE maskMIA=imgRaster.getMIA(band);
+    ::rero(&markMIA,&maskMIA,8,1);
+    setMIA(markMIA,band);
+    imgRaster.setMIA(maskMIA,band);
+  }
+  catch(std::string errorString){
+    return(errorString);
+  }
+}
