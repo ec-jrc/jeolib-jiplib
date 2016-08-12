@@ -18,6 +18,18 @@
 
    %ignore Jim::operator=;
 
+
+
+
+%inline %{
+extern "C"
+{
+ void *__dso_handle = 0;
+}
+ %}
+
+
+
 /* namespace std { */
 /*   %template(ImgVector) vector<jiplib::Jim>; */
 /* } */
