@@ -42,7 +42,7 @@ public:
   ///constructor output image
   Jim(unsigned int ncol, unsigned int nrow, unsigned int nband, const GDALDataType& dataType) : ImgRaster(ncol, nrow, nband, dataType){m_nplane=1;};
   ///destructor
-  ~Jim(void){};
+  ~Jim(void){if(m_mia) delete(m_mia);};
 
   ///Get the number of planes of this dataset
   unsigned int nrOfPlane(void) const { return m_nplane;};
@@ -51,9 +51,11 @@ public:
   /// convert single band multiple plane image to single plane multiband image
   CPLErr plane2band(){};//not implemented yet
   ///get MIA representation for a particular band
-  IMAGE getMIA(unsigned int band);
-  ///set memory from MIA representation for particular band
-  CPLErr setMIA(IMAGE& mia, unsigned int band);
+  IMAGE* getMIA(unsigned int band);
+  ///set memory from internal MIA representation for particular band
+  CPLErr setMIA(unsigned int band);
+  // ///set memory from MIA representation for particular band
+  // CPLErr setMIA(IMAGE* mia, unsigned int band);
   ///convert a GDAL data type to MIA data type
   /** 
    * 
@@ -125,7 +127,7 @@ protected:
   ///number of planes in this dataset
   unsigned int m_nplane;
 private:
-
+  IMAGE* m_mia;
 };
 }
 #endif // _JIM_H_

@@ -13,47 +13,46 @@ using namespace jiplib;
  * 
  * @param band the band to get the MIA image representation for
  * 
- * @return a MIA image representation
+ * @return pointer to MIA image representation
  */
-IMAGE Jim::getMIA(unsigned int band){
+IMAGE* Jim::getMIA(unsigned int band){
   if(getBlockSize()!=nrOfRow()){
     std::ostringstream s;
     s << "Error: increase memory to support MIA library functions (now at " << 100.0*getBlockSize()/nrOfRow() << "%)";
     throw(s.str());
   }    
-  IMAGE mia;
-  mia.p_im=m_data[band];/* Pointer to image data */
-  mia.DataType=GDAL2MIADataType(getDataType());
-  mia.nx=nrOfCol();
-  mia.ny=nrOfRow();
-  mia.nz=1;
-  mia.NByte=mia.nx*mia.ny*mia.nz*GDALGetDataTypeSize(getDataType())>>3;//assumes image data type is not of bit type!!!
-  //todo: remove mia.vol and only rely on the getVolume function
-  mia.vol=0;//not used.
-  mia.lut=0;
+  m_mia=new(IMAGE);
+  m_mia->p_im=m_data[band];/* Pointer to image data */
+  m_mia->DataType=GDAL2MIADataType(getDataType());
+  m_mia->nx=nrOfCol();
+  m_mia->ny=nrOfRow();
+  m_mia->nz=1;
+  m_mia->NByte=m_mia->nx*m_mia->ny*m_mia->nz*GDALGetDataTypeSize(getDataType())>>3;//assumes image data type is not of bit type!!!
+  //todo: remove m_mia->vol and only rely on the getVolume function
+  m_mia->vol=0;//not used.
+  m_mia->lut=0;
   //USHORT *lut;   /* Pointer to colour map */
   //mia->g=getgetDataType();//not used
-  return mia;
+  return m_mia;
 }
 
 /** 
  * 
  * 
- * @param mia the MIA image pointer to be set
  * @param band the band for which the MIA image pointer needs to be set
  * 
  * @return C_None if successful
  */
-CPLErr Jim::setMIA(IMAGE& mia, unsigned int band){
-  if(mia.nz>1){
+CPLErr Jim::setMIA(unsigned int band){
+  if(m_mia->nz>1){
     std::string errorString="Error: MIA image with nz>1 not supported";
     throw(errorString);
   }
-  if(m_ncol!=mia.nx){
+  if(m_ncol!=m_mia->nx){
     std::string errorString="Error: dimensions of images in do not match";
     throw(errorString);
   }
-  if(m_ncol!=mia.ny){
+  if(m_ncol!=m_mia->ny){
     std::string errorString="Error: dimensions of images do not match";
     throw(errorString);
   }
@@ -61,17 +60,54 @@ CPLErr Jim::setMIA(IMAGE& mia, unsigned int band){
     std::string errorString="Error: band exceeds number of bands in target image";
     throw(errorString);
   }
-  if(m_dataType!=MIA2GDALDataType(mia.DataType)){
+  if(m_dataType!=MIA2GDALDataType(m_mia->DataType)){
     std::ostringstream s;
     s << "Error: data types of images do not match: ";
-    s << m_dataType << ", " << MIA2GDALDataType(mia.DataType);
+    s << m_dataType << ", " << MIA2GDALDataType(m_mia->DataType);
     throw(s.str());
   }
-  m_data[band]=mia.p_im+band*nrOfRow()*nrOfCol()*(GDALGetDataTypeSize(getDataType())>>3);
+  m_data[band]=m_mia->p_im+band*nrOfRow()*nrOfCol()*(GDALGetDataTypeSize(getDataType())>>3);
   m_begin[band]=0;
   m_end[band]=m_begin[band]+getBlockSize();
   return(CE_None);
 }
+
+// /** 
+//  * 
+//  * 
+//  * @param mia the MIA image pointer to be set
+//  * @param band the band for which the MIA image pointer needs to be set
+//  * 
+//  * @return C_None if successful
+//  */
+// CPLErr Jim::setMIA(IMAGE* mia, unsigned int band){
+//   if(mia.nz>1){
+//     std::string errorString="Error: MIA image with nz>1 not supported";
+//     throw(errorString);
+//   }
+//   if(m_ncol!=mia.nx){
+//     std::string errorString="Error: dimensions of images in do not match";
+//     throw(errorString);
+//   }
+//   if(m_ncol!=mia.ny){
+//     std::string errorString="Error: dimensions of images do not match";
+//     throw(errorString);
+//   }
+//   if(m_nband<=band){
+//     std::string errorString="Error: band exceeds number of bands in target image";
+//     throw(errorString);
+//   }
+//   if(m_dataType!=MIA2GDALDataType(mia.DataType)){
+//     std::ostringstream s;
+//     s << "Error: data types of images do not match: ";
+//     s << m_dataType << ", " << MIA2GDALDataType(mia.DataType);
+//     throw(s.str());
+//   }
+//   m_data[band]=mia.p_im+band*nrOfRow()*nrOfCol()*(GDALGetDataTypeSize(getDataType())>>3);
+//   m_begin[band]=0;
+//   m_end[band]=m_begin[band]+getBlockSize();
+//   return(CE_None);
+// }
 
 /** 
  * 
@@ -118,12 +154,12 @@ CPLErr Jim::arith(Jim& imgRaster, int theOperation, unsigned int iband){
  * @return CE_None if successful
  */
 CPLErr Jim::rdil(Jim& mask, int graph, int flag, unsigned int iband){
-  IMAGE markMIA=this->getMIA(iband);
-  IMAGE maskMIA=mask.getMIA(iband);
+  IMAGE* markMIA=this->getMIA(iband);
+  IMAGE* maskMIA=mask.getMIA(iband);
   CPLErr success=CE_None;
-  ::rdil(&markMIA,&maskMIA,graph,flag);
-  setMIA(markMIA,iband);
-  mask.setMIA(maskMIA,iband);
+  ::rdil(markMIA,maskMIA,graph,flag);
+  setMIA(iband);
+  mask.setMIA(iband);
   return(success);
 }
 
@@ -138,12 +174,12 @@ CPLErr Jim::rdil(Jim& mask, int graph, int flag, unsigned int iband){
  * @return CE_None if successful
  */
 CPLErr Jim::rero(Jim& mask, int graph, int flag, unsigned int iband){
-  IMAGE markMIA=this->getMIA(iband);
-  IMAGE maskMIA=mask.getMIA(iband);
+  IMAGE* markMIA=this->getMIA(iband);
+  IMAGE* maskMIA=mask.getMIA(iband);
   CPLErr success=CE_None;
-  ::rero(&markMIA,&maskMIA,graph,flag);
-  setMIA(markMIA,iband);
-  mask.setMIA(maskMIA,iband);
+  ::rero(markMIA,maskMIA,graph,flag);
+  setMIA(iband);
+  mask.setMIA(iband);
   return(success);
 }
 
@@ -184,9 +220,9 @@ bool Jim::operator==(Jim& refImg)
       isEqual=false;
       break;
     }
-    IMAGE refMIA=refImg.getMIA(iband);
-    IMAGE thisMIA=this->getMIA(iband);
-    if(::imequalp(&thisMIA,&refMIA)){
+    IMAGE* refMIA=refImg.getMIA(iband);
+    IMAGE* thisMIA=this->getMIA(iband);
+    if(::imequalp(thisMIA,refMIA)){
       isEqual=false;
       break;
     }
@@ -197,11 +233,12 @@ bool Jim::operator==(Jim& refImg)
 std::string Jim::f4(Jim& imgRaster, unsigned int band)
 {
   try{
-    IMAGE markMIA=this->getMIA(band);
-    IMAGE maskMIA=imgRaster.getMIA(band);
-    // ::rero(&markMIA,&maskMIA,8,1);
-    // setMIA(markMIA,band);
-    // imgRaster.setMIA(maskMIA,band);
+    IMAGE* markMIA=this->getMIA(band);
+    IMAGE* maskMIA=imgRaster.getMIA(band);
+    ::rero(markMIA,maskMIA,8,1);
+    setMIA(band);
+    imgRaster.setMIA(band);
+    return("running f4");
   }
   catch(std::string errorString){
     return(errorString);
@@ -211,11 +248,12 @@ std::string Jim::f4(Jim& imgRaster, unsigned int band)
 std::string Jim::f5(Jim& imgRaster, unsigned int band)
 {
   try{
-    IMAGE markMIA=this->getMIA(band);
-    IMAGE maskMIA=imgRaster.getMIA(band);
-    ::rero(&markMIA,&maskMIA,8,1);
-    setMIA(markMIA,band);
-    imgRaster.setMIA(maskMIA,band);
+    IMAGE* markMIA=this->getMIA(band);
+    IMAGE* maskMIA=imgRaster.getMIA(band);
+    ::rero(markMIA,maskMIA,8,1);
+    setMIA(band);
+    imgRaster.setMIA(band);
+    return("running f5");
   }
   catch(std::string errorString){
     return(errorString);

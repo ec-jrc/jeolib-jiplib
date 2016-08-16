@@ -28,7 +28,24 @@ extern "C"
 }
  %}
 
+%include "std_vector.i"
+%include "std_string.i"
+// Instantiate templates for vector
+namespace std {
+   %template(ByteVector) vector<char>;
+   %template(Int16Vector) vector<short>;
+   %template(UInt16Vector) vector<unsigned short>;
+   %template(Int32Vector) vector<int>;
+   %template(UInt32Vector) vector<unsigned int>;
+   %template(Float32Vector) vector<float>;
+   %template(Float64Vector) vector<double>;
+   %template(StringVector) vector<std::string>;
+}
 
+// instantiate read and write data from ImgRaster
+%template(readDataUInt16) jiplib::Jim::readData<unsigned short>;
+%template(writeDataUInt16) jiplib::Jim::writeData<unsigned short>;
+/* %template(writeDataUInt16) ImgRaster::writeData<unsigned short> */
 
 /* namespace std { */
 /*   %template(ImgVector) vector<jiplib::Jim>; */
