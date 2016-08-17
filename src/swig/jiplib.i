@@ -41,25 +41,26 @@ extern "C"
 /*   %template(ImgVector) vector<jiplib::Jim>; */
 /* } */
 
-   /* %rename(__assign__) *::operator=; */
-// Instantiate templates used by example
-   /* %rename(__assignJim__) jiplib::Jim::operator=; */
-   %rename(__isEqual__) jiplib::Jim::operator==;
-   %rename(__isNot__) jiplib::Jim::operator!=;
-
    ///////////// how to build _jiplib.so /////////////////
-   // swig -c++ -I.. -I/usr/local/include/mia -I/usr/local/include/pktools -python -o jiplib_wrap.cc jiplib.i
-// add following lines to jiplib_wrap.cc
-// extern "C"
-// {
-// void *__dso_handle = 0;
-// }
-// g++ -fPIC -I.. -I../../build -I/usr/local/include/mia -I/usr/local/include/pktools -c jiplib_wrap.cc $(python-config --cflags) -o jiplib_wrap.o
-// g++ -shared -v -nostartfiles -L../../build/src -L/usr/local/lib jiplib_wrap.o -ljip_generic -ljiplib -limageClasses -lalgorithms -lgsl -ldl -lgdal $(python-config --ldflags) -o _jiplib.so
-
-//%catches(std::string)
-
+/*
+cd ~/jiplib/build/
+make -j
+sudo cp ~/jiplib/build/src/libjiplib.so /usr/local/lib
+cd ~/jiplib/src/swig/
+swig -c++ -I.. -I/usr/local/include/mia -I/usr/local/include/pktools -python -o jiplib_wrap.cc jiplib.i
+g++ -fPIC -I.. -I../../build -I/usr/local/include/mia -I/usr/local/include/pktools -c jiplib_wrap.cc $(python-config --cflags) -o jiplib_wrap.o
+g++ -shared -v -nostartfiles -L../../build/src -L/usr/local/lib jiplib_wrap.o -ljip_generic -ljiplib -limageClasses -lalgorithms -lgsl -ldl -lgdal $(python-config --ldflags) -o _jiplib.so
+sudo cp _jiplib.so jiplib.py /usr/local/lib/python2.7/site-packages
+*/
+//////// how to use jiplib module within Python //////////
+/*
+import sys
+sys.path.append("/usr/local/lib/python2.7/site-packages/")
+import jiplib
+*/
 enum CPLErr {CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4};
 
 %include <typemaps.i>
 %apply unsigned short *OUTPUT { unsigned short & theValue, unsigned int, unsigned int, unsigned int };
+
+%allowexception;                // turn on globally
