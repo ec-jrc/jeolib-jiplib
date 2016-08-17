@@ -30,19 +30,19 @@ class Jim : public ImgRaster
 {
 public:
   ///default constructor
-  Jim(void) : ImgRaster(){m_nplane=1;};
+  Jim(void) : ImgRaster(){m_nplane=1;m_mia=0;};
   ///constructor input image
-  Jim(const std::string& filename, unsigned long int memory=0) : ImgRaster(filename,memory){m_nplane=1;};
+  Jim(const std::string& filename, unsigned long int memory=0) : ImgRaster(filename,memory){m_nplane=1;m_mia=0;};
   ///constructor input image
-  Jim(const std::string& filename, const ImgRaster& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename,imgSrc,memory,options){m_nplane=1;};
+  Jim(const std::string& filename, const ImgRaster& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename,imgSrc,memory,options){m_nplane=1;m_mia=0;};
   ///constructor input image
-  Jim(ImgRaster& imgSrc, bool copyData=true) : ImgRaster(imgSrc, copyData){m_nplane=1;};
+  Jim(ImgRaster& imgSrc, bool copyData=true) : ImgRaster(imgSrc, copyData){m_nplane=1;m_mia=0;};
   ///constructor output image
-  Jim(const std::string& filename, unsigned int ncol, unsigned int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){m_nplane=1;};
+  Jim(const std::string& filename, unsigned int ncol, unsigned int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){m_nplane=1;m_mia=0;};
   ///constructor output image
-  Jim(unsigned int ncol, unsigned int nrow, unsigned int nband, const GDALDataType& dataType) : ImgRaster(ncol, nrow, nband, dataType){m_nplane=1;};
+  Jim(unsigned int ncol, unsigned int nrow, unsigned int nband, const GDALDataType& dataType) : ImgRaster(ncol, nrow, nband, dataType){m_nplane=1;m_mia=0;};
   ///destructor
-  ~Jim(void){if(m_mia) delete(m_mia);};
+  ~Jim(void){if(m_mia) delete(m_mia);m_mia=0;};
 
   ///Get the number of planes of this dataset
   unsigned int nrOfPlane(void) const { return m_nplane;};
@@ -107,6 +107,8 @@ public:
   Jim& operator=(Jim& imgSrc);
   ///relational == operator
   bool operator==(Jim& refImg);
+  ///relational == operator
+  bool isEqual(Jim& refImg){return((*this)==(refImg));};
   ///relational != operator
   bool operator!=(Jim& refImg){ return !(this->operator==(refImg)); };
   /// perform arithmetic operation for a particular band

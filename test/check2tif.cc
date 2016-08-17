@@ -45,10 +45,8 @@ int main(int argc, char *argv[])
   }
   try{
     Jim inputImg(input_opt[0]);
+    inputImg.readData();
     Jim mask(inputImg,true);
-    // mask.writeData(nodata_opt[0],1500,1500,0);
-    if(mask.setThreshold(nodata_opt[0],nodata_opt[0],0,1)==CE_Failure)
-      cerr<< "Error: could not set threshold" << endl;
     Jim marker(inputImg,false);
     std::vector<unsigned short> lineBuffer(marker.nrOfCol());
     std::vector<unsigned short> zeroBuffer(marker.nrOfCol());
@@ -63,11 +61,16 @@ int main(int argc, char *argv[])
       marker.writeData(lineBuffer,irow,0);
     marker.writeData(zeroBuffer,marker.nrOfRow()-1,0);
 
+    mask.writeData(nodata_opt[0],1500,1500,0);
+    mask.setThreshold(nodata_opt[0],nodata_opt[0],0,1);
+
     marker.rero(mask,8,1);
-    if(marker!=mask)
-      std::cout << "Error: check not passed for image " << input_opt[0] << std::endl;
-    else
+    marker.setFile("/scratch/test/marker_cc.tif",oformat_opt[0],memory_opt[0],option_opt);
+    mask.setFile("/scratch/test/mask_cc.tif",oformat_opt[0],memory_opt[0],option_opt);
+    if(marker.isEqual(mask))
       std::cout << "Check passed for image " << input_opt[0] << std::endl;
+    else
+      std::cout << "Error: check not passed for image " << input_opt[0] << std::endl;
     Jim outputImg(inputImg,true);
     outputImg.setFile(output_opt[0],oformat_opt[0],memory_opt[0],option_opt);
     if(inputImg==outputImg)
