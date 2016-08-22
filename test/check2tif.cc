@@ -62,7 +62,8 @@ int main(int argc, char *argv[])
     marker.writeData(zeroBuffer,marker.nrOfRow()-1,0);
 
     mask.writeData(nodata_opt[0],1500,1500,0);
-    mask.setThreshold(nodata_opt[0],nodata_opt[0],0,1);
+    mask.pushNoDataValue(1);
+    mask.setThreshold(nodata_opt[0],nodata_opt[0],0);
 
     marker.rero(mask,8,1);
     marker.setFile("/scratch/test/marker_cc.tif",oformat_opt[0],memory_opt[0],option_opt);

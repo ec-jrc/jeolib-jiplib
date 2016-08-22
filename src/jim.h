@@ -32,11 +32,11 @@ public:
   ///default constructor
   Jim(void) : ImgRaster(){m_nplane=1;m_mia=0;};
   ///constructor input image
-  Jim(const std::string& filename, unsigned long int memory=0) : ImgRaster(filename,memory){m_nplane=1;m_mia=0;};
+  Jim(const std::string& filename, unsigned int memory=0) : ImgRaster(filename,memory){m_nplane=1;m_mia=0;};
   ///constructor input image
-  Jim(const std::string& filename, const ImgRaster& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename,imgSrc,memory,options){m_nplane=1;m_mia=0;};
+  Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename,imgSrc,memory,options){m_nplane=1;m_mia=0;};
   ///constructor input image
-  Jim(ImgRaster& imgSrc, bool copyData=true) : ImgRaster(imgSrc, copyData){m_nplane=1;m_mia=0;};
+  Jim(Jim& imgSrc, bool copyData=true) : ImgRaster(imgSrc, copyData){m_nplane=1;m_mia=0;};
   ///constructor output image
   Jim(const std::string& filename, unsigned int ncol, unsigned int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){m_nplane=1;m_mia=0;};
   ///constructor output image

@@ -48,7 +48,8 @@ Optionpk<string>  input_opt("i", "input", "Input image file(s). If input contain
   try{
     Jim inputImg(input_opt[0]);
     Jim mask(inputImg,true);
-    mask.setThreshold(nodata_opt[0],nodata_opt[0],0,1);
+    mask.pushNoDataValue(1);
+    mask.setThreshold(nodata_opt[0],nodata_opt[0],0);
     Jim marker(inputImg,false);
     int theValue=1;
     marker.writeData(theValue,static_cast<unsigned int>(1),static_cast<unsigned int>(1),static_cast<unsigned int>(0));
