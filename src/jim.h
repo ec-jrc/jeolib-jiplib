@@ -30,19 +30,36 @@ class Jim : public ImgRaster
 {
 public:
   ///default constructor
-  Jim(void) : ImgRaster(){m_nplane=1;m_mia=0;};
+  Jim(void) : ImgRaster(){m_nplane=1;m_mia=0;
+  };
   ///constructor input image
-  Jim(const std::string& filename, unsigned int memory=0) : ImgRaster(filename,memory){m_nplane=1;m_mia=0;};
+  Jim(const std::string& filename, unsigned int memory=0) : ImgRaster(filename,memory){
+    m_nplane=1;
+    m_mia=0;
+  };
   ///constructor input image
-  Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename,imgSrc,memory,options){m_nplane=1;m_mia=0;};
+  Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename,imgSrc,memory,options){m_nplane=1;m_mia=0;
+};
   ///constructor input image
-  Jim(Jim& imgSrc, bool copyData=true) : ImgRaster(imgSrc, copyData){m_nplane=1;m_mia=0;};
+  Jim(Jim& imgSrc, bool copyData=true) : ImgRaster(imgSrc, copyData){m_nplane=1;m_mia=0;
+  };
   ///constructor output image
-  Jim(const std::string& filename, unsigned int ncol, unsigned int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){m_nplane=1;m_mia=0;};
+  Jim(const std::string& filename, unsigned int ncol, unsigned int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){m_nplane=1;m_mia=0;
+  };
   ///constructor output image
-  Jim(unsigned int ncol, unsigned int nrow, unsigned int nband, const GDALDataType& dataType) : ImgRaster(ncol, nrow, nband, dataType){m_nplane=1;m_mia=0;};
+  Jim(unsigned int ncol, unsigned int nrow, unsigned int nband, const GDALDataType& dataType) : ImgRaster(ncol, nrow, nband, dataType){m_nplane=1;m_mia=0;
+  };
   ///destructor
   ~Jim(void){if(m_mia) delete(m_mia);m_mia=0;};
+
+  ///Clone as new shared pointer to ImgRaster object
+  /** 
+   * 
+   * @return shared pointer to new ImgRaster object alllowing polymorphism
+   */  
+  std::shared_ptr<ImgRaster> clone() { return std::make_shared<Jim>(*this,false); };
+  // std::shared_ptr<Jim> clone() { return std::shared_ptr<Jim>(new Jim(*this,false) ); };
+  // std::shared_ptr<ImgRaster> clone() { return std::shared_ptr<ImgRaster>(new Jim(*this,false) ); };
 
   ///Get the number of planes of this dataset
   unsigned int nrOfPlane(void) const { return m_nplane;};
@@ -117,13 +134,6 @@ public:
   CPLErr rdil(Jim& mask, int graph, int flag, unsigned int band=0);
   /// perform a morphological erosion for a particular band
   CPLErr rero(Jim& mask, int graph, int flag, unsigned int band=0);
-
-  //test functions
-  std::string f1(Jim& imgRaster){return("this is function 1");};
-  unsigned int f2(Jim& imgRaster){return(imgRaster.nrOfCol());};
-  unsigned int f3(Jim& imgRaster, unsigned int band=0){return(imgRaster.nrOfCol());};
-  std::string f4(Jim& imgRaster, unsigned int band=0);
-  std::string f5(Jim& imgRaster, unsigned int band=0);
 
 protected:
   ///number of planes in this dataset

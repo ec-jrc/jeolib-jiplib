@@ -7,7 +7,6 @@
 %shared_ptr(ImgRaster)
 %shared_ptr(jiplib::Jim)
 
-
 %module jiplib
 %{
 #include <memory>
@@ -26,7 +25,7 @@
 
 //Parse the header file
 //%include "imageclasses/ImgRaster.h"
-//%include "/home/kempepi/pktools/src/swig/pktools.i"
+%include "/home/kempepi/pktools/src/swig/pktools.i"
 %include "imageclasses/ImgCollection.h"
 %include "imageclasses/ImgRaster.h"
 %include "apps/AppFactory.h"
@@ -35,13 +34,14 @@
 //%include "jipl_glue.h"
 
 //%ignore Jim::operator=;
+/* %rename(ImgCollection) ImgCollection<std::shared_ptr<jiplib::Jim> >; */
 
-%inline %{
-extern "C"
-{
- void *__dso_handle = 0;
-}
- %}
+/* %inline %{ */
+/* extern "C" */
+/* { */
+/*  void *__dso_handle = 0; */
+/* } */
+/*  %} */
 
 
 // Instantiate templates for vector
@@ -78,17 +78,17 @@ import jiplib
 */
 enum CPLErr {CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4};
 
-%include <typemaps.i>
-%apply unsigned short *OUTPUT { unsigned short & theValue, unsigned int, unsigned int, unsigned int };
+/* %include <typemaps.i> */
+/* %apply unsigned short *OUTPUT { unsigned short & theValue, unsigned int, unsigned int, unsigned int }; */
 
-%typemap(out) std::shared_ptr<ImgRaster> {
-  $result=std::dynamic_pointer_cast<jiplib::Jim> $1;
- }
+/* %typemap(out) std::shared_ptr<ImgRaster> { */
+/*   $result=std::dynamic_pointer_cast<jiplib::Jim> $1; */
+/*  } */
 
-//todo: does not work yet
-%typemap(out) std::shared_ptr<ImgRaster> {
-  $result=jiplib::createJim($1);
-}
+/* //todo: does not work yet */
+/* %typemap(out) std::shared_ptr<ImgRaster> { */
+/*   $result=jiplib::createJim($1); */
+/* } */
 
 %typemap(out) std::shared_ptr<ImgRaster> ImgCollection::composite {
   $result=jiplib::createJim($1);
@@ -106,6 +106,15 @@ enum CPLErr {CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal
 /*     $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), outtype, $owner); */
 /* } */
 
+%typemap(out) ImgRaster * {
+  jiplib::Jim *downcast = dynamic_cast<jiplib::Jim *>($1);
+  *(jiplib::Jim **)&$result = downcast;
+}
+
+%typemap(out) std::shared_ptr<ImgRaster> {
+  std::dynamic_pointer_cast<jiplib::Jim>($1);
+}
+
 %newobject createJim;
 %inline %{
   std::shared_ptr<jiplib::Jim> createJim(){std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim()); return pJim;};
@@ -115,7 +124,7 @@ enum CPLErr {CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal
   std::shared_ptr<jiplib::Jim> createJim(jiplib::Jim& imgSrc, bool copyData){std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim(imgSrc,copyData)); return pJim;};
   std::shared_ptr<jiplib::Jim> createJim(jiplib::Jim& imgSrc){std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim(imgSrc,true)); return pJim;};
   //todo: create Jim with proper attributes as derived from imgRaster, perhaps creating new object and delete old?
-  std::shared_ptr<jiplib::Jim> createJim(std::shared_ptr<ImgRaster> imgSrc){return(std::static_pointer_cast<jiplib::Jim>(imgSrc));};
+  std::shared_ptr<jiplib::Jim> createJim(std::shared_ptr<ImgRaster> imgSrc){return(std::dynamic_pointer_cast<jiplib::Jim>(imgSrc));};
  %}
 
 /* %ignore("ImgCollection::pushImage"); */

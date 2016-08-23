@@ -119,28 +119,28 @@ CPLErr Jim::setMIA(unsigned int band){
  * @return CE_None if successful
  */
 CPLErr Jim::arith(Jim& imgRaster, int theOperation, unsigned int iband){
-  // try{
-  //   if(imgRaster.nrOfBand()<iband){
-  //     std::string errorString="Error: band number exceeds number of bands in input image";
-  //     throw(errorString);
-  //   }
-  //   if(nrOfBand()<iband){
-  //     std::string errorString="Error: band number exceeds number of bands in input image";
-  //     throw(errorString);
-  //   }
-  //   IMAGE mia1=this->getMIA(iband);
-  //   IMAGE mia2=imgRaster.getMIA(iband);
-  //   ::arith(&mia1, &mia2, theOperation);
-  //   setMIA(mia1,iband);
-  //   imgRaster.setMIA(mia2,iband);
-  //   return(CE_None);
-  // }
-  // catch(std::string errorString){
-  //   std::cerr << errorString << std::endl;
-  //   return(CE_Failure);
-  // }
-  //test
-  return(CE_None);
+  try{
+    if(imgRaster.nrOfBand()<iband){
+      std::string errorString="Error: band number exceeds number of bands in input image";
+      throw(errorString);
+    }
+    if(nrOfBand()<iband){
+      std::string errorString="Error: band number exceeds number of bands in input image";
+      throw(errorString);
+    }
+    IMAGE* mia1=this->getMIA(iband);
+    std::cout << "getMIA" << std::endl;
+    IMAGE* mia2=imgRaster.getMIA(iband);
+    ::arith(mia1, mia2, theOperation);
+    setMIA(iband);
+    imgRaster.setMIA(iband);
+    std::cout << "setMIA" << std::endl;
+    return(CE_None);
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    return(CE_Failure);
+  }
 }
 
 /** 
@@ -228,34 +228,4 @@ bool Jim::operator==(Jim& refImg)
     }
   }
   return(isEqual);
-}
-
-std::string Jim::f4(Jim& imgRaster, unsigned int band)
-{
-  try{
-    IMAGE* markMIA=this->getMIA(band);
-    IMAGE* maskMIA=imgRaster.getMIA(band);
-    ::rero(markMIA,maskMIA,8,1);
-    setMIA(band);
-    imgRaster.setMIA(band);
-    return("running f4");
-  }
-  catch(std::string errorString){
-    return(errorString);
-  }
-}
-
-std::string Jim::f5(Jim& imgRaster, unsigned int band)
-{
-  try{
-    IMAGE* markMIA=this->getMIA(band);
-    IMAGE* maskMIA=imgRaster.getMIA(band);
-    ::rero(markMIA,maskMIA,8,1);
-    setMIA(band);
-    imgRaster.setMIA(band);
-    return("running f5");
-  }
-  catch(std::string errorString){
-    return(errorString);
-  }
 }
