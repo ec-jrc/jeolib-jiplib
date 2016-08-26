@@ -83,7 +83,7 @@ Optionpk<string>  input_opt("i", "input", "Input image file(s). If input contain
     imgPointer=static_pointer_cast<Jim>(inputCollection.crop(app));
     // inputCollection.crop(imgPointer,app);
     cout << "smoothing" << endl;
-    filter.smooth(*imgPointer,*imgPointer,5);
+    filter.smooth(imgPointer,imgPointer,5);
 
 
     // for(int iband=0;iband<imgPointer->nrOfBand();++iband){
@@ -97,7 +97,7 @@ Optionpk<string>  input_opt("i", "input", "Input image file(s). If input contain
     imgPointer->rdil(*imgPointer,1,1);
 
     cout << "performing erosion" << endl;
-    filter.morphology(*imgPointer,*imgPointer,"erode",3,3);
+    filter.morphology(imgPointer,imgPointer,"erode",3,3);
     // cout << "performing dilation" << endl;
     // filter.morphology(*imgPointer,*imgPointer,"dilate",3,3);
 
