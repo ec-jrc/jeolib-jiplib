@@ -11,7 +11,7 @@ Change log
 #include <string>
 #include <vector>
 extern "C" {
-#include "jipl_glue.h"
+#include "mialib_swig.h"
 #include "op.h"
 }
 

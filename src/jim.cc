@@ -20,7 +20,7 @@ IMAGE* Jim::getMIA(unsigned int band){
     std::ostringstream s;
     s << "Error: increase memory to support MIA library functions (now at " << 100.0*getBlockSize()/nrOfRow() << "%)";
     throw(s.str());
-  }    
+  }
   m_mia=new(IMAGE);
   m_mia->p_im=m_data[band];/* Pointer to image data */
   m_mia->DataType=GDAL2MIADataType(getDataType());
