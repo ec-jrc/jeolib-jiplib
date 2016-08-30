@@ -23,7 +23,7 @@ set (PROJECT_SOURCE_DIR src)
 
 # Name of C++ library
 set(JIPLIB_LIB_NAME jiplib)
-set(MIA_LIB_NAME jip_generic)
+set(MIA_LIB_NAME mia_generic)
 
 option (BUILD_SHARED_LIBS "Build with shared library" ON)
 

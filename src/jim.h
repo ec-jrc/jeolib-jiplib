@@ -80,11 +80,11 @@ public:
    * @param aGDALDataType 
    * 
    * @return MIA data type
-   */  int GDAL2MIADataType(GDALDataType aGDALDataType)
-  {
+   */
+  int GDAL2MIADataType(GDALDataType aGDALDataType){
     //function exists, but introduced for naming consistency
-    return(GDAL2LIIARDataType(aGDALDataType));
-  }
+    return(GDAL2MIALDataType(aGDALDataType));
+  };
   ///convert a MIA data type to GDAL data type
   /** 
    * 
