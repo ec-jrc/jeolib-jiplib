@@ -16,7 +16,7 @@
 #include "apps/AppFactory.h"
 #include "algorithms/Filter2d.h"
 #include "jim.h"
-#include "jipl_glue.h"
+#include "mialib_swig.h"
 #include <cpl_error.h>
   %}
 
@@ -31,7 +31,6 @@
 %include "apps/AppFactory.h"
 %include "algorithms/Filter2d.h"
 %include "jim.h"
-//%include "jipl_glue.h"
 
 //%ignore Jim::operator=;
 /* %rename(ImgCollection) ImgCollection<std::shared_ptr<jiplib::Jim> >; */
