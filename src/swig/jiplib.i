@@ -65,8 +65,8 @@ make -j
 sudo cp ~/jiplib/build/src/libjiplib.so /usr/local/lib
 cd ~/jiplib/src/swig/
 swig -c++ -I.. -I/usr/local/include/mia -I/usr/local/include/pktools -python -o jiplib_wrap.cc jiplib.i
-g++ -fPIC -I.. -I../../build -I/usr/local/include/mia -I/usr/local/include/pktools -c jiplib_wrap.cc $(python-config --cflags) -o jiplib_wrap.o
-g++ -shared -v -nostartfiles -L../../build/src -L/usr/local/lib jiplib_wrap.o -ljip_generic -ljiplib -limageClasses -lalgorithms -lgsl -ldl -lgdal $(python-config --ldflags) -o _jiplib.so
+g++ -fPIC -std=c++11 -I.. -I../../build -I/usr/local/include/mia -I/usr/local/include/pktools -c jiplib_wrap.cc $(python-config --cflags) -o jiplib_wrap.o
+g++ -shared -v -nostartfiles -L../../build/src -L/usr/local/lib jiplib_wrap.o -lmia_generic -ljiplib -limageClasses -lalgorithms -lgsl -ldl -lgdal $(python-config --ldflags) -o _jiplib.so
 sudo cp _jiplib.so jiplib.py /usr/local/lib/python2.7/site-packages
 */
 //////// how to use jiplib module within Python //////////
