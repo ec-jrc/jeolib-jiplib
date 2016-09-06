@@ -44,10 +44,6 @@ JIPL_ROOT = ../../core/c/
 BUILDBASEDIR = ../build
 BUILDDIR = ../build/python/
 
-SWIGOUTPUTDIR = extensions/
-JIPL_ROOT = ../../core/c/
-BUILDDIR = ../build/python/
-
 PY_MODULES      =       ${PACKAGE_DIR}/jiplib.py
 
 
@@ -85,7 +81,7 @@ XINCLUDE   = -I/usr/X11R6/include
 IWRAP      = $(INTERFACE:.i=_wrap.i)
 ISRCS      = $(IWRAP:%.i=$(SWIGOUTPUTDIR)/%.cc)
 ICXXSRCS   = $(IWRAP:.i=.cxx)
-IOBJS      = $(IWRAP:%.i=$(BUILDDIR)/temp/$(SWIGOUTPUTDIR)/%.o)
+IOBJS      = $(IWRAP:%.i=$(BUILDDIR)/$(SWIGOUTPUTDIR)/%.o)
 
 
 # Symbols used for using shared libraries
@@ -128,8 +124,8 @@ jiplib_wrap.cc: ../include/jiplib.i ../include/$(BINDING)/jiplib_$(BINDING).i # 
 
 
 jiplib_wrap.o: jiplib_wrap.cc
-	@mkdir -p $(BUILDDIR)/temp/$(SWIGOUTPUTDIR)/$(@D)
-	$(CC) -c $(CCSHARED) $(CFLAGS) $(ISRCS) $(INCLUDE) $(PYTHON_INCLUDE) -o  $(BUILDDIR)/temp/$(SWIGOUTPUTDIR)/$@ 
+	@mkdir -p $(BUILDDIR)/$(SWIGOUTPUTDIR)/$(@D)
+	$(CC) -c $(CCSHARED) $(CFLAGS) $(ISRCS) $(INCLUDE) $(PYTHON_INCLUDE) -o  $(BUILDDIR)/$(SWIGOUTPUTDIR)/$@ 
 
 jiplib: jiplib_wrap.o
 	@mkdir -p $(BUILDDIR)/$(@D)
@@ -146,7 +142,7 @@ all: jiplib doc
 
 install:
 	test -f $(SWIGOUTPUTDIR)/$(TARGET).py && mv $(SWIGOUTPUTDIR)/$(TARGET).py $(BUILDDIR)
-	cp -a $(BUILDDIR)/_$(TARGET).py $(PYTHON_PACKAGES_DIR)
+	cp -a $(BUILDDIR)/$(TARGET).py $(PYTHON_PACKAGES_DIR)
 	cp -a $(BUILDDIR)/_$(TARGET)$(SO) $(PYTHON_PACKAGES_DIR)
 
 
