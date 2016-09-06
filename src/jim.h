@@ -132,8 +132,10 @@ public:
   CPLErr arith(Jim& imgRaster, int theOperation, unsigned int band=0);
   /// perform a morphological dilation for a particular band
   CPLErr rdil(Jim& mask, int graph, int flag, unsigned int band=0);
-  /// perform a morphological erosion for a particular band
+  /// perform a morphological reconstruction by erosion for a particular band
   CPLErr rero(Jim& mask, int graph, int flag, unsigned int band=0);
+  /// perform a morphological reconstruction by erosion for a particular band (non-destructive version)
+  std::shared_ptr<jiplib::Jim> Jim::rero(Jim& mask, int graph, int flag, unsigned int iband=0);
 
 protected:
   ///number of planes in this dataset

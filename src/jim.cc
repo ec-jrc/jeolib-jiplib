@@ -167,7 +167,7 @@ CPLErr Jim::rdil(Jim& mask, int graph, int flag, unsigned int iband){
  * 
  * 
  * @param mask
- * @param grap
+ * @param graph
  * @param flag
  * @param iband is the band for which the arithmetic operation needs to be performed (default is 0: first band)
  * 
@@ -176,11 +176,37 @@ CPLErr Jim::rdil(Jim& mask, int graph, int flag, unsigned int iband){
 CPLErr Jim::rero(Jim& mask, int graph, int flag, unsigned int iband){
   IMAGE* markMIA=this->getMIA(iband);
   IMAGE* maskMIA=mask.getMIA(iband);
-  CPLErr success=CE_None;
-  ::rero(markMIA,maskMIA,graph,flag);
-  setMIA(iband);
+  if (::rero(markMIA,maskMIA,graph,flag) == NO_ERROR){
+    this->setMIA(iband);
+    mask.setMIA(iband);
+    return(CE_None);
+  }
+  this->setMIA(iband);
   mask.setMIA(iband);
-  return(success);
+  return(CE_Failure);
+}
+
+/** 
+ * 
+ * 
+ * @param mask
+ * @param graph
+ * @param flag
+ * @param iband is the band for which the arithmetic operation needs to be performed (default is 0: first band)
+ * 
+ * @return CE_None if successful
+ */
+std::shared_ptr<jiplib::Jim> Jim::rero(Jim& mask, int graph, int flag, unsigned int iband){
+  std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim(shared_from_this(), true));
+  IMAGE* markMIA=pJim->getMIA(iband);
+  IMAGE* maskMIA=mask.getMIA(iband);
+  if (::rero(markMIA,maskMIA,graph,flag) == NO_ERROR){
+    pJim->setMIA(iband);
+  }
+  else
+    pJim=NULL;
+  mask.setMIA(iband);
+  return(pJim);
 }
 
 /**
