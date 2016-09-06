@@ -25,7 +25,7 @@
 
 //Parse the header file
 //%include "imageclasses/ImgRaster.h"
-%include "swig/pktools.i"
+%include "/home/soillpi/workstation/jip/pktools/src/swig/pktools.i"
 %include "imageclasses/ImgCollection.h"
 %include "imageclasses/ImgRaster.h"
 %include "apps/AppFactory.h"
