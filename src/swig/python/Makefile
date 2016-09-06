@@ -122,9 +122,9 @@ PYTHON_DLNK   =
 
 
 jiplib_wrap.cc: ../include/jiplib.i ../include/$(BINDING)/jiplib_$(BINDING).i # ../include/$(BINDING)/typemaps_$(BINDING).i
+	@mkdir -p $(SWIGOUTPUTDIR)$(@D)
 	@mkdir -p $(BUILDDIR)$(@D)
 	$(SWIG) $(SWIGARGS) $(SWIGDEFINES) -I$(JIPL_ROOT) -$(BINDING) -o $(SWIGOUTPUTDIR)$@ ../include/jiplib.i
-	test -f $(SWIGOUTPUTDIR)/$(TARGET).py && mv $(SWIGOUTPUTDIR)/$(TARGET).py $(BUILDDIR)
 
 
 jiplib_wrap.o: jiplib_wrap.cc
@@ -145,6 +145,8 @@ all: jiplib doc
 
 
 install:
+	test -f $(SWIGOUTPUTDIR)/$(TARGET).py && mv $(SWIGOUTPUTDIR)/$(TARGET).py $(BUILDDIR)
+	cp -a $(BUILDDIR)/_$(TARGET).py $(PYTHON_PACKAGES_DIR)
 	cp -a $(BUILDDIR)/_$(TARGET)$(SO) $(PYTHON_PACKAGES_DIR)
 
 
