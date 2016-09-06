@@ -8,11 +8,11 @@ Change log
 
 using namespace jiplib;
 
-/** 
- * 
- * 
+/**
+ *
+ *
  * @param band the band to get the MIA image representation for
- * 
+ *
  * @return pointer to MIA image representation
  */
 IMAGE* Jim::getMIA(unsigned int band){
@@ -36,11 +36,11 @@ IMAGE* Jim::getMIA(unsigned int band){
   return m_mia;
 }
 
-/** 
- * 
- * 
+/**
+ *
+ *
  * @param band the band for which the MIA image pointer needs to be set
- * 
+ *
  * @return C_None if successful
  */
 CPLErr Jim::setMIA(unsigned int band){
@@ -72,12 +72,12 @@ CPLErr Jim::setMIA(unsigned int band){
   return(CE_None);
 }
 
-// /** 
-//  * 
-//  * 
+// /**
+//  *
+//  *
 //  * @param mia the MIA image pointer to be set
 //  * @param band the band for which the MIA image pointer needs to be set
-//  * 
+//  *
 //  * @return C_None if successful
 //  */
 // CPLErr Jim::setMIA(IMAGE* mia, unsigned int band){
@@ -109,18 +109,18 @@ CPLErr Jim::setMIA(unsigned int band){
 //   return(CE_None);
 // }
 
-/** 
- * 
- * 
+/**
+ *
+ *
  * @param imgRaster is operand
  * @param theOperation the operation to be performed
  * @param iband is the band for which the function needs to be performed (default 0 is first band)
- * 
+ *
  * @return CE_None if successful
  */
-CPLErr Jim::arith(Jim& imgRaster, int theOperation, unsigned int iband){
+CPLErr Jim::arith(std::shared_ptr<Jim> imgRaster, int theOperation, unsigned int iband){
   try{
-    if(imgRaster.nrOfBand()<iband){
+    if(imgRaster->nrOfBand()<iband){
       std::string errorString="Error: band number exceeds number of bands in input image";
       throw(errorString);
     }
@@ -129,83 +129,158 @@ CPLErr Jim::arith(Jim& imgRaster, int theOperation, unsigned int iband){
       throw(errorString);
     }
     IMAGE* mia1=this->getMIA(iband);
-    std::cout << "getMIA" << std::endl;
-    IMAGE* mia2=imgRaster.getMIA(iband);
-    ::arith(mia1, mia2, theOperation);
-    setMIA(iband);
-    imgRaster.setMIA(iband);
-    std::cout << "setMIA" << std::endl;
-    return(CE_None);
+    IMAGE* mia2=imgRaster->getMIA(iband);
+    if(::arith(mia1, mia2, theOperation) == NO_ERROR){
+      this->setMIA(iband);
+      imgRaster->setMIA(iband);
+      return(CE_None);
+    }
+    else{
+      this->setMIA(iband);
+      imgRaster->setMIA(iband);
+      std::string errorString="Error: arith function in MIA failed";
+      throw(errorString);
+    }
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
     return(CE_Failure);
   }
+  catch(...){
+    return(CE_Failure);
+  }
 }
 
-/** 
- * 
- * 
+/**
+ *
+ *
+ * @param imgRaster is operand
+ * @param theOperation the operation to be performed
+ * @param iband is the band for which the function needs to be performed (default 0 is first band)
+ *
+ * @return shared pointer to resulting image
+ */
+std::shared_ptr<jiplib::Jim> Jim::getArith(std::shared_ptr<Jim> imgRaster, int theOperation, unsigned int iband){
+  try{
+    if(imgRaster->nrOfBand()<iband){
+      std::string errorString="Error: band number exceeds number of bands in input image";
+      throw(errorString);
+    }
+    if(nrOfBand()<iband){
+      std::string errorString="Error: band number exceeds number of bands in input image";
+      throw(errorString);
+    }
+    std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim(shared_from_this(), true));
+    IMAGE* mia1=pJim->getMIA(iband);
+    IMAGE* mia2=imgRaster->getMIA(iband);
+    if(::arith(mia1, mia2, theOperation) == NO_ERROR){
+      pJim->setMIA(iband);
+      imgRaster->setMIA(iband);
+      return(pJim);
+    }
+    else{
+      imgRaster->setMIA(iband);
+      std::string errorString="Error: arith function in MIA failed";
+      throw(errorString);
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    return(NULL);
+  }
+  catch(...){
+    return(NULL);
+  }
+}
+
+/**
+ *
+ *
  * @param mask
  * @param graph
  * @param flag
  * @param iband is the band for which the function needs to be performed (default is 0: first band)
- * 
+ *
  * @return CE_None if successful
  */
-CPLErr Jim::rdil(Jim& mask, int graph, int flag, unsigned int iband){
+CPLErr Jim::rdil(std::shared_ptr<Jim> mask, int graph, int flag, unsigned int iband){
   IMAGE* markMIA=this->getMIA(iband);
-  IMAGE* maskMIA=mask.getMIA(iband);
-  CPLErr success=CE_None;
-  ::rdil(markMIA,maskMIA,graph,flag);
-  setMIA(iband);
-  mask.setMIA(iband);
-  return(success);
-}
-
-/** 
- * 
- * 
- * @param mask
- * @param graph
- * @param flag
- * @param iband is the band for which the arithmetic operation needs to be performed (default is 0: first band)
- * 
- * @return CE_None if successful
- */
-CPLErr Jim::rero(Jim& mask, int graph, int flag, unsigned int iband){
-  IMAGE* markMIA=this->getMIA(iband);
-  IMAGE* maskMIA=mask.getMIA(iband);
-  if (::rero(markMIA,maskMIA,graph,flag) == NO_ERROR){
+  IMAGE* maskMIA=mask->getMIA(iband);
+  if(::rdil(markMIA,maskMIA,graph,flag) == NO_ERROR){
     this->setMIA(iband);
-    mask.setMIA(iband);
+    mask->setMIA(iband);
     return(CE_None);
   }
   this->setMIA(iband);
-  mask.setMIA(iband);
+  mask->setMIA(iband);
   return(CE_Failure);
 }
 
-/** 
- * 
- * 
+/**
+ *
+ *
  * @param mask
  * @param graph
  * @param flag
- * @param iband is the band for which the arithmetic operation needs to be performed (default is 0: first band)
- * 
- * @return CE_None if successful
+ * @param iband is the band for which the operation needs to be performed (default is 0: first band)
+ *
+ * @return shared pointer to resulting image
  */
-std::shared_ptr<jiplib::Jim> Jim::reroGLOUP(Jim& mask, int graph, int flag, unsigned int iband){
+std::shared_ptr<jiplib::Jim> Jim::getRdil(std::shared_ptr<Jim> mask, int graph, int flag, unsigned int iband){
   std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim(shared_from_this(), true));
   IMAGE* markMIA=pJim->getMIA(iband);
-  IMAGE* maskMIA=mask.getMIA(iband);
+  IMAGE* maskMIA=mask->getMIA(iband);
+  if (::rdil(markMIA,maskMIA,graph,flag) == NO_ERROR){
+    pJim->setMIA(iband);
+  }
+  else
+    pJim=NULL;
+  mask->setMIA(iband);
+  return(pJim);
+}
+/**
+ *
+ *
+ * @param mask
+ * @param graph
+ * @param flag
+ * @param iband is the band for which the operation needs to be performed (default is 0: first band)
+ *
+ * @return CE_None if successful
+ */
+CPLErr Jim::rero(std::shared_ptr<Jim> mask, int graph, int flag, unsigned int iband){
+  IMAGE* markMIA=this->getMIA(iband);
+  IMAGE* maskMIA=mask->getMIA(iband);
+  if (::rero(markMIA,maskMIA,graph,flag) == NO_ERROR){
+    this->setMIA(iband);
+    mask->setMIA(iband);
+    return(CE_None);
+  }
+  this->setMIA(iband);
+  mask->setMIA(iband);
+  return(CE_Failure);
+}
+
+/**
+ *
+ *
+ * @param mask
+ * @param graph
+ * @param flag
+ * @param iband is the band for which the operation needs to be performed (default is 0: first band)
+ *
+ * @return shared pointer to resulting image
+ */
+std::shared_ptr<jiplib::Jim> Jim::getRero(std::shared_ptr<Jim> mask, int graph, int flag, unsigned int iband){
+  std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim(shared_from_this(), true));
+  IMAGE* markMIA=pJim->getMIA(iband);
+  IMAGE* maskMIA=mask->getMIA(iband);
   if (::rero(markMIA,maskMIA,graph,flag) == NO_ERROR){
     pJim->setMIA(iband);
   }
   else
     pJim=NULL;
-  mask.setMIA(iband);
+  mask->setMIA(iband);
   return(pJim);
 }
 
@@ -225,10 +300,40 @@ Jim& Jim::operator=(Jim& imgSrc)
 }
 
 
-/** 
- * 
+/**
+ *
  * @param refImg Use this as the reference image
- * 
+ *
+ * @return true if image is equal to reference image
+ */
+bool Jim::operator==(std::shared_ptr<Jim> refImg)
+{
+  bool isEqual=true;
+  if(nrOfBand()!=refImg->nrOfBand())
+    return(false);
+  if(nrOfRow()!=refImg->nrOfRow())
+    return(false);
+  if(nrOfCol()!=refImg->nrOfCol())
+    return(false);
+
+  for(int iband=0;iband<nrOfBand();++iband){
+    if(getDataType(iband)!=refImg->getDataType(iband)){
+      isEqual=false;
+      break;
+    }
+    IMAGE* refMIA=refImg->getMIA(iband);
+    IMAGE* thisMIA=this->getMIA(iband);
+    if(::imequalp(thisMIA,refMIA)){
+      isEqual=false;
+      break;
+    }
+  }
+  return(isEqual);
+}
+/**
+ *
+ * @param refImg Use this as the reference image
+ *
  * @return true if image is equal to reference image
  */
 bool Jim::operator==(Jim& refImg)

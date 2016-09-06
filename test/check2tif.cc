@@ -46,29 +46,29 @@ int main(int argc, char *argv[])
   try{
     Jim inputImg(input_opt[0]);
     inputImg.readData();
-    Jim mask(inputImg,true);
-    Jim marker(inputImg,false);
-    std::vector<unsigned short> lineBuffer(marker.nrOfCol());
-    std::vector<unsigned short> zeroBuffer(marker.nrOfCol());
-    marker.writeData(zeroBuffer,0,0);
-    for(int icol=0;icol<marker.nrOfCol();++icol){
-      if(icol<1||icol>marker.nrOfCol()-2)
+    shared_ptr<Jim> mask=make_shared<Jim>(inputImg,true);
+    shared_ptr<Jim> marker=make_shared<Jim>(inputImg,false);
+    std::vector<unsigned short> lineBuffer(marker->nrOfCol());
+    std::vector<unsigned short> zeroBuffer(marker->nrOfCol());
+    marker->writeData(zeroBuffer,0,0);
+    for(int icol=0;icol<marker->nrOfCol();++icol){
+      if(icol<1||icol>marker->nrOfCol()-2)
         lineBuffer[icol]=0;
       else
         lineBuffer[icol]=1;
     }
-    for(int irow=1;irow<marker.nrOfRow()-1;++irow)
-      marker.writeData(lineBuffer,irow,0);
-    marker.writeData(zeroBuffer,marker.nrOfRow()-1,0);
+    for(int irow=1;irow<marker->nrOfRow()-1;++irow)
+      marker->writeData(lineBuffer,irow,0);
+    marker->writeData(zeroBuffer,marker->nrOfRow()-1,0);
 
-    mask.writeData(nodata_opt[0],1500,1500,0);
-    mask.pushNoDataValue(1);
-    mask.setThreshold(nodata_opt[0],nodata_opt[0],0);
+    mask->writeData(nodata_opt[0],1500,1500,0);
+    mask->pushNoDataValue(1);
+    mask->setThreshold(nodata_opt[0],nodata_opt[0],0);
 
-    marker.rero(mask,8,1);
-    marker.setFile("/scratch/test/marker_cc.tif",oformat_opt[0],memory_opt[0],option_opt);
-    mask.setFile("/scratch/test/mask_cc.tif",oformat_opt[0],memory_opt[0],option_opt);
-    if(marker.isEqual(mask))
+    marker->rero(mask,8,1);
+    marker->setFile("/scratch/test/marker_cc.tif",oformat_opt[0],memory_opt[0],option_opt);
+    mask->setFile("/scratch/test/mask_cc.tif",oformat_opt[0],memory_opt[0],option_opt);
+    if(marker->isEqual(mask))
       std::cout << "Check passed for image " << input_opt[0] << std::endl;
     else
       std::cout << "Error: check not passed for image " << input_opt[0] << std::endl;
@@ -79,8 +79,8 @@ int main(int argc, char *argv[])
     else
       cout << "Error: created image different then input image" << endl;
     outputImg.close();
-    mask.close();
-    marker.close();
+    mask->close();
+    marker->close();
     inputImg.close();
   }
   catch(string helpString){//help was invoked
@@ -88,4 +88,4 @@ int main(int argc, char *argv[])
     return(1);
   }
   return(0);
-}  
+}

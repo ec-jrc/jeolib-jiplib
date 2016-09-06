@@ -93,8 +93,8 @@ Optionpk<string>  input_opt("i", "input", "Input image file(s). If input contain
     // }
 
     cout << "performing arithmetic operation" << endl;
-    imgPointer->arith(*imgPointer,ADD_op);
-    imgPointer->rdil(*imgPointer,1,1);
+    imgPointer->arith(imgPointer,ADD_op);
+    imgPointer->rdil(imgPointer,1,1);
 
     cout << "performing erosion" << endl;
     filter.morphology(imgPointer,imgPointer,"erode",3,3);

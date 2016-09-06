@@ -47,20 +47,20 @@ Optionpk<string>  input_opt("i", "input", "Input image file(s). If input contain
   filter2d::Filter2d filter;
   try{
     Jim inputImg(input_opt[0]);
-    Jim mask(inputImg,true);
-    mask.pushNoDataValue(1);
-    mask.setThreshold(nodata_opt[0],nodata_opt[0],0);
-    Jim marker(inputImg,false);
+    shared_ptr<Jim> mask=make_shared<Jim>(inputImg,true);
+    shared_ptr<Jim> marker=make_shared<Jim>(inputImg,false);
+    mask->pushNoDataValue(1);
+    mask->setThreshold(nodata_opt[0],nodata_opt[0],0);
     int theValue=1;
-    marker.writeData(theValue,static_cast<unsigned int>(1),static_cast<unsigned int>(1),static_cast<unsigned int>(0));
-    marker.rdil(mask,8,1);
+    marker->writeData(theValue,static_cast<unsigned int>(1),static_cast<unsigned int>(1),static_cast<unsigned int>(0));
+    marker->rdil(mask,8,1);
     if(marker!=mask)
       std::cout << "Error: check not passed for image " << input_opt[0] << std::endl;
     else
       std::cout << "Check passed for image " << input_opt[0] << std::endl;
     inputImg.close();
-    mask.close();
-    marker.close();
+    mask->close();
+    marker->close();
   }
   catch(string helpString){//help was invoked
     std::cout << helpString << std::endl;
