@@ -196,7 +196,7 @@ CPLErr Jim::rero(Jim& mask, int graph, int flag, unsigned int iband){
  * 
  * @return CE_None if successful
  */
-std::shared_ptr<jiplib::Jim> Jim::rero(Jim& mask, int graph, int flag, unsigned int iband){
+std::shared_ptr<jiplib::Jim> Jim::reroGLOUP(Jim& mask, int graph, int flag, unsigned int iband){
   std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim(shared_from_this(), true));
   IMAGE* markMIA=pJim->getMIA(iband);
   IMAGE* maskMIA=mask.getMIA(iband);
