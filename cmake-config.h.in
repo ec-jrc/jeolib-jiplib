@@ -1,2 +1,5 @@
-/* Version number of package */
-#define VERSION "@JIPLIB_VERSION@"
+// the configured options and settings for jiplib
+#define JIPLIB_VERSION_MAJOR @JIPLIB_VERSION_MAJOR@
+#define JIPLIB_VERSION_MINOR @JIPLIB_VERSION_MINOR@
+#define JIPLIB_VERSION_PATCH @JIPLIB_VERSION_PATCH@
+#define VERSION @JIPLIB_VERSION_MAJOR@

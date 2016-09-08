@@ -170,7 +170,7 @@ std::shared_ptr<jiplib::Jim> Jim::getArith(std::shared_ptr<Jim> imgRaster, int t
       std::string errorString="Error: band number exceeds number of bands in input image";
       throw(errorString);
     }
-    std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim(shared_from_this(), true));
+    std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(shared_from_this(), true);
     IMAGE* mia1=pJim->getMIA(iband);
     IMAGE* mia2=imgRaster->getMIA(iband);
     if(::arith(mia1, mia2, theOperation) == NO_ERROR){
@@ -227,7 +227,7 @@ CPLErr Jim::rdil(std::shared_ptr<Jim> mask, int graph, int flag, unsigned int ib
  * @return shared pointer to resulting image
  */
 std::shared_ptr<jiplib::Jim> Jim::getRdil(std::shared_ptr<Jim> mask, int graph, int flag, unsigned int iband){
-  std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim(shared_from_this(), true));
+  std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(shared_from_this(), true);
   IMAGE* markMIA=pJim->getMIA(iband);
   IMAGE* maskMIA=mask->getMIA(iband);
   if (::rdil(markMIA,maskMIA,graph,flag) == NO_ERROR){
@@ -272,7 +272,7 @@ CPLErr Jim::rero(std::shared_ptr<Jim> mask, int graph, int flag, unsigned int ib
  * @return shared pointer to resulting image
  */
 std::shared_ptr<jiplib::Jim> Jim::getRero(std::shared_ptr<Jim> mask, int graph, int flag, unsigned int iband){
-  std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim(shared_from_this(), true));
+  std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(shared_from_this(), true);
   IMAGE* markMIA=pJim->getMIA(iband);
   IMAGE* maskMIA=mask->getMIA(iband);
   if (::rero(markMIA,maskMIA,graph,flag) == NO_ERROR){
