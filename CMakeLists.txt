@@ -48,9 +48,6 @@ else(COMPILER_SUPPORTS_CXX11)
   message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-########## INSTALL ##########
-install (TARGETS ${JIPLIB_LIB_NAME} DESTINATION lib)
-install (FILES ${JIPLIB_H} DESTINATION include/jiplib)
 ########## CTEST ############
 # add_test(test1Run test1)
 # set_tests_properties (test1Run
@@ -58,12 +55,12 @@ install (FILES ${JIPLIB_H} DESTINATION include/jiplib)
 
 ########## BUILDING INSTALLLER ##########
 # build a CPack driven installer package
-include (InstallRequiredSystemLibraries)
-set (CPACK_RESOURCE_FILE_LICENSE  
-     "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
-set (CPACK_PACKAGE_VERSION_MAJOR "${JIPLIB_VERSION_MAJOR}")
-set (CPACK_PACKAGE_VERSION_MINOR "${JIPLIB_VERSION_MINOR}")
-include (CPack)
+# include (InstallRequiredSystemLibraries)
+# set (CPACK_RESOURCE_FILE_LICENSE  
+#      "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
+# set (CPACK_PACKAGE_VERSION_MAJOR "${JIPLIB_VERSION_MAJOR}")
+# set (CPACK_PACKAGE_VERSION_MINOR "${JIPLIB_VERSION_MINOR}")
+# include (CPack)
 
 # Make sure pktools version 3.0.0 is found
 set(PKTOOLS_INCLUDE_DIR /usr/local/include/pktools CACHE PATH "Include PATH for PKTOOLS")
@@ -100,7 +97,7 @@ endif()
 
 # configure_file ( "cmake-config.in" "${CMAKE_CURRENT_BINARY_DIR}/config" @ONLY )
 configure_file ( "cmake-config.h.in" "${CMAKE_SOURCE_DIR}/config.h" @ONLY )
-configure_file ( "cmake.pc.in" "jiplib.pc"  @ONLY)
+# configure_file ( "cmake.pc.in" "jiplib.pc"  @ONLY)
 add_definitions(-DHAVE_CONFIG_H)
 
 
@@ -111,16 +108,19 @@ configure_file ( "cmake.pc.in" "jiplib.pc"  @ONLY)
 include_directories("${PROJECT_BINARY_DIR}")
 
 # Name of C++ library
-set(JIPLIB_LIB_NAME jiplib-${JIPLIB_VERSION_MAJOR}.${JIPLIB_VERSION_MINOR})
+set(JIPLIB_LIB_NAME jiplib-${JIPLIB_VERSION_MAJOR}.${JIPLIB_VERSION_MINOR}.${JIPLIB_VERSION_PATCH})
+set(TEST_LIB_NAME testlib)
+
 # Build libraries
 ###############################################################################
 include_directories("${PROJECT_SOURCE_DIR}")
+include_directories("${CMAKE_SOURCE_DIR}")
 # Instruct CMake to inspect the following subfolders (with CMakeLists.txt in each subfolder)
 
-set(JIPLIB_IMG_CC src/jim.cc)
-set(JIPLIB_IMG_H src/jim.h)
+set(JIPLIB_CC jim.cc)
+set(JIPLIB_H jim.h)
 # Define the jiplib library.
-add_library( ${JIPLIB_LIB_NAME} ${JIPLIB_IMG_H} ${JIPLIB_IMG_CC})
+add_library( ${JIPLIB_LIB_NAME} ${PROJECT_SOURCE_DIR}/${JIPLIB_H} ${PROJECT_SOURCE_DIR}/${JIPLIB_CC})
 target_link_libraries(
   ${JIPLIB_LIB_NAME}
   ${MIA_LIB_NAME}
@@ -132,6 +132,10 @@ target_link_libraries(
   )
 # add_subdirectory ("${PROJECT_SOURCE_DIR}")
 ###############################################################################
+
+########## INSTALL ##########
+install (TARGETS ${JIPLIB_LIB_NAME} LIBRARY DESTINATION lib)
+install (FILES ${PROJECT_SOURCE_DIR}/${JIPLIB_H} DESTINATION include/jiplib)
 
 ###############################################################################
 # Build executables
