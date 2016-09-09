@@ -55,17 +55,25 @@ endif()
 
 ########## BUILDING INSTALLLER ##########
 # build a CPack driven installer package
-# include (InstallRequiredSystemLibraries)
-# set (CPACK_RESOURCE_FILE_LICENSE  
-#      "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
-# set (CPACK_PACKAGE_VERSION_MAJOR "${JIPLIB_VERSION_MAJOR}")
-# set (CPACK_PACKAGE_VERSION_MINOR "${JIPLIB_VERSION_MINOR}")
-# include (CPack)
+include (InstallRequiredSystemLibraries)
+set (CPACK_RESOURCE_FILE_LICENSE
+     "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
+set (CPACK_PACKAGE_VERSION_MAJOR "${JIPLIB_VERSION_MAJOR}")
+set (CPACK_PACKAGE_VERSION_MINOR "${JIPLIB_VERSION_MINOR}")
+set (CPACK_PACKAGE_VERSION_PATCH "${JIPLIB_VERSION_PATCH}")
+include (CPack)
 
 # Make sure pktools version 3.0.0 is found
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
+# find_package(pktools CONFIG REQUIRED)
+# include_directories(${PKTOOLS_INCLUDE_DIRS})
+#should replace following line
+# EXECUTE_PROCESS(COMMAND pkg-config --cflags pktools OUTPUT_VARIABLE PKTOOLS_INCLUDE_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
+# set(PKTOOLS_INCLUDE_DIR ${PKTOOLS_INCLUDE_DIRS} CACHE PATH "Include PATH for PKTOOLS")
 set(PKTOOLS_INCLUDE_DIR /usr/local/include/pktools CACHE PATH "Include PATH for PKTOOLS")
+include_directories(${PKTOOLS_INCLUDE_DIR})
+# #should not be needed with FindPktools
 set(PKTOOLS_LIB_PATH /usr/local/lib CACHE PATH "Library PATH for PKTOOLS")
-
 
 
 # Make sure mia is found
@@ -74,7 +82,6 @@ set(MIA_LIB_NAME mia_generic)
 set(MIA_INCLUDE_DIR /usr/local/include/mia CACHE PATH "Include PATH for MIA")
 set(MIA_LIB_PATH /usr/local/lib CACHE PATH "Library PATH for MIA")
 
-INCLUDE_DIRECTORIES(${PKTOOLS_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${MIA_INCLUDE_DIR})
 LINK_DIRECTORIES(${MIA_LIB_PATH})
 
@@ -129,15 +136,11 @@ target_link_libraries(
   base
   algorithms
   imageClasses
+  # ${PKTOOLS_LIBRARIES}
   )
 # add_subdirectory ("${PROJECT_SOURCE_DIR}")
 ###############################################################################
 
-########## INSTALL ##########
-install (TARGETS ${JIPLIB_LIB_NAME} LIBRARY DESTINATION lib)
-install (FILES ${PROJECT_SOURCE_DIR}/${JIPLIB_H} DESTINATION include/jiplib)
-
-###############################################################################
 # Build executables
 
 # add_executable(test1 ${PROJECT_TEST_DIR}/test1.cc)
@@ -149,18 +152,23 @@ install (FILES ${PROJECT_SOURCE_DIR}/${JIPLIB_H} DESTINATION include/jiplib)
 ########## SWIG #############
 FIND_PACKAGE(SWIG REQUIRED)
 FIND_PACKAGE(PythonLibs)
-set(PYTHON_SRC_DIR ${PROJECT_SOURCE_DIR}/swig)
+SET(PYTHON_SRC_DIR ${PROJECT_SOURCE_DIR}/swig)
 FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/swig)
-
 INCLUDE(${SWIG_USE_FILE})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-
 SET(CMAKE_SWIG_FLAGS "")
-set_property(SOURCE ${PYTHON_SRC_DIR}/jiplib.i PROPERTY CPLUSPLUS ON)
-swig_add_module(jiplib python ${PYTHON_SRC_DIR}/jiplib.i)
-
-
+SET_PROPERTY(SOURCE ${PYTHON_SRC_DIR}/jiplib.i PROPERTY CPLUSPLUS ON)
+SWIG_ADD_MODULE(jiplib python ${PYTHON_SRC_DIR}/jiplib.i)
 SET_SOURCE_FILES_PROPERTIES(${PYTHON_SRC_DIR}/jiplib.i PROPERTIES SWIG_FLAGS "-Wall")
 SWIG_LINK_LIBRARIES(jiplib ${PYTHON_LIBRARIES} ${JIPLIB_LIB_NAME})
+
+########## INSTALL ##########
+INSTALL (TARGETS ${JIPLIB_LIB_NAME} LIBRARY DESTINATION lib)
+INSTALL (FILES ${PROJECT_SOURCE_DIR}/${JIPLIB_H} DESTINATION include/jiplib)
+EXECUTE_PROCESS(COMMAND python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
+SET(PYTHON_INSTALL_DIR ${PYTHON_SITE_PACKAGES} CACHE PATH "Install directory for Python library")
+INSTALL(TARGETS ${SWIG_MODULE_jiplib_REAL_NAME} LIBRARY DESTINATION ${PYTHON_INSTALL_DIR})
+INSTALL(FILES ${CMAKE_BINARY_DIR}/jiplib.py DESTINATION ${PYTHON_INSTALL_DIR})
+###############################################################################
