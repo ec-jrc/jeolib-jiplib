@@ -48,11 +48,6 @@ else(COMPILER_SUPPORTS_CXX11)
   message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-########## CTEST ############
-# add_test(test1Run test1)
-# set_tests_properties (test1Run
-#     PROPERTIES PASS_REGULAR_EXPRESSION "success")
-
 ########## BUILDING INSTALLLER ##########
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
@@ -65,15 +60,21 @@ include (CPack)
 
 # Make sure pktools version 3.0.0 is found
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
-# find_package(pktools CONFIG REQUIRED)
-# include_directories(${PKTOOLS_INCLUDE_DIRS})
+find_package(PKTOOLS CONFIG REQUIRED)
+if(PKTOOLS_FOUND)
+  include_directories(${PKTOOLS_INCLUDE_DIRS})
+else(PKTOOLS_FOUND)
+  message(WARNING "pktools not found, set manually")
+  set(PKTOOLS_INCLUDE_DIR /usr/local/include/pktools CACHE PATH "Include PATH for PKTOOLS")
+  include_directories(${PKTOOLS_INCLUDE_DIR})
+  # set(PKTOOLS_LIB_PATH /usr/local/lib CACHE PATH "Library PATH for PKTOOLS")
+endif()
+
+
 #should replace following line
 # EXECUTE_PROCESS(COMMAND pkg-config --cflags pktools OUTPUT_VARIABLE PKTOOLS_INCLUDE_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
 # set(PKTOOLS_INCLUDE_DIR ${PKTOOLS_INCLUDE_DIRS} CACHE PATH "Include PATH for PKTOOLS")
-set(PKTOOLS_INCLUDE_DIR /usr/local/include/pktools CACHE PATH "Include PATH for PKTOOLS")
-include_directories(${PKTOOLS_INCLUDE_DIR})
 # #should not be needed with FindPktools
-set(PKTOOLS_LIB_PATH /usr/local/lib CACHE PATH "Library PATH for PKTOOLS")
 
 
 # Make sure mia is found
@@ -88,6 +89,12 @@ LINK_DIRECTORIES(${MIA_LIB_PATH})
 find_package(GDAL 2.00 REQUIRED)
 if(GDAL_FOUND)
 	include_directories(${GDAL_INCLUDE_DIRS})
+endif()
+
+find_package(GSL REQUIRED)
+if(GSL_FOUND)
+  include_directories(${GSL_INCLUDE_DIRS})
+  add_definitions(-DGSL_DLL)
 endif()
 
 #todo: use find_library pktools instead of setting target_link_libraries
@@ -116,7 +123,21 @@ include_directories("${PROJECT_BINARY_DIR}")
 
 # Name of C++ library
 set(JIPLIB_LIB_NAME jiplib-${JIPLIB_VERSION_MAJOR}.${JIPLIB_VERSION_MINOR}.${JIPLIB_VERSION_PATCH})
-set(TEST_LIB_NAME testlib)
+
+# Build executables
+
+add_executable(createImg ${PROJECT_TEST_DIR}/createImg.cc)
+target_link_libraries( createImg
+  ${JIPLIB_LIB_NAME}
+  ${PKTOOLS_LIBRARIES}
+  ${GSL_LIBRARIES}
+  )
+
+
+########## CTEST ############
+add_test(test1 createImg -o Testing/test1.tif -ns 1 -nl 1 -of GTiff -ot Byte -seed 100 -mean 0 -sigma 100)
+set_tests_properties (test1
+    PROPERTIES PASS_REGULAR_EXPRESSION "success")
 
 # Build libraries
 ###############################################################################
@@ -133,21 +154,13 @@ target_link_libraries(
   ${MIA_LIB_NAME}
   gomp
   ${GDAL_LIBRARIES}
-  base
-  algorithms
-  imageClasses
-  # ${PKTOOLS_LIBRARIES}
+  # base
+  # algorithms
+  # imageClasses
+  ${PKTOOLS_LIBRARIES}
   )
 # add_subdirectory ("${PROJECT_SOURCE_DIR}")
 ###############################################################################
-
-# Build executables
-
-# add_executable(test1 ${PROJECT_TEST_DIR}/test1.cc)
-# target_link_libraries(
-#   ${JIPLIB_LIB_NAME}
-#   )
-
 
 ########## SWIG #############
 FIND_PACKAGE(SWIG REQUIRED)
