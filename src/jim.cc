@@ -8,6 +8,11 @@ Change log
 
 using namespace jiplib;
 
+//test
+void Jim::open(unsigned int ncol, unsigned int nrow, unsigned int nband, int dataType){
+  ImgRaster::open(ncol,nrow,nband,static_cast<GDALDataType>(dataType));
+};
+
 /**
  *
  *
@@ -302,7 +307,7 @@ Jim& Jim::operator=(Jim& imgSrc)
   if(this==&imgSrc)
      return *this;
   else{
-    open(imgSrc,copyData);
+    ImgRaster::open(imgSrc,copyData);
     return *this;
   }
 }

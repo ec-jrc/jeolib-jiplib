@@ -5,6 +5,7 @@ History
 Change log
 ***********************************************************************/
 #include <memory>
+#include <string>
 #include "base/Optionpk.h"
 #include "algorithms/StatFactory.h"
 #include "jim.h"

@@ -30,30 +30,24 @@ namespace jiplib{
   {
   public:
     ///default constructor
-  Jim(void) : ImgRaster(){m_nplane=1;m_mia=0;
-    };
+  Jim(void) : m_nplane(1), m_mia(0), ImgRaster(){};
     ///constructor input image
-  Jim(const std::string& filename, unsigned int memory=0) : ImgRaster(filename,memory){
-      m_nplane=1;
-      m_mia=0;
-    };
+  Jim(const std::string& filename, unsigned int memory=0) : m_nplane(1), m_mia(0), ImgRaster(filename,memory){};
     ///constructor input image
-  Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename,imgSrc,memory,options){m_nplane=1;m_mia=0;
-    };
+  Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : m_nplane(1), m_mia(0), ImgRaster(filename,imgSrc,memory,options){};
     ///constructor input image
-  Jim(std::shared_ptr<ImgRaster> imgSrc, bool copyData=true) : ImgRaster(imgSrc, copyData){m_nplane=1;m_mia=0;
-    };
+  Jim(std::shared_ptr<ImgRaster> imgSrc, bool copyData=true) : m_nplane(1), m_mia(0), ImgRaster(imgSrc, copyData){};
     ///constructor input image
-  Jim(Jim& imgSrc, bool copyData=true) : ImgRaster(imgSrc, copyData){m_nplane=1;m_mia=0;
-    };
+  Jim(Jim& imgSrc, bool copyData=true) : m_nplane(1), m_mia(0), ImgRaster(imgSrc, copyData){};
     ///constructor output image
-  Jim(const std::string& filename, unsigned int ncol, unsigned int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){m_nplane=1;m_mia=0;
-    };
+  Jim(const std::string& filename, unsigned int ncol, unsigned int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : m_nplane(1), m_mia(0), ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){};
     ///constructor output image
-  Jim(unsigned int ncol, unsigned int nrow, unsigned int nband, const GDALDataType& dataType) : ImgRaster(ncol, nrow, nband, dataType){m_nplane=1;m_mia=0;
-    };
+  Jim(unsigned int ncol, unsigned int nrow, unsigned int nband, const GDALDataType& dataType) : m_nplane(1), m_mia(0), ImgRaster(ncol, nrow, nband, dataType){};
     ///destructor
     ~Jim(void){if(m_mia) delete(m_mia);m_mia=0;};
+
+    ///Open an image for writing in memory, defining image attributes.
+    void open(unsigned int ncol, unsigned int nrow, unsigned int nband, int dataType);
 
     ///Clone as new shared pointer to ImgRaster object
     /**
