@@ -64,6 +64,8 @@ namespace jiplib{
     // std::shared_ptr<Jim> clone() { return std::shared_ptr<Jim>(new Jim(*this,false) ); };
     // std::shared_ptr<ImgRaster> clone() { return std::shared_ptr<ImgRaster>(new Jim(*this,false) ); };
 
+    ///reset all member variables
+    void reset(void){ImgRaster::reset();m_nplane=1;m_mia=0;};
     ///Get the number of planes of this dataset
     unsigned int nrOfPlane(void) const { return m_nplane;};
     /// convert single plane multiband image to single band image with multiple planes
@@ -75,7 +77,7 @@ namespace jiplib{
     ///set memory from internal MIA representation for particular band
     CPLErr setMIA(unsigned int band);
     // ///set memory from MIA representation for particular band
-    // CPLErr setMIA(IMAGE* mia, unsigned int band);
+    CPLErr setMIA(IMAGE* mia, unsigned int band);
     ///convert a GDAL data type to MIA data type
     /**
      *

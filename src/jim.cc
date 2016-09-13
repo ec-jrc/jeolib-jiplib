@@ -72,42 +72,50 @@ CPLErr Jim::setMIA(unsigned int band){
   return(CE_None);
 }
 
-// /**
-//  *
-//  *
-//  * @param mia the MIA image pointer to be set
-//  * @param band the band for which the MIA image pointer needs to be set
-//  *
-//  * @return C_None if successful
-//  */
-// CPLErr Jim::setMIA(IMAGE* mia, unsigned int band){
-//   if(mia.nz>1){
-//     std::string errorString="Error: MIA image with nz>1 not supported";
-//     throw(errorString);
-//   }
-//   if(m_ncol!=mia.nx){
-//     std::string errorString="Error: dimensions of images in do not match";
-//     throw(errorString);
-//   }
-//   if(m_ncol!=mia.ny){
-//     std::string errorString="Error: dimensions of images do not match";
-//     throw(errorString);
-//   }
-//   if(m_nband<=band){
-//     std::string errorString="Error: band exceeds number of bands in target image";
-//     throw(errorString);
-//   }
-//   if(m_dataType!=MIA2GDALDataType(mia.DataType)){
-//     std::ostringstream s;
-//     s << "Error: data types of images do not match: ";
-//     s << m_dataType << ", " << MIA2GDALDataType(mia.DataType);
-//     throw(s.str());
-//   }
-//   m_data[band]=mia.p_im+band*nrOfRow()*nrOfCol()*(GDALGetDataTypeSize(getDataType())>>3);
-//   m_begin[band]=0;
-//   m_end[band]=m_begin[band]+getBlockSize();
-//   return(CE_None);
-// }
+/**
+ *
+ *
+ * @param mia the MIA image pointer to be set
+ * @param band the band for which the MIA image pointer needs to be set
+ *
+ * @return C_None if successful
+ */
+CPLErr Jim::setMIA(IMAGE* mia, unsigned int band){
+  if(nrOfBand()>1){
+    if(mia->nz>1){
+      std::string errorString="Error: MIA image with nz>1 not supported";
+      throw(errorString);
+    }
+    if(m_ncol!=mia->nx){
+      std::string errorString="Error: dimensions of images in do not match";
+      throw(errorString);
+    }
+    if(m_nrow!=mia->ny){
+      std::string errorString="Error: dimensions of images do not match";
+      throw(errorString);
+    }
+    if(m_nband<=band){
+      std::string errorString="Error: band exceeds number of bands in target image";
+      throw(errorString);
+    }
+    if(m_dataType!=MIA2GDALDataType(mia->DataType)){
+      std::ostringstream s;
+      s << "Error: data types of images do not match: ";
+      s << m_dataType << ", " << MIA2GDALDataType(mia->DataType);
+      throw(s.str());
+    }
+  }
+  else{
+    reset();
+    m_nplane=mia->nz;
+    m_ncol=mia->nx;
+    m_nrow=mia->ny;
+    m_nband=1;
+  }
+  m_mia=mia;
+  this->setMIA(band);
+  return(CE_None);
+}
 
 /**
  *
