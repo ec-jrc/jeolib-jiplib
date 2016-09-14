@@ -42,14 +42,14 @@ namespace jiplib{
     ///constructor input image
   Jim(Jim& imgSrc, bool copyData=true) : m_nplane(1), m_mia(0), ImgRaster(imgSrc, copyData){};
     ///constructor output image
-  Jim(const std::string& filename, unsigned int ncol, unsigned int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : m_nplane(1), m_mia(0), ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){};
+  Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : m_nplane(1), m_mia(0), ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){};
     ///constructor output image
-  Jim(unsigned int ncol, unsigned int nrow, unsigned int nband, const GDALDataType& dataType) : m_nplane(1), m_mia(0), ImgRaster(ncol, nrow, nband, dataType){};
+  Jim(int ncol, int nrow, int nband, const GDALDataType& dataType) : m_nplane(1), m_mia(0), ImgRaster(ncol, nrow, nband, dataType){};
     ///destructor
     ~Jim(void){if(m_mia) delete(m_mia);m_mia=0;};
 
     ///Open an image for writing in memory, defining image attributes.
-    void open(unsigned int ncol, unsigned int nrow, unsigned int nband, int dataType);
+    /* void open(int ncol, int nrow, int nband, int dataType); */
 
     ///Clone as new shared pointer to ImgRaster object
     /**
@@ -74,13 +74,9 @@ namespace jiplib{
       return(std::make_shared<Jim>());
     };
     static std::shared_ptr<Jim> createImg(const app::AppFactory &theApp){
-      std::shared_ptr<Jim> pJim=std::dynamic_pointer_cast<Jim>(ImgRaster::createImg(theApp));
-      if(pJim)
-        return(pJim);
-      else{
-        std::cerr << "Warning: static pointer cast may slice object" << std::endl;
-        return(std::static_pointer_cast<Jim>(ImgRaster::createImg(theApp)));
-      }
+      std::shared_ptr<Jim> pJim=createImg();
+      ImgRaster::createImg(pJim,theApp);
+      return(pJim);
     }
     // std::shared_ptr<Jim> clone() { return std::shared_ptr<Jim>(new Jim(*this,false) ); };
     // std::shared_ptr<ImgRaster> clone() { return std::shared_ptr<ImgRaster>(new Jim(*this,false) ); };
@@ -88,17 +84,17 @@ namespace jiplib{
     ///reset all member variables
     void reset(void){ImgRaster::reset();m_nplane=1;m_mia=0;};
     ///Get the number of planes of this dataset
-    unsigned int nrOfPlane(void) const { return m_nplane;};
+    int nrOfPlane(void) const { return m_nplane;};
     /// convert single plane multiband image to single band image with multiple planes
     CPLErr band2plane(){};//not implemented yet
     /// convert single band multiple plane image to single plane multiband image
     CPLErr plane2band(){};//not implemented yet
     ///get MIA representation for a particular band
-    IMAGE* getMIA(unsigned int band=0);
+    IMAGE* getMIA(int band=0);
     ///set memory from internal MIA representation for particular band
-    CPLErr setMIA(unsigned int band=0);
+    CPLErr setMIA(int band=0);
     // ///set memory from MIA representation for particular band
-    CPLErr setMIA(IMAGE* mia, unsigned int band=0);
+    CPLErr setMIA(IMAGE* mia, int band=0);
     ///convert a GDAL data type to MIA data type
     /**
      *
@@ -161,21 +157,21 @@ namespace jiplib{
     ///relational != operator
     bool operator!=(std::shared_ptr<Jim> refImg){ return !(this->operator==(refImg)); };
     /// perform arithmetic operation for a particular band
-    CPLErr arith(std::shared_ptr<Jim> imgRaster, int theOperation, unsigned int band=0);
+    CPLErr arith(std::shared_ptr<Jim> imgRaster, int theOperation, int band=0);
     /// perform arithmetic operation for a particular band (non-destructive version)
-    std::shared_ptr<jiplib::Jim> getArith(std::shared_ptr<Jim> imgRaster, int theOperation, unsigned int iband=0);
+    std::shared_ptr<jiplib::Jim> getArith(std::shared_ptr<Jim> imgRaster, int theOperation, int iband=0);
     /// perform a morphological reconstruction by dilation for a particular band
-    CPLErr rdil(std::shared_ptr<Jim> mask, int graph, int flag, unsigned int band=0);
+    CPLErr rdil(std::shared_ptr<Jim> mask, int graph, int flag, int band=0);
     /// perform a morphological reconstruction by dilation for a particular band (non-destructive version)
-    std::shared_ptr<jiplib::Jim> getRdil(std::shared_ptr<Jim> mask, int graph, int flag, unsigned int iband=0);
+    std::shared_ptr<jiplib::Jim> getRdil(std::shared_ptr<Jim> mask, int graph, int flag, int iband=0);
     /// perform a morphological reconstruction by erosion for a particular band
-    CPLErr rero(std::shared_ptr<Jim> mask, int graph, int flag, unsigned int band=0);
+    CPLErr rero(std::shared_ptr<Jim> mask, int graph, int flag, int band=0);
     /// perform a morphological reconstruction by erosion for a particular band (non-destructive version)
-    std::shared_ptr<jiplib::Jim> getRero(std::shared_ptr<Jim> mask, int graph, int flag, unsigned int iband=0);
+    std::shared_ptr<jiplib::Jim> getRero(std::shared_ptr<Jim> mask, int graph, int flag, int iband=0);
 
   protected:
     ///number of planes in this dataset
-    unsigned int m_nplane;
+    int m_nplane;
   private:
     virtual std::shared_ptr<ImgRaster> cloneImpl() {
       return std::make_shared<Jim>(*this,false);
