@@ -126,8 +126,8 @@ set(JIPLIB_LIB_NAME jiplib-${JIPLIB_VERSION_MAJOR}.${JIPLIB_VERSION_MINOR}.${JIP
 
 # Build executables
 
-add_executable(createImg ${PROJECT_TEST_DIR}/createImg.cc)
-target_link_libraries( createImg
+add_executable(testCreateImg ${PROJECT_TEST_DIR}/testCreateImg.cc)
+target_link_libraries( testCreateImg
   ${JIPLIB_LIB_NAME}
   ${PKTOOLS_LIBRARIES}
   ${GSL_LIBRARIES}
@@ -135,7 +135,7 @@ target_link_libraries( createImg
 
 
 ########## CTEST ############
-add_test(test1 createImg -o Testing/test1.tif -ns 1 -nl 1 -of GTiff -ot Byte -seed 100 -mean 0 -sigma 100)
+add_test(test1 testCreateImg -o Testing/test1.tif -ns 1 -nl 1 -of GTiff -ot Byte -seed 100 -mean 0 -sigma 100)
 set_tests_properties (test1
     PROPERTIES PASS_REGULAR_EXPRESSION "success")
 

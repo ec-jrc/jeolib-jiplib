@@ -8,8 +8,10 @@ Change log
 #define _JIM_H_
 
 #include "pktools/imageclasses/ImgRaster.h"
+#include "pktools/apps/AppFactory.h"
 #include <string>
 #include <vector>
+#include <memory>
 extern "C" {
 #include "mialib_swig.h"
 #include "op.h"
@@ -30,7 +32,7 @@ namespace jiplib{
   {
   public:
     ///default constructor
-  Jim(void) : m_nplane(1), m_mia(0), ImgRaster(){};
+  Jim() : m_nplane(1), m_mia(0), ImgRaster(){};
     ///constructor input image
   Jim(const std::string& filename, unsigned int memory=0) : m_nplane(1), m_mia(0), ImgRaster(filename,memory){};
     ///constructor input image
@@ -54,7 +56,32 @@ namespace jiplib{
      *
      * @return shared pointer to new ImgRaster object alllowing polymorphism
      */
-    std::shared_ptr<ImgRaster> clone() { return std::make_shared<Jim>(*this,false); };
+    virtual std::shared_ptr<ImgRaster> clone() {
+      std::shared_ptr<Jim> pJim=std::dynamic_pointer_cast<Jim>(cloneImpl());
+      if(pJim)
+        return(pJim);
+      else{
+        std::cerr << "Warning: static pointer cast may slice object" << std::endl;
+        return(std::static_pointer_cast<Jim>(cloneImpl()));
+      }
+    }
+    ///Create new shared pointer to Jim object
+    /**
+     *
+     * @return shared pointer to new Jim object
+     */
+    static std::shared_ptr<Jim> createImg() {
+      return(std::make_shared<Jim>());
+    };
+    static std::shared_ptr<Jim> createImg(const app::AppFactory &theApp){
+      std::shared_ptr<Jim> pJim=std::dynamic_pointer_cast<Jim>(ImgRaster::createImg(theApp));
+      if(pJim)
+        return(pJim);
+      else{
+        std::cerr << "Warning: static pointer cast may slice object" << std::endl;
+        return(std::static_pointer_cast<Jim>(ImgRaster::createImg(theApp)));
+      }
+    }
     // std::shared_ptr<Jim> clone() { return std::shared_ptr<Jim>(new Jim(*this,false) ); };
     // std::shared_ptr<ImgRaster> clone() { return std::shared_ptr<ImgRaster>(new Jim(*this,false) ); };
 
@@ -67,11 +94,11 @@ namespace jiplib{
     /// convert single band multiple plane image to single plane multiband image
     CPLErr plane2band(){};//not implemented yet
     ///get MIA representation for a particular band
-    IMAGE* getMIA(unsigned int band);
+    IMAGE* getMIA(unsigned int band=0);
     ///set memory from internal MIA representation for particular band
-    CPLErr setMIA(unsigned int band);
+    CPLErr setMIA(unsigned int band=0);
     // ///set memory from MIA representation for particular band
-    CPLErr setMIA(IMAGE* mia, unsigned int band);
+    CPLErr setMIA(IMAGE* mia, unsigned int band=0);
     ///convert a GDAL data type to MIA data type
     /**
      *
@@ -150,6 +177,9 @@ namespace jiplib{
     ///number of planes in this dataset
     unsigned int m_nplane;
   private:
+    virtual std::shared_ptr<ImgRaster> cloneImpl() {
+      return std::make_shared<Jim>(*this,false);
+    };
     IMAGE* m_mia;
   };
 }
