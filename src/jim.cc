@@ -199,9 +199,9 @@ CPLErr Jim::arith(std::shared_ptr<Jim> imgRaster, int theOperation, int iband){
  *
  * @return shared pointer to resulting image
  */
-std::shared_ptr<jiplib::Jim> Jim::getArith(std::shared_ptr<Jim> imgRaster, int theOperation, int iband){
+std::shared_ptr<jiplib::Jim> Jim::getArith(std::shared_ptr<Jim> inputImg, int theOperation, int iband){
   try{
-    if(imgRaster->nrOfBand()<iband){
+    if(inputImg->nrOfBand()<iband){
       std::string errorString="Error: band number exceeds number of bands in input image";
       throw(errorString);
     }
@@ -211,14 +211,14 @@ std::shared_ptr<jiplib::Jim> Jim::getArith(std::shared_ptr<Jim> imgRaster, int t
     }
     std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(shared_from_this(), true);
     IMAGE* mia1=pJim->getMIA(iband);
-    IMAGE* mia2=imgRaster->getMIA(iband);
+    IMAGE* mia2=inputImg->getMIA(iband);
     if(::arith(mia1, mia2, theOperation) == NO_ERROR){
       pJim->setMIA(iband);
-      imgRaster->setMIA(iband);
+      inputImg->setMIA(iband);
       return(pJim);
     }
     else{
-      imgRaster->setMIA(iband);
+      inputImg->setMIA(iband);
       std::string errorString="Error: arith function in MIA failed";
       throw(errorString);
     }

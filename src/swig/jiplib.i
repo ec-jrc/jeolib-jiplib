@@ -58,3 +58,29 @@ enum GDALDataType {GDT_Unknown = 0, GDT_Byte = 1, GDT_UInt16 = 2, GDT_Int16 = 3,
 /*  %} */
 
 /* %allowexception;                // turn on globally */
+/* %catches(std::string,...) jiplib::Jim::createImg(); */
+
+//from :  http://stackoverflow.com/questions/39436632/wrap-a-function-that-takes-a-struct-of-optional-arguments-using-kwargs
+/* %pythoncode %{ */
+/*   def StructArgs(type_name): */
+/*   def wrap(f): */
+/*   def _wrapper(*args, **kwargs): */
+/*   ty=globals()[type_name] */
+/*     arg=(ty(),) if kwargs else tuple() */
+/*     for it in kwargs.iteritems(): */
+/*       setattr(arg[0], *it) */
+/*     return f(*(args+arg)) */
+/*     return _wrapper */
+/*     return wrap */
+/*     %} */
+
+/* %define %StructArgs(func, ret, type) */
+/* %pythoncode %{ @StructArgs(#type) %} // *very* position sensitive */
+/* %pythonprepend func %{ %} // Hack to workaround problem with #3 */
+/* ret func(const type*); */
+/* %ignore func; */
+/* %enddef */
+
+/* typedef bool _Bool; */
+
+/* %StructArgs(createImg, std::shared_ptr<jiplib::Jim>, const app::AppFactory&) */
