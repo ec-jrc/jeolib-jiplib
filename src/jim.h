@@ -34,6 +34,8 @@ namespace jiplib{
     ///default constructor
   Jim() : m_nplane(1), m_mia(0), ImgRaster(){};
     ///constructor input image
+  Jim(IMAGE *mia);
+    ///constructor input image
   Jim(const std::string& filename, unsigned int memory=0) : m_nplane(1), m_mia(0), ImgRaster(filename,memory){};
     ///constructor input image
   Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : m_nplane(1), m_mia(0), ImgRaster(filename,imgSrc,memory,options){};
