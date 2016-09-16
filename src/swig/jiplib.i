@@ -7,7 +7,52 @@
 %shared_ptr(ImgRaster)
 %shared_ptr(jiplib::Jim)
 
-%module jiplib
+%include "exception.i"
+%exception {
+  try {
+    $action
+      }
+  catch (const std::string errorString) {
+    PyErr_SetString(PyExc_SystemError,errorString.c_str());
+    SWIG_fail;
+  }
+}
+%define DOCSTRING
+"Joint image processing library (jiplib)
+developed in the framework of the JEODPP of the EO&SS@BD pilot project."
+%enddef
+
+
+%feature("autodoc", "2");
+
+%module(docstring=DOCSTRING) jiplib
+/* %module(docstring="Joint image processing library (jiplib)") jiplib */
+
+ //almost works, but need to introduce typecheck for overloaded functions
+ //then replace PyList with kwargs 
+ /* %typemap(in) (const app::AppFactory&) { */
+ /*   std::cout << "we are in typemap" << std::endl; */
+ /*   int argc=PyList_Size($input)+1; */
+ /*   std::vector<std::string> argv; */
+ /*   argv.push_back("function"); */
+ /*   int i = 0; */
+ /*   for (i = 0; i < PyList_Size($input); i++) { */
+ /*     PyObject *s = PyList_GetItem($input,i); */
+ /*     if (!PyString_Check(s)) { */
+ /*       PyErr_SetString(PyExc_ValueError, "List items must be strings"); */
+ /*       return NULL; */
+ /*     } */
+ /*     std::string inputString=PyString_AsString(s); */
+ /*     argv.push_back(inputString); */
+ /*   } */
+ /*   $1=new app::AppFactory(); */
+ /*   $1->setOptions(argc,argv); */
+ /* } */
+
+/* %typemap(freearg)  (const app::AppFactory&){ */
+/*   if ($1) free($1); */
+/*  } */
+
 %{
 #include <memory>
 #include "config.h"
@@ -20,11 +65,11 @@
 #include <cpl_error.h>
   %}
 
+
 %template(ImgVectorRaster) std::vector< std::shared_ptr< ImgRaster > >;
 %template(ImgVectorJim) std::vector< std::shared_ptr< jiplib::Jim > >;
 
 //Parse the header file
-//%include "imageclasses/ImgRaster.h"
 %include "swig/pktools.i"
 %include "imageclasses/ImgCollection.h"
 %include "imageclasses/ImgRaster.h"
@@ -45,42 +90,4 @@
 enum CPLErr {CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4};
 enum GDALDataType {GDT_Unknown = 0, GDT_Byte = 1, GDT_UInt16 = 2, GDT_Int16 = 3, GDT_UInt32 = 4, GDT_Int32 = 5, GDT_Float32 = 6, GDT_Float64 = 7, GDT_CInt16 = 8, GDT_CInt32 = 9, GDT_CFloat32 = 10, GDT_CFloat64 = 11, GDT_TypeCount = 12}; 
 
-/* %newobject createJim; */
-/* %inline %{ */
-/*   std::shared_ptr<jiplib::Jim> createJim(){std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim()); return pJim;}; */
-/*   std::shared_ptr<jiplib::Jim> createJim(const std::string& filename){std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim(filename)); return pJim;}; */
-/*   std::shared_ptr<jiplib::Jim> createJim(const std::string& filename, const jiplib::Jim& imgSrc){std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim(filename, imgSrc)); return pJim;}; */
-/*   std::shared_ptr<jiplib::Jim> createJim(const std::string& filename, const jiplib::Jim& imgSrc, const std::vector<std::string>& options){std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim(filename, imgSrc, 0, options)); return pJim;}; */
-/*   std::shared_ptr<jiplib::Jim> createJim(jiplib::Jim& imgSrc, bool copyData){std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim(imgSrc,copyData)); return pJim;}; */
-/*   std::shared_ptr<jiplib::Jim> createJim(jiplib::Jim& imgSrc){std::shared_ptr<jiplib::Jim> pJim(new jiplib::Jim(imgSrc,true)); return pJim;}; */
-/*   //todo: create Jim with proper attributes as derived from imgRaster, perhaps creating new object and delete old? */
-/*   std::shared_ptr<jiplib::Jim> createJim(std::shared_ptr<ImgRaster> imgSrc){return(std::dynamic_pointer_cast<jiplib::Jim>(imgSrc));}; */
-/*  %} */
-
-/* %allowexception;                // turn on globally */
-/* %catches(std::string,...) jiplib::Jim::createImg(); */
-
 //from :  http://stackoverflow.com/questions/39436632/wrap-a-function-that-takes-a-struct-of-optional-arguments-using-kwargs
-/* %pythoncode %{ */
-/*   def StructArgs(type_name): */
-/*   def wrap(f): */
-/*   def _wrapper(*args, **kwargs): */
-/*   ty=globals()[type_name] */
-/*     arg=(ty(),) if kwargs else tuple() */
-/*     for it in kwargs.iteritems(): */
-/*       setattr(arg[0], *it) */
-/*     return f(*(args+arg)) */
-/*     return _wrapper */
-/*     return wrap */
-/*     %} */
-
-/* %define %StructArgs(func, ret, type) */
-/* %pythoncode %{ @StructArgs(#type) %} // *very* position sensitive */
-/* %pythonprepend func %{ %} // Hack to workaround problem with #3 */
-/* ret func(const type*); */
-/* %ignore func; */
-/* %enddef */
-
-/* typedef bool _Bool; */
-
-/* %StructArgs(createImg, std::shared_ptr<jiplib::Jim>, const app::AppFactory&) */

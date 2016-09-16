@@ -74,7 +74,7 @@ namespace jiplib{
       return(std::make_shared<Jim>());
     };
     static std::shared_ptr<Jim> createImg(const app::AppFactory &theApp){
-      std::shared_ptr<Jim> pJim=createImg();
+      std::shared_ptr<Jim> pJim=std::make_shared<Jim>();
       ImgRaster::createImg(pJim,theApp);
       return(pJim);
     }
