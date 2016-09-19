@@ -33,8 +33,10 @@ namespace jiplib{
   public:
     ///default constructor
   Jim() : m_nplane(1), m_mia(0), ImgRaster(){};
+    ///constructor opening an image in memory using an external data pointer (not tested yet)
+  Jim(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType) : Jim() {open(dataPointer,ncol,nrow,dataType);};
     ///constructor input image
-  Jim(IMAGE *mia);
+  Jim(IMAGE *mia) : Jim(){setMIA(mia,0);};
     ///constructor input image
   Jim(const std::string& filename, unsigned int memory=0) : m_nplane(1), m_mia(0), ImgRaster(filename,memory){};
     ///constructor input image
@@ -72,9 +74,9 @@ namespace jiplib{
      *
      * @return shared pointer to new Jim object
      */
-    static std::shared_ptr<Jim> createImg() {
-      return(std::make_shared<Jim>());
-    };
+    /* static std::shared_ptr<Jim> createImg() { */
+    /*   return(std::make_shared<Jim>()); */
+    /* }; */
     static std::shared_ptr<Jim> createImg(const app::AppFactory &theApp){
       std::shared_ptr<Jim> pJim=std::make_shared<Jim>();
       ImgRaster::createImg(pJim,theApp);
@@ -171,6 +173,12 @@ namespace jiplib{
     /// perform a morphological reconstruction by erosion for a particular band (non-destructive version)
     std::shared_ptr<jiplib::Jim> getRero(std::shared_ptr<Jim> mask, int graph, int flag, int iband=0);
 
+    //in memory functions from ImgRaster using AppFactory
+    std::shared_ptr<Jim> filter(const app::AppFactory& theApp){
+      std::shared_ptr<Jim> pJim=std::make_shared<Jim>();
+      ImgRaster::filter(pJim,theApp);
+      return(pJim);
+    }
   protected:
     ///number of planes in this dataset
     int m_nplane;

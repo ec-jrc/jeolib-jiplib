@@ -13,22 +13,6 @@ using namespace jiplib;
 //   ImgRaster::open(ncol,nrow,nband,static_cast<GDALDataType>(dataType));
 // }
 
-
-Jim::Jim(IMAGE *mia) : m_nplane(1), m_mia(0), ImgRaster(){
-  m_ncol=mia->nx;
-  m_nrow=mia->ny;
-  m_nplane=mia->nz;
-  m_nband=1;
-  m_begin[0]=0;
-  m_end[0]=getBlockSize();
-  if (m_nplane>1){
-    std::ostringstream s;
-    s << "Error: m_nplanes > 1 not yet implemented";
-    throw(s.str());
-  }
-  open(mia->p_im, m_ncol, m_nrow, MIA2GDALDataType(m_mia->DataType));
-}
-
 /**
  *
  *
