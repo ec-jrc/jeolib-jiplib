@@ -38,11 +38,9 @@ int main(int argc, char *argv[])
         exit(1);
       }
     }
-    std::shared_ptr<ImgRaster> pRaster=std::make_shared<Jim>();
-    // shared_ptr<ImgRaster> pRaster=Jim::createImg();
-    pRaster->setFile(output_opt[0],oformat_opt[0],memory_opt[0],option_opt);
+    ImgRaster pRaster(output_opt[0],oformat_opt[0],memory_opt[0],option_opt);
     ImgRaster::createImg(pRaster,app);
-    pRaster->close();
+    pRaster.close();
   }
   catch(string helpString){
     cerr << helpString << endl;

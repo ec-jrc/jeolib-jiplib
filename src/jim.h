@@ -36,13 +36,13 @@ namespace jiplib{
     ///constructor opening an image in memory using an external data pointer (not tested yet)
   Jim(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType) : Jim() {open(dataPointer,ncol,nrow,dataType);};
     ///constructor input image
-  Jim(IMAGE *mia) : Jim(){setMIA(mia,0);};
+  Jim(IMAGE *mia) : Jim() {setMIA(mia,0);};
     ///constructor input image
   Jim(const std::string& filename, unsigned int memory=0) : m_nplane(1), m_mia(0), ImgRaster(filename,memory){};
     ///constructor input image
   Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : m_nplane(1), m_mia(0), ImgRaster(filename,imgSrc,memory,options){};
     ///constructor input image
-  Jim(std::shared_ptr<ImgRaster> imgSrc, bool copyData=true) : m_nplane(1), m_mia(0), ImgRaster(imgSrc, copyData){};
+  /* Jim(std::shared_ptr<ImgRaster> imgSrc, bool copyData=true) : m_nplane(1), m_mia(0), ImgRaster(imgSrc, copyData){}; */
     ///constructor input image
   Jim(Jim& imgSrc, bool copyData=true) : m_nplane(1), m_mia(0), ImgRaster(imgSrc, copyData){};
     ///constructor output image
@@ -79,7 +79,7 @@ namespace jiplib{
     /* }; */
     static std::shared_ptr<Jim> createImg(const app::AppFactory &theApp){
       std::shared_ptr<Jim> pJim=std::make_shared<Jim>();
-      ImgRaster::createImg(pJim,theApp);
+      ImgRaster::createImg(*pJim,theApp);
       return(pJim);
     }
     // std::shared_ptr<Jim> clone() { return std::shared_ptr<Jim>(new Jim(*this,false) ); };
@@ -176,7 +176,7 @@ namespace jiplib{
     //in memory functions from ImgRaster using AppFactory
     std::shared_ptr<Jim> filter(const app::AppFactory& theApp){
       std::shared_ptr<Jim> pJim=std::make_shared<Jim>();
-      ImgRaster::filter(pJim,theApp);
+      ImgRaster::filter(*pJim,theApp);
       return(pJim);
     }
   protected:

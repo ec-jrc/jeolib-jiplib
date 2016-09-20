@@ -136,6 +136,7 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
       m_end.resize(m_nband);
     }
     m_mia=mia;
+    setExternalData(true);//todo: need to fix memory leak when setMIA used for single band only! (either create vector<bool> m_externalData or only allow for setMIA all bands)
     this->setMIA(band);
   }
   catch(std::string errorString){
@@ -209,7 +210,7 @@ std::shared_ptr<jiplib::Jim> Jim::getArith(std::shared_ptr<Jim> inputImg, int th
       std::string errorString="Error: band number exceeds number of bands in input image";
       throw(errorString);
     }
-    std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(shared_from_this(), true);
+    std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(*this, true);
     IMAGE* mia1=pJim->getMIA(iband);
     IMAGE* mia2=inputImg->getMIA(iband);
     if(::arith(mia1, mia2, theOperation) == NO_ERROR){
@@ -266,7 +267,7 @@ CPLErr Jim::rdil(std::shared_ptr<Jim> mask, int graph, int flag, int iband){
  * @return shared pointer to resulting image
  */
 std::shared_ptr<jiplib::Jim> Jim::getRdil(std::shared_ptr<Jim> mask, int graph, int flag, int iband){
-  std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(shared_from_this(), true);
+  std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(*this, true);
   IMAGE* markMIA=pJim->getMIA(iband);
   IMAGE* maskMIA=mask->getMIA(iband);
   if (::rdil(markMIA,maskMIA,graph,flag) == NO_ERROR){
@@ -311,7 +312,7 @@ CPLErr Jim::rero(std::shared_ptr<Jim> mask, int graph, int flag, int iband){
  * @return shared pointer to resulting image
  */
 std::shared_ptr<jiplib::Jim> Jim::getRero(std::shared_ptr<Jim> mask, int graph, int flag, int iband){
-  std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(shared_from_this(), true);
+  std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(*this, true);
   IMAGE* markMIA=pJim->getMIA(iband);
   IMAGE* maskMIA=mask->getMIA(iband);
   if (::rero(markMIA,maskMIA,graph,flag) == NO_ERROR){

@@ -40,7 +40,11 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
       std::string theKey=PyString_AsString(pKey);
       std::cout << "key: " << theKey << std::endl;
       PyObject *pValue = PyDict_GetItem($input, pKey); // borrowed reference
-      std::string theValue=PyString_AsString(PyObject_Repr(pValue));
+      std::string theValue; 
+      if(PyString_Check(pValue))
+        theValue=PyString_AsString(pValue);
+      else
+        theValue=PyString_AsString(PyObject_Repr(pValue));
       std::cout << "value: " << theValue << std::endl;
       assert(pValue);
       $1->setOption(theKey,theValue);
