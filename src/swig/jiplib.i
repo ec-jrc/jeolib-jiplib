@@ -29,53 +29,36 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 
  /* almost works, but need to introduce typecheck for overloaded functions */
  /* then replace PyList with kwargs  */
-%typemap(in) const app::AppFactory& {
-  std::cout << "we are in typemap" << std::endl;
-  PyObject *pKeys = PyDict_Keys($input); // new reference
-  $1=new app::AppFactory();
-  for(int i = 0; i < PyList_Size(pKeys); ++i)
-    {
-      std::cout << "item " << i << std::endl;
-      PyObject *pKey = PyList_GetItem(pKeys, i); // borrowed reference
-      std::string theKey=PyString_AsString(pKey);
-      std::cout << "key: " << theKey << std::endl;
-      PyObject *pValue = PyDict_GetItem($input, pKey); // borrowed reference
-      std::string theValue; 
-      if(PyString_Check(pValue))
-        theValue=PyString_AsString(pValue);
-      else
-        theValue=PyString_AsString(PyObject_Repr(pValue));
-      std::cout << "value: " << theValue << std::endl;
-      assert(pValue);
-      $1->setOption(theKey,theValue);
-    }
-  Py_DECREF(pKeys);
-  $1->showOptions();
- }
-
-%typemap(freearg)  (const app::AppFactory&){
-  if ($1) free($1);
- }
-
-/* %typemap(in) (const app::AppFactory&) { */
+/* %typemap(in) const app::AppFactory& { */
 /*   std::cout << "we are in typemap" << std::endl; */
-/*   int argc=PyList_Size($input)+1; */
-/*   std::vector<std::string> argv; */
-/*   argv.push_back("function"); */
-/*   int i = 0; */
-/*   for (i = 0; i < PyList_Size($input); i++) { */
-/*     PyObject *s = PyList_GetItem($input,i); */
-/*     if (!PyString_Check(s)) { */
-/*       PyErr_SetString(PyExc_ValueError, "List items must be strings"); */
-/*       return NULL; */
-/*     } */
-/*     std::string inputString=PyString_AsString(s); */
-/*     argv.push_back(inputString); */
-/*   } */
+/*   PyObject *pKeys = PyDict_Keys($input); // new reference */
 /*   $1=new app::AppFactory(); */
-/*   $1->setOptions(argc,argv); */
+/*   for(int i = 0; i < PyList_Size(pKeys); ++i) */
+/*     { */
+/*       std::cout << "item " << i << std::endl; */
+/*       PyObject *pKey = PyList_GetItem(pKeys, i); // borrowed reference */
+/*       std::string theKey=PyString_AsString(pKey); */
+/*       std::cout << "key: " << theKey << std::endl; */
+/*       PyObject *pValue = PyDict_GetItem($input, pKey); // borrowed reference */
+/*       std::string theValue; */
+/*       if(PyString_Check(pValue)) */
+/*         theValue=PyString_AsString(pValue); */
+/*       else */
+/*         theValue=PyString_AsString(PyObject_Repr(pValue)); */
+/*       std::cout << "value: " << theValue << std::endl; */
+/*       assert(pValue); */
+/*       $1->setOption(theKey,theValue); */
+/*     } */
+/*   Py_DECREF(pKeys); */
+/*   $1->showOptions(); */
 /*  } */
 
+/* %typemap(freearg)  (const app::AppFactory&){ */
+/*   if ($1) free($1); */
+/*  } */
+
+/* %typemap(typecheck,precedence=SWIG_TYPECHECK_VOID) void { */
+/* } */
 
 %{
 #include <memory>

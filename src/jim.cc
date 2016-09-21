@@ -158,26 +158,62 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
  *
  * @return CE_None if successful
  */
-CPLErr Jim::arith(std::shared_ptr<Jim> imgRaster, int theOperation, int iband){
+CPLErr Jim::shift(int value, int iband){
   try{
-    if(imgRaster->nrOfBand()<iband){
-      std::string errorString="Error: band number exceeds number of bands in input image";
-      throw(errorString);
-    }
-    if(nrOfBand()<iband){
+    if(nrOfBand()<=iband){
       std::string errorString="Error: band number exceeds number of bands in input image";
       throw(errorString);
     }
     IMAGE* mia1=this->getMIA(iband);
-    IMAGE* mia2=imgRaster->getMIA(iband);
-    if(::arith(mia1, mia2, theOperation) == NO_ERROR){
+    if(::shift(mia1, value) == NO_ERROR){
       this->setMIA(iband);
-      imgRaster->setMIA(iband);
       return(CE_None);
     }
     else{
       this->setMIA(iband);
-      imgRaster->setMIA(iband);
+      std::string errorString="Error: arith function in MIA failed";
+      throw(errorString);
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    return(CE_Failure);
+  }
+  catch(...){
+    return(CE_Failure);
+  }
+}
+
+/**
+ *
+ *
+ * @param imgRaster is operand
+ * @param theOperation the operation to be performed
+ * @param iband is the band for which the function needs to be performed (default 0 is first band)
+ *
+ * @return CE_None if successful
+ */
+// CPLErr Jim::arith(std::shared_ptr<Jim> imgRaster, int theOperation, int iband){
+CPLErr Jim::arith(Jim& imgRaster, int theOperation, int iband){
+  try{
+    if(imgRaster.nrOfBand()<=iband){
+      std::string errorString="Error: band number exceeds number of bands in input image";
+      throw(errorString);
+    }
+    if(nrOfBand()<=iband){
+      std::string errorString="Error: band number exceeds number of bands in input image";
+      throw(errorString);
+    }
+    IMAGE* mia1=this->getMIA(iband);
+    IMAGE* mia2=imgRaster.getMIA(iband);
+    if(::arith(mia1, mia2, theOperation) == NO_ERROR){
+      this->setMIA(iband);
+      imgRaster.setMIA(iband);
+      return(CE_None);
+    }
+    else{
+      this->setMIA(iband);
+      imgRaster.setMIA(iband);
       std::string errorString="Error: arith function in MIA failed";
       throw(errorString);
     }
@@ -202,11 +238,11 @@ CPLErr Jim::arith(std::shared_ptr<Jim> imgRaster, int theOperation, int iband){
  */
 std::shared_ptr<jiplib::Jim> Jim::getArith(std::shared_ptr<Jim> inputImg, int theOperation, int iband){
   try{
-    if(inputImg->nrOfBand()<iband){
+    if(inputImg->nrOfBand()<=iband){
       std::string errorString="Error: band number exceeds number of bands in input image";
       throw(errorString);
     }
-    if(nrOfBand()<iband){
+    if(nrOfBand()<=iband){
       std::string errorString="Error: band number exceeds number of bands in input image";
       throw(errorString);
     }

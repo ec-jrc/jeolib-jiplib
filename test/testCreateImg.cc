@@ -38,9 +38,11 @@ int main(int argc, char *argv[])
         exit(1);
       }
     }
-    ImgRaster pRaster(output_opt[0],oformat_opt[0],memory_opt[0],option_opt);
-    ImgRaster::createImg(pRaster,app);
-    pRaster.close();
+    ImgRaster imgRaster(app);
+    imgRaster.setFile(output_opt[0],oformat_opt[0],memory_opt[0],option_opt);
+    // ImgRaster imgRaster(output_opt[0],oformat_opt[0],memory_opt[0],option_opt);
+    // ImgRaster::createImg(imgRaster,app);
+    imgRaster.close();
   }
   catch(string helpString){
     cerr << helpString << endl;

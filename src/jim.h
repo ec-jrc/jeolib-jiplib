@@ -49,6 +49,8 @@ namespace jiplib{
   Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : m_nplane(1), m_mia(0), ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){};
     ///constructor output image
   Jim(int ncol, int nrow, int nband, const GDALDataType& dataType) : m_nplane(1), m_mia(0), ImgRaster(ncol, nrow, nband, dataType){};
+    ///constructor from app
+  Jim(const app::AppFactory &theApp): m_nplane(1), m_mia(0), ImgRaster(theApp){};
     ///destructor
     ~Jim(void){if(m_mia) delete(m_mia);m_mia=0;};
 
@@ -74,16 +76,14 @@ namespace jiplib{
      *
      * @return shared pointer to new Jim object
      */
-    /* static std::shared_ptr<Jim> createImg() { */
-    /*   return(std::make_shared<Jim>()); */
-    /* }; */
+    static std::shared_ptr<Jim> createImg() {
+      return(std::make_shared<Jim>());
+    };
     static std::shared_ptr<Jim> createImg(const app::AppFactory &theApp){
       std::shared_ptr<Jim> pJim=std::make_shared<Jim>();
       ImgRaster::createImg(*pJim,theApp);
       return(pJim);
     }
-    // std::shared_ptr<Jim> clone() { return std::shared_ptr<Jim>(new Jim(*this,false) ); };
-    // std::shared_ptr<ImgRaster> clone() { return std::shared_ptr<ImgRaster>(new Jim(*this,false) ); };
 
     ///reset all member variables
     void reset(void){ImgRaster::reset();m_nplane=1;m_mia=0;};
@@ -160,8 +160,11 @@ namespace jiplib{
     bool operator!=(Jim& refImg){ return !(this->operator==(refImg)); };
     ///relational != operator
     bool operator!=(std::shared_ptr<Jim> refImg){ return !(this->operator==(refImg)); };
+    /// perform bitwise shift for a particular band
+    CPLErr shift(int value, int iband=0);
     /// perform arithmetic operation for a particular band
-    CPLErr arith(std::shared_ptr<Jim> imgRaster, int theOperation, int band=0);
+    CPLErr arith(Jim& imgRaster, int theOperation, int band=0);
+    /* CPLErr arith(std::shared_ptr<Jim> imgRaster, int theOperation, int band=0); */
     /// perform arithmetic operation for a particular band (non-destructive version)
     std::shared_ptr<jiplib::Jim> getArith(std::shared_ptr<Jim> imgRaster, int theOperation, int iband=0);
     /// perform a morphological reconstruction by dilation for a particular band
