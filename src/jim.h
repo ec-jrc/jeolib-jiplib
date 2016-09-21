@@ -13,8 +13,8 @@ Change log
 #include <vector>
 #include <memory>
 extern "C" {
-#include "mialib_swig.h"
-#include "op.h"
+#include "mialib/mialib_swig.h"
+#include "mialib/op.h"
 }
 
 /**

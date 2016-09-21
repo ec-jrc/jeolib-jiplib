@@ -79,8 +79,8 @@ endif()
 
 # Make sure mia is found
 # fix: need to copy jip/swig/jipl_glue.h to jip/ljip/src
-set(MIA_LIB_NAME mia_generic)
-set(MIA_INCLUDE_DIR /usr/local/include/mia CACHE PATH "Include PATH for MIA")
+set(MIA_LIB_NAME mialib_generic)
+set(MIA_INCLUDE_DIR /usr/local/include/mialib CACHE PATH "Include PATH for MIA")
 set(MIA_LIB_PATH /usr/local/lib CACHE PATH "Library PATH for MIA")
 
 INCLUDE_DIRECTORIES(${MIA_INCLUDE_DIR})
