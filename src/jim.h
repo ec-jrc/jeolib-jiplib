@@ -79,9 +79,19 @@ namespace jiplib{
     static std::shared_ptr<Jim> createImg() {
       return(std::make_shared<Jim>());
     };
+    static std::shared_ptr<Jim> createImg(const std::string &fn, unsigned int memory=0){
+      std::shared_ptr<Jim> pJim=std::make_shared<Jim>();
+      ImgRaster::createImg(*pJim,fn,memory);
+      return(pJim);
+    }
     static std::shared_ptr<Jim> createImg(const app::AppFactory &theApp){
       std::shared_ptr<Jim> pJim=std::make_shared<Jim>();
       ImgRaster::createImg(*pJim,theApp);
+      return(pJim);
+    }
+    static std::shared_ptr<Jim> createImg(const std::shared_ptr<Jim> pSrc, bool copyData=true){
+      std::shared_ptr<Jim> pJim=std::make_shared<Jim>();
+      ImgRaster::createImg(*pJim,*pSrc,copyData);
       return(pJim);
     }
 
@@ -175,7 +185,8 @@ namespace jiplib{
     CPLErr rero(std::shared_ptr<Jim> mask, int graph, int flag, int band=0);
     /// perform a morphological reconstruction by erosion for a particular band (non-destructive version)
     std::shared_ptr<jiplib::Jim> getRero(std::shared_ptr<Jim> mask, int graph, int flag, int iband=0);
-
+    ///read data from with reduced resolution
+    CPLErr GDALRead(std::string filename, int band, int nXOff, int nYOff, int nXSize, int nYSize, int nBufXSize=0, int nBufYSize=0);
     //in memory functions from ImgRaster using AppFactory
     std::shared_ptr<Jim> filter(const app::AppFactory& theApp){
       std::shared_ptr<Jim> pJim=std::make_shared<Jim>();

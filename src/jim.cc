@@ -436,3 +436,40 @@ bool Jim::operator==(Jim& refImg)
   }
   return(isEqual);
 }
+
+
+/**
+ *
+ *
+ * @param filename raster dataset filename
+ * @param band: index of band to read (0 for first band).
+ * @param nXOff: The pixel offset to the top left corner of the region of the band to be accessed.
+ *               This would be zero to start from the left side.
+ * @param nYOff: The line offset to the top left corner of the region of the band to be accessed.
+ *               This would be zero to start from the top.
+ * @param nXSize: The width of the region of the band to be accessed in pixels.
+ * @param nYSize: The height of the region of the band to be accessed in lines.
+ * @param nBufXSize: the width of the buffer image into which the desired region is to be read,
+                     or from which it is to be written.
+ * @param nBufYSize: the height of the buffer image into which the desired region is to be read,
+                     or from which it is to be written.
+ * @return CE_None if successful or CE_Failure if failure
+ */
+CPLErr Jim::GDALRead(const std::string filename, int band, int nXOff, int nYOff, int nXSize, int nYSize, int nBufXSize, int nBufYSize){
+  try{
+    if(nBufXSize<=0)
+      nBufXSize=nXOff;
+    if(nBufYSize<=0)
+      nBufYSize=nYOff;
+    reset();
+    IMAGE *mia=::GDALRead(const_cast<char*>(filename.c_str()), band, nXOff, nYOff, nXSize, nYSize, nBufXSize, nBufYSize);
+    setMIA(mia);
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    return(CE_Failure);
+  }
+  catch(...){
+    return(CE_Failure);
+  }
+}
