@@ -226,7 +226,87 @@ CPLErr Jim::arith(Jim& imgRaster, int theOperation, int iband){
     return(CE_Failure);
   }
 }
+/**
+ *
+ *
+ * @param imgRaster is operand
+ * @param theOperation the operation to be performed
+ * @param iband is the band for which the function needs to be performed (default 0 is first band)
+ *
+ * @return CE_None if successful
+ */
+// CPLErr Jim::arith(std::shared_ptr<Jim> imgRaster, int theOperation, int iband){
+CPLErr Jim::arithcst(double dcst, int theOperation, int iband){
+  try{
+    if(nrOfBand()<=iband){
+      std::string errorString="Error: band number exceeds number of bands in input image";
+      throw(errorString);
+    }
+    G_TYPE gt;
+    IMAGE* mia1=this->getMIA(iband);
+    switch(getDataType()){
+    case(GDT_Byte):
+      gt.uc_val=static_cast<unsigned char>(dcst);
+      break;
+    case(GDT_Int16):
+      gt.us_val=static_cast<short>(dcst);
+      break;
+    case(GDT_UInt16):
+      gt.s_val=static_cast<unsigned short>(dcst);
+      break;
+    case(GDT_Int32):
+      gt.i32_val=static_cast<int>(dcst);
+      break;
+    case(GDT_UInt32):
+      gt.u32_val=static_cast<unsigned int>(dcst);
+      break;
+    case(GDT_Float32):
+      gt.f_val=static_cast<float>(dcst);
+      break;
+    case(GDT_Float64):
+      gt.d_val=static_cast<double>(dcst);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
+    if(::arithcst(mia1, gt, theOperation) == NO_ERROR){
+      this->setMIA(iband);
+      return(CE_None);
+    }
+    else{
+      std::string errorString="Error: arithcst function in MIA failed";
+      throw(errorString);
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    this->setMIA(iband);
+    return(CE_Failure);
+  }
+  catch(...){
+    this->setMIA(iband);
+    return(CE_Failure);
+  }
+}
 
+/**
+ *
+ *
+ * @param dcst is the constant for operation
+ * @param theOperation the operation to be performed
+ * @param iband is the band for which the function needs to be performed (default 0 is first band)
+ *
+ * @return shared pointer to resulting image
+ */
+std::shared_ptr<jiplib::Jim> Jim::getArithcst(double dcst, int theOperation, int iband){
+  std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(*this, true);
+  if(pJim->arithcst(dcst, theOperation, iband)==CE_None)
+    return(pJim);
+  else
+    return(0);
+}
 /**
  *
  *
@@ -236,37 +316,12 @@ CPLErr Jim::arith(Jim& imgRaster, int theOperation, int iband){
  *
  * @return shared pointer to resulting image
  */
-std::shared_ptr<jiplib::Jim> Jim::getArith(std::shared_ptr<Jim> inputImg, int theOperation, int iband){
-  try{
-    if(inputImg->nrOfBand()<=iband){
-      std::string errorString="Error: band number exceeds number of bands in input image";
-      throw(errorString);
-    }
-    if(nrOfBand()<=iband){
-      std::string errorString="Error: band number exceeds number of bands in input image";
-      throw(errorString);
-    }
-    std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(*this, true);
-    IMAGE* mia1=pJim->getMIA(iband);
-    IMAGE* mia2=inputImg->getMIA(iband);
-    if(::arith(mia1, mia2, theOperation) == NO_ERROR){
-      pJim->setMIA(iband);
-      inputImg->setMIA(iband);
-      return(pJim);
-    }
-    else{
-      inputImg->setMIA(iband);
-      std::string errorString="Error: arith function in MIA failed";
-      throw(errorString);
-    }
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    return(NULL);
-  }
-  catch(...){
-    return(NULL);
-  }
+std::shared_ptr<jiplib::Jim> Jim::getArith(Jim& imgRaster, int theOperation, int iband){
+  std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(*this, true);
+  if(pJim->arith(imgRaster, theOperation, iband)==CE_None)
+    return(pJim);
+  else
+    return(0);
 }
 
 /**

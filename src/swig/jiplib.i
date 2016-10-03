@@ -27,38 +27,86 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 
 %module(docstring=DOCSTRING) jiplib
 
- /* almost works, but need to introduce typecheck for overloaded functions */
- /* then replace PyList with kwargs  */
+ //working
 /* %typemap(in) const app::AppFactory& { */
-/*   std::cout << "we are in typemap" << std::endl; */
-/*   PyObject *pKeys = PyDict_Keys($input); // new reference */
-/*   $1=new app::AppFactory(); */
-/*   for(int i = 0; i < PyList_Size(pKeys); ++i) */
-/*     { */
-/*       std::cout << "item " << i << std::endl; */
-/*       PyObject *pKey = PyList_GetItem(pKeys, i); // borrowed reference */
-/*       std::string theKey=PyString_AsString(pKey); */
-/*       std::cout << "key: " << theKey << std::endl; */
-/*       PyObject *pValue = PyDict_GetItem($input, pKey); // borrowed reference */
-/*       std::string theValue; */
-/*       if(PyString_Check(pValue)) */
-/*         theValue=PyString_AsString(pValue); */
-/*       else */
-/*         theValue=PyString_AsString(PyObject_Repr(pValue)); */
-/*       std::cout << "value: " << theValue << std::endl; */
-/*       assert(pValue); */
-/*       $1->setOption(theKey,theValue); */
-/*     } */
-/*   Py_DECREF(pKeys); */
-/*   $1->showOptions(); */
-/*  } */
+/*    std::cout << "we are in typemap AppFactory" << std::endl; */
+/*    void *argp2 = 0 ; */
+/*    /\* $1=new app::AppFactory(); *\/ */
+/*    int res2 = 0 ; */
+/*    res2 = SWIG_ConvertPtr($input, &argp2, SWIGTYPE_p_app__AppFactory,  0  | 0); */
+/*    if (!SWIG_IsOK(res2)) { */
+/*      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Derived_printKeyValues" "', argument " "2"" of type '" "app::AppFactory const &""'"); */
+/*    } */
+/*    if (!argp2) { */
+/*      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Derived_printKeyValues" "', argument " "2"" of type '" "app::AppFactory const &""'"); */
+/*    } */
+/*    $1 = reinterpret_cast< app::AppFactory * >(argp2); */
+/*    $1->showOptions(); */
+/*    } */
 
-/* %typemap(freearg)  (const app::AppFactory&){ */
-/*   if ($1) free($1); */
-/*  } */
+%typemap(in) const std::vector<double>& {
+  if(PyList_Check($input)){
+    $1=new std::vector<double>(PyList_Size($input));
+    Py_ssize_t ppos=0;
+    for(Py_ssize_t i=0;i<PyList_Size($input);++i){
+      PyObject *rValue;
+      rValue=PyList_GetItem($input,i);
+      $1->at(i)=PyFloat_AsDouble(rValue);
+    }
+  } else {
+    SWIG_exception(SWIG_TypeError, "PyList expected");
+  }
+ }
 
-/* %typemap(typecheck,precedence=SWIG_TYPECHECK_VOID) void { */
-/* } */
+%typemap(freearg)  (const std::vector<double>&){
+  if ($1) free($1);
+ }
+
+%typemap(in) const app::AppFactory& {
+  std::cout << "we are in typemap AppFactory" << std::endl;
+  if(PyDict_Check($input)){
+    PyObject *pKey, *pValue;
+    Py_ssize_t ppos=0;
+    $1=new app::AppFactory();
+    while (PyDict_Next($input, &ppos, &pKey, &pValue)) {
+      std::string theKey=PyString_AsString(pKey);
+      std::string theValue;
+      if(PyList_Check(pValue)){
+        for(Py_ssize_t i=0;i<PyList_Size(pValue);++i){
+          PyObject *rValue;
+          rValue=PyList_GetItem(pValue,i);
+          if(PyString_Check(rValue))
+            theValue=PyString_AsString(rValue);
+          else
+            theValue=PyString_AsString(PyObject_Repr(rValue));
+          $1->pushOption(theKey,theValue);
+        }
+        continue;
+      }
+      else if(PyString_Check(pValue))
+        theValue=PyString_AsString(pValue);
+      else
+        theValue=PyString_AsString(PyObject_Repr(pValue));
+      $1->pushOption(theKey,theValue);
+    }
+    $1->showOptions();
+  } else {
+    SWIG_exception(SWIG_TypeError, "Python dictionary expected");
+  }
+ }
+
+%typemap(freearg)  (const app::AppFactory&){
+  if ($1) free($1);
+ }
+
+/* !!! from: http://svn.salilab.org/imp/branches/1.0/kernel/pyext/IMP_streams.i */
+/* to allow overloading and select the appropriate typemap when a Python object is provided */
+%typemap(typecheck) (const app::AppFactory&) = PyObject *;
+/* %typemap(typecheck) (const app::AppFactory&) = PyDict *; */
+
+%typemap(typecheck) (const app:AppFactory& app) {
+  $1 = PyDict_Check($input) ? 1 : 0;
+ }
 
 %{
 #include <memory>
@@ -95,6 +143,22 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 /* %template(StringVector) std::vector<std::string>; */
 
 enum CPLErr {CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4};
-enum GDALDataType {GDT_Unknown = 0, GDT_Byte = 1, GDT_UInt16 = 2, GDT_Int16 = 3, GDT_UInt32 = 4, GDT_Int32 = 5, GDT_Float32 = 6, GDT_Float64 = 7, GDT_CInt16 = 8, GDT_CInt32 = 9, GDT_CFloat32 = 10, GDT_CFloat64 = 11, GDT_TypeCount = 12}; 
+enum GDALDataType {GDT_Unknown = 0, GDT_Byte = 1, GDT_UInt16 = 2, GDT_Int16 = 3, GDT_UInt32 = 4, GDT_Int32 = 5, GDT_Float32 = 6, GDT_Float64 = 7, GDT_CInt16 = 8, GDT_CInt32 = 9, GDT_CFloat32 = 10, GDT_CFloat64 = 11, GDT_TypeCount = 12};
 
 //from :  http://stackoverflow.com/questions/39436632/wrap-a-function-that-takes-a-struct-of-optional-arguments-using-kwargs
+
+/* %typemap(in) jiplib::Jim& { */
+/*   std::cout << "we are in typemap AppFactory" << std::endl; */
+/*   void *argp2 = 0 ; */
+/*   int res2 = 0 ; */
+/*   res2 = SWIG_ConvertPtr($input, &argp2, SWIGTYPE_p_std__shared_ptrT_jiplib__Jim_,  0  | 0); */
+/*   if (!SWIG_IsOK(res2)) { */
+/*     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Derived_printKeyValues" "', argument " "2"" of type '" "jiplib::Jim&""'"); */
+/*   } */
+/*   if (!argp2) { */
+/*     SWIG_exception_fail(SWIG_ValueError, "invalid null reference , argument " "2"" of type '" "jiplib::Jim&""'"); */
+/*   } */
+/*   $1 = reinterpret_cast< jiplib::Jim* >(argp2); */
+
+/*   $1=*() */
+/*     } */
