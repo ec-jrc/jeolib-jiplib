@@ -8,6 +8,8 @@ Change log
 
 using namespace jiplib;
 
+//test for swig binding with mialib
+// std::shared_ptr<Jim> pJim=Jim::createImg();
 // //test
 // void Jim::open(int ncol, int nrow, int nband, int dataType){
 //   ImgRaster::open(ncol,nrow,nband,static_cast<GDALDataType>(dataType));
@@ -31,7 +33,7 @@ IMAGE* Jim::getMIA(int band){
   m_mia->DataType=GDAL2MIADataType(getDataType());
   m_mia->nx=nrOfCol();
   m_mia->ny=nrOfRow();
-  m_mia->nz=1;
+  m_mia->nz=nrOfPlane();
   m_mia->NByte=m_mia->nx*m_mia->ny*m_mia->nz*(GDALGetDataTypeSize(getDataType())>>3);//assumes image data type is not of bit type!!!
   //todo: remove m_mia->vol and only rely on the getVolume function
   m_mia->vol=0;//not used.
@@ -50,10 +52,10 @@ IMAGE* Jim::getMIA(int band){
  */
 CPLErr Jim::setMIA(int band){
   try{
-    if(m_mia->nz>1){
-      std::string errorString="Error: MIA image with nz>1 not supported";
-      throw(errorString);
-    }
+    // if(m_mia->nz>1){
+    //   std::string errorString="Error: MIA image with nz>1 not supported";
+    //   throw(errorString);
+    // }
     if(m_ncol!=m_mia->nx){
       std::ostringstream s;
       s << "Error: x dimension of image (" << m_ncol << ") does not match MIA (" << m_mia->nx << ")";
@@ -100,10 +102,10 @@ CPLErr Jim::setMIA(int band){
 CPLErr Jim::setMIA(IMAGE* mia, int band){
   try{
     if(nrOfBand()>1){
-      if(mia->nz>1){
-        std::string errorString="Error: MIA image with nz>1 not supported";
-        throw(errorString);
-      }
+      // if(mia->nz>1){
+      //   std::string errorString="Error: MIA image with nz>1 not supported";
+      //   throw(errorString);
+      // }
       if(m_ncol!=mia->nx){
         std::string errorString="Error: dimensions of images in do not match";
         throw(errorString);

@@ -21,7 +21,6 @@ extern "C" {
    Name space jiplib
 **/
 namespace jiplib{
-
   /** @brief class for raster dataset (read and write).
 
       Jim is a class that enables the integration of functionalities from both pktools and mia image processing libraries

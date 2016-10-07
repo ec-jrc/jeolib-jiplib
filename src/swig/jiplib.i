@@ -7,6 +7,7 @@
 %shared_ptr(ImgRaster)
 %shared_ptr(jiplib::Jim)
 
+ //catch all exceptions thrown in C++
 %include "exception.i"
 %exception {
   try {
@@ -17,7 +18,8 @@
     SWIG_fail;
   }
 }
-%define DOCSTRING
+
+%define DOCJIPLIB
 "Joint image processing library (jiplib)
 developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 %enddef
@@ -25,7 +27,7 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 
 %feature("autodoc", "2");
 
-%module(docstring=DOCSTRING) jiplib
+%module(docstring=DOCJIPLIB) jiplib
 
  //working
 /* %typemap(in) const app::AppFactory& { */
@@ -44,30 +46,63 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 /*    $1->showOptions(); */
 /*    } */
 
-%typemap(in) const std::vector<double>& {
-  if(PyList_Check($input)){
-    $1=new std::vector<double>(PyList_Size($input));
-    Py_ssize_t ppos=0;
-    for(Py_ssize_t i=0;i<PyList_Size($input);++i){
-      PyObject *rValue;
-      rValue=PyList_GetItem($input,i);
-      $1->at(i)=PyFloat_AsDouble(rValue);
-    }
-  } else {
-    SWIG_exception(SWIG_TypeError, "PyList expected");
-  }
- }
+ // Instantiate templates for vector
+ /* %template(ByteVector) std::vector<char>; */
+ /* %template(Int16Vector) std::vector<short>; */
+ /* %template(UInt16Vector) std::vector<unsigned short>; */
+ /* %template(Int32Vector) std::vector<int>; */
+ /* %template(UInt32Vector) std::vector<unsigned int>; */
+ /* %template(Float32Vector) std::vector<float>; */
+ %template(Float64Vector) std::vector<double>;
+ /* %template(StringVector) std::vector<std::string>; */
+ 
+/* %template() std::vector<double>; */
+ //check also http://www.swig.org/Doc3.0/Python.html#Python_nn28
+/* %typemap(in, numinputs=0) std::vector<double>& histvector (std::vector<double> temp){ */
+/*   $1=temp */
+/*  } */
 
-%typemap(freearg)  (const std::vector<double>&){
-  if ($1) free($1);
- }
+%apply int &INOUT{ int &nbin };
+%apply double &INOUT{ double &min };
+%apply double &INOUT{ double &max };
+%apply Float64Vector &INOUT{ std::vector<double>& };
 
-%typemap(in) const app::AppFactory& {
+/* %typemap(argout) std::vector<double>& histvector{ */
+/*   size_t dim=temp$argnum.size(); */
+/*   PyObject *list = PyList_New(dim); */
+/*   for (size_t i = 0; i < dim; ++i) */
+/*     PyList_SetItem(list, i, PyFloat_FromDouble(temp$argnum[i])); */
+/*   $result=list; */
+/*  } */
+
+/* %typemap(in) const std::vector<double>& (std::vector<double> temp){ */
+/*   if(PyList_Check($input)){ */
+/*     /\* $1=new std::vector<double>(PyList_Size($input)); *\/ */
+/*     Py_ssize_t ppos=0; */
+/*     for(Py_ssize_t i=0;i<PyList_Size($input);++i){ */
+/*       PyObject *rValue; */
+/*       rValue=PyList_GetItem($input,i); */
+/*       temp.push_back(PyFloat_AsDouble(rValue)); */
+/*       /\* $1->at(i)=PyFloat_AsDouble(rValue); *\/ */
+/*     } */
+/*     $1=temp */
+/*   } else { */
+/*     SWIG_exception(SWIG_TypeError, "PyList expected"); */
+/*   } */
+/*  } */
+
+/* %typemap(freearg)  (const std::vector<double>&){ */
+/*   if ($1) free($1); */
+/*  } */
+
+
+%typemap(in) const app::AppFactory& (app::AppFactory tempFactory){
   std::cout << "we are in typemap AppFactory" << std::endl;
   if(PyDict_Check($input)){
     PyObject *pKey, *pValue;
     Py_ssize_t ppos=0;
-    $1=new app::AppFactory();
+    /* $1=new app::AppFactory(); */
+    $1=&tempFactory;
     while (PyDict_Next($input, &ppos, &pKey, &pValue)) {
       std::string theKey=PyString_AsString(pKey);
       std::string theValue;
@@ -95,9 +130,10 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
   }
  }
 
-%typemap(freearg)  (const app::AppFactory&){
-  if ($1) free($1);
- }
+//free in case $1=new app::AppFactory() is used above
+/* %typemap(freearg)  (const app::AppFactory&){ */
+/*   if ($1) free($1); */
+/*  } */
 
 /* !!! from: http://svn.salilab.org/imp/branches/1.0/kernel/pyext/IMP_streams.i */
 /* to allow overloading and select the appropriate typemap when a Python object is provided */
@@ -108,8 +144,13 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
   $1 = PyDict_Check($input) ? 1 : 0;
  }
 
+/* to resolve naming conflicts with mialib library*/
+%rename(filter2d_erode) filter2d::erode;
+%rename(filter2d_dilate) filter2d::dilate;
+%rename(filter2d_shift) filter2d::shift;
+
 %{
-#include <memory>
+/* #include <memory> */
 #include "config.h"
 #include "imageclasses/ImgRaster.h"
 #include "imageclasses/ImgCollection.h"
@@ -120,27 +161,16 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 #include <cpl_error.h>
   %}
 
-
-%template(ImgVectorRaster) std::vector< std::shared_ptr< ImgRaster > >;
 %template(ImgVectorJim) std::vector< std::shared_ptr< jiplib::Jim > >;
 
 //Parse the header file
 //%include "swig/pktools.i"
+%include "swig/mialib.i"
 %include "imageclasses/ImgCollection.h"
 %include "imageclasses/ImgRaster.h"
 %include "apps/AppFactory.h"
 %include "algorithms/Filter2d.h"
 %include "jim.h"
-
-// Instantiate templates for vector
-/* %template(ByteVector) std::vector<char>; */
-/* %template(Int16Vector) std::vector<short>; */
-/* %template(UInt16Vector) std::vector<unsigned short>; */
-/* %template(Int32Vector) std::vector<int>; */
-/* %template(UInt32Vector) std::vector<unsigned int>; */
-/* %template(Float32Vector) std::vector<float>; */
-/* %template(Float64Vector) std::vector<double>; */
-/* %template(StringVector) std::vector<std::string>; */
 
 enum CPLErr {CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4};
 enum GDALDataType {GDT_Unknown = 0, GDT_Byte = 1, GDT_UInt16 = 2, GDT_Int16 = 3, GDT_UInt32 = 4, GDT_Int32 = 5, GDT_Float32 = 6, GDT_Float64 = 7, GDT_CInt16 = 8, GDT_CInt32 = 9, GDT_CFloat32 = 10, GDT_CFloat64 = 11, GDT_TypeCount = 12};
