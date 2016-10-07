@@ -165,7 +165,7 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 
 //Parse the header file
 //%include "swig/pktools.i"
-%include "swig/mialib.i"
+%include "swig/mialib_tmp.i"
 %include "imageclasses/ImgCollection.h"
 %include "imageclasses/ImgRaster.h"
 %include "apps/AppFactory.h"
