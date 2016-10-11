@@ -30,7 +30,7 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
 /* Put header files here or function declarations like below */
 #include "mialib_swig.h"
 #include "op.h"
-#include "jiplib/jim.h"
+#include "jim.h"
 %}
 
 
