@@ -71,12 +71,10 @@ CPLErr Jim::setMIA(int band){
       std::string errorString="Error: band exceeds number of bands in target image";
       throw(errorString);
     }
-    if(m_dataType!=MIA2GDALDataType(m_mia->DataType)){
-      std::ostringstream s;
-      s << "Error: data types of images do not match: ";
-      s << m_dataType << ", " << MIA2GDALDataType(m_mia->DataType);
-      throw(s.str());
+    if(m_nband>1&&m_dataType!=MIA2GDALDataType(m_mia->DataType)){
+      std::cout << "Warning: changing data type of multiband image, make sure to process all bands" << std::endl;
     }
+    m_dataType=MIA2GDALDataType(m_mia->DataType);
     m_data[band]=m_mia->p_im+band*nrOfRow()*nrOfCol()*(GDALGetDataTypeSize(getDataType())>>3);
     m_begin[band]=0;
     m_end[band]=m_begin[band]+getBlockSize();
@@ -118,12 +116,10 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
         std::string errorString="Error: band exceeds number of bands in target image";
         throw(errorString);
       }
-      if(m_dataType!=MIA2GDALDataType(mia->DataType)){
-        std::ostringstream s;
-        s << "Error: data types of images do not match: ";
-        s << m_dataType << ", " << MIA2GDALDataType(mia->DataType);
-        throw(s.str());
+      if(m_nband>1&&m_dataType!=MIA2GDALDataType(m_mia->DataType)){
+        std::cout << "Warning: changing data type of multiband image, make sure to process all bands" << std::endl;
       }
+      m_dataType=MIA2GDALDataType(m_mia->DataType);
     }
     else{
       reset();

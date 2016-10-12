@@ -8,6 +8,7 @@ Change log
 #define _JIM_H_
 
 #include "pktools/imageclasses/ImgRaster.h"
+#include "pktools/imageclasses/ImgCollection.h"
 #include "pktools/apps/AppFactory.h"
 #include <string>
 #include <vector>
@@ -182,23 +183,79 @@ namespace jiplib{
     CPLErr rero(std::shared_ptr<Jim> mask, int graph, int flag, int band=0);
     /// perform a morphological reconstruction by erosion for a particular band (non-destructive version)
     std::shared_ptr<jiplib::Jim> getRero(std::shared_ptr<Jim> mask, int graph, int flag, int iband=0);
+    ///get volume (from mialib)
+    double getVolume(int iband=0){return(getMIA()->vol);};
     ///read data from with reduced resolution
     CPLErr GDALRead(std::string filename, int band, int nXOff, int nYOff, int nXSize, int nYSize, int nBufXSize=0, int nBufYSize=0);
 
     //in memory functions from ImgRaster using AppFactory
+    ///filter Jim image and return filtered image as shared pointer
     std::shared_ptr<Jim> filter(const app::AppFactory& theApp){
-      std::shared_ptr<Jim> pJim=std::make_shared<Jim>();
-      ImgRaster::filter(*pJim,theApp);
-      return(pJim);
+      std::shared_ptr<Jim> imgWriter=createImg();
+      ImgRaster::filter(*imgWriter,theApp);
+      return(imgWriter);
     }
+    ///stretch Jim image and return stretched image as shared pointer
+    std::shared_ptr<Jim> stretch(const app::AppFactory& app){
+      std::shared_ptr<Jim> imgWriter=createImg();
+      ImgRaster::stretch(*imgWriter, app);
+      return(imgWriter);
+    }
+    ///create statistical profile from a collection
+    std::shared_ptr<Jim> diff(const app::AppFactory& app){
+      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      ImgRaster::diff(*imgWriter, app);
+      return(imgWriter);
+    }
+    ///supervised classification using support vector machine (train with extractImg/extractOgr)
+    std::shared_ptr<Jim> svm(const app::AppFactory& app){
+      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      ImgRaster::svm(*imgWriter, app);
+      return(imgWriter);
+    }
+
   protected:
     ///number of planes in this dataset
     int m_nplane;
   private:
     virtual std::shared_ptr<ImgRaster> cloneImpl() {
-      return std::make_shared<Jim>(*this,false);
+      //test
+      std::cout << "clone Jim object" << std::endl;
+      /* return std::make_shared<Jim>(*this,false); */
+      return(Jim::createImg());
     };
     IMAGE* m_mia;
   };
+
+  class JimCollection : public ImgCollection{
+  public:
+    ///constructor using vector of images
+    JimCollection(const std::vector<std::shared_ptr<Jim> > &jimVector){
+      for(int ijim=0;ijim<jimVector.size();++ijim){
+        pushImage(jimVector[ijim]);
+      }
+    }
+    ///composite image only for in memory
+    std::shared_ptr<Jim> composite(const app::AppFactory& app){
+      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      ImgCollection::composite(*imgWriter, app);
+      return(imgWriter);
+    }
+    ///crop image only for in memory
+    std::shared_ptr<Jim> crop(const app::AppFactory& app){
+      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      ImgCollection::crop(*imgWriter, app);
+      return(imgWriter);
+    }
+    ///stack all images in collection to multiband image (alias for crop)
+    std::shared_ptr<Jim> stack(const app::AppFactory& app){return(crop(app));};
+    ///create statistical profile from a collection
+    std::shared_ptr<Jim> statProfile(const app::AppFactory& app){
+      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      ImgCollection::statProfile(*imgWriter, app);
+      return(imgWriter);
+    }
+  };
 }
+
 #endif // _JIM_H_
