@@ -36,7 +36,7 @@ IMAGE* Jim::getMIA(int band){
   m_mia->nz=nrOfPlane();
   m_mia->NByte=m_mia->nx*m_mia->ny*m_mia->nz*(GDALGetDataTypeSize(getDataType())>>3);//assumes image data type is not of bit type!!!
   //todo: remove m_mia->vol and only rely on the getVolume function
-  m_mia->vol=0;//not used.
+  m_mia->vol=0;//use getVolume() function
   m_mia->lut=0;
   //USHORT *lut;   /* Pointer to colour map */
   //mia->g=getgetDataType();//not used
@@ -526,3 +526,14 @@ CPLErr Jim::GDALRead(const std::string filename, int band, int nXOff, int nYOff,
     return(CE_Failure);
   }
 }
+
+// double Jim::getVolume(int iband){
+//   double theVolume=0;
+//   std::vector<double> lineBuffer(nrOfCol());
+//   for(int irow=0;irow<nrOfRow();++irow){
+//     readData(lineBuffer,irow,iband);
+//     for(int icol=0;icol<nrOfCol();++icol)
+//       theVolume+=lineBuffer[icol];
+//   }
+//   return(theVolume);
+// }

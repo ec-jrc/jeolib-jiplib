@@ -184,7 +184,7 @@ namespace jiplib{
     /// perform a morphological reconstruction by erosion for a particular band (non-destructive version)
     std::shared_ptr<jiplib::Jim> getRero(std::shared_ptr<Jim> mask, int graph, int flag, int iband=0);
     ///get volume (from mialib)
-    double getVolume(int iband=0){return(getMIA()->vol);};
+    double getVolume(int iband=0) {IMAGE *mia=getMIA(iband);volume(mia);return(mia->vol);};
     ///read data from with reduced resolution
     CPLErr GDALRead(std::string filename, int band, int nXOff, int nYOff, int nXSize, int nYSize, int nBufXSize=0, int nBufYSize=0);
 
