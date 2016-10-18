@@ -14,6 +14,7 @@ Change log
 #include <vector>
 #include <memory>
 extern "C" {
+#include "mialib/mialib.h"
 #include "mialib/mialib_swig.h"
 #include "mialib/op.h"
 }
