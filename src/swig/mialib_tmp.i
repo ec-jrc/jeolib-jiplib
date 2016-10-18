@@ -22,7 +22,9 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
 
 
 // see https://stackoverflow.com/questions/11435102/is-there-a-good-way-to-produce-documentation-for-swig-interfaces
-/* %import "../../../core/build/doc/xml/mial_doxy2swig.i" */
+
+
+%import "mial_doxy2swig.i"
 
 
 
