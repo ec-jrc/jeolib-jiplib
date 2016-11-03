@@ -24,12 +24,13 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
 // see https://stackoverflow.com/questions/11435102/is-there-a-good-way-to-produce-documentation-for-swig-interfaces
 
 
-%import "mial_doxy2swig.i"
+/* %import "mial_doxy2swig.i" */
 
 
 
 %{
 /* Put header files here or function declarations like below */
+/* #include "mialib_swig.h" */
 #include "mialib_swig.h"
 #include "op.h"
 #include "jim.h"
@@ -96,8 +97,8 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
 
 
 %typemap(in) G_TYPE {
+  std::cout << "we are in typemap(in) G_TYPE" << std::endl;
   G_TYPE gt;
-  printf("coucou\n");
   if (!PyFloat_Check($input)) {
     PyErr_SetString(PyExc_ValueError,"Expected a number");
     return NULL;
@@ -240,32 +241,12 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
     SWIG_exception_fail(SWIG_ValueError, "invalid null reference , argument " "2"" of type '" "shared_ptr<const jiplib::Jim&>""'");
   }
   tempMIA = (*(reinterpret_cast< std::shared_ptr< jiplib::Jim > * >(argp2)))->getMIA();
+  //test
+  /* std::cout << "jim before function call:" << std::endl; */
+  /* (*(reinterpret_cast< std::shared_ptr< jiplib::Jim > * >(argp2)))->dumpimg(); */
   if(tempMIA)
     $1=tempMIA;
  }
-
-
-%typemap(argout) IMAGE * {
-  std::cout << "we are in typemap(argout) IMAGE*" << std::endl;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  res2 = SWIG_ConvertPtr($input, &argp2, SWIGTYPE_p_std__shared_ptrT_jiplib__Jim_t,  0  | 0);
-  IMAGE *imp=(IMAGE *)$1;
-  (*(reinterpret_cast< std::shared_ptr< jiplib::Jim > * >(argp2)))->setMIA(imp);
-  /* $input.setMIA(imp); */
-  /* tempJim=jiplib::Jim::createImg(); */
-  /* tempJim->setMIA(imp); */
-  /* PyObject* o=0; */
-  /* argp2=SWIG_as_voidptr(&tempJim); */
-  /* o = SWIG_NewPointerObj(argp2, SWIGTYPE_p_std__shared_ptrT_jiplib__Jim_t, SWIG_POINTER_OWN |  0 ); */
-  /* if(o) */
-  /*   $result=o; */
-  /* else */
-  /*   SWIG_exception_fail(SWIG_ArgError(res2), "in method " "$symname"); */
- }
-/* %inline %{ */
-/*   extern std::shared_ptr<jiplib::Jim> pJim; */
-/*   %} */
 
 /* %typemap(out) IMAGE * (std::shared_ptr<jiplib::Jim> tempJim){ */
 /* %typemap(out) IMAGE * (jiplib::Jim *tempJim){ */
@@ -291,9 +272,35 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
     SWIG_exception_fail(SWIG_ArgError(res2), "in method " "$symname");
  }
 
+//$input is the input Python object
+//$1 is the (c/c++) function call argument
+%typemap(argout) IMAGE * {
+  std::cout << "we are in typemap(argout) IMAGE*" << std::endl;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  res2 = SWIG_ConvertPtr($input, &argp2, SWIGTYPE_p_std__shared_ptrT_jiplib__Jim_t,  0  | 0);
+  IMAGE *imp=(IMAGE *)$1;
+  (*(reinterpret_cast< std::shared_ptr< jiplib::Jim > * >(argp2)))->setMIA(imp);
+  //test
+  /* std::cout << "jim after function call:" << std::endl; */
+  /* (*(reinterpret_cast< std::shared_ptr< jiplib::Jim > * >(argp2)))->dumpimg(); */
+  /* $input.setMIA(imp); */
+  /* tempJim=jiplib::Jim::createImg(); */
+  /* tempJim->setMIA(imp); */
+  /* PyObject* o=0; */
+  /* argp2=SWIG_as_voidptr(&tempJim); */
+  /* o = SWIG_NewPointerObj(argp2, SWIGTYPE_p_std__shared_ptrT_jiplib__Jim_t, SWIG_POINTER_OWN |  0 ); */
+  /* if(o) */
+  /*   $result=o; */
+  /* else */
+  /*   SWIG_exception_fail(SWIG_ArgError(res2), "in method " "$symname"); */
+ }
+/* %inline %{ */
+/*   extern std::shared_ptr<jiplib::Jim> pJim; */
+/*   %} */
 
 // These are the headers with the declarations that will be warped
-// It needs to be inserted before the extend declaration
+// It needs to be inserted before the extend declaration (but after the typemaps)
 %include "mialib_swig.h"
 %include "op.h"
 

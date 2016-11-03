@@ -147,40 +147,40 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
   return(CE_None);
 }
 
-/**
- *
- *
- * @param imgRaster is operand
- * @param theOperation the operation to be performed
- * @param iband is the band for which the function needs to be performed (default 0 is first band)
- *
- * @return CE_None if successful
- */
-CPLErr Jim::shift(int value, int iband){
-  try{
-    if(nrOfBand()<=iband){
-      std::string errorString="Error: band number exceeds number of bands in input image";
-      throw(errorString);
-    }
-    IMAGE* mia1=this->getMIA(iband);
-    if(::shift(mia1, value) == NO_ERROR){
-      this->setMIA(iband);
-      return(CE_None);
-    }
-    else{
-      this->setMIA(iband);
-      std::string errorString="Error: arith function in MIA failed";
-      throw(errorString);
-    }
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    return(CE_Failure);
-  }
-  catch(...){
-    return(CE_Failure);
-  }
-}
+// /**
+//  *
+//  *
+//  * @param imgRaster is operand
+//  * @param theOperation the operation to be performed
+//  * @param iband is the band for which the function needs to be performed (default 0 is first band)
+//  *
+//  * @return CE_None if successful
+//  */
+// CPLErr Jim::shift(int value, int iband){
+//   try{
+//     if(nrOfBand()<=iband){
+//       std::string errorString="Error: band number exceeds number of bands in input image";
+//       throw(errorString);
+//     }
+//     IMAGE* mia1=this->getMIA(iband);
+//     if(::shift(mia1, value) == NO_ERROR){
+//       this->setMIA(iband);
+//       return(CE_None);
+//     }
+//     else{
+//       this->setMIA(iband);
+//       std::string errorString="Error: arith function in MIA failed";
+//       throw(errorString);
+//     }
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     return(CE_Failure);
+//   }
+//   catch(...){
+//     return(CE_Failure);
+//   }
+// }
 
 /**
  *
@@ -224,6 +224,7 @@ CPLErr Jim::arith(Jim& imgRaster, int theOperation, int iband){
     return(CE_Failure);
   }
 }
+
 /**
  *
  *
@@ -233,7 +234,6 @@ CPLErr Jim::arith(Jim& imgRaster, int theOperation, int iband){
  *
  * @return CE_None if successful
  */
-// CPLErr Jim::arith(std::shared_ptr<Jim> imgRaster, int theOperation, int iband){
 CPLErr Jim::arithcst(double dcst, int theOperation, int iband){
   try{
     if(nrOfBand()<=iband){
@@ -289,243 +289,243 @@ CPLErr Jim::arithcst(double dcst, int theOperation, int iband){
   }
 }
 
-/**
- *
- *
- * @param dcst is the constant for operation
- * @param theOperation the operation to be performed
- * @param iband is the band for which the function needs to be performed (default 0 is first band)
- *
- * @return shared pointer to resulting image
- */
-std::shared_ptr<jiplib::Jim> Jim::getArithcst(double dcst, int theOperation, int iband){
-  std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(*this, true);
-  if(pJim->arithcst(dcst, theOperation, iband)==CE_None)
-    return(pJim);
-  else
-    return(0);
-}
-/**
- *
- *
- * @param imgRaster is operand
- * @param theOperation the operation to be performed
- * @param iband is the band for which the function needs to be performed (default 0 is first band)
- *
- * @return shared pointer to resulting image
- */
-std::shared_ptr<jiplib::Jim> Jim::getArith(Jim& imgRaster, int theOperation, int iband){
-  std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(*this, true);
-  if(pJim->arith(imgRaster, theOperation, iband)==CE_None)
-    return(pJim);
-  else
-    return(0);
-}
+// /**
+//  *
+//  *
+//  * @param dcst is the constant for operation
+//  * @param theOperation the operation to be performed
+//  * @param iband is the band for which the function needs to be performed (default 0 is first band)
+//  *
+//  * @return shared pointer to resulting image
+//  */
+// std::shared_ptr<jiplib::Jim> Jim::getArithcst(double dcst, int theOperation, int iband){
+//   std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(*this, true);
+//   if(pJim->arithcst(dcst, theOperation, iband)==CE_None)
+//     return(pJim);
+//   else
+//     return(0);
+// }
+// /**
+//  *
+//  *
+//  * @param imgRaster is operand
+//  * @param theOperation the operation to be performed
+//  * @param iband is the band for which the function needs to be performed (default 0 is first band)
+//  *
+//  * @return shared pointer to resulting image
+//  */
+// std::shared_ptr<jiplib::Jim> Jim::getArith(Jim& imgRaster, int theOperation, int iband){
+//   std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(*this, true);
+//   if(pJim->arith(imgRaster, theOperation, iband)==CE_None)
+//     return(pJim);
+//   else
+//     return(0);
+// }
 
-/**
- *
- *
- * @param mask
- * @param graph
- * @param flag
- * @param iband is the band for which the function needs to be performed (default is 0: first band)
- *
- * @return CE_None if successful
- */
-CPLErr Jim::rdil(std::shared_ptr<Jim> mask, int graph, int flag, int iband){
-  IMAGE* markMIA=this->getMIA(iband);
-  IMAGE* maskMIA=mask->getMIA(iband);
-  if(::rdil(markMIA,maskMIA,graph,flag) == NO_ERROR){
-    this->setMIA(iband);
-    mask->setMIA(iband);
-    return(CE_None);
-  }
-  this->setMIA(iband);
-  mask->setMIA(iband);
-  return(CE_Failure);
-}
+// /**
+//  *
+//  *
+//  * @param mask
+//  * @param graph
+//  * @param flag
+//  * @param iband is the band for which the function needs to be performed (default is 0: first band)
+//  *
+//  * @return CE_None if successful
+//  */
+// CPLErr Jim::rdil(std::shared_ptr<Jim> mask, int graph, int flag, int iband){
+//   IMAGE* markMIA=this->getMIA(iband);
+//   IMAGE* maskMIA=mask->getMIA(iband);
+//   if(::rdil(markMIA,maskMIA,graph,flag) == NO_ERROR){
+//     this->setMIA(iband);
+//     mask->setMIA(iband);
+//     return(CE_None);
+//   }
+//   this->setMIA(iband);
+//   mask->setMIA(iband);
+//   return(CE_Failure);
+// }
 
-/**
- *
- *
- * @param mask
- * @param graph
- * @param flag
- * @param iband is the band for which the operation needs to be performed (default is 0: first band)
- *
- * @return shared pointer to resulting image
- */
-std::shared_ptr<jiplib::Jim> Jim::getRdil(std::shared_ptr<Jim> mask, int graph, int flag, int iband){
-  std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(*this, true);
-  IMAGE* markMIA=pJim->getMIA(iband);
-  IMAGE* maskMIA=mask->getMIA(iband);
-  if (::rdil(markMIA,maskMIA,graph,flag) == NO_ERROR){
-    pJim->setMIA(iband);
-  }
-  else
-    pJim=NULL;
-  mask->setMIA(iband);
-  return(pJim);
-}
-/**
- *
- *
- * @param mask
- * @param graph
- * @param flag
- * @param iband is the band for which the operation needs to be performed (default is 0: first band)
- *
- * @return CE_None if successful
- */
-CPLErr Jim::rero(std::shared_ptr<Jim> mask, int graph, int flag, int iband){
-  IMAGE* markMIA=this->getMIA(iband);
-  IMAGE* maskMIA=mask->getMIA(iband);
-  if (::rero(markMIA,maskMIA,graph,flag) == NO_ERROR){
-    this->setMIA(iband);
-    mask->setMIA(iband);
-    return(CE_None);
-  }
-  this->setMIA(iband);
-  mask->setMIA(iband);
-  return(CE_Failure);
-}
+// /**
+//  *
+//  *
+//  * @param mask
+//  * @param graph
+//  * @param flag
+//  * @param iband is the band for which the operation needs to be performed (default is 0: first band)
+//  *
+//  * @return shared pointer to resulting image
+//  */
+// std::shared_ptr<jiplib::Jim> Jim::getRdil(std::shared_ptr<Jim> mask, int graph, int flag, int iband){
+//   std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(*this, true);
+//   IMAGE* markMIA=pJim->getMIA(iband);
+//   IMAGE* maskMIA=mask->getMIA(iband);
+//   if (::rdil(markMIA,maskMIA,graph,flag) == NO_ERROR){
+//     pJim->setMIA(iband);
+//   }
+//   else
+//     pJim=NULL;
+//   mask->setMIA(iband);
+//   return(pJim);
+// }
+// /**
+//  *
+//  *
+//  * @param mask
+//  * @param graph
+//  * @param flag
+//  * @param iband is the band for which the operation needs to be performed (default is 0: first band)
+//  *
+//  * @return CE_None if successful
+//  */
+// CPLErr Jim::rero(std::shared_ptr<Jim> mask, int graph, int flag, int iband){
+//   IMAGE* markMIA=this->getMIA(iband);
+//   IMAGE* maskMIA=mask->getMIA(iband);
+//   if (::rero(markMIA,maskMIA,graph,flag) == NO_ERROR){
+//     this->setMIA(iband);
+//     mask->setMIA(iband);
+//     return(CE_None);
+//   }
+//   this->setMIA(iband);
+//   mask->setMIA(iband);
+//   return(CE_Failure);
+// }
 
-/**
- *
- *
- * @param mask
- * @param graph
- * @param flag
- * @param iband is the band for which the operation needs to be performed (default is 0: first band)
- *
- * @return shared pointer to resulting image
- */
-std::shared_ptr<jiplib::Jim> Jim::getRero(std::shared_ptr<Jim> mask, int graph, int flag, int iband){
-  std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(*this, true);
-  IMAGE* markMIA=pJim->getMIA(iband);
-  IMAGE* maskMIA=mask->getMIA(iband);
-  if (::rero(markMIA,maskMIA,graph,flag) == NO_ERROR){
-    pJim->setMIA(iband);
-  }
-  else
-    pJim=NULL;
-  mask->setMIA(iband);
-  return(pJim);
-}
+// /**
+//  *
+//  *
+//  * @param mask
+//  * @param graph
+//  * @param flag
+//  * @param iband is the band for which the operation needs to be performed (default is 0: first band)
+//  *
+//  * @return shared pointer to resulting image
+//  */
+// std::shared_ptr<jiplib::Jim> Jim::getRero(std::shared_ptr<Jim> mask, int graph, int flag, int iband){
+//   std::shared_ptr<jiplib::Jim> pJim=std::make_shared<jiplib::Jim>(*this, true);
+//   IMAGE* markMIA=pJim->getMIA(iband);
+//   IMAGE* maskMIA=mask->getMIA(iband);
+//   if (::rero(markMIA,maskMIA,graph,flag) == NO_ERROR){
+//     pJim->setMIA(iband);
+//   }
+//   else
+//     pJim=NULL;
+//   mask->setMIA(iband);
+//   return(pJim);
+// }
 
-/**
- * @param imgSrc Use this source image as a template to copy image attributes
- **/
-Jim& Jim::operator=(Jim& imgSrc)
-{
-  bool copyData=true;
-  //check for assignment to self (of the form v=v)
-  if(this==&imgSrc)
-     return *this;
-  else{
-    ImgRaster::open(imgSrc,copyData);
-    return *this;
-  }
-}
-
-
-/**
- *
- * @param refImg Use this as the reference image
- *
- * @return true if image is equal to reference image
- */
-bool Jim::operator==(std::shared_ptr<Jim> refImg)
-{
-  bool isEqual=true;
-  if(nrOfBand()!=refImg->nrOfBand())
-    return(false);
-  if(nrOfRow()!=refImg->nrOfRow())
-    return(false);
-  if(nrOfCol()!=refImg->nrOfCol())
-    return(false);
-
-  for(int iband=0;iband<nrOfBand();++iband){
-    if(getDataType(iband)!=refImg->getDataType(iband)){
-      isEqual=false;
-      break;
-    }
-    IMAGE* refMIA=refImg->getMIA(iband);
-    IMAGE* thisMIA=this->getMIA(iband);
-    if(::imequalp(thisMIA,refMIA)){
-      isEqual=false;
-      break;
-    }
-  }
-  return(isEqual);
-}
-/**
- *
- * @param refImg Use this as the reference image
- *
- * @return true if image is equal to reference image
- */
-bool Jim::operator==(Jim& refImg)
-{
-  bool isEqual=true;
-  if(nrOfBand()!=refImg.nrOfBand())
-    return(false);
-  if(nrOfRow()!=refImg.nrOfRow())
-    return(false);
-  if(nrOfCol()!=refImg.nrOfCol())
-    return(false);
-
-  for(int iband=0;iband<nrOfBand();++iband){
-    if(getDataType(iband)!=refImg.getDataType(iband)){
-      isEqual=false;
-      break;
-    }
-    IMAGE* refMIA=refImg.getMIA(iband);
-    IMAGE* thisMIA=this->getMIA(iband);
-    if(::imequalp(thisMIA,refMIA)){
-      isEqual=false;
-      break;
-    }
-  }
-  return(isEqual);
-}
+// /**
+//  * @param imgSrc Use this source image as a template to copy image attributes
+//  **/
+// Jim& Jim::operator=(Jim& imgSrc)
+// {
+//   bool copyData=true;
+//   //check for assignment to self (of the form v=v)
+//   if(this==&imgSrc)
+//      return *this;
+//   else{
+//     ImgRaster::open(imgSrc,copyData);
+//     return *this;
+//   }
+// }
 
 
-/**
- *
- *
- * @param filename raster dataset filename
- * @param band: index of band to read (0 for first band).
- * @param nXOff: The pixel offset to the top left corner of the region of the band to be accessed.
- *               This would be zero to start from the left side.
- * @param nYOff: The line offset to the top left corner of the region of the band to be accessed.
- *               This would be zero to start from the top.
- * @param nXSize: The width of the region of the band to be accessed in pixels.
- * @param nYSize: The height of the region of the band to be accessed in lines.
- * @param nBufXSize: the width of the buffer image into which the desired region is to be read,
-                     or from which it is to be written.
- * @param nBufYSize: the height of the buffer image into which the desired region is to be read,
-                     or from which it is to be written.
- * @return CE_None if successful or CE_Failure if failure
- */
-CPLErr Jim::GDALRead(const std::string filename, int band, int nXOff, int nYOff, int nXSize, int nYSize, int nBufXSize, int nBufYSize){
-  try{
-    if(nBufXSize<=0)
-      nBufXSize=nXOff;
-    if(nBufYSize<=0)
-      nBufYSize=nYOff;
-    reset();
-    IMAGE *mia=::GDALRead(const_cast<char*>(filename.c_str()), band, nXOff, nYOff, nXSize, nYSize, nBufXSize, nBufYSize);
-    setMIA(mia);
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    return(CE_Failure);
-  }
-  catch(...){
-    return(CE_Failure);
-  }
-}
+// /**
+//  *
+//  * @param refImg Use this as the reference image
+//  *
+//  * @return true if image is equal to reference image
+//  */
+// bool Jim::operator==(std::shared_ptr<Jim> refImg)
+// {
+//   bool isEqual=true;
+//   if(nrOfBand()!=refImg->nrOfBand())
+//     return(false);
+//   if(nrOfRow()!=refImg->nrOfRow())
+//     return(false);
+//   if(nrOfCol()!=refImg->nrOfCol())
+//     return(false);
+
+//   for(int iband=0;iband<nrOfBand();++iband){
+//     if(getDataType(iband)!=refImg->getDataType(iband)){
+//       isEqual=false;
+//       break;
+//     }
+//     IMAGE* refMIA=refImg->getMIA(iband);
+//     IMAGE* thisMIA=this->getMIA(iband);
+//     if(::imequalp(thisMIA,refMIA)){
+//       isEqual=false;
+//       break;
+//     }
+//   }
+//   return(isEqual);
+// }
+// /**
+//  *
+//  * @param refImg Use this as the reference image
+//  *
+//  * @return true if image is equal to reference image
+//  */
+// bool Jim::operator==(Jim& refImg)
+// {
+//   bool isEqual=true;
+//   if(nrOfBand()!=refImg.nrOfBand())
+//     return(false);
+//   if(nrOfRow()!=refImg.nrOfRow())
+//     return(false);
+//   if(nrOfCol()!=refImg.nrOfCol())
+//     return(false);
+
+//   for(int iband=0;iband<nrOfBand();++iband){
+//     if(getDataType(iband)!=refImg.getDataType(iband)){
+//       isEqual=false;
+//       break;
+//     }
+//     IMAGE* refMIA=refImg.getMIA(iband);
+//     IMAGE* thisMIA=this->getMIA(iband);
+//     if(::imequalp(thisMIA,refMIA)){
+//       isEqual=false;
+//       break;
+//     }
+//   }
+//   return(isEqual);
+// }
+
+
+// /**
+//  *
+//  *
+//  * @param filename raster dataset filename
+//  * @param band: index of band to read (0 for first band).
+//  * @param nXOff: The pixel offset to the top left corner of the region of the band to be accessed.
+//  *               This would be zero to start from the left side.
+//  * @param nYOff: The line offset to the top left corner of the region of the band to be accessed.
+//  *               This would be zero to start from the top.
+//  * @param nXSize: The width of the region of the band to be accessed in pixels.
+//  * @param nYSize: The height of the region of the band to be accessed in lines.
+//  * @param nBufXSize: the width of the buffer image into which the desired region is to be read,
+//                      or from which it is to be written.
+//  * @param nBufYSize: the height of the buffer image into which the desired region is to be read,
+//                      or from which it is to be written.
+//  * @return CE_None if successful or CE_Failure if failure
+//  */
+// CPLErr Jim::GDALRead(const std::string filename, int band, int nXOff, int nYOff, int nXSize, int nYSize, int nBufXSize, int nBufYSize){
+//   try{
+//     if(nBufXSize<=0)
+//       nBufXSize=nXOff;
+//     if(nBufYSize<=0)
+//       nBufYSize=nYOff;
+//     reset();
+//     IMAGE *mia=::GDALRead(const_cast<char*>(filename.c_str()), band, nXOff, nYOff, nXSize, nYSize, nBufXSize, nBufYSize);
+//     setMIA(mia);
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     return(CE_Failure);
+//   }
+//   catch(...){
+//     return(CE_Failure);
+//   }
+// }
 
 // double Jim::getVolume(int iband){
 //   double theVolume=0;

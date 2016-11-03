@@ -14,7 +14,6 @@ Change log
 #include <vector>
 #include <memory>
 extern "C" {
-#include "mialib/mialib.h"
 #include "mialib/mialib_swig.h"
 #include "mialib/op.h"
 }
@@ -152,42 +151,42 @@ namespace jiplib{
     };
     ///assignment operator
     Jim& operator=(Jim& imgSrc);
-    ///relational == operator
-    bool operator==(Jim& refImg);
-    ///relational == operator
-    bool operator==(std::shared_ptr<Jim> refImg);
-    ///test for equality (relational == operator)
-    bool isEqual(Jim& refImg){return(*this==(refImg));};
-    ///relational == operator
-    bool isEqual(std::shared_ptr<Jim> refImg){return(this->operator==(refImg));};
-    ///relational != operator
-    bool operator!=(Jim& refImg){ return !(this->operator==(refImg)); };
-    ///relational != operator
-    bool operator!=(std::shared_ptr<Jim> refImg){ return !(this->operator==(refImg)); };
-    /// perform bitwise shift for a particular band
-    CPLErr shift(int value, int iband=0);
-    /// perform arithmetic operation for a particular band
+    /* ///relational == operator */
+    /* bool operator==(Jim& refImg); */
+    /* ///relational == operator */
+    /* bool operator==(std::shared_ptr<Jim> refImg); */
+    /* ///test for equality (relational == operator) */
+    /* bool isEqual(Jim& refImg){return(*this==(refImg));}; */
+    /* ///relational == operator */
+    /* bool isEqual(std::shared_ptr<Jim> refImg){return(this->operator==(refImg));}; */
+    /* ///relational != operator */
+    /* bool operator!=(Jim& refImg){ return !(this->operator==(refImg)); }; */
+    /* ///relational != operator */
+    /* bool operator!=(std::shared_ptr<Jim> refImg){ return !(this->operator==(refImg)); }; */
+    /* /// perform bitwise shift for a particular band */
+    /* CPLErr shift(int value, int iband=0); */
+    /* /// perform arithmetic operation for a particular band */
     CPLErr arith(Jim& imgRaster, int theOperation, int band=0);
-    /* CPLErr arith(std::shared_ptr<Jim> imgRaster, int theOperation, int band=0); */
-    /// perform arithmetic operation for a particular band (non-destructive version)
-    std::shared_ptr<jiplib::Jim> getArith(Jim& imgRaster, int theOperation, int iband=0);
-    std::shared_ptr<jiplib::Jim> getArith(std::shared_ptr<Jim> imgRaster, int theOperation, int iband=0){return(getArith(*imgRaster,theOperation,iband));};
-    /// perform arithmetic operation with a cst argument for a particular band
+    /* /\* CPLErr arith(std::shared_ptr<Jim> imgRaster, int theOperation, int band=0); *\/ */
+    /* /// perform arithmetic operation for a particular band (non-destructive version) */
+    /* std::shared_ptr<jiplib::Jim> getArith(Jim& imgRaster, int theOperation, int iband=0); */
+    /* std::shared_ptr<jiplib::Jim> getArith(std::shared_ptr<Jim> imgRaster, int theOperation, int iband=0){return(getArith(*imgRaster,theOperation,iband));}; */
+    /* /// perform arithmetic operation with a cst argument for a particular band */
     CPLErr arithcst(double dcst, int theOperation, int band=0);
-    /// perform arithmetic operation with a cst argument for a particular band (non-destructive version)
-    std::shared_ptr<jiplib::Jim> getArithcst(double dcst, int theOperation, int iband=0);
-    /// perform a morphological reconstruction by dilation for a particular band
-    CPLErr rdil(std::shared_ptr<Jim> mask, int graph, int flag, int band=0);
-    /// perform a morphological reconstruction by dilation for a particular band (non-destructive version)
-    std::shared_ptr<jiplib::Jim> getRdil(std::shared_ptr<Jim> mask, int graph, int flag, int iband=0);
-    /// perform a morphological reconstruction by erosion for a particular band
-    CPLErr rero(std::shared_ptr<Jim> mask, int graph, int flag, int band=0);
-    /// perform a morphological reconstruction by erosion for a particular band (non-destructive version)
-    std::shared_ptr<jiplib::Jim> getRero(std::shared_ptr<Jim> mask, int graph, int flag, int iband=0);
+    /* /// perform arithmetic operation with a cst argument for a particular band (non-destructive version) */
+    /* std::shared_ptr<jiplib::Jim> getArithcst(double dcst, int theOperation, int iband=0); */
+    /* /// perform a morphological reconstruction by dilation for a particular band */
+    /* CPLErr rdil(std::shared_ptr<Jim> mask, int graph, int flag, int band=0); */
+    /* /// perform a morphological reconstruction by dilation for a particular band (non-destructive version) */
+    /* std::shared_ptr<jiplib::Jim> getRdil(std::shared_ptr<Jim> mask, int graph, int flag, int iband=0); */
+    /* /// perform a morphological reconstruction by erosion for a particular band */
+    /* CPLErr rero(std::shared_ptr<Jim> mask, int graph, int flag, int band=0); */
+    /* /// perform a morphological reconstruction by erosion for a particular band (non-destructive version) */
+    /* std::shared_ptr<jiplib::Jim> getRero(std::shared_ptr<Jim> mask, int graph, int flag, int iband=0); */
     ///get volume (from mialib)
     double getVolume(int iband=0) {IMAGE *mia=getMIA(iband);volume(mia);return(mia->vol);};
-    ///read data from with reduced resolution
-    CPLErr GDALRead(std::string filename, int band, int nXOff, int nYOff, int nXSize, int nYSize, int nBufXSize=0, int nBufYSize=0);
+    /* ///read data from with reduced resolution */
+    /* CPLErr GDALRead(std::string filename, int band, int nXOff, int nYOff, int nXSize, int nYSize, int nBufXSize=0, int nBufYSize=0); */
 
     //in memory functions from ImgRaster using AppFactory
     ///filter Jim image and return filtered image as shared pointer
@@ -228,28 +227,37 @@ namespace jiplib{
     IMAGE* m_mia;
   };
 
-  class JimCollection : public ImgCollection{
+  class JimList : public ImgCollection{
   public:
+    JimList(){ImgCollection();};
     ///constructor using vector of images
-    JimCollection(const std::vector<std::shared_ptr<Jim> > &jimVector){
+    JimList(const std::vector<std::shared_ptr<Jim> > &jimVector){
       for(int ijim=0;ijim<jimVector.size();++ijim){
         pushImage(jimVector[ijim]);
       }
     }
+    ///push image to collection
+    void pushImage(const std::shared_ptr<Jim> imgRaster){
+      this->emplace_back(imgRaster);
+    };
+    ///get image from collection
+    const std::shared_ptr<Jim> getImage(int index){
+      return(std::dynamic_pointer_cast<Jim>(this->at(index)));
+    }
     ///composite image only for in memory
-    std::shared_ptr<Jim> composite(const app::AppFactory& app){
+    std::shared_ptr<Jim> composite(const app::AppFactory& app=app::AppFactory()){
       std::shared_ptr<Jim> imgWriter=Jim::createImg();
       ImgCollection::composite(*imgWriter, app);
       return(imgWriter);
     }
     ///crop image only for in memory
-    std::shared_ptr<Jim> crop(const app::AppFactory& app){
+    std::shared_ptr<Jim> crop(const app::AppFactory& app=app::AppFactory()){
       std::shared_ptr<Jim> imgWriter=Jim::createImg();
       ImgCollection::crop(*imgWriter, app);
       return(imgWriter);
     }
     ///stack all images in collection to multiband image (alias for crop)
-    std::shared_ptr<Jim> stack(const app::AppFactory& app){return(crop(app));};
+    std::shared_ptr<Jim> stack(const app::AppFactory& app=app::AppFactory()){return(crop(app));};
     ///create statistical profile from a collection
     std::shared_ptr<Jim> statProfile(const app::AppFactory& app){
       std::shared_ptr<Jim> imgWriter=Jim::createImg();
