@@ -165,6 +165,12 @@ namespace jiplib{
     /* bool operator!=(std::shared_ptr<Jim> refImg){ return !(this->operator==(refImg)); }; */
     /* /// perform bitwise shift for a particular band */
     /* CPLErr shift(int value, int iband=0); */
+    ///crop image only for in memory
+    std::shared_ptr<Jim> crop(const app::AppFactory& app=app::AppFactory()){
+      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      ImgRaster::crop(*imgWriter, app);
+      return(imgWriter);
+    }
     /* /// perform arithmetic operation for a particular band */
     CPLErr arith(Jim& imgRaster, int theOperation, int band=0);
     /* /\* CPLErr arith(std::shared_ptr<Jim> imgRaster, int theOperation, int band=0); *\/ */
