@@ -27,6 +27,8 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 
 %feature("autodoc", "2");
 
+%import "../../doc/xml/jiplib_doc.i"
+
 %module(docstring=DOCJIPLIB) jiplib
 
  //working

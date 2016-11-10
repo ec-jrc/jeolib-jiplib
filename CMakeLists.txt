@@ -12,13 +12,13 @@ cmake_minimum_required(VERSION 2.6.0)
 #cmake_minimum_required(VERSION 2.8)
 ###############################################################################
 
-# The project's name
+# The project's name and version
 project(jiplib)
 
 include(CTest)
 
-set (JIPLIB_VERSION_MAJOR 1)
-set (JIPLIB_VERSION_MINOR 0)
+set (JIPLIB_VERSION_MAJOR 0)
+set (JIPLIB_VERSION_MINOR 1)
 set (JIPLIB_VERSION_PATCH 0)
 
 set (PROJECT_BINARY_DIR bin)
@@ -140,11 +140,13 @@ add_test(test1 testCreateImg -o Testing/test1.tif -ns 1 -nl 1 -of GTiff -ot Byte
 set_tests_properties (test1
     PROPERTIES PASS_REGULAR_EXPRESSION "success")
 
-# Build libraries
+# Include directories
 ###############################################################################
 include_directories("${PROJECT_SOURCE_DIR}")
 include_directories("${CMAKE_SOURCE_DIR}")
+###############################################################################
 # Instruct CMake to inspect the following subfolders (with CMakeLists.txt in each subfolder)
+add_subdirectory ("${PROJECT_DOC_DIR}")
 
 set(JIPLIB_CC jim.cc)
 set(JIPLIB_H jim.h)
