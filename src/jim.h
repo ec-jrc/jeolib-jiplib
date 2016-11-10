@@ -15,6 +15,23 @@ Change log
 #include <memory>
 extern "C" {
 #include "mialib/mialib_swig.h"
+#include "mialib/mialib_convolve.h"
+#include "mialib/mialib_dem.h"
+#include "mialib/mialib_dist.h"
+#include "mialib/mialib_erodil.h"
+#include "mialib/mialib_format.h"
+#include "mialib/mialib_geodesy.h"
+#include "mialib/mialib_geometry.h"
+#include "mialib/mialib_hmt.h"
+#include "mialib/mialib_imem.h"
+#include "mialib/mialib_io.h"
+#include "mialib/mialib_label.h"
+#include "mialib/mialib_miscel.h"
+#include "mialib/mialib_opclo.h"
+#include "mialib/mialib_pointop.h"
+#include "mialib/mialib_proj.h"
+#include "mialib/mialib_segment.h"
+#include "mialib/mialib_stats.h"
 #include "mialib/op.h"
 }
 
