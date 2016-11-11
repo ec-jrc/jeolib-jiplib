@@ -190,6 +190,8 @@ namespace jiplib{
     }
     /* /// perform arithmetic operation for a particular band */
     CPLErr arith(Jim& imgRaster, int theOperation, int band=0);
+    CPLErr bitwise_op(Jim& imgRaster, int theOperation, int band=0);
+    CPLErr thresh(double , double, double, double, int band=0);
     /* /\* CPLErr arith(std::shared_ptr<Jim> imgRaster, int theOperation, int band=0); *\/ */
     /* /// perform arithmetic operation for a particular band (non-destructive version) */
     /* std::shared_ptr<jiplib::Jim> getArith(Jim& imgRaster, int theOperation, int iband=0); */
