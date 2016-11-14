@@ -6,6 +6,7 @@ Change log
 ***********************************************************************/
 #include "jim.h"
 
+
 using namespace jiplib;
 
 //test for swig binding with mialib
@@ -34,7 +35,7 @@ IMAGE* Jim::getMIA(int band){
   m_mia->nx=nrOfCol();
   m_mia->ny=nrOfRow();
   m_mia->nz=nrOfPlane();
-  m_mia->NByte=m_mia->nx*m_mia->ny*m_mia->nz*(GDALGetDataTypeSize(getDataType())>>3);//assumes image data type is not of bit type!!!
+  m_mia->NByte=m_mia->nx * m_mia->ny * m_mia->nz * (GDALGetDataTypeSize(getDataType())>>3);//assumes image data type is not of bit type!!!
   //todo: remove m_mia->vol and only rely on the getVolume function
   m_mia->vol=0;//use getVolume() function
   m_mia->lut=0;
@@ -74,7 +75,7 @@ CPLErr Jim::setMIA(int band){
       std::cout << "Warning: changing data type of multiband image, make sure to process all bands" << std::endl;
     }
     m_dataType=MIA2GDALDataType(m_mia->DataType);
-    m_data[band]=m_mia->p_im+band*nrOfRow()*nrOfCol()*(GDALGetDataTypeSize(getDataType())>>3);
+    m_data[band]=(unsigned char *)m_mia->p_im + band * nrOfRow() * nrOfCol() * (GDALGetDataTypeSize(getDataType())>>3);
     m_begin[band]=0;
     m_end[band]=m_begin[band]+getBlockSize();
   }
@@ -181,223 +182,230 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
 //   }
 // }
 
-CPLErr Jim::thresh(double d_gt1, double d_gt2, double d_gbg, double d_gfg, int iband){
-	 try{
-		 if(nrOfBand()<=iband){
-			 std::string errorString="Error: band number exceeds number of bands in input image";
-			 throw(errorString);
-		 }
-		IMAGE * im=this->getMIA(iband);
-		G_TYPE gt1;
-		G_TYPE gt2;
-		G_TYPE gbg;
-		G_TYPE gfg;
-		switch(getDataType()){
-		case(GDT_Byte):
-			gt1.uc_val=static_cast<unsigned char>(d_gt1);
-			gt2.uc_val=static_cast<unsigned char>(d_gt2);
-			gbg.uc_val=static_cast<unsigned char>(d_gbg);
-			gfg.uc_val=static_cast<unsigned char>(d_gfg);
-			break;
-		case(GDT_Int16):
-			gt1.s_val=static_cast<short int>(d_gt1);
-			gt2.s_val=static_cast<short int>(d_gt2);
-			gbg.s_val=static_cast<short int>(d_gbg);
-			gfg.s_val=static_cast<short int>(d_gfg);
-			break;
-		case(GDT_UInt16):
-			gt1.us_val=static_cast<unsigned short int>(d_gt1);
-			gt2.us_val=static_cast<unsigned short int>(d_gt2);
-			gbg.us_val=static_cast<unsigned short int>(d_gbg);
-			gfg.us_val=static_cast<unsigned short int>(d_gfg);
-			break;
-		case(GDT_Int32):
-			gt1.i32_val=static_cast<int>(d_gt1);
-			gt2.i32_val=static_cast<int>(d_gt2);
-			gbg.i32_val=static_cast<int>(d_gbg);
-			gfg.i32_val=static_cast<int>(d_gfg);
-			break;
-		case(GDT_UInt32):
-			gt1.u32_val=static_cast<unsigned int>(d_gt1);
-			gt2.u32_val=static_cast<unsigned int>(d_gt2);
-			gbg.u32_val=static_cast<unsigned int>(d_gbg);
-			gfg.u32_val=static_cast<unsigned int>(d_gfg);
-			break;
-		case(GDT_Float32):
-			gt1.f_val=static_cast<float>(d_gt1);
-			gt2.f_val=static_cast<float>(d_gt2);
-			gbg.f_val=static_cast<float>(d_gbg);
-			gfg.f_val=static_cast<float>(d_gfg);
-			break;
-		case(GDT_Float64):
-			gt1.d_val=static_cast<double>(d_gt1);
-			gt2.d_val=static_cast<double>(d_gt2);
-			gbg.d_val=static_cast<double>(d_gbg);
-			gfg.d_val=static_cast<double>(d_gfg);
-			break;
-		default:
-			std::string errorString="Error: data type not supported";
-			throw(errorString);
-			break;
-		}
-		if(::thresh(im, gt1, gt2, gbg, gfg) == NO_ERROR){
-			this->setMIA(iband);
-			return(CE_None);
-		}
-		else{
-			this->setMIA(iband);
-			std::string errorString="Error: arith function in MIA failed";
-			throw(errorString);
-		}
-	}
-    	catch(std::string errorString){
-    		std::cerr << errorString << std::endl;
-    		return(CE_Failure);
-    	}
-    	catch(...){
-    		return(CE_Failure);
-    	}
-    }
+// CPLErr Jim::thresh(double d_gt1, double d_gt2, double d_gbg, double d_gfg, int iband){
+// 	 try{
+// 		 if(nrOfBand()<=iband){
+// 			 std::string errorString="Error: band number exceeds number of bands in input image";
+// 			 throw(errorString);
+// 		 }
+// 		IMAGE * im=this->getMIA(iband);
+// 		G_TYPE gt1;
+// 		G_TYPE gt2;
+// 		G_TYPE gbg;
+// 		G_TYPE gfg;
+// 		switch(getDataType()){
+// 		case(GDT_Byte):
+// 			gt1.uc_val=static_cast<unsigned char>(d_gt1);
+// 			gt2.uc_val=static_cast<unsigned char>(d_gt2);
+// 			gbg.uc_val=static_cast<unsigned char>(d_gbg);
+// 			gfg.uc_val=static_cast<unsigned char>(d_gfg);
+// 			break;
+// 		case(GDT_Int16):
+// 			gt1.s_val=static_cast<short int>(d_gt1);
+// 			gt2.s_val=static_cast<short int>(d_gt2);
+// 			gbg.s_val=static_cast<short int>(d_gbg);
+// 			gfg.s_val=static_cast<short int>(d_gfg);
+// 			break;
+// 		case(GDT_UInt16):
+// 			gt1.us_val=static_cast<unsigned short int>(d_gt1);
+// 			gt2.us_val=static_cast<unsigned short int>(d_gt2);
+// 			gbg.us_val=static_cast<unsigned short int>(d_gbg);
+// 			gfg.us_val=static_cast<unsigned short int>(d_gfg);
+// 			break;
+// 		case(GDT_Int32):
+// 			gt1.i32_val=static_cast<int>(d_gt1);
+// 			gt2.i32_val=static_cast<int>(d_gt2);
+// 			gbg.i32_val=static_cast<int>(d_gbg);
+// 			gfg.i32_val=static_cast<int>(d_gfg);
+// 			break;
+// 		case(GDT_UInt32):
+// 			gt1.u32_val=static_cast<unsigned int>(d_gt1);
+// 			gt2.u32_val=static_cast<unsigned int>(d_gt2);
+// 			gbg.u32_val=static_cast<unsigned int>(d_gbg);
+// 			gfg.u32_val=static_cast<unsigned int>(d_gfg);
+// 			break;
+// 		case(GDT_Float32):
+// 			gt1.f_val=static_cast<float>(d_gt1);
+// 			gt2.f_val=static_cast<float>(d_gt2);
+// 			gbg.f_val=static_cast<float>(d_gbg);
+// 			gfg.f_val=static_cast<float>(d_gfg);
+// 			break;
+// 		case(GDT_Float64):
+// 			gt1.d_val=static_cast<double>(d_gt1);
+// 			gt2.d_val=static_cast<double>(d_gt2);
+// 			gbg.d_val=static_cast<double>(d_gbg);
+// 			gfg.d_val=static_cast<double>(d_gfg);
+// 			break;
+// 		default:
+// 			std::string errorString="Error: data type not supported";
+// 			throw(errorString);
+// 			break;
+// 		}
+// 		if(::thresh(im, gt1, gt2, gbg, gfg) == NO_ERROR){
+// 			this->setMIA(iband);
+// 			return(CE_None);
+// 		}
+// 		else{
+// 			this->setMIA(iband);
+// 			std::string errorString="Error: arith function in MIA failed";
+// 			throw(errorString);
+// 		}
+// 	}
+//     	catch(std::string errorString){
+//     		std::cerr << errorString << std::endl;
+//     		return(CE_Failure);
+//     	}
+//     	catch(...){
+//     		return(CE_Failure);
+//     	}
+//     }
 
 
-CPLErr Jim::bitwise_op(Jim& imRaster_im2, int op, int iband){
-  try{
-    if(nrOfBand()<=iband){
-      std::string errorString="Error: band number exceeds number of bands in input image";
-      throw(errorString);
-    }
-    if(imRaster_im2.nrOfBand()<=iband){
-      std::string errorString="Error: band number exceeds number of bands in input image";
-      throw(errorString);
-    }
-    IMAGE * im1=this->getMIA(iband);
-    IMAGE * im2=imRaster_im2.getMIA(iband);
-    if(::bitwise_op(im1, im2, op) == NO_ERROR){
-      this->setMIA(iband);
-      imRaster_im2.setMIA(iband);
-      return(CE_None);
-    }
-    else{
-      this->setMIA(iband);
-      imRaster_im2.setMIA(iband);
-      std::string errorString="Error: arith function in MIA failed";
-      throw(errorString);
-    }
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    return(CE_Failure);
-  }
-  catch(...){
-    return(CE_Failure);
-  }
-}
-/**
- *
- *
- * @param imgRaster is operand
- * @param theOperation the operation to be performed
- * @param iband is the band for which the function needs to be performed (default 0 is first band)
- *
- * @return CE_None if successful
- */
-// CPLErr Jim::arith(std::shared_ptr<Jim> imgRaster, int theOperation, int iband){
-CPLErr Jim::arith(Jim& imgRaster, int theOperation, int iband){
-  try{
-    if(imgRaster.nrOfBand()<=iband){
-      std::string errorString="Error: band number exceeds number of bands in input image";
-      throw(errorString);
-    }
-    if(nrOfBand()<=iband){
-      std::string errorString="Error: band number exceeds number of bands in input image";
-      throw(errorString);
-    }
-    IMAGE* mia1=this->getMIA(iband);
-    IMAGE* mia2=imgRaster.getMIA(iband);
-    if(::arith(mia1, mia2, theOperation) == NO_ERROR){
-      this->setMIA(iband);
-      imgRaster.setMIA(iband);
-      return(CE_None);
-    }
-    else{
-      this->setMIA(iband);
-      imgRaster.setMIA(iband);
-      std::string errorString="Error: arith function in MIA failed";
-      throw(errorString);
-    }
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    return(CE_Failure);
-  }
-  catch(...){
-    return(CE_Failure);
-  }
-}
+// CPLErr Jim::bitwise_op(Jim& imRaster_im2, int op, int iband){
+//   try{
+//     if(nrOfBand()<=iband){
+//       std::string errorString="Error: band number exceeds number of bands in input image";
+//       throw(errorString);
+//     }
+//     if(imRaster_im2.nrOfBand()<=iband){
+//       std::string errorString="Error: band number exceeds number of bands in input image";
+//       throw(errorString);
+//     }
+//     IMAGE * im1=this->getMIA(iband);
+//     IMAGE * im2=imRaster_im2.getMIA(iband);
+//     if(::bitwise_op(im1, im2, op) == NO_ERROR){
+//       this->setMIA(iband);
+//       imRaster_im2.setMIA(iband);
+//       return(CE_None);
+//     }
+//     else{
+//       this->setMIA(iband);
+//       imRaster_im2.setMIA(iband);
+//       std::string errorString="Error: arith function in MIA failed";
+//       throw(errorString);
+//     }
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     return(CE_Failure);
+//   }
+//   catch(...){
+//     return(CE_Failure);
+//   }
+// }
+// /**
+//  *
+//  *
+//  * @param imgRaster is operand
+//  * @param theOperation the operation to be performed
+//  * @param iband is the band for which the function needs to be performed (default 0 is first band)
+//  *
+//  * @return CE_None if successful
+//  */
+// // CPLErr Jim::arith(std::shared_ptr<Jim> imgRaster, int theOperation, int iband){
+// CPLErr Jim::arith(Jim& imgRaster, int theOperation, int iband){
+//   try{
+//     if(imgRaster.nrOfBand()<=iband){
+//       std::string errorString="Error: band number exceeds number of bands in input image";
+//       throw(errorString);
+//     }
+//     if(nrOfBand()<=iband){
+//       std::string errorString="Error: band number exceeds number of bands in input image";
+//       throw(errorString);
+//     }
+//     IMAGE* mia1=this->getMIA(iband);
+//     IMAGE* mia2=imgRaster.getMIA(iband);
+//     if(::arith(mia1, mia2, theOperation) == NO_ERROR){
+//       this->setMIA(iband);
+//       imgRaster.setMIA(iband);
+//       return(CE_None);
+//     }
+//     else{
+//       this->setMIA(iband);
+//       imgRaster.setMIA(iband);
+//       std::string errorString="Error: arith function in MIA failed";
+//       throw(errorString);
+//     }
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     return(CE_Failure);
+//   }
+//   catch(...){
+//     return(CE_Failure);
+//   }
+// }
 
-/**
- *
- *
- * @param imgRaster is operand
- * @param theOperation the operation to be performed
- * @param iband is the band for which the function needs to be performed (default 0 is first band)
- *
- * @return CE_None if successful
- */
-CPLErr Jim::arithcst(double dcst, int theOperation, int iband){
-  try{
-    if(nrOfBand()<=iband){
-      std::string errorString="Error: band number exceeds number of bands in input image";
-      throw(errorString);
-    }
-    G_TYPE gt;
-    IMAGE* mia1=this->getMIA(iband);
-    switch(getDataType()){
-    case(GDT_Byte):
-      gt.uc_val=static_cast<unsigned char>(dcst);
-      break;
-    case(GDT_Int16):
-      gt.us_val=static_cast<short>(dcst);
-      break;
-    case(GDT_UInt16):
-      gt.s_val=static_cast<unsigned short>(dcst);
-      break;
-    case(GDT_Int32):
-      gt.i32_val=static_cast<int>(dcst);
-      break;
-    case(GDT_UInt32):
-      gt.u32_val=static_cast<unsigned int>(dcst);
-      break;
-    case(GDT_Float32):
-      gt.f_val=static_cast<float>(dcst);
-      break;
-    case(GDT_Float64):
-      gt.d_val=static_cast<double>(dcst);
-      break;
-    default:
-      std::string errorString="Error: data type not supported";
-      throw(errorString);
-      break;
-    }
-    if(::arithcst(mia1, gt, theOperation) == NO_ERROR){
-      this->setMIA(iband);
-      return(CE_None);
-    }
-    else{
-      std::string errorString="Error: arithcst function in MIA failed";
-      throw(errorString);
-    }
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    this->setMIA(iband);
-    return(CE_Failure);
-  }
-  catch(...){
-    this->setMIA(iband);
-    return(CE_Failure);
-  }
-}
+// /**
+//  *
+//  *
+//  * @param imgRaster is operand
+//  * @param theOperation the operation to be performed
+//  * @param iband is the band for which the function needs to be performed (default 0 is first band)
+//  *
+//  * @return CE_None if successful
+//  */
+// CPLErr Jim::arithcst(double dcst, int theOperation, int iband){
+//   try{
+//     if(nrOfBand()<=iband){
+//       std::string errorString="Error: band number exceeds number of bands in input image";
+//       throw(errorString);
+//     }
+//     G_TYPE gt;
+//     IMAGE* mia1=this->getMIA(iband);
+//     switch(getDataType()){
+//     case(GDT_Byte):
+//       gt.uc_val=static_cast<unsigned char>(dcst);
+//       break;
+//     case(GDT_Int16):
+//       gt.us_val=static_cast<short>(dcst);
+//       break;
+//     case(GDT_UInt16):
+//       gt.s_val=static_cast<unsigned short>(dcst);
+//       break;
+//     case(GDT_Int32):
+//       gt.i32_val=static_cast<int>(dcst);
+//       break;
+//     case(GDT_UInt32):
+//       gt.u32_val=static_cast<unsigned int>(dcst);
+//       break;
+//     case(GDT_Float32):
+//       gt.f_val=static_cast<float>(dcst);
+//       break;
+//     case(GDT_Float64):
+//       gt.d_val=static_cast<double>(dcst);
+//       break;
+//     default:
+//       std::string errorString="Error: data type not supported";
+//       throw(errorString);
+//       break;
+//     }
+//     if(::arithcst(mia1, gt, theOperation) == NO_ERROR){
+//       this->setMIA(iband);
+//       return(CE_None);
+//     }
+//     else{
+//       std::string errorString="Error: arithcst function in MIA failed";
+//       throw(errorString);
+//     }
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     this->setMIA(iband);
+//     return(CE_Failure);
+//   }
+//   catch(...){
+//     this->setMIA(iband);
+//     return(CE_Failure);
+//   }
+// }
+
+
+
+#include "fun2method.cc"
+
+
+
 
 // /**
 //  *

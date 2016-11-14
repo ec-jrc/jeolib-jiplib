@@ -21,6 +21,9 @@ set (JIPLIB_VERSION_MAJOR 1)
 set (JIPLIB_VERSION_MINOR 0)
 set (JIPLIB_VERSION_PATCH 0)
 
+set(CLASSIF 0 CACHE STRING "set a variable that can be used in jim.cc")
+set(ODOITHIN 0 CACHE STRING "set a variable that can be used in jim.cc")
+
 set (PROJECT_BINARY_DIR bin)
 set (PROJECT_LIBRARY_DIR lib)
 set (PROJECT_INCLUDE_DIR include/jiplib)

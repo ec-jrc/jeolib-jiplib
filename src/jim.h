@@ -14,6 +14,7 @@ Change log
 #include <vector>
 #include <memory>
 extern "C" {
+#include "config.h"
 #include "mialib/mialib_swig.h"
 #include "mialib/mialib_convolve.h"
 #include "mialib/mialib_dem.h"
@@ -189,15 +190,131 @@ namespace jiplib{
       return(imgWriter);
     }
     /* /// perform arithmetic operation for a particular band */
-    CPLErr arith(Jim& imgRaster, int theOperation, int band=0);
-    CPLErr bitwise_op(Jim& imgRaster, int theOperation, int band=0);
-    CPLErr thresh(double , double, double, double, int band=0);
+    /* CPLErr arith(Jim& imgRaster, int theOperation, int band=0); */
+    /* CPLErr bitwise_op(Jim& imgRaster, int theOperation, int band=0); */
+
+    //#include "fun2method.h"
+
+    // include here all methods from mialib functions by inserting fun2method.h
+
+
+CPLErr azimuth(Jim& imRaster_iy, int iband=0);
+CPLErr mapori(int  ox, int  oy, int iband=0);
+CPLErr dir(int  graph, int iband=0);
+CPLErr cboutlet(Jim& imRaster_d8, int iband=0);
+CPLErr cbconfluence(Jim& imRaster_d8, int iband=0);
+CPLErr strahler(int iband=0);
+CPLErr FlatIGeodAFAB(Jim& imRaster_im, int  graph, int iband=0);
+CPLErr dst2d4(int iband=0);
+CPLErr dst2dchamfer(int iband=0);
+CPLErr chamfer2d(int  type, int iband=0);
+CPLErr oiiz(int iband=0);
+CPLErr geodist(Jim& imRaster_im_r, int  graph, int iband=0);
+CPLErr linero(int  dx, int  dy, int  n, int  line_type, int iband=0);
+CPLErr lindil(int  dx, int  dy, int  n, int  line_type, int iband=0);
+CPLErr herkpldil(int  dx, int  dy, int  k, int  o, int  t, int iband=0);
+CPLErr herkplero(int  dx, int  dy, int  k, int  o, int  t, int iband=0);
+CPLErr linerank(int  dx, int  dy, int  k, int  rank, int  o, int iband=0);
+CPLErr to_uchar(int iband=0);
+CPLErr dbltofloat(int iband=0);
+CPLErr uint32_to_float(int iband=0);
+CPLErr swap(int iband=0);
+CPLErr rdil(Jim& imRaster_mask, int  graph, int  flag, int iband=0);
+CPLErr rero(Jim& imRaster_mask, int  graph, int  flag, int iband=0);
+CPLErr rerodilp(Jim& imRaster_mask, int  graph, int  flag, int  version, int iband=0);
+CPLErr complete(Jim& imRaster_im_rmin, int  graph, int iband=0);
+CPLErr sqtgpla(Jim& imRaster_im_r, int  graph, int iband=0);
+CPLErr sqtg(Jim& imRaster_im_r, int  graph, int iband=0);
+CPLErr framebox(int * box, double d_gval, int iband=0);
+CPLErr addframebox(int * box, double d_gval, int iband=0);
+CPLErr subframebox(int * box, int iband=0);
+CPLErr dumpxyz(int  x, int  y, int  z, int  dx, int  dy, int iband=0);
+CPLErr imputop(Jim& imRaster_im2, int  x, int  y, int  z, int  op, int iband=0);
+CPLErr imputcompose(Jim& imRaster_imlbl, Jim& imRaster_im2, int  x, int  y, int  z, int  val, int iband=0);
+CPLErr szcompat(Jim& imRaster_im2, int iband=0);
+CPLErr szgeocompat(Jim& imRaster_im2, int iband=0);
+CPLErr plotline(int  x1, int  y1, int  x2, int  y2, int  val, int iband=0);
+CPLErr ovlmatrix(Jim& imRaster_maxg_array, char * odir, int iband=0);
+CPLErr skeleton(int iband=0);
+CPLErr bprune(int  occa, int  graph, int iband=0);
+CPLErr oiskeleton(Jim& imRaster_imanchor, int iband=0);
+CPLErr oiask(Jim& imRaster_imanchor, int iband=0);
+CPLErr binODthin_noqueue(int  stype, int  atype, Jim& imRaster_imanchor, int iband=0);
+CPLErr binODthin_FIFO(int  stype, int  atype, Jim& imRaster_imanchor, int iband=0);
+CPLErr binOIthin_noqueue(int  stype, int  atype, Jim& imRaster_imanchor, int iband=0);
+CPLErr binOIthin_FIFO(int  stype, int  atype, Jim& imRaster_imanchor, int iband=0);
+CPLErr iminfo(int iband=0);
+CPLErr copy_lut(Jim& imRaster_im2, int iband=0);
+CPLErr create_lut(int iband=0);
+CPLErr setpixval(unsigned long  offset, double d_g, int iband=0);
+CPLErr write_ColorMap_tiff(char * fn, int iband=0);
+CPLErr write_tiff(char * fn, int iband=0);
+CPLErr writeTiffOneStripPerLine(char * fn, char * desc, int iband=0);
+CPLErr writeGeoTiffOneStripPerLine(char * fn, int  PCSCode, double  xoff, double  yoff, double  scale, unsigned short  RasterType, int  nodata_flag, int  nodata_val, int  metadata_flag, char * metadata_str, int iband=0);
+CPLErr label(Jim& imRaster_im2, int  ox, int  oy, int  oz, int iband=0);
+CPLErr labelpixngb(Jim& imRaster_im2, int  ox, int  oy, int  oz, int iband=0);
+CPLErr labelplat(Jim& imRaster_im2, int  ox, int  oy, int  oz, int iband=0);
+CPLErr seededlabelplat(Jim& imRaster_im2, Jim& imRaster_im3, int  ox, int  oy, int  oz, int iband=0);
+CPLErr seededplat(Jim& imRaster_im2, Jim& imRaster_im3, int  ox, int  oy, int  oz, int iband=0);
+CPLErr labelpix(int iband=0);
+CPLErr resolveLabels(Jim& imRaster_imlut, Jim& imRaster_imlutback, int  graph, int iband=0);
+CPLErr gorder(Jim& imRaster_g, int  n, int iband=0);
+CPLErr propagate(Jim& imRaster_dst, IMAGE ** imap, int  nc, int  graph, int iband=0);
+CPLErr set_regions(Jim& imRaster_ival, int  indic, int iband=0);
+CPLErr setregionsgraph(Jim& imRaster_ival, int  indic, int  graph, int iband=0);
+CPLErr tessel_surface(int iband=0);
+CPLErr relabel(Jim& imRaster_ilbl2, Jim& imRaster_iarea2, int iband=0);
+CPLErr bitwise_op(Jim& imRaster_im2, int  op, int iband=0);
+CPLErr negation(int iband=0);
+CPLErr arith(Jim& imRaster_im2, int  op, int iband=0);
+CPLErr arithcst(double d_gt, int  op, int iband=0);
+CPLErr imabs(int iband=0);
+CPLErr imsqrt(int iband=0);
+CPLErr imlog(int iband=0);
+CPLErr imatan(int iband=0);
+CPLErr imcos(int iband=0);
+CPLErr imacos(int iband=0);
+CPLErr imsin(int iband=0);
+CPLErr imasin(int iband=0);
+CPLErr thresh(double d_gt1, double d_gt2, double d_gbg, double d_gfg, int iband=0);
+CPLErr setlevel(double d_gt1, double d_gt2, double d_gval, int iband=0);
+CPLErr modulo(int  val, int iband=0);
+CPLErr complement(int iband=0);
+CPLErr power2p(int iband=0);
+CPLErr blank(double d_gval, int iband=0);
+CPLErr shift(int  val, int iband=0);
+CPLErr setrange(double d_gt1, double d_gt2, int iband=0);
+CPLErr FindPixWithVal(double d_gval, unsigned long int * ofs, int iband=0);
+CPLErr wsfah(Jim& imRaster_imr, int  graph, int  maxfl, int iband=0);
+CPLErr skelfah(Jim& imRaster_imr, Jim& imRaster_imdir, int  graph, int  maxfl, int iband=0);
+CPLErr skelfah2(Jim& imRaster_impskp, int  n, int  graph, int iband=0);
+CPLErr compose(Jim& imRaster_mask, Jim& imRaster_g, Jim& imRaster_lbl, int  graph, int iband=0);
+CPLErr oiws(int iband=0);
+CPLErr srg(Jim& imRaster_im2, Jim& imRaster_im3, int  ox, int  oy, int  oz, int iband=0);
+CPLErr IsPartitionEqual(Jim& imRaster_im2, int * result, int iband=0);
+CPLErr IsPartitionFiner(Jim& imRaster_im2, int  graph, unsigned long int * res, int iband=0);
+CPLErr getfirstmaxpos(unsigned long int * pos, int iband=0);
+CPLErr histcompress(int iband=0);
+CPLErr lookup(Jim& imRaster_imlut, int iband=0);
+CPLErr lookuptypematch(Jim& imRaster_imlut, int iband=0);
+CPLErr volume(int iband=0);
+CPLErr dirmax(int  dir, int iband=0);
+CPLErr imequalp(Jim& imRaster_im2, int iband=0);
+CPLErr getmax(double * maxval, int iband=0);
+CPLErr getminmax(double * minval, double * maxval, int iband=0);
+CPLErr classstatsinfo(Jim& imRaster_imin, int iband=0);
+CPLErr clmindist(Jim& imRaster_imin, int  bklabel, int  mode, double  thr, int iband=0);
+CPLErr clparpip(Jim& imRaster_imin, int  bklabel, int  mode, double  mult, int iband=0);
+CPLErr clmaha(Jim& imRaster_imin, int  bklabel, int  mode, double  thr, int iband=0);
+CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int iband=0);
+
+
     /* /\* CPLErr arith(std::shared_ptr<Jim> imgRaster, int theOperation, int band=0); *\/ */
     /* /// perform arithmetic operation for a particular band (non-destructive version) */
     /* std::shared_ptr<jiplib::Jim> getArith(Jim& imgRaster, int theOperation, int iband=0); */
     /* std::shared_ptr<jiplib::Jim> getArith(std::shared_ptr<Jim> imgRaster, int theOperation, int iband=0){return(getArith(*imgRaster,theOperation,iband));}; */
     /* /// perform arithmetic operation with a cst argument for a particular band */
-    CPLErr arithcst(double dcst, int theOperation, int band=0);
+    //CPLErr arithcst(double dcst, int theOperation, int band=0);
     /* /// perform arithmetic operation with a cst argument for a particular band (non-destructive version) */
     /* std::shared_ptr<jiplib::Jim> getArithcst(double dcst, int theOperation, int iband=0); */
     /* /// perform a morphological reconstruction by dilation for a particular band */
@@ -209,7 +326,11 @@ namespace jiplib{
     /* /// perform a morphological reconstruction by erosion for a particular band (non-destructive version) */
     /* std::shared_ptr<jiplib::Jim> getRero(std::shared_ptr<Jim> mask, int graph, int flag, int iband=0); */
     ///get volume (from mialib)
-    double getVolume(int iband=0) {IMAGE *mia=getMIA(iband);volume(mia);return(mia->vol);};
+    double getVolume(int iband=0) {
+      IMAGE *mia=getMIA(iband);
+      //volume(mia);
+      return(mia->vol);
+    };
     /* ///read data from with reduced resolution */
     /* CPLErr GDALRead(std::string filename, int band, int nXOff, int nYOff, int nXSize, int nYSize, int nBufXSize=0, int nBufYSize=0); */
 
