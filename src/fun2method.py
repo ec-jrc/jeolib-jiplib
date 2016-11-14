@@ -2,7 +2,7 @@
 
 
 def fun2method(inputfile, outputfile_basename):
-    """converts MIALib C function declarations into JIPLib C++ methods (outputfile_basename.cc file) and C++ method declarations (outputfile_basename.h file)
+    """converts MIALib C function declarations into JIPLib C++ methods (outputfile_basename.cc file) and C++ method declarations (outputfile_basename.h file).  Currently only convert desctuctive functions, i.e., ERROR_TYPE functions, with IMAGE * as first argument (IMAGE ** not yet taken into account).
 
     :param inputfile: string for input file containing extern declarations
     :param outputfile_basename: string for output file basename (i.e. without extension)
@@ -72,18 +72,7 @@ def fun2method(inputfile, outputfile_basename):
             print separator
             print arg
             print arg[0]
-
-
-            # if idx==0: # first argument MUST be an image
-            #     if arg[0]!='IMAGE *':
-            #         print 'error'
-            #     else:
-            #         imDeclare.append(a.get("arguments")[0][0]+' '+a.get("arguments")[0][1]+'=this->getMIA(iband);')
-            #         cCall=a.get("arguments")[0][1]
-            # else:     
-                
-
-
+            
             if (arg[0]=='IMAGE *'):
                 methodDeclaration+=separator+'Jim& imRaster_'+arg[1]
                 imRasterArray.append('imRaster_'+arg[1])
@@ -98,13 +87,9 @@ def fun2method(inputfile, outputfile_basename):
             cCall+=cSeparator+arg[1]
             separator=', '
 
-
-
         fh.write(re.sub(r'Jim::','',methodDeclaration+separator+'int iband=0);\n'))
         
-
         methodDeclaration+=separator+'int iband)'
-
 
         f.write(methodDeclaration+'{')
         f.write('\n\t try{')
