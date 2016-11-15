@@ -1,7 +1,7 @@
 ###############################################################################
 #
 # CMake build scripts for JIPLIB
-# 
+#
 #
 # History
 # 2016/06/24 - Created by Pieter Kempeneers

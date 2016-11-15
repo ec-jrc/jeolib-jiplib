@@ -191,4 +191,6 @@ if __name__ == "__main__":
 
 
 # cat /home/soillpi/workstation/jip/mia//core/c/mialib_*.h | grep '^extern ERROR'  > toto
-# python fun2method.py  -i toto -o fun2method 
+# python fun2method.py  -i toto -o fun2method
+# to automatically insert content of fun2method in jim.h within placeholder //start insert from fun2method -> //end insert from fun2method
+# sed -i -ne '/\/\/start insert from fun2method/ {p; r fun2method.h' -e ':a; n; /\/\/end insert from fun2method/ {p; b}; ba}; p' jim.h

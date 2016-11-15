@@ -246,9 +246,7 @@ Some examples how to use pkcrop can be found \ref examples_pkcrop "here"
 
     //#include "fun2method.h"
 
-    // include here all methods from mialib functions by inserting fun2method.h
-
-
+    //start insert from fun2method
 CPLErr azimuth(Jim& imRaster_iy, int iband=0);
 CPLErr mapori(int  ox, int  oy, int iband=0);
 CPLErr dir(int  graph, int iband=0);
@@ -358,8 +356,8 @@ CPLErr clmindist(Jim& imRaster_imin, int  bklabel, int  mode, double  thr, int i
 CPLErr clparpip(Jim& imRaster_imin, int  bklabel, int  mode, double  mult, int iband=0);
 CPLErr clmaha(Jim& imRaster_imin, int  bklabel, int  mode, double  thr, int iband=0);
 CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int iband=0);
-
-
+//end insert from fun2method
+//
     /* /\* CPLErr arith(std::shared_ptr<Jim> imgRaster, int theOperation, int band=0); *\/ */
     /* /// perform arithmetic operation for a particular band (non-destructive version) */
     /* std::shared_ptr<jiplib::Jim> getArith(Jim& imgRaster, int theOperation, int iband=0); */
@@ -379,7 +377,7 @@ CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int i
     ///get volume (from mialib)
     double getVolume(int iband=0) {
       IMAGE *mia=getMIA(iband);
-      //volume(mia);
+      ::volume(mia);
       return(mia->vol);
     };
     /* ///read data from with reduced resolution */

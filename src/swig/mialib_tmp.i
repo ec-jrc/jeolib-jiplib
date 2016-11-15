@@ -31,6 +31,7 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
 %{
 /* Put header files here or function declarations like below */
 /* #include "mialib_swig.h" */
+#include <memory>
 #include "mialib/mialib_swig.h"
 #include "mialib/mialib_convolve.h"
 #include "mialib/mialib_dem.h"
@@ -73,7 +74,7 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
 %array_functions(double , doublep)
 
 
-// %nodefaultctor image;      // No default constructor 
+// %nodefaultctor image;      // No default constructor
 // %nodefaultdtor image;      // No default destructor
 
 
@@ -265,8 +266,6 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
     $1=tempMIA;
  }
 
-/* %typemap(out) IMAGE * (std::shared_ptr<jiplib::Jim> tempJim){ */
-/* %typemap(out) IMAGE * (jiplib::Jim *tempJim){ */
 %typemap(out) IMAGE * {
   std::cout << "we are in typemap(out) IMAGE*" << std::endl;
   void *argp2 = 0 ;
@@ -274,12 +273,6 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
   IMAGE *imp=(IMAGE *)$1;
   std::shared_ptr<jiplib::Jim> result=jiplib::Jim::createImg();
   result->setMIA(imp);
-  /* //test */
-  /* std::cout << result->nrOfPlane() << std::endl; */
-  /* std::cout << result->nrOfBand() << std::endl; */
-  /* //test */
-  /* std::cout << "after setMIA" << std::endl; */
-  /* iminfo(result->getMIA()); */
   PyObject* o=0;
   std::shared_ptr<  jiplib::Jim > *smartresult = result ? new std::shared_ptr<  jiplib::Jim >(result) : 0;
   o = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_jiplib__Jim_t, SWIG_POINTER_OWN | 0);
@@ -298,23 +291,48 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
   res2 = SWIG_ConvertPtr($input, &argp2, SWIGTYPE_p_std__shared_ptrT_jiplib__Jim_t,  0  | 0);
   IMAGE *imp=(IMAGE *)$1;
   (*(reinterpret_cast< std::shared_ptr< jiplib::Jim > * >(argp2)))->setMIA(imp);
-  //test
-  /* std::cout << "jim after function call:" << std::endl; */
-  /* (*(reinterpret_cast< std::shared_ptr< jiplib::Jim > * >(argp2)))->dumpimg(); */
-  /* $input.setMIA(imp); */
-  /* tempJim=jiplib::Jim::createImg(); */
-  /* tempJim->setMIA(imp); */
-  /* PyObject* o=0; */
-  /* argp2=SWIG_as_voidptr(&tempJim); */
-  /* o = SWIG_NewPointerObj(argp2, SWIGTYPE_p_std__shared_ptrT_jiplib__Jim_t, SWIG_POINTER_OWN |  0 ); */
-  /* if(o) */
-  /*   $result=o; */
-  /* else */
-  /*   SWIG_exception_fail(SWIG_ArgError(res2), "in method " "$symname"); */
  }
-/* %inline %{ */
-/*   extern std::shared_ptr<jiplib::Jim> pJim; */
-/*   %} */
+
+%typemap(in) (IMAGE **tempMIA, int nc){
+  std::cout << "we are in typemap(in) IMAGE**" << std::endl;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  res2 = SWIG_ConvertPtr($input, &argp2, SWIGTYPE_p_jiplib__JimList,  0  | 0);
+  /* res2 = SWIG_ConvertPtr($input, &argp2, SWIGTYPE_p_std__shared_ptrT_jiplib__Jim_t,  0  | 0); */
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method " "$symname");
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference , argument " "2"" of type '" "jiplib::JimList""'");
+  }
+  jiplib::JimList jimList= (*(reinterpret_cast< jiplib::JimList * >(argp2)));
+  $1 = (IMAGE **) malloc(jimList.size()*sizeof(IMAGE **));
+  $2 = jimList.size();
+  for (int i = 0; i < jimList.size(); i++)
+    $1[i]=(std::dynamic_pointer_cast< jiplib::Jim >(jimList[i]))->getMIA();
+ }
+
+/* %typemap(out) IMAGE **rotatecoor { */
+/*   std::cout << "we are in typemap(out) IMAGE** rotatecoor" << std::endl; */
+/*   void *argp2 = 0 ; */
+/*   int res2 = 0 ; */
+/*   IMAGE **imap=(IMAGE **)$1; */
+/*   int nc=2; */
+/*   jiplib::JimList result; */
+/*   for(int i=0;i<nc;++i){ */
+/*     //todo: how will smart pointer be garbage collected in Python (is there a need for smartresult)? */
+/*     std::shared_ptr<jiplib::Jim> jimImg=jiplib::Jim::createImg(); */
+/*     jimImg->setMIA(imap[i]); */
+/*     result.pushImage(jimImg); */
+/*   } */
+/*   PyObject* o=0; */
+/*   o = SWIG_NewPointerObj(SWIG_as_voidptr(&result), SWIGTYPE_p_jiplib__JimList, SWIG_POINTER_OWN | 0); */
+/*   if(o) */
+/*     $result=o; */
+/*   else */
+/*     SWIG_exception_fail(SWIG_ArgError(res2), "in method " "$symname"); */
+/*   free(imap); */
+/*  } */
 
 // These are the headers with the declarations that will be warped
 // It needs to be inserted before the extend declaration (but after the typemaps)

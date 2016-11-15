@@ -31,23 +31,6 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 
 %module(docstring=DOCJIPLIB) jiplib
 
- //working
-/* %typemap(in) app::AppFactory& { */
-/*    std::cout << "we are in typemap AppFactory" << std::endl; */
-/*    void *argp2 = 0 ; */
-/*    /\* $1=new app::AppFactory(); *\/ */
-/*    int res2 = 0 ; */
-/*    res2 = SWIG_ConvertPtr($input, &argp2, SWIGTYPE_p_app__AppFactory,  0  | 0); */
-/*    if (!SWIG_IsOK(res2)) { */
-/*      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Derived_printKeyValues" "', argument " "2"" of type '" "app::AppFactory const &""'"); */
-/*    } */
-/*    if (!argp2) { */
-/*      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Derived_printKeyValues" "', argument " "2"" of type '" "app::AppFactory const &""'"); */
-/*    } */
-/*    $1 = reinterpret_cast< app::AppFactory * >(argp2); */
-/*    $1->showOptions(); */
-/*    } */
-
  // Instantiate templates for vector
  /* %template(ByteVector) std::vector<char>; */
  /* %template(Int16Vector) std::vector<short>; */
@@ -68,35 +51,6 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 %apply double &INOUT{ double &min };
 %apply double &INOUT{ double &max };
 %apply Float64Vector &INOUT{ std::vector<double>& };
-
-/* %typemap(argout) std::vector<double>& histvector{ */
-/*   size_t dim=temp$argnum.size(); */
-/*   PyObject *list = PyList_New(dim); */
-/*   for (size_t i = 0; i < dim; ++i) */
-/*     PyList_SetItem(list, i, PyFloat_FromDouble(temp$argnum[i])); */
-/*   $result=list; */
-/*  } */
-
-/* %typemap(in) const std::vector<double>& (std::vector<double> temp){ */
-/*   if(PyList_Check($input)){ */
-/*     /\* $1=new std::vector<double>(PyList_Size($input)); *\/ */
-/*     Py_ssize_t ppos=0; */
-/*     for(Py_ssize_t i=0;i<PyList_Size($input);++i){ */
-/*       PyObject *rValue; */
-/*       rValue=PyList_GetItem($input,i); */
-/*       temp.push_back(PyFloat_AsDouble(rValue)); */
-/*       /\* $1->at(i)=PyFloat_AsDouble(rValue); *\/ */
-/*     } */
-/*     $1=temp */
-/*   } else { */
-/*     SWIG_exception(SWIG_TypeError, "PyList expected"); */
-/*   } */
-/*  } */
-
-/* %typemap(freearg)  (const std::vector<double>&){ */
-/*   if ($1) free($1); */
-/*  } */
-
 
 %typemap(in) app::AppFactory& (app::AppFactory tempFactory){
   std::cout << "we are in typemap AppFactory" << std::endl;
@@ -143,11 +97,6 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
   }
  }
 
-//free in case $1=new app::AppFactory() is used above
-/* %typemap(freearg)  (app::AppFactory&){ */
-/*   if ($1) free($1); */
-/*  } */
-
 /* !!! from: http://svn.salilab.org/imp/branches/1.0/kernel/pyext/IMP_streams.i */
 /* to allow overloading and select the appropriate typemap when a Python object is provided */
 %typemap(typecheck) (app::AppFactory&) = PyObject *;
@@ -163,7 +112,7 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 %rename(filter2d_shift) filter2d::shift;
 
 %{
-/* #include <memory> */
+#include <memory>
 #include "config.h"
 #include "imageclasses/ImgRaster.h"
 #include "imageclasses/ImgReaderOgr.h"
@@ -189,21 +138,3 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 
 enum CPLErr {CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4};
 enum GDALDataType {GDT_Unknown = 0, GDT_Byte = 1, GDT_UInt16 = 2, GDT_Int16 = 3, GDT_UInt32 = 4, GDT_Int32 = 5, GDT_Float32 = 6, GDT_Float64 = 7, GDT_CInt16 = 8, GDT_CInt32 = 9, GDT_CFloat32 = 10, GDT_CFloat64 = 11, GDT_TypeCount = 12};
-
-//from :  http://stackoverflow.com/questions/39436632/wrap-a-function-that-takes-a-struct-of-optional-arguments-using-kwargs
-
-/* %typemap(in) jiplib::Jim& { */
-/*   std::cout << "we are in typemap AppFactory" << std::endl; */
-/*   void *argp2 = 0 ; */
-/*   int res2 = 0 ; */
-/*   res2 = SWIG_ConvertPtr($input, &argp2, SWIGTYPE_p_std__shared_ptrT_jiplib__Jim_,  0  | 0); */
-/*   if (!SWIG_IsOK(res2)) { */
-/*     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Derived_printKeyValues" "', argument " "2"" of type '" "jiplib::Jim&""'"); */
-/*   } */
-/*   if (!argp2) { */
-/*     SWIG_exception_fail(SWIG_ValueError, "invalid null reference , argument " "2"" of type '" "jiplib::Jim&""'"); */
-/*   } */
-/*   $1 = reinterpret_cast< jiplib::Jim* >(argp2); */
-
-/*   $1=*() */
-/*     } */
