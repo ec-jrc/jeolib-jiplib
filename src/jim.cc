@@ -4,16 +4,10 @@ History
 2016/06/24 - Created by Pieter Kempeneers
 Change log
 ***********************************************************************/
+#include "config.h"
 #include "jim.h"
 
 using namespace jiplib;
-
-//test for swig binding with mialib
-// std::shared_ptr<Jim> pJim=Jim::createImg();
-// //test
-// void Jim::open(int ncol, int nrow, int nband, int dataType){
-//   ImgRaster::open(ncol,nrow,nband,static_cast<GDALDataType>(dataType));
-// }
 
 /**
  *

@@ -27,12 +27,12 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 
 %feature("autodoc", "2");
 
-%import "../../doc/xml/jiplib_doc.i"
+%import "jiplib_doc.i"
 
 %module(docstring=DOCJIPLIB) jiplib
 
  //working
-/* %typemap(in) const app::AppFactory& { */
+/* %typemap(in) app::AppFactory& { */
 /*    std::cout << "we are in typemap AppFactory" << std::endl; */
 /*    void *argp2 = 0 ; */
 /*    /\* $1=new app::AppFactory(); *\/ */
@@ -98,7 +98,7 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 /*  } */
 
 
-%typemap(in) const app::AppFactory& (app::AppFactory tempFactory){
+%typemap(in) app::AppFactory& (app::AppFactory tempFactory){
   std::cout << "we are in typemap AppFactory" << std::endl;
   if(PyDict_Check($input)){
     PyObject *pKey, *pValue;
@@ -116,15 +116,26 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
             theValue=PyString_AsString(rValue);
           else
             theValue=PyString_AsString(PyObject_Repr(rValue));
-          $1->pushOption(theKey,theValue);
+          $1->pushLongOption(theKey,theValue);
         }
         continue;
       }
-      else if(PyString_Check(pValue))
+      else if(PyString_Check(pValue)){
         theValue=PyString_AsString(pValue);
-      else
+        $1->pushLongOption(theKey,theValue);
+      }
+      else if(PyBool_Check(pValue)){
+        if(pValue==Py_True){
+          if(theKey=="help")
+            $1->pushLongOption("dict");
+          else
+            $1->pushLongOption(theKey);
+        }
+      }
+      else{
         theValue=PyString_AsString(PyObject_Repr(pValue));
-      $1->pushOption(theKey,theValue);
+        $1->pushLongOption(theKey,theValue);
+      }
     }
     $1->showOptions();
   } else {
@@ -133,14 +144,14 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
  }
 
 //free in case $1=new app::AppFactory() is used above
-/* %typemap(freearg)  (const app::AppFactory&){ */
+/* %typemap(freearg)  (app::AppFactory&){ */
 /*   if ($1) free($1); */
 /*  } */
 
 /* !!! from: http://svn.salilab.org/imp/branches/1.0/kernel/pyext/IMP_streams.i */
 /* to allow overloading and select the appropriate typemap when a Python object is provided */
-%typemap(typecheck) (const app::AppFactory&) = PyObject *;
-/* %typemap(typecheck) (const app::AppFactory&) = PyDict *; */
+%typemap(typecheck) (app::AppFactory&) = PyObject *;
+/* %typemap(typecheck) (app::AppFactory&) = PyDict *; */
 
 %typemap(typecheck) (const app:AppFactory& app) {
   $1 = PyDict_Check($input) ? 1 : 0;

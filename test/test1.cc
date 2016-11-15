@@ -59,7 +59,7 @@ Optionpk<string>  input_opt("i", "input", "Input image file(s). If input contain
   app::AppFactory app(argc,argv);
   // // app.setOption("dx","500");
   // // app.setOption("dy","500");
-  
+
   filter2d::Filter2d filter;
   ImgCollection inputCollection;
   try{
