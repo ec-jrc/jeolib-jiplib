@@ -8,31 +8,59 @@
 # Change log
 #
 ###############################################################################
-find_package (Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
-include_directories (${TEST_SOURCE_DIR}/src
-                     ${Boost_INCLUDE_DIRS}
-                     )
-add_definitions (-DBOOST_TEST_DYN_LINK)
+# find_package (Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
+# include_directories (${TEST_SOURCE_DIR}/src
+#                      ${Boost_INCLUDE_DIRS}
+#                      )
+# add_definitions (-DBOOST_TEST_DYN_LINK)
 
 set(TESTAPPS
-  test1
-  checkS2nodata
-  check2tif
+  testCreateImg
+  test2
   )
 
-set(JIPLIBS 
-  base
-  algorithms
-  imageClasses
-  ${GDAL_LIBRARIES}
+set(JIPLIBS
   ${JIPLIB_LIB_NAME}
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  ${PKTOOLS_LIBRARIES}
+  ${GSL_LIBRARIES}
   )
+# set(JIPLIBS
+#   base
+#   algorithms
+#   imageClasses
+#   ${GDAL_LIBRARIES}
+#   ${JIPLIB_LIB_NAME}
+#   ${Boost_FILESYSTEM_LIBRARY}
+#   ${Boost_SYSTEM_LIBRARY}
+#   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+#   )
 
 foreach(TESTAPP ${TESTAPPS})
-  add_executable(${TESTAPP} ${TESTAPP}.cc)
+  add_executable(${TESTAPP} ${CMAKE_CURRENT_SOURCE_DIR}/${TESTAPP}.cc)
   target_link_libraries(${TESTAPP} ${JIPLIBS})
 endforeach()
+
+# Build executables
+
+# add_executable(testCreateImg ${PROJECT_TEST_DIR}/testCreateImg.cc)
+# add_executable(test2 ${PROJECT_TEST_DIR}/test2.cc)
+# target_link_libraries( testCreateImg
+#   ${JIPLIB_LIB_NAME}
+#   ${PKTOOLS_LIBRARIES}
+#   ${GSL_LIBRARIES}
+#   )
+# target_link_libraries( test2
+#   ${JIPLIB_LIB_NAME}
+#   ${PKTOOLS_LIBRARIES}
+#   ${GSL_LIBRARIES}
+#   )
+
+
+########## CTEST ############
+add_test(test1 ${CMAKE_CURRENT_BINARY_DIR}/testCreateImg -o ../Testing/test1.tif --ncol 1 --nrow 1 -of GTiff -ot Byte -seed 100 -mean 0 -sigma 100)
+add_test(test2 ${CMAKE_CURRENT_BINARY_DIR}/test2 -o ../Testing/test2.tif --ncol 100 --nrow 100 -of GTiff -ot Byte -seed 100 -mean 0 -sigma 100)
+set_tests_properties (test1
+  PROPERTIES PASS_REGULAR_EXPRESSION "success")
+set_tests_properties (test2
+    PROPERTIES PASS_REGULAR_EXPRESSION "success")
 

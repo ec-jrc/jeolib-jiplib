@@ -128,21 +128,6 @@ include_directories("${PROJECT_BINARY_DIR}")
 # Name of C++ library
 set(JIPLIB_LIB_NAME jiplib-${JIPLIB_VERSION_MAJOR}.${JIPLIB_VERSION_MINOR}.${JIPLIB_VERSION_PATCH})
 
-# Build executables
-
-add_executable(testCreateImg ${PROJECT_TEST_DIR}/testCreateImg.cc)
-target_link_libraries( testCreateImg
-  ${JIPLIB_LIB_NAME}
-  ${PKTOOLS_LIBRARIES}
-  ${GSL_LIBRARIES}
-  )
-
-
-########## CTEST ############
-add_test(test1 testCreateImg -o Testing/test1.tif -ns 1 -nl 1 -of GTiff -ot Byte -seed 100 -mean 0 -sigma 100)
-set_tests_properties (test1
-    PROPERTIES PASS_REGULAR_EXPRESSION "success")
-
 # Include directories
 ###############################################################################
 include_directories("${PROJECT_SOURCE_DIR}")
@@ -150,6 +135,7 @@ include_directories("${CMAKE_SOURCE_DIR}")
 ###############################################################################
 # Instruct CMake to inspect the following subfolders (with CMakeLists.txt in each subfolder)
 add_subdirectory ("${PROJECT_DOC_DIR}")
+add_subdirectory ("${PROJECT_TEST_DIR}")
 
 set(JIPLIB_CC jim.cc)
 set(JIPLIB_H jim.h)

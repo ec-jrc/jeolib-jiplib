@@ -24,13 +24,12 @@ int main(int argc, char *argv[])
   memory_opt.setHide(1);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
+  app::AppFactory app(argc,argv);
   try{
-    doProcess=output_opt.retrieveOption(argc,argv);
-    oformat_opt.retrieveOption(argc,argv);
-    option_opt.retrieveOption(argc,argv);
-    memory_opt.retrieveOption(argc,argv);
-
-    app::AppFactory app(argc,argv);
+    doProcess=output_opt.retrieveOption(app);
+    oformat_opt.retrieveOption(app);
+    option_opt.retrieveOption(app);
+    memory_opt.retrieveOption(app);
 
     if(doProcess&&output_opt.empty()){
       if(output_opt.empty()){
@@ -46,9 +45,9 @@ int main(int argc, char *argv[])
   }
   catch(string helpString){
     cerr << helpString << endl;
-    cout << "Usage: testCreateImg -ns samples -nl lines [-b bands] -o output" << endl;
+    cout << "Usage: testCreateImg --ncol columns --ncol rows [--nband bands] -o output" << endl;
     return(1);
   }
-  std::cout << "success" << std::endl;
+  std::cout << "test1: success" << std::endl;
   return(0);
 }
