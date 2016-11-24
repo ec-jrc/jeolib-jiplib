@@ -31,26 +31,17 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 
 %module(docstring=DOCJIPLIB) jiplib
 
- // Instantiate templates for vector
- /* %template(ByteVector) std::vector<char>; */
- /* %template(Int16Vector) std::vector<short>; */
- /* %template(UInt16Vector) std::vector<unsigned short>; */
- /* %template(Int32Vector) std::vector<int>; */
- /* %template(UInt32Vector) std::vector<unsigned int>; */
- /* %template(Float32Vector) std::vector<float>; */
- %template(Float64Vector) std::vector<double>;
- /* %template(StringVector) std::vector<std::string>; */
- 
-/* %template() std::vector<double>; */
- //check also http://www.swig.org/Doc3.0/Python.html#Python_nn28
-/* %typemap(in, numinputs=0) std::vector<double>& histvector (std::vector<double> temp){ */
-/*   $1=temp */
-/*  } */
+ /* %template(Float64Vector) std::vector<double>; */
 
-%apply int &INOUT{ int &nbin };
-%apply double &INOUT{ double &min };
-%apply double &INOUT{ double &max };
-%apply Float64Vector &INOUT{ std::vector<double>& };
+/* %apply int &INOUT{ int &nbin }; */
+/* %apply double &INOUT{ double &min }; */
+/* %apply double &INOUT{ double &max }; */
+/* %apply Float64Vector &INOUT{ std::vector<double>& }; */
+
+/* to resolve naming conflicts with mialib library*/
+%rename(filter2d_erode) filter2d::erode;
+%rename(filter2d_dilate) filter2d::dilate;
+%rename(filter2d_shift) filter2d::shift;
 
 %typemap(in) app::AppFactory& (app::AppFactory tempFactory){
   std::cout << "we are in typemap AppFactory" << std::endl;
@@ -102,14 +93,29 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 %typemap(typecheck) (app::AppFactory&) = PyObject *;
 /* %typemap(typecheck) (app::AppFactory&) = PyDict *; */
 
-%typemap(typecheck) (const app:AppFactory& app) {
+%typemap(typecheck) (const app::AppFactory& app) {
   $1 = PyDict_Check($input) ? 1 : 0;
  }
 
-/* to resolve naming conflicts with mialib library*/
-%rename(filter2d_erode) filter2d::erode;
-%rename(filter2d_dilate) filter2d::dilate;
-%rename(filter2d_shift) filter2d::shift;
+%typemap(typecheck) (app::AppFactory& app) {
+  $1 = PyDict_Check($input) ? 1 : 0;
+ }
+
+%{
+#include <memory>
+ %}
+
+//return the object itself for all functions returning CPLErr
+%typemap(out) CPLErr {
+  std::cout << "we are in typemap(out) CPLErr" << std::endl;
+  $result=$self;
+ }
+
+/* %typemap(out) CPLErr jiplib::Jim::setFile(app::AppFactory){ */
+/*   std::cout << "we are in typemap(out) CPLErr" << std::endl; */
+/*   $result=getShared(); */
+/*  } */
+
 
 %{
 #include <memory>

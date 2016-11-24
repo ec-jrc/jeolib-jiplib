@@ -106,8 +106,6 @@ namespace jiplib{
       return(pJim);
     }
 
-    ///reset all member variables
-    void reset(void){ImgRaster::reset();m_nplane=1;m_mia=0;};
     ///Get the number of planes of this dataset
     int nrOfPlane(void) const { return m_nplane;};
     /// convert single plane multiband image to single band image with multiple planes
@@ -187,55 +185,10 @@ namespace jiplib{
     /**
      * @param app application specific option arguments
      * @return output image
-The utility pkcrop can subset and stack raster images. In the spatial domain it can crop a bounding box from a larger image. The output bounding box is selected by setting the new corner coordinates using the options -ulx -uly -lrx -lry. Alternatively you can set the new image center (-x -y) and size. This can be done either in projected coordinates (using the options -nx -ny) or in image coordinates (using the options -ns -nl). You can also use a vector file to set the new bounding box (option -e). In the spectral domain, pkcrop allows you to select individual bands from one or more input image(s). Bands are stored in the same order as provided on the command line, using the option -b. Band numbers start with index 0 (indicating the first band). The default is to select all input bands. If more input images are provided, the bands are stacked into a multi-band image. If the bounding boxes or spatial resolution are not identical for all input images, you should explicitly set them via the options. The pkcrop utility is not suitable to mosaic or composite images. Consider the utility pkcomposite instead.
-
-\section pkcrop_options Options
- - use either `-short` or `--long` options (both `--long=value` and `--long value` are supported)
- - short option `-h` shows basic options only, long option `--help` shows all options
-|short|long|type|default|description|
-|-----|----|----|-------|-----------|
- | i      | input                | std::string |       |Input image file(s). If input contains multiple images, a multi-band output is created | 
- | o      | output               | std::string |       |Output image file | 
- | a_srs  | a_srs                | std::string |       |Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid | 
- | ulx    | ulx                  | double | 0     |Upper left x value bounding box | 
- | uly    | uly                  | double | 0     |Upper left y value bounding box | 
- | lrx    | lrx                  | double | 0     |Lower right x value bounding box | 
- | lry    | lry                  | double | 0     |Lower right y value bounding box | 
- | b      | band                 | unsigned int |       |band index to crop (leave empty to retain all bands) | 
- | sband  | startband            | unsigned int |      |Start band sequence number | 
- | eband  | endband              | unsigned int |      |End band sequence number   | 
- | as     | autoscale            | double |       |scale output to min and max, e.g., --autoscale 0 --autoscale 255 | 
- | ot     | otype                | std::string |       |Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image | 
- | of     | oformat              | std::string | GTiff |Output image format (see also gdal_translate)| 
- | ct     | ct                   | std::string |       |color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid) | 
- | dx     | dx                   | double |       |Output resolution in x (in meter) (empty: keep original resolution) | 
- | dy     | dy                   | double |       |Output resolution in y (in meter) (empty: keep original resolution) | 
- | r      | resampling-method    | std::string | near  |Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation). | 
- | e      | extent               | std::string |       |get boundary from extent from polygons in vector file | 
- | cut      | crop_to_cutline    | bool | false |Crop the extent of the target dataset to the extent of the cutline | 
- | eo       | eo                 | std::string |       |special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname |
- | m      | mask                 | std::string |       |Use the specified file as a validity mask (0 is nodata) | 
- | msknodata | msknodata            | float | 0     |Mask value not to consider for crop
- | mskband | mskband              | short | 0     |Mask band to read (0 indexed) | 
- | co     | co                   | std::string |       |Creation option for output file. Multiple options can be specified. | 
- | x      | x                    | double |       |x-coordinate of image center to crop (in meter) | 
- | y      | y                    | double |       |y-coordinate of image center to crop (in meter) | 
- | nx     | nx                   | double |       |image size in x to crop (in meter) | 
- | ny     | ny                   | double |       |image size in y to crop (in meter) | 
- | ns     | ns                   | int  |       |number of samples  to crop (in pixels) | 
- | nl     | nl                   | int  |       |number of lines to crop (in pixels) | 
- | scale  | scale                | double |       |output=scale*input+offset | 
- | off    | offset               | double |       |output=scale*input+offset | 
- | nodata | nodata               | float |       |Nodata value to put in image if out of bounds. | 
- | align  | align                | bool  |       |Align output bounding box to input image | 
- | mem    | mem                  | unsigned long int | 0 |Buffer size (in MB) to read image data blocks in memory | 
- | d      | description          | std::string |       |Set image description | 
-
-Examples
-========
-Some examples how to use pkcrop can be found \ref examples_pkcrop "here"
-**/
+     **/
     std::shared_ptr<Jim> crop(app::AppFactory& app){
+      /* ImgRaster::crop(*this,app); */
+      /* return(std::dynamic_pointer_cast<Jim>(shared_from_this())); */
       std::shared_ptr<Jim> imgWriter=Jim::createImg();
       ImgRaster::crop(*imgWriter, app);
       return(imgWriter);
@@ -244,6 +197,9 @@ Some examples how to use pkcrop can be found \ref examples_pkcrop "here"
     /* CPLErr arith(Jim& imgRaster, int theOperation, int band=0); */
     /* CPLErr bitwise_op(Jim& imgRaster, int theOperation, int band=0); */
 
+    std::shared_ptr<Jim> getShared(){
+      return(std::dynamic_pointer_cast<Jim>(shared_from_this()));
+    }
     //#include "fun2method.h"
 
     //start insert from fun2method
@@ -385,9 +341,134 @@ CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int i
 
     //in memory functions from ImgRaster using AppFactory
     ///filter Jim image and return filtered image as shared pointer
+    /**
+     * @param input  (type: std::string)Input image file(s). If input contains multiple images, a multi-band output is created
+     * @param output  (type: std::string)Output image file
+     * @param oformat  (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
+     * @param co  (type: std::string)Creation option for output file. Multiple options can be specified.
+     * @param a_srs  (type: std::string)Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
+     * @param mem  (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
+     * @param a_srs  (type: std::string)Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
+     * @param ulx  (type: double) (default: 0) Upper left x value bounding box
+     * @param uly  (type: double) (default: 0) Upper left y value bounding box
+     * @param lrx  (type: double) (default: 0) Lower right x value bounding box
+     * @param lry  (type: double) (default: 0) Lower right y value bounding box
+     * @param band  (type: unsigned int)band index to crop (leave empty to retain all bands)
+     * @param startband  (type: unsigned int)Start band sequence number
+     * @param endband  (type: unsigned int)End band sequence number
+     * @param autoscale  (type: double)scale output to min and max, e.g., --autoscale 0 --autoscale 255
+     * @param otype  (type: std::string)Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
+     * @param oformat  (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
+     * @param ct  (type: std::string)color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)
+     * @param dx  (type: double)Output resolution in x (in meter) (empty: keep original resolution)
+     * @param dy  (type: double)Output resolution in y (in meter) (empty: keep original resolution)
+     * @param resampling-method  (type: std::string) (default: near) Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).
+     * @param extent  (type: std::string)get boundary from extent from polygons in vector file
+     * @param crop_to_cutline  (type: bool) (default: 0) Crop the extent of the target dataset to the extent of the cutline.
+     * @param eo  (type: std::string)special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname
+     * @param mask  (type: std::string)Use the the specified file as a validity mask (0 is nodata).
+     * @param msknodata  (type: double) (default: 0) Mask value not to consider for crop.
+     * @param mskband  (type: unsigned int) (default: 0) Mask band to read (0 indexed)
+     * @param x  (type: double)x-coordinate of image center to crop (in meter)
+     * @param y  (type: double)y-coordinate of image center to crop (in meter)
+     * @param nx  (type: double)image size in x to crop (in meter)
+     * @param ny  (type: double)image size in y to crop (in meter)
+     * @param ns  (type: unsigned int)number of samples  to crop (in pixels)
+     * @param nl  (type: unsigned int)number of lines to crop (in pixels)
+     * @param scale  (type: double)output=scale*input+offset
+     * @param offset  (type: double)output=scale*input+offset
+     * @param nodata  (type: double)Nodata value to put in image if out of bounds.
+     * @param description  (type: std::string)Set image description
+     * @param align  (type: bool) (default: 0) Align output bounding box to input image
+     **/
     std::shared_ptr<Jim> filter(app::AppFactory& theApp){
       std::shared_ptr<Jim> imgWriter=createImg();
       ImgRaster::filter(*imgWriter,theApp);
+      return(imgWriter);
+    }
+    ///create statistical profile from a collection
+    /**
+     * @param input (type: std::string) input image
+     * @param reference (type: std::string) Reference (raster or vector) dataset
+     * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
+     * @param band (type: unsigned int) (default: 0) Input (reference) raster band. Optionally, you can define different bands for input and reference bands respectively: -b 1 -b 0.
+     * @param rmse (type: bool) (default: 0) Report root mean squared error
+     * @param reg (type: bool) (default: 0) Report linear regression (Input = c0+c1*Reference)
+     * @param confusion (type: bool) (default: 0) Create confusion matrix (to std out)
+     * @param class (type: std::string) List of class names.
+     * @param reclass (type: short) List of class values (use same order as in classname option).
+     * @param nodata (type: double) No data value(s) in input or reference dataset are ignored
+     * @param mask (type: std::string) Use the first band of the specified file as a validity mask. Nodata values can be set with the option msknodata.
+     * @param msknodata (type: double) (default: 0) Mask value(s) where image is invalid. Use negative value for valid data (example: use -t -1: if only -1 is valid value)
+     * @param output (type: std::string) Output dataset (optional)
+     * @param cmf (type: std::string) (default: ascii) Format for confusion matrix (ascii or latex)
+     * @param cmo (type: std::string) Output file for confusion matrix
+     * @param se95 (type: bool) (default: 0) Report standard error for 95 confidence interval
+     * @param ct (type: std::string) Color table in ASCII format having 5 columns: id R G B ALFA (0: transparent, 255: solid).
+     * @param commission (type: short) (default: 2) Value for commission errors: input label < reference label
+     * @return output image
+     **/
+    std::shared_ptr<Jim> diff(app::AppFactory& app){
+      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      ImgRaster::diff(*imgWriter, app);
+      return(imgWriter);
+    }
+    ///supervised classification using support vector machine (train with extractImg/extractOgr)
+    /**
+     * @param input (type: std::string) input image
+     * @param output (type: std::string) Output classification image
+     * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
+     * @param co (type: std::string) Creation option for output file. Multiple options can be specified.
+     * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
+     * @param training (type: std::string) Training vector file. A single vector file contains all training features (must be set as: b0, b1, b2,...) for all classes (class numbers identified by label option). Use multiple training files for bootstrap aggregation (alternative to the bag and bsize options, where a random subset is taken from a single training file)
+     * @param cv (type: unsigned short) (default: 0) N-fold cross validation mode
+     * @param cmf (type: std::string) (default: ascii) Format for confusion matrix (ascii or latex)
+     * @param tln (type: std::string) Training layer name(s)
+     * @param class (type: std::string) List of class names.
+     * @param reclass (type: short) List of class values (use same order as in class opt).
+     * @param f (type: std::string) (default: SQLite) Output ogr format for active training sample
+     * @param ct (type: std::string) Color table in ASCII format having 5 columns: id R G B ALFA (0: transparent, 255: solid)
+     * @param label (type: std::string) (default: label) Attribute name for class label in training vector file.
+     * @param prior (type: double) (default: 0) Prior probabilities for each class (e.g., -p 0.3 -p 0.3 -p 0.2 ). Used for input only (ignored for cross validation)
+     * @param gamma (type: float) (default: 1) Gamma in kernel function
+     * @param ccost (type: float) (default: 1000) The parameter C of C_SVC, epsilon_SVR, and nu_SVR
+     * @param extent (type: std::string) Only classify within extent from polygons in vector file
+     * @param eo (type: std::string) special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname
+     * @param mask (type: std::string) Only classify within specified mask. For raster mask, set nodata values with the option msknodata.
+     * @param msknodata (type: short) (default: 0) Mask value(s) not to consider for classification. Values will be taken over in classification image.
+     * @param nodata (type: unsigned short) (default: 0) Nodata value to put where image is masked as nodata
+     * @param band (type: unsigned int) Band index (starting from 0, either use band option or use start to end)
+     * @param startband (type: unsigned int) Start band sequence number
+     * @param endband (type: unsigned int) End band sequence number
+     * @param balance (type: unsigned int) (default: 0) Balance the input data to this number of samples for each class
+     * @param min (type: unsigned int) (default: 0) If number of training pixels is less then min, do not take this class into account (0: consider all classes)
+     * @param bag (type: unsigned short) (default: 1) Number of bootstrap aggregations
+     * @param bagsize (type: int) (default: 100) Percentage of features used from available training features for each bootstrap aggregation (one size for all classes, or a different size for each class respectively
+     * @param comb (type: unsigned short) (default: 0) How to combine bootstrap aggregation classifiers (0: sum rule, 1: product rule, 2: max rule). Also used to aggregate classes with rc option.
+     * @param classbag (type: std::string) Output for each individual bootstrap aggregation
+     * @param prob (type: std::string) Probability image.
+     * @param priorimg (type: std::string) (default: ) Prior probability image (multi-band img with band for each class
+     * @param offset (type: double) (default: 0) Offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]
+     * @param scale (type: double) (default: 0) Scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)
+     * @param svmtype (type: std::string) (default: C_SVC) Type of SVM (C_SVC, nu_SVC,one_class, epsilon_SVR, nu_SVR)
+     * @param kerneltype (type: std::string) (default: radial) Type of kernel function (linear,polynomial,radial,sigmoid)
+     * @param kd (type: unsigned short) (default: 3) Degree in kernel function
+     * @param coef0 (type: float) (default: 0) Coef0 in kernel function
+     * @param nu (type: float) (default: 0.5) The parameter nu of nu_SVC, one_class SVM, and nu_SVR
+     * @param eloss (type: float) (default: 0.1) The epsilon in loss function of epsilon_SVR
+     * @param cache (type: int) (default: 100) Cache memory size in MB
+     * @param etol (type: float) (default: 0.001) The tolerance of termination criterion
+     * @param shrink (type: bool) (default: 0) Whether to use the shrinking heuristics
+     * @param probest (type: bool) (default: 1) Whether to train a SVC or SVR model for probability estimates
+     * @param entropy (type: std::string) (default: ) Entropy image (measure for uncertainty of classifier output
+     * @param active (type: std::string) (default: ) Ogr output for active training sample.
+     * @param nactive (type: unsigned int) (default: 1) Number of active training points
+     * @param random (type: bool) (default: 1) Randomize training data for balancing and bagging
+     * @return output image
+     **/
+    std::shared_ptr<Jim> svm(app::AppFactory& app){
+      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      ImgRaster::svm(*imgWriter, app);
       return(imgWriter);
     }
     ///stretch Jim image and return stretched image as shared pointer
@@ -396,20 +477,10 @@ CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int i
       ImgRaster::stretch(*imgWriter, app);
       return(imgWriter);
     }
-    ///create statistical profile from a collection
-    std::shared_ptr<Jim> diff(app::AppFactory& app){
-      std::shared_ptr<Jim> imgWriter=Jim::createImg();
-      ImgRaster::diff(*imgWriter, app);
-      return(imgWriter);
-    }
-    ///supervised classification using support vector machine (train with extractImg/extractOgr)
-    std::shared_ptr<Jim> svm(app::AppFactory& app){
-      std::shared_ptr<Jim> imgWriter=Jim::createImg();
-      ImgRaster::svm(*imgWriter, app);
-      return(imgWriter);
-    }
 
   protected:
+    ///reset all member variables
+    void reset(void){ImgRaster::reset();m_nplane=1;m_mia=0;};
     ///number of planes in this dataset
     int m_nplane;
   private:
@@ -440,72 +511,192 @@ CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int i
       return(std::dynamic_pointer_cast<Jim>(this->at(index)));
     }
     ///composite image only for in memory
+    /**
+     * @param input (type: std::string) Input image file(s). If input contains multiple images, a multi-band output is created
+     * @param output (type: std::string) Output image file
+     * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
+     * @param co (type: std::string) Creation option for output file. Multiple options can be specified.
+     * @param scale (type: double) output=scale*input+offset
+     * @param offset (type: double) output=scale*input+offset
+     * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
+     * @param band (type: unsigned int) band index(es) to crop (leave empty if all bands must be retained)
+     * @param dx (type: double) Output resolution in x (in meter) (empty: keep original resolution)
+     * @param dy (type: double) Output resolution in y (in meter) (empty: keep original resolution)
+     * @param extent (type: std::string) get boundary from extent from polygons in vector file
+     * @param crop_to_cutline (type: bool) (default: 0) Crop the extent of the target dataset to the extent of the cutline.
+     * @param eo (type: std::string) special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname
+     * @param mask (type: std::string) Use the specified file as a validity mask.
+     * @param msknodata (type: float) (default: 0) Mask value not to consider for composite.
+     * @param mskband (type: unsigned int) (default: 0) Mask band to read (0 indexed)
+     * @param ulx (type: double) (default: 0) Upper left x value bounding box
+     * @param uly (type: double) (default: 0) Upper left y value bounding box
+     * @param lrx (type: double) (default: 0) Lower right x value bounding box
+     * @param lry (type: double) (default: 0) Lower right y value bounding box
+     * @param crule (type: std::string) (default: overwrite) Composite rule (overwrite, maxndvi, maxband, minband, mean, mode (only for byte images), median, sum, maxallbands, minallbands, stdev
+     * @param cband (type: unsigned int) (default: 0) band index used for the composite rule (e.g., for ndvi, use --cband=0 --cband=1 with 0 and 1 indices for red and nir band respectively
+     * @param srcnodata (type: double) invalid value(s) for input raster dataset
+     * @param bndnodata (type: unsigned int) (default: 0) Band(s) in input image to check if pixel is valid (used for srcnodata, min and max options)
+     * @param min (type: double) flag values smaller or equal to this value as invalid.
+     * @param max (type: double) flag values larger or equal to this value as invalid.
+     * @param dstnodata (type: double) (default: 0) nodata value to put in output raster dataset if not valid or out of bounds.
+     * @param resampling-method (type: std::string) (default: near) Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).
+     * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
+     * @param a_srs (type: std::string) Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
+     * @param file (type: short) (default: 0) write number of observations (1) or sequence nr of selected file (2) for each pixels as additional layer in composite
+     * @param weight (type: short) (default: 1) Weights (type: short) for the composite, use one weight for each input file in same order as input files are provided). Use value 1 for equal weights.
+     * @param class (type: short) (default: 0) classes for multi-band output image: each band represents the number of observations for one specific class. Use value 0 for no multi-band output image.
+     * @param ct (type: std::string) color table file with 5 columns: id R G B ALFA (0: transparent, 255: solid)
+     * @param description (type: std::string) Set image description
+     * @param align (type: bool) (default: 0) Align output bounding box to input image
+     * @return output image
+     **/
     std::shared_ptr<Jim> composite(app::AppFactory& app){
       std::shared_ptr<Jim> imgWriter=Jim::createImg();
       ImgCollection::composite(*imgWriter, app);
       return(imgWriter);
     }
     /**
-     * @param app application specific option arguments
+     * @param input (type: std::string) Input image file(s). If input contains multiple images, a multi-band output is created
+     * @param output (type: std::string) Output image file
+     * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
+     * @param co (type: std::string) Creation option for output file. Multiple options can be specified.
+     * @param a_srs (type: std::string) Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
+     * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
+     * @param a_srs (type: std::string) Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
+     * @param ulx (type: double) (default: 0) Upper left x value bounding box
+     * @param uly (type: double) (default: 0) Upper left y value bounding box
+     * @param lrx (type: double) (default: 0) Lower right x value bounding box
+     * @param lry (type: double) (default: 0) Lower right y value bounding box
+     * @param band (type: unsigned int) band index to crop (leave empty to retain all bands)
+     * @param startband (type: unsigned int) Start band sequence number
+     * @param endband (type: unsigned int) End band sequence number
+     * @param autoscale (type: double) scale output to min and max, e.g., --autoscale 0 --autoscale 255
+     * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
+     * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
+     * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)
+     * @param dx (type: double) Output resolution in x (in meter) (empty: keep original resolution)
+     * @param dy (type: double) Output resolution in y (in meter) (empty: keep original resolution)
+     * @param resampling-method (type: std::string) (default: near) Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).
+     * @param extent (type: std::string) get boundary from extent from polygons in vector file
+     * @param crop_to_cutline (type: bool) (default: 0) Crop the extent of the target dataset to the extent of the cutline.
+     * @param eo (type: std::string) special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname
+     * @param mask (type: std::string) Use the the specified file as a validity mask (0 is nodata).
+     * @param msknodata (type: double) (default: 0) Mask value not to consider for crop.
+     * @param mskband (type: unsigned int) (default: 0) Mask band to read (0 indexed)
+     * @param x (type: double) x-coordinate of image center to crop (in meter)
+     * @param y (type: double) y-coordinate of image center to crop (in meter)
+     * @param nx (type: double) image size in x to crop (in meter)
+     * @param ny (type: double) image size in y to crop (in meter)
+     * @param ns (type: unsigned int) number of samples  to crop (in pixels)
+     * @param nl (type: unsigned int) number of lines to crop (in pixels)
+     * @param scale (type: double) output=scale*input+offset
+     * @param offset (type: double) output=scale*input+offset
+     * @param nodata (type: double) Nodata value to put in image if out of bounds.
+     * @param description (type: std::string) Set image description
+     * @param align (type: bool) (default: 0) Align output bounding box to input image
      * @return output image
-The utility pkcrop can subset and stack raster images. In the spatial domain it can crop a bounding box from a larger image. The output bounding box is selected by setting the new corner coordinates using the options -ulx -uly -lrx -lry. Alternatively you can set the new image center (-x -y) and size. This can be done either in projected coordinates (using the options -nx -ny) or in image coordinates (using the options -ns -nl). You can also use a vector file to set the new bounding box (option -e). In the spectral domain, pkcrop allows you to select individual bands from one or more input image(s). Bands are stored in the same order as provided on the command line, using the option -b. Band numbers start with index 0 (indicating the first band). The default is to select all input bands. If more input images are provided, the bands are stacked into a multi-band image. If the bounding boxes or spatial resolution are not identical for all input images, you should explicitly set them via the options. The pkcrop utility is not suitable to mosaic or composite images. Consider the utility pkcomposite instead.
-
-\section pkcrop_options Options
- - use either `-short` or `--long` options (both `--long=value` and `--long value` are supported)
- - short option `-h` shows basic options only, long option `--help` shows all options
-|short|long|type|default|description|
-|-----|----|----|-------|-----------|
- | i      | input                | std::string |       |Input image file(s). If input contains multiple images, a multi-band output is created | 
- | o      | output               | std::string |       |Output image file | 
- | a_srs  | a_srs                | std::string |       |Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid | 
- | ulx    | ulx                  | double | 0     |Upper left x value bounding box | 
- | uly    | uly                  | double | 0     |Upper left y value bounding box | 
- | lrx    | lrx                  | double | 0     |Lower right x value bounding box | 
- | lry    | lry                  | double | 0     |Lower right y value bounding box | 
- | b      | band                 | unsigned int |       |band index to crop (leave empty to retain all bands) | 
- | sband  | startband            | unsigned int |      |Start band sequence number | 
- | eband  | endband              | unsigned int |      |End band sequence number   | 
- | as     | autoscale            | double |       |scale output to min and max, e.g., --autoscale 0 --autoscale 255 | 
- | ot     | otype                | std::string |       |Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image | 
- | of     | oformat              | std::string | GTiff |Output image format (see also gdal_translate)| 
- | ct     | ct                   | std::string |       |color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid) | 
- | dx     | dx                   | double |       |Output resolution in x (in meter) (empty: keep original resolution) | 
- | dy     | dy                   | double |       |Output resolution in y (in meter) (empty: keep original resolution) | 
- | r      | resampling-method    | std::string | near  |Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation). | 
- | e      | extent               | std::string |       |get boundary from extent from polygons in vector file | 
- | cut      | crop_to_cutline    | bool | false |Crop the extent of the target dataset to the extent of the cutline | 
- | eo       | eo                 | std::string |       |special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname |
- | m      | mask                 | std::string |       |Use the specified file as a validity mask (0 is nodata) | 
- | msknodata | msknodata            | float | 0     |Mask value not to consider for crop
- | mskband | mskband              | short | 0     |Mask band to read (0 indexed) | 
- | co     | co                   | std::string |       |Creation option for output file. Multiple options can be specified. | 
- | x      | x                    | double |       |x-coordinate of image center to crop (in meter) | 
- | y      | y                    | double |       |y-coordinate of image center to crop (in meter) | 
- | nx     | nx                   | double |       |image size in x to crop (in meter) | 
- | ny     | ny                   | double |       |image size in y to crop (in meter) | 
- | ns     | ns                   | int  |       |number of samples  to crop (in pixels) | 
- | nl     | nl                   | int  |       |number of lines to crop (in pixels) | 
- | scale  | scale                | double |       |output=scale*input+offset | 
- | off    | offset               | double |       |output=scale*input+offset | 
- | nodata | nodata               | float |       |Nodata value to put in image if out of bounds. | 
- | align  | align                | bool  |       |Align output bounding box to input image | 
- | mem    | mem                  | unsigned long int | 0 |Buffer size (in MB) to read image data blocks in memory | 
- | d      | description          | std::string |       |Set image description | 
-
-Examples
-========
-Some examples how to use pkcrop can be found \ref examples_pkcrop "here"
-**/
+     **/
     std::shared_ptr<Jim> crop(app::AppFactory& app){
       std::shared_ptr<Jim> imgWriter=Jim::createImg();
       ImgCollection::crop(*imgWriter, app);
       return(imgWriter);
     }
     ///stack all images in collection to multiband image (alias for crop)
+    /**
+     * @param input (type: std::string) Input image file(s). If input contains multiple images, a multi-band output is created
+     * @param output (type: std::string) Output image file
+     * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
+     * @param co (type: std::string) Creation option for output file. Multiple options can be specified.
+     * @param a_srs (type: std::string) Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
+     * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
+     * @param a_srs (type: std::string) Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
+     * @param ulx (type: double) (default: 0) Upper left x value bounding box
+     * @param uly (type: double) (default: 0) Upper left y value bounding box
+     * @param lrx (type: double) (default: 0) Lower right x value bounding box
+     * @param lry (type: double) (default: 0) Lower right y value bounding box
+     * @param band (type: unsigned int) band index to stack (leave empty to retain all bands)
+     * @param startband (type: unsigned int) Start band sequence number
+     * @param endband (type: unsigned int) End band sequence number
+     * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
+     * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
+     * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)
+     * @param dx (type: double) Output resolution in x (in meter) (empty: keep original resolution)
+     * @param dy (type: double) Output resolution in y (in meter) (empty: keep original resolution)
+     * @param resampling-method (type: std::string) (default: near) Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).
+     * @param extent (type: std::string) get boundary from extent from polygons in vector file
+     * @param crop_to_cutline (type: bool) (default: 0) Crop the extent of the target dataset to the extent of the cutline.
+     * @param eo (type: std::string) special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname
+     * @param mask (type: std::string) Use the the specified file as a validity mask (0 is nodata).
+     * @param msknodata (type: double) (default: 0) Mask value not to consider for crop.
+     * @param mskband (type: unsigned int) (default: 0) Mask band to read (0 indexed)
+     * @param x (type: double) x-coordinate of image center to crop (in meter)
+     * @param y (type: double) y-coordinate of image center to crop (in meter)
+     * @param nx (type: double) image size in x to crop (in meter)
+     * @param ny (type: double) image size in y to crop (in meter)
+     * @param ns (type: unsigned int) number of samples  to crop (in pixels)
+     * @param nl (type: unsigned int) number of lines to crop (in pixels)
+     * @param scale (type: double) output=scale*input+offset
+     * @param offset (type: double) output=scale*input+offset
+     * @param nodata (type: double) Nodata value to put in image if out of bounds.
+     * @param description (type: std::string) Set image description
+     * @param align (type: bool) (default: 0) Align output bounding box to input image
+     * @return output image
+     **/
     std::shared_ptr<Jim> stack(app::AppFactory& app){return(crop(app));};
     ///stack all images in collection to multiband image (alias for crop)
+    /**
+     * @param input (type: std::string) Input image file(s). If input contains multiple images, a multi-band output is created
+     * @param output (type: std::string) Output image file
+     * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
+     * @param co (type: std::string) Creation option for output file. Multiple options can be specified.
+     * @param a_srs (type: std::string) Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
+     * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
+     * @param a_srs (type: std::string) Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
+     * @param ulx (type: double) (default: 0) Upper left x value bounding box
+     * @param uly (type: double) (default: 0) Upper left y value bounding box
+     * @param lrx (type: double) (default: 0) Lower right x value bounding box
+     * @param lry (type: double) (default: 0) Lower right y value bounding box
+     * @param band (type: unsigned int) band index to stack (leave empty to retain all bands)
+     * @param startband (type: unsigned int) Start band sequence number
+     * @param endband (type: unsigned int) End band sequence number
+     * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
+     * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
+     * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)
+     * @param dx (type: double) Output resolution in x (in meter) (empty: keep original resolution)
+     * @param dy (type: double) Output resolution in y (in meter) (empty: keep original resolution)
+     * @param resampling-method (type: std::string) (default: near) Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).
+     * @param extent (type: std::string) get boundary from extent from polygons in vector file
+     * @param crop_to_cutline (type: bool) (default: 0) Crop the extent of the target dataset to the extent of the cutline.
+     * @param eo (type: std::string) special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname
+     * @param mask (type: std::string) Use the the specified file as a validity mask (0 is nodata).
+     * @param msknodata (type: double) (default: 0) Mask value not to consider for crop.
+     * @param mskband (type: unsigned int) (default: 0) Mask band to read (0 indexed)
+     * @param x (type: double) x-coordinate of image center to crop (in meter)
+     * @param y (type: double) y-coordinate of image center to crop (in meter)
+     * @param nx (type: double) image size in x to crop (in meter)
+     * @param ny (type: double) image size in y to crop (in meter)
+     * @param ns (type: unsigned int) number of samples  to crop (in pixels)
+     * @param nl (type: unsigned int) number of lines to crop (in pixels)
+     * @param scale (type: double) output=scale*input+offset
+     * @param offset (type: double) output=scale*input+offset
+     * @param nodata (type: double) Nodata value to put in image if out of bounds.
+     * @param description (type: std::string) Set image description
+     * @param align (type: bool) (default: 0) Align output bounding box to input image
+     * @return output image
+     **/
     std::shared_ptr<Jim> stack(){app::AppFactory app;return(crop(app));};
     ///create statistical profile from a collection
+    /**
+     * @param input (type: std::string) input image file
+     * @param output (type: std::string) Output image file
+     * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate)
+     * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
+     * @param function (type: std::string) Statistics function (mean, median, var, stdev, min, max, sum, mode (provide classes), ismin, ismax, proportion (provide classes), percentile, nvalid
+     * @param perc (type: double) Percentile value(s) used for rule percentile
+     * @param nodata (type: double) nodata value(s)
+     * @param otype (type: std::string) (default: GDT_Unknown) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
+     * @return output image
+     **/
     std::shared_ptr<Jim> statProfile(app::AppFactory& app){
       std::shared_ptr<Jim> imgWriter=Jim::createImg();
       ImgCollection::statProfile(*imgWriter, app);
