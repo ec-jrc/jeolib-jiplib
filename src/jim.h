@@ -80,7 +80,7 @@ namespace jiplib{
      *
      * @return shared pointer to new ImgRaster object alllowing polymorphism
      */
-    virtual std::shared_ptr<ImgRaster> clone() {
+    std::shared_ptr<Jim> clone() {
       std::shared_ptr<Jim> pJim=std::dynamic_pointer_cast<Jim>(cloneImpl());
       if(pJim)
         return(pJim);
@@ -91,20 +91,92 @@ namespace jiplib{
     }
     ///Create new shared pointer to Jim object
     /**
-     *
+     * @param input (type: std::string) input filename
+     * @param nodata (type: double) Nodata value to put in image if out of bounds.
+     * @param band (type: int) Bands to open, index starts from 0
+     * @param ulx (type: double) Upper left x value bounding box
+     * @param uly (type: double) Upper left y value bounding box
+     * @param lrx (type: double) Lower right x value bounding box
+     * @param lry (type: double) Lower right y value bounding box
+     * @param dx (type: double) Resolution in x
+     * @param dy (type: double) Resolution in y
+     * @param resample (type: std::string) (default: GRIORA_NearestNeighbour) resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)
+     * @param extent (type: std::string) get boundary from extent from polygons in vector file
+     * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
+     * @param ncol (type: int) Number of columns
+     * @param nrow (type: int) Number of rows
+     * @param nband (type: int) (default: 1) Number of bands
+     * @param otype (type: std::string) (default: Byte) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64})
+     * @param seed (type: unsigned long) (default: 0) seed value for random generator
+     * @param mean (type: double) (default: 0) Mean value for random generator
+     * @param sigma (type: double) (default: 0) Sigma value for random generator
+     * @param description (type: std::string) Set image description
+     * @param a_srs (type: std::string) Assign the spatial reference for the output file, e.g., psg:3035 to use European projection and force to European grid
      * @return shared pointer to new Jim object
-     */
-    static std::shared_ptr<Jim> createImg() {
-      return(std::make_shared<Jim>());
-    };
-    static std::shared_ptr<Jim> createImg(const std::shared_ptr<Jim> pSrc, bool copyData=true){
-      std::shared_ptr<Jim> pJim=std::make_shared<Jim>(*pSrc,copyData);
-      return(pJim);
-    }
+     **/
     static std::shared_ptr<Jim> createImg(app::AppFactory &theApp){
       std::shared_ptr<Jim> pJim=std::make_shared<Jim>(theApp);
       return(pJim);
     }
+    ///this is a testFunction
+    static void testFunction(){}
+    /* ///Create new shared pointer to Jim object */
+    /* /\** */
+    /*  * @param input (type: std::string) input filename */
+    /*  * @param nodata (type: double) Nodata value to put in image if out of bounds. */
+    /*  * @param band (type: int) Bands to open, index starts from 0 */
+    /*  * @param ulx (type: double) Upper left x value bounding box */
+    /*  * @param uly (type: double) Upper left y value bounding box */
+    /*  * @param lrx (type: double) Lower right x value bounding box */
+    /*  * @param lry (type: double) Lower right y value bounding box */
+    /*  * @param dx (type: double) Resolution in x */
+    /*  * @param dy (type: double) Resolution in y */
+    /*  * @param resample (type: std::string) (default: GRIORA_NearestNeighbour) resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a) */
+    /*  * @param extent (type: std::string) get boundary from extent from polygons in vector file */
+    /*  * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory */
+    /*  * @param ncol (type: int) Number of columns */
+    /*  * @param nrow (type: int) Number of rows */
+    /*  * @param nband (type: int) (default: 1) Number of bands */
+    /*  * @param otype (type: std::string) (default: Byte) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}) */
+    /*  * @param seed (type: unsigned long) (default: 0) seed value for random generator */
+    /*  * @param mean (type: double) (default: 0) Mean value for random generator */
+    /*  * @param sigma (type: double) (default: 0) Sigma value for random generator */
+    /*  * @param description (type: std::string) Set image description */
+    /*  * @param a_srs (type: std::string) Assign the spatial reference for the output file, e.g., psg:3035 to use European projection and force to European grid */
+    /*  * @return shared pointer to new Jim object */
+    /*  **\/ */
+    /* static std::shared_ptr<Jim> createImg() { */
+    /*   return(std::make_shared<Jim>()); */
+    /* }; */
+    /* ///Create new shared pointer to Jim object */
+    /* /\** */
+    /*  * @param input (type: std::string) input filename */
+    /*  * @param nodata (type: double) Nodata value to put in image if out of bounds. */
+    /*  * @param band (type: int) Bands to open, index starts from 0 */
+    /*  * @param ulx (type: double) Upper left x value bounding box */
+    /*  * @param uly (type: double) Upper left y value bounding box */
+    /*  * @param lrx (type: double) Lower right x value bounding box */
+    /*  * @param lry (type: double) Lower right y value bounding box */
+    /*  * @param dx (type: double) Resolution in x */
+    /*  * @param dy (type: double) Resolution in y */
+    /*  * @param resample (type: std::string) (default: GRIORA_NearestNeighbour) resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a) */
+    /*  * @param extent (type: std::string) get boundary from extent from polygons in vector file */
+    /*  * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory */
+    /*  * @param ncol (type: int) Number of columns */
+    /*  * @param nrow (type: int) Number of rows */
+    /*  * @param nband (type: int) (default: 1) Number of bands */
+    /*  * @param otype (type: std::string) (default: Byte) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}) */
+    /*  * @param seed (type: unsigned long) (default: 0) seed value for random generator */
+    /*  * @param mean (type: double) (default: 0) Mean value for random generator */
+    /*  * @param sigma (type: double) (default: 0) Sigma value for random generator */
+    /*  * @param description (type: std::string) Set image description */
+    /*  * @param a_srs (type: std::string) Assign the spatial reference for the output file, e.g., psg:3035 to use European projection and force to European grid */
+    /*  * @return shared pointer to new Jim object */
+    /*  **\/ */
+    /* static std::shared_ptr<Jim> createImg(const std::shared_ptr<Jim> pSrc, bool copyData=true){ */
+    /*   std::shared_ptr<Jim> pJim=std::make_shared<Jim>(*pSrc,copyData); */
+    /*   return(pJim); */
+    /* } */
 
     ///Get the number of planes of this dataset
     int nrOfPlane(void) const { return m_nplane;};
@@ -169,27 +241,66 @@ namespace jiplib{
     Jim& operator=(Jim& imgSrc);
     /* ///relational == operator */
     /* bool operator==(Jim& refImg); */
-    /* ///relational == operator */
-    /* bool operator==(std::shared_ptr<Jim> refImg); */
-    /* ///test for equality (relational == operator) */
+    ///relational == operator
+    bool operator==(std::shared_ptr<Jim> refImg);
+    ///test for equality (relational == operator)
     /* bool isEqual(Jim& refImg){return(*this==(refImg));}; */
-    /* ///relational == operator */
-    /* bool isEqual(std::shared_ptr<Jim> refImg){return(this->operator==(refImg));}; */
+    ///relational == operator
+    bool isEqual(std::shared_ptr<Jim> refImg){return(this->operator==(refImg));};
     /* ///relational != operator */
     /* bool operator!=(Jim& refImg){ return !(this->operator==(refImg)); }; */
     /* ///relational != operator */
     /* bool operator!=(std::shared_ptr<Jim> refImg){ return !(this->operator==(refImg)); }; */
     /* /// perform bitwise shift for a particular band */
     /* CPLErr shift(int value, int iband=0); */
+    /* CPLErr magnify(int value, int iband=0); */
     ///crop Jim image in memory returning Jim image
     /**
-     * @param app application specific option arguments
+     * @param input (type: std::string) Input image file(s). If input contains multiple images, a multi-band output is created
+     * @param output (type: std::string) Output image file
+     * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
+     * @param co (type: std::string) Creation option for output file. Multiple options can be specified.
+     * @param a_srs (type: std::string) Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
+     * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
+     * @param a_srs (type: std::string) Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
+     * @param ulx (type: double) (default: 0) Upper left x value bounding box
+     * @param uly (type: double) (default: 0) Upper left y value bounding box
+     * @param lrx (type: double) (default: 0) Lower right x value bounding box
+     * @param lry (type: double) (default: 0) Lower right y value bounding box
+     * @param band (type: unsigned int) band index to crop (leave empty to retain all bands)
+     * @param startband (type: unsigned int) Start band sequence number
+     * @param endband (type: unsigned int) End band sequence number
+     * @param autoscale (type: double) scale output to min and max, e.g., --autoscale 0 --autoscale 255
+     * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
+     * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
+     * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)
+     * @param dx (type: double) Output resolution in x (in meter) (empty: keep original resolution)
+     * @param dy (type: double) Output resolution in y (in meter) (empty: keep original resolution)
+     * @param resampling-method (type: std::string) (default: near) Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).
+     * @param extent (type: std::string) get boundary from extent from polygons in vector file
+     * @param crop_to_cutline (type: bool) (default: 0) Crop the extent of the target dataset to the extent of the cutline.
+     * @param eo (type: std::string) special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname
+     * @param mask (type: std::string) Use the the specified file as a validity mask (0 is nodata).
+     * @param msknodata (type: double) (default: 0) Mask value not to consider for crop.
+     * @param mskband (type: unsigned int) (default: 0) Mask band to read (0 indexed)
+     * @param x (type: double) x-coordinate of image center to crop (in meter)
+     * @param y (type: double) y-coordinate of image center to crop (in meter)
+     * @param nx (type: double) image size in x to crop (in meter)
+     * @param ny (type: double) image size in y to crop (in meter)
+     * @param ns (type: unsigned int) number of samples  to crop (in pixels)
+     * @param nl (type: unsigned int) number of lines to crop (in pixels)
+     * @param scale (type: double) output=scale*input+offset
+     * @param offset (type: double) output=scale*input+offset
+     * @param nodata (type: double) Nodata value to put in image if out of bounds.
+     * @param description (type: std::string) Set image description
+     * @param align (type: bool) (default: 0) Align output bounding box to input image
      * @return output image
      **/
     std::shared_ptr<Jim> crop(app::AppFactory& app){
       /* ImgRaster::crop(*this,app); */
       /* return(std::dynamic_pointer_cast<Jim>(shared_from_this())); */
-      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      /* std::shared_ptr<Jim> imgWriter=Jim::createImg(); */
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
       ImgRaster::crop(*imgWriter, app);
       return(imgWriter);
     }
@@ -382,7 +493,8 @@ CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int i
      * @param align  (type: bool) (default: 0) Align output bounding box to input image
      **/
     std::shared_ptr<Jim> filter(app::AppFactory& theApp){
-      std::shared_ptr<Jim> imgWriter=createImg();
+      /* std::shared_ptr<Jim> imgWriter=createImg(); */
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
       ImgRaster::filter(*imgWriter,theApp);
       return(imgWriter);
     }
@@ -409,7 +521,8 @@ CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int i
      * @return output image
      **/
     std::shared_ptr<Jim> diff(app::AppFactory& app){
-      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      /* std::shared_ptr<Jim> imgWriter=Jim::createImg(); */
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
       ImgRaster::diff(*imgWriter, app);
       return(imgWriter);
     }
@@ -467,16 +580,36 @@ CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int i
      * @return output image
      **/
     std::shared_ptr<Jim> svm(app::AppFactory& app){
-      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      /* std::shared_ptr<Jim> imgWriter=Jim::createImg(); */
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
       ImgRaster::svm(*imgWriter, app);
       return(imgWriter);
     }
     ///stretch Jim image and return stretched image as shared pointer
     std::shared_ptr<Jim> stretch(app::AppFactory& app){
-      std::shared_ptr<Jim> imgWriter=createImg();
+      /* std::shared_ptr<Jim> imgWriter=createImg(); */
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
       ImgRaster::stretch(*imgWriter, app);
       return(imgWriter);
     }
+    ///Apply thresholds: set to no data if not within thresholds t1 and t2
+    std::shared_ptr<Jim> setThreshold(double t1, double t2){
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
+      ImgRaster::setThreshold(*imgWriter,t1,t2);
+      return(imgWriter);
+    }
+    ///Apply thresholds: set to no data if not within thresholds t1 and t2, else set to value
+    std::shared_ptr<Jim> setThreshold(double t1, double t2, double value){
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
+      ImgRaster::setThreshold(*imgWriter,t1,t2,value);
+      return(imgWriter);
+    }
+    ///Check for difference with reference image
+    CPLErr diff(std::shared_ptr<Jim> refImage,app::AppFactory& app){
+      return(ImgRaster::diff(*refImage,app));
+    }
+    ///Clear all no data values, including the one in GDAL dataset if it is set
+    CPLErr clearNoData(int band=0){return(ImgRaster::clearNoData(band));}
 
   protected:
     ///reset all member variables
@@ -484,11 +617,11 @@ CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int i
     ///number of planes in this dataset
     int m_nplane;
   private:
-    virtual std::shared_ptr<ImgRaster> cloneImpl() {
+    std::shared_ptr<Jim> cloneImpl() {
       //test
       std::cout << "clone Jim object" << std::endl;
-      /* return std::make_shared<Jim>(*this,false); */
-      return(Jim::createImg());
+      return std::make_shared<Jim>(*this,true);
+      /* return(std::make_shared<Jim>()); */
     };
     IMAGE* m_mia;
   };
@@ -551,7 +684,8 @@ CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int i
      * @return output image
      **/
     std::shared_ptr<Jim> composite(app::AppFactory& app){
-      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      /* std::shared_ptr<Jim> imgWriter=Jim::createImg(); */
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
       ImgCollection::composite(*imgWriter, app);
       return(imgWriter);
     }
@@ -597,7 +731,8 @@ CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int i
      * @return output image
      **/
     std::shared_ptr<Jim> crop(app::AppFactory& app){
-      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      /* std::shared_ptr<Jim> imgWriter=Jim::createImg(); */
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
       ImgCollection::crop(*imgWriter, app);
       return(imgWriter);
     }
@@ -698,11 +833,12 @@ CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int i
      * @return output image
      **/
     std::shared_ptr<Jim> statProfile(app::AppFactory& app){
-      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      /* std::shared_ptr<Jim> imgWriter=Jim::createImg(); */
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
       ImgCollection::statProfile(*imgWriter, app);
       return(imgWriter);
     }
   };
 }
-
 #endif // _JIM_H_
+

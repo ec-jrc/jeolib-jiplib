@@ -74,11 +74,6 @@ Clone as new shared pointer to ImgRaster object
 
 shared pointer to new ImgRaster object alllowing polymorphism ";
 
-%feature("docstring")  jiplib::Jim::reset "void
-jiplib::Jim::reset(void)
-
-reset all member variables ";
-
 %feature("docstring")  jiplib::Jim::nrOfPlane "int
 jiplib::Jim::nrOfPlane(void) const
 
@@ -165,7 +160,107 @@ crop Jim image in memory returning Jim image
 Parameters:
 -----------
 
-app:  application specific option arguments
+input:  (type: std::string) Input image file(s). If input contains
+multiple images, a multi-band output is created
+
+output:  (type: std::string) Output image file
+
+oformat:  (type: std::string) (default: GTiff) Output image format
+(see also gdal_translate).
+
+co:  (type: std::string) Creation option for output file. Multiple
+options can be specified.
+
+a_srs:  (type: std::string) Override the spatial reference for the
+output file (leave blank to copy from input file, use epsg:3035 to use
+European projection and force to European grid
+
+mem:  (type: unsigned long) (default: 0) Buffer size (in MB) to read
+image data blocks in memory
+
+a_srs:  (type: std::string) Override the projection for the output
+file (leave blank to copy from input file, use epsg:3035 to use
+European projection and force to European grid
+
+ulx:  (type: double) (default: 0) Upper left x value bounding box
+
+uly:  (type: double) (default: 0) Upper left y value bounding box
+
+lrx:  (type: double) (default: 0) Lower right x value bounding box
+
+lry:  (type: double) (default: 0) Lower right y value bounding box
+
+band:  (type: unsigned int) band index to crop (leave empty to retain
+all bands)
+
+startband:  (type: unsigned int) Start band sequence number
+
+endband:  (type: unsigned int) End band sequence number
+
+autoscale:  (type: double) scale output to min and max, e.g.,autoscale
+0autoscale 255
+
+otype:  (type: std::string) Data type for output image
+({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}).
+Empty string: inherit type from input image
+
+oformat:  (type: std::string) (default: GTiff) Output image format
+(see also gdal_translate).
+
+ct:  (type: std::string) color table (file with 5 columns: id R G B
+ALFA (0: transparent, 255: solid)
+
+dx:  (type: double) Output resolution in x (in meter) (empty: keep
+original resolution)
+
+dy:  (type: double) Output resolution in y (in meter) (empty: keep
+original resolution)
+
+resampling-method:  (type: std::string) (default: near) Resampling
+method (near: nearest neighbor, bilinear: bi-linear interpolation).
+
+extent:  (type: std::string) get boundary from extent from polygons in
+vector file
+
+crop_to_cutline:  (type: bool) (default: 0) Crop the extent of the
+target dataset to the extent of the cutline.
+
+eo:  (type: std::string) special extent options controlling
+rasterization:
+ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo
+ATTRIBUTE=fieldname
+
+mask:  (type: std::string) Use the the specified file as a validity
+mask (0 is nodata).
+
+msknodata:  (type: double) (default: 0) Mask value not to consider for
+crop.
+
+mskband:  (type: unsigned int) (default: 0) Mask band to read (0
+indexed)
+
+x:  (type: double) x-coordinate of image center to crop (in meter)
+
+y:  (type: double) y-coordinate of image center to crop (in meter)
+
+nx:  (type: double) image size in x to crop (in meter)
+
+ny:  (type: double) image size in y to crop (in meter)
+
+ns:  (type: unsigned int) number of samples to crop (in pixels)
+
+nl:  (type: unsigned int) number of lines to crop (in pixels)
+
+scale:  (type: double) output=scale*input+offset
+
+offset:  (type: double) output=scale*input+offset
+
+nodata:  (type: double) Nodata value to put in image if out of bounds.
+
+description:  (type: std::string) Set image description
+
+align:  (type: bool) (default: 0) Align output bounding box to input
+image
 
 output image ";
 
@@ -1694,6 +1789,65 @@ bklabel, int mode, double thr, int iband=0) ";
 
 
 // File: jim_8h.xml
+%feature("docstring")  jiplib::createImg "std::shared_ptr<jiplib::Jim> createImg(app::AppFactory &app)
+
+Create new shared pointer to Jim object.
+
+Parameters:
+-----------
+
+input:  (type: std::string) input filename
+
+nodata:  (type: double) Nodata value to put in image if out of bounds.
+
+band:  (type: int) Bands to open, index starts from 0
+
+ulx:  (type: double) Upper left x value bounding box
+
+uly:  (type: double) Upper left y value bounding box
+
+lrx:  (type: double) Lower right x value bounding box
+
+lry:  (type: double) Lower right y value bounding box
+
+dx:  (type: double) Resolution in x
+
+dy:  (type: double) Resolution in y
+
+resample:  (type: std::string) (default: GRIORA_NearestNeighbour)
+resample:
+GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss
+(checkhttp://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)
+
+extent:  (type: std::string) get boundary from extent from polygons in
+vector file
+
+mem:  (type: unsigned long) (default: 0) Buffer size (in MB) to read
+image data blocks in memory
+
+ncol:  (type: int) Number of columns
+
+nrow:  (type: int) Number of rows
+
+nband:  (type: int) (default: 1) Number of bands
+
+otype:  (type: std::string) (default: Byte) Data type for output image
+({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64})
+
+seed:  (type: unsigned long) (default: 0) seed value for random
+generator
+
+mean:  (type: double) (default: 0) Mean value for random generator
+
+sigma:  (type: double) (default: 0) Sigma value for random generator
+
+description:  (type: std::string) Set image description
+
+a_srs:  (type: std::string) Assign the spatial reference for the
+output file, e.g., psg:3035 to use European projection and force to
+European grid
+
+shared pointer to new Jim object ";
 
 
 // File: dir_68267d1309a1af8e8297ef4c3efbcdba.xml

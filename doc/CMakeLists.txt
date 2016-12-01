@@ -15,7 +15,7 @@ endif(DOXYGEN_FOUND)
 
 # cd ~/jiplib/build
 # make doc
-# cd ~/jiplib/doc/xml
+# cd ~/jiplib/build/doc/xml
 # python ~/jiplib/doxy2swig.py index.xml ~/jiplib/src/swig/jiplib_doc.i
 # cd ~/jiplib/build
 # touch ~/jiplib/src/swig/jiplib.i

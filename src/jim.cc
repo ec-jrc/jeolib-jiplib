@@ -141,6 +141,31 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
   return(CE_None);
 }
 
+// CPLErr Jim::magnify(int value, int iband){
+//   try{
+//     if(nrOfBand()<=iband){
+//       std::string errorString="Error: band number exceeds number of bands in input image";
+//       throw(errorString);
+//     }
+//     IMAGE* mia1=this->getMIA(iband);
+//     if(::magnify(mia1, value) == NO_ERROR){
+//       this->setMIA(iband);
+//       return(CE_None);
+//     }
+//     else{
+//       this->setMIA(iband);
+//       std::string errorString="Error: arith function in MIA failed";
+//       throw(errorString);
+//     }
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     return(CE_Failure);
+//   }
+//   catch(...){
+//     return(CE_Failure);
+//   }
+// }
 // /**
 //  *
 //  *
@@ -541,36 +566,36 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
 // }
 
 
-// /**
-//  *
-//  * @param refImg Use this as the reference image
-//  *
-//  * @return true if image is equal to reference image
-//  */
-// bool Jim::operator==(std::shared_ptr<Jim> refImg)
-// {
-//   bool isEqual=true;
-//   if(nrOfBand()!=refImg->nrOfBand())
-//     return(false);
-//   if(nrOfRow()!=refImg->nrOfRow())
-//     return(false);
-//   if(nrOfCol()!=refImg->nrOfCol())
-//     return(false);
+/**
+ *
+ * @param refImg Use this as the reference image
+ *
+ * @return true if image is equal to reference image
+ */
+bool Jim::operator==(std::shared_ptr<Jim> refImg)
+{
+  bool isEqual=true;
+  if(nrOfBand()!=refImg->nrOfBand())
+    return(false);
+  if(nrOfRow()!=refImg->nrOfRow())
+    return(false);
+  if(nrOfCol()!=refImg->nrOfCol())
+    return(false);
 
-//   for(int iband=0;iband<nrOfBand();++iband){
-//     if(getDataType(iband)!=refImg->getDataType(iband)){
-//       isEqual=false;
-//       break;
-//     }
-//     IMAGE* refMIA=refImg->getMIA(iband);
-//     IMAGE* thisMIA=this->getMIA(iband);
-//     if(::imequalp(thisMIA,refMIA)){
-//       isEqual=false;
-//       break;
-//     }
-//   }
-//   return(isEqual);
-// }
+  for(int iband=0;iband<nrOfBand();++iband){
+    if(getDataType(iband)!=refImg->getDataType(iband)){
+      isEqual=false;
+      break;
+    }
+    IMAGE* refMIA=refImg->getMIA(iband);
+    IMAGE* thisMIA=this->getMIA(iband);
+    if(::imequalp(thisMIA,refMIA)){
+      isEqual=false;
+      break;
+    }
+  }
+  return(isEqual);
+}
 // /**
 //  *
 //  * @param refImg Use this as the reference image
