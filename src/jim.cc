@@ -128,7 +128,7 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
       m_end.resize(m_nband);
     }
     m_mia=mia;
-    setExternalData(true);//todo: need to fix memory leak when setMIA used for single band only! (either create vector<bool> m_externalData or only allow for setMIA all bands)
+    // setExternalData(true);//todo: need to fix memory leak when setMIA used for single band only! (either create vector<bool> m_externalData or only allow for setMIA all bands)
     this->setMIA(band);
   }
   catch(std::string errorString){
@@ -141,6 +141,57 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
   return(CE_None);
 }
 
+std::shared_ptr<Jim> Jim::arith(Jim& imRaster_im2, int op, int iband, bool destructive){
+  try{
+    if(nrOfBand()<=iband){
+      std::string errorString="Error: band number exceeds number of bands in input image";
+      throw(errorString);
+    }
+    if(imRaster_im2.nrOfBand()<=iband){
+      std::string errorString="Error: band number exceeds number of bands in input image";
+      throw(errorString);
+    }
+    IMAGE * im1;
+    IMAGE * im2=imRaster_im2.getMIA(iband);
+    if(!destructive){
+      //make a copy of this
+      std::shared_ptr<Jim> copyImg=this->clone();
+      im1=copyImg->getMIA(iband);
+      if(::arith(im1, im2, op) == NO_ERROR){
+        copyImg->setMIA(iband);
+        imRaster_im2.setMIA(iband);
+        return(copyImg);
+      }
+      else{
+        copyImg->setMIA(iband);
+        imRaster_im2.setMIA(iband);
+        std::string errorString="Error: arith() function in MIA failed, returning NULL pointer";
+        throw(errorString);
+      }
+    }
+    else{
+      im1=this->getMIA(iband);
+      if(::arith(im1, im2, op) == NO_ERROR){
+        this->setMIA(iband);
+        imRaster_im2.setMIA(iband);
+        return(this->getShared());
+      }
+      else{
+        this->setMIA(iband);
+        imRaster_im2.setMIA(iband);
+        std::string errorString="Error: arith() function in MIA failed, returning NULL pointer";
+        throw(errorString);
+      }
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    return(0);
+  }
+  catch(...){
+    return(0);
+  }
+}
 // CPLErr Jim::magnify(int value, int iband){
 //   try{
 //     if(nrOfBand()<=iband){
@@ -202,81 +253,81 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
 // }
 
 // CPLErr Jim::thresh(double d_gt1, double d_gt2, double d_gbg, double d_gfg, int iband){
-// 	 try{
-// 		 if(nrOfBand()<=iband){
-// 			 std::string errorString="Error: band number exceeds number of bands in input image";
-// 			 throw(errorString);
-// 		 }
-// 		IMAGE * im=this->getMIA(iband);
-// 		G_TYPE gt1;
-// 		G_TYPE gt2;
-// 		G_TYPE gbg;
-// 		G_TYPE gfg;
-// 		switch(getDataType()){
-// 		case(GDT_Byte):
-// 			gt1.uc_val=static_cast<unsigned char>(d_gt1);
-// 			gt2.uc_val=static_cast<unsigned char>(d_gt2);
-// 			gbg.uc_val=static_cast<unsigned char>(d_gbg);
-// 			gfg.uc_val=static_cast<unsigned char>(d_gfg);
-// 			break;
-// 		case(GDT_Int16):
-// 			gt1.s_val=static_cast<short int>(d_gt1);
-// 			gt2.s_val=static_cast<short int>(d_gt2);
-// 			gbg.s_val=static_cast<short int>(d_gbg);
-// 			gfg.s_val=static_cast<short int>(d_gfg);
-// 			break;
-// 		case(GDT_UInt16):
-// 			gt1.us_val=static_cast<unsigned short int>(d_gt1);
-// 			gt2.us_val=static_cast<unsigned short int>(d_gt2);
-// 			gbg.us_val=static_cast<unsigned short int>(d_gbg);
-// 			gfg.us_val=static_cast<unsigned short int>(d_gfg);
-// 			break;
-// 		case(GDT_Int32):
-// 			gt1.i32_val=static_cast<int>(d_gt1);
-// 			gt2.i32_val=static_cast<int>(d_gt2);
-// 			gbg.i32_val=static_cast<int>(d_gbg);
-// 			gfg.i32_val=static_cast<int>(d_gfg);
-// 			break;
-// 		case(GDT_UInt32):
-// 			gt1.u32_val=static_cast<unsigned int>(d_gt1);
-// 			gt2.u32_val=static_cast<unsigned int>(d_gt2);
-// 			gbg.u32_val=static_cast<unsigned int>(d_gbg);
-// 			gfg.u32_val=static_cast<unsigned int>(d_gfg);
-// 			break;
-// 		case(GDT_Float32):
-// 			gt1.f_val=static_cast<float>(d_gt1);
-// 			gt2.f_val=static_cast<float>(d_gt2);
-// 			gbg.f_val=static_cast<float>(d_gbg);
-// 			gfg.f_val=static_cast<float>(d_gfg);
-// 			break;
-// 		case(GDT_Float64):
-// 			gt1.d_val=static_cast<double>(d_gt1);
-// 			gt2.d_val=static_cast<double>(d_gt2);
-// 			gbg.d_val=static_cast<double>(d_gbg);
-// 			gfg.d_val=static_cast<double>(d_gfg);
-// 			break;
-// 		default:
-// 			std::string errorString="Error: data type not supported";
-// 			throw(errorString);
-// 			break;
-// 		}
-// 		if(::thresh(im, gt1, gt2, gbg, gfg) == NO_ERROR){
-// 			this->setMIA(iband);
-// 			return(CE_None);
-// 		}
-// 		else{
-// 			this->setMIA(iband);
-// 			std::string errorString="Error: arith function in MIA failed";
-// 			throw(errorString);
-// 		}
-// 	}
-//     	catch(std::string errorString){
-//     		std::cerr << errorString << std::endl;
-//     		return(CE_Failure);
-//     	}
-//     	catch(...){
-//     		return(CE_Failure);
-//     	}
+//   try{
+//     if(nrOfBand()<=iband){
+//       std::string errorString="Error: band number exceeds number of bands in input image";
+//       throw(errorString);
+//     }
+//    IMAGE * im=this->getMIA(iband);
+//    G_TYPE gt1;
+//    G_TYPE gt2;
+//    G_TYPE gbg;
+//    G_TYPE gfg;
+//    switch(getDataType()){
+//    case(GDT_Byte):
+//      gt1.uc_val=static_cast<unsigned char>(d_gt1);
+//      gt2.uc_val=static_cast<unsigned char>(d_gt2);
+//      gbg.uc_val=static_cast<unsigned char>(d_gbg);
+//      gfg.uc_val=static_cast<unsigned char>(d_gfg);
+//      break;
+//    case(GDT_Int16):
+//      gt1.s_val=static_cast<short int>(d_gt1);
+//      gt2.s_val=static_cast<short int>(d_gt2);
+//      gbg.s_val=static_cast<short int>(d_gbg);
+//      gfg.s_val=static_cast<short int>(d_gfg);
+//      break;
+//    case(GDT_UInt16):
+//      gt1.us_val=static_cast<unsigned short int>(d_gt1);
+//      gt2.us_val=static_cast<unsigned short int>(d_gt2);
+//      gbg.us_val=static_cast<unsigned short int>(d_gbg);
+//      gfg.us_val=static_cast<unsigned short int>(d_gfg);
+//      break;
+//    case(GDT_Int32):
+//      gt1.i32_val=static_cast<int>(d_gt1);
+//      gt2.i32_val=static_cast<int>(d_gt2);
+//      gbg.i32_val=static_cast<int>(d_gbg);
+//      gfg.i32_val=static_cast<int>(d_gfg);
+//      break;
+//    case(GDT_UInt32):
+//      gt1.u32_val=static_cast<unsigned int>(d_gt1);
+//      gt2.u32_val=static_cast<unsigned int>(d_gt2);
+//      gbg.u32_val=static_cast<unsigned int>(d_gbg);
+//      gfg.u32_val=static_cast<unsigned int>(d_gfg);
+//      break;
+//    case(GDT_Float32):
+//      gt1.f_val=static_cast<float>(d_gt1);
+//      gt2.f_val=static_cast<float>(d_gt2);
+//      gbg.f_val=static_cast<float>(d_gbg);
+//      gfg.f_val=static_cast<float>(d_gfg);
+//      break;
+//    case(GDT_Float64):
+//      gt1.d_val=static_cast<double>(d_gt1);
+//      gt2.d_val=static_cast<double>(d_gt2);
+//      gbg.d_val=static_cast<double>(d_gbg);
+//      gfg.d_val=static_cast<double>(d_gfg);
+//      break;
+//    default:
+//      std::string errorString="Error: data type not supported";
+//      throw(errorString);
+//      break;
+//    }
+//    if(::thresh(im, gt1, gt2, gbg, gfg) == NO_ERROR){
+//      this->setMIA(iband);
+//      return(CE_None);
+//    }
+//    else{
+//      this->setMIA(iband);
+//      std::string errorString="Error: arith function in MIA failed";
+//      throw(errorString);
+//    }
+//  }
+//      catch(std::string errorString){
+//        std::cerr << errorString << std::endl;
+//        return(CE_Failure);
+//      }
+//      catch(...){
+//        return(CE_Failure);
+//      }
 //     }
 
 
@@ -424,7 +475,68 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
 #include "fun2method.cc"
 
 
+std::shared_ptr<Jim> Jim::imrgb2hsx(int x){
+  std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
+  try{
+    IMAGE * imr;
+    IMAGE * img;
+    IMAGE * imb;
+    IMAGE ** imout;
+    app::AppFactory app;
+    imout=::imrgb2hsx(getMIA(0),getMIA(1),getMIA(2),x);
+    if(imout){
+      for(int iim=0;iim<nrOfBand();++iim){
+        std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(*this,false);
+        imgWriter->setMIA(imout[0],0);
+        imgWriter->setMIA(imout[1],1);
+        imgWriter->setMIA(imout[2],2);
+      }
+      return(imgWriter);
+    }
+    else{
+      std::string errorString="Error: imrgb2hsx() function in MIA failed, returning empty list";
+      throw(errorString);
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    return(imgWriter);
+  }
+  catch(...){
+    return(imgWriter);
+  }
+}
 
+
+// std::shared_ptr<Jim> Jim::imrgb2hsx(int x){
+//   std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
+//   try{
+//     IMAGE * imr;
+//     IMAGE * img;
+//     IMAGE * imb;
+//     IMAGE ** imout;
+//     app::AppFactory app;
+//     imout=::imrgb2hsx(getMIA(0),getMIA(1),getMIA(2),x);
+//     if(imout){
+//       // std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(*this,false);
+//       std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(*this,true);
+//       for(int iim=0;iim<nrOfBand();++iim)
+//         imgWriter->setMIA(imout[iim],iim);
+//       return(imgWriter);
+//     }
+//     else{
+//       std::string errorString="Error: imrgb2hsx() function in MIA failed, returning empty list";
+//       throw(errorString);
+//     }
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     return(imgWriter);
+//   }
+//   catch(...){
+//     return(imgWriter);
+//   }
+// }
 
 // /**
 //  *
@@ -674,3 +786,70 @@ bool Jim::operator==(std::shared_ptr<Jim> refImg)
 //   }
 //   return(theVolume);
 // }
+
+std::shared_ptr<Jim> Jim::mean2d(int width, int iband){
+  try{
+    if(nrOfBand()<=iband){
+      std::string errorString="Error: band number exceeds number of bands in input image";
+      throw(errorString);
+    }
+    IMAGE * imin;
+    IMAGE * imout;
+    imin=this->getMIA(iband);
+    imout=::mean2d(imin,width);
+    this->setMIA(iband);
+    if(imout){
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout);
+      imgWriter->copyGeoTransform(*this);
+      imgWriter->setProjection(getProjectionRef());
+      return(imgWriter);
+    }
+    else{
+      std::string errorString="Error: mean2d() function in MIA failed, returning NULL pointer";
+      throw(errorString);
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    return(0);
+  }
+  catch(...){
+    return(0);
+  }
+}
+
+JimList Jim::rotatecoor(double theta, int iband){
+  JimList listout;
+  try{
+    int nc=2;//depends on mialib function
+    if(nrOfBand()<=iband){
+      std::string errorString="Error: band number exceeds number of bands in input image";
+      throw(errorString);
+    }
+    IMAGE * imin;
+    IMAGE ** imout;
+    imin=this->getMIA(iband);
+    imout=::rotatecoor(imin,theta);
+    this->setMIA(iband);
+    if(imout){
+      for(int iim=0;iim<nc;++iim){
+        std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);
+        imgWriter->copyGeoTransform(*this);
+        imgWriter->setProjection(getProjectionRef());
+        listout.pushImage(imgWriter);
+      }
+      return(listout);
+    }
+    else{
+      std::string errorString="Error: rotatecoor() function in MIA failed, returning empty list";
+      throw(errorString);
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    return(listout);
+  }
+  catch(...){
+    return(listout);
+  }
+}

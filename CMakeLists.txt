@@ -137,10 +137,10 @@ include_directories("${CMAKE_SOURCE_DIR}")
 add_subdirectory ("${PROJECT_DOC_DIR}")
 add_subdirectory ("${PROJECT_TEST_DIR}")
 
-set(JIPLIB_CC jim.cc)
-set(JIPLIB_H jim.h)
+set(JIPLIB_CC ${PROJECT_SOURCE_DIR}/jim.cc ${PROJECT_SOURCE_DIR}/jimlist.cc)
+set(JIPLIB_H ${PROJECT_SOURCE_DIR}/jim.h ${PROJECT_SOURCE_DIR}/jimlist.h)
 # Define the jiplib library.
-add_library( ${JIPLIB_LIB_NAME} ${PROJECT_SOURCE_DIR}/${JIPLIB_H} ${PROJECT_SOURCE_DIR}/${JIPLIB_CC})
+add_library( ${JIPLIB_LIB_NAME} ${JIPLIB_H} ${JIPLIB_CC})
 target_link_libraries(
   ${JIPLIB_LIB_NAME}
   ${MIA_LIB_NAME}
@@ -171,7 +171,7 @@ SWIG_LINK_LIBRARIES(jiplib ${PKTOOLS_LIBRARIES} ${PYTHON_LIBRARIES} ${JIPLIB_LIB
 
 ########## INSTALL ##########
 INSTALL (TARGETS ${JIPLIB_LIB_NAME} LIBRARY DESTINATION lib)
-INSTALL (FILES ${PROJECT_SOURCE_DIR}/${JIPLIB_H} DESTINATION include/jiplib)
+INSTALL (FILES ${JIPLIB_H} DESTINATION include/jiplib)
 EXECUTE_PROCESS(COMMAND python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
 SET(PYTHON_INSTALL_DIR ${PYTHON_SITE_PACKAGES} CACHE PATH "Install directory for Python library")
 INSTALL(TARGETS ${SWIG_MODULE_jiplib_REAL_NAME} LIBRARY DESTINATION ${PYTHON_INSTALL_DIR})
