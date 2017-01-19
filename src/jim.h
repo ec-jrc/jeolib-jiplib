@@ -305,14 +305,12 @@ namespace jiplib{
       ImgRaster::crop(*imgWriter, app);
       return(imgWriter);
     }
-    /* /// perform arithmetic operation for a particular band */
-    /* CPLErr arith(Jim& imgRaster, int theOperation, int band=0); */
-    /* CPLErr bitwise_op(Jim& imgRaster, int theOperation, int band=0); */
 
     std::shared_ptr<Jim> getShared(){
       return(std::dynamic_pointer_cast<Jim>(shared_from_this()));
     }
-    std::shared_ptr<Jim> arith(Jim& imRaster_im2, int op, int iband=0, bool destructive=false);
+    //used as a template for functions returning IMAGE* with destructive flag
+    /* std::shared_ptr<Jim> arith(Jim& imRaster_im2, int op, int iband=0, bool destructive=false); */
     //#include "fun2method.h"
 
     //start insert from fun2method

@@ -102,8 +102,6 @@ CPLErr Jim::setMIA(int band){
 CPLErr Jim::setMIA(IMAGE* mia, int band){
   try{
     if(nrOfBand()){
-      //test
-      std::cout << "debug0" << std::endl;
       if(m_ncol!=mia->nx){
         std::ostringstream s;
         s << "Error: x dimension of image (" << m_ncol << ") does not match MIA (" << mia->nx << ")";
@@ -123,8 +121,6 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
         throw(errorString);
       }
     }
-    //test
-    std::cout << "band: " << band << std::endl;
     if(m_mia.size()<band+1){
       m_mia.resize(band+1);
       m_nband=band+1;
@@ -152,57 +148,59 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
   return(CE_None);
 }
 
-std::shared_ptr<Jim> Jim::arith(Jim& imRaster_im2, int op, int iband, bool destructive){
-  try{
-    if(nrOfBand()<=iband){
-      std::string errorString="Error: band number exceeds number of bands in input image";
-      throw(errorString);
-    }
-    if(imRaster_im2.nrOfBand()<=iband){
-      std::string errorString="Error: band number exceeds number of bands in input image";
-      throw(errorString);
-    }
-    IMAGE * im1;
-    IMAGE * im2=imRaster_im2.getMIA(iband);
-    if(!destructive){
-      //make a copy of this
-      std::shared_ptr<Jim> copyImg=this->clone();
-      im1=copyImg->getMIA(iband);
-      if(::arith(im1, im2, op) == NO_ERROR){
-        copyImg->setMIA(iband);
-        imRaster_im2.setMIA(iband);
-        return(copyImg);
-      }
-      else{
-        copyImg->setMIA(iband);
-        imRaster_im2.setMIA(iband);
-        std::string errorString="Error: arith() function in MIA failed, returning NULL pointer";
-        throw(errorString);
-      }
-    }
-    else{
-      im1=this->getMIA(iband);
-      if(::arith(im1, im2, op) == NO_ERROR){
-        this->setMIA(iband);
-        imRaster_im2.setMIA(iband);
-        return(this->getShared());
-      }
-      else{
-        this->setMIA(iband);
-        imRaster_im2.setMIA(iband);
-        std::string errorString="Error: arith() function in MIA failed, returning NULL pointer";
-        throw(errorString);
-      }
-    }
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    return(0);
-  }
-  catch(...){
-    return(0);
-  }
-}
+//used as a template for functions returning IMAGE* with destructive flag
+// std::shared_ptr<Jim> Jim::arith(Jim& imRaster_im2, int op, int iband, bool destructive){
+//   try{
+//     if(nrOfBand()<=iband){
+//       std::string errorString="Error: band number exceeds number of bands in input image";
+//       throw(errorString);
+//     }
+//     if(imRaster_im2.nrOfBand()<=iband){
+//       std::string errorString="Error: band number exceeds number of bands in input image";
+//       throw(errorString);
+//     }
+//     IMAGE * im1;
+//     IMAGE * im2=imRaster_im2.getMIA(iband);
+//     if(!destructive){
+//       //make a copy of this
+//       std::shared_ptr<Jim> copyImg=this->clone();
+//       im1=copyImg->getMIA(iband);
+//       if(::arith(im1, im2, op) == NO_ERROR){
+//         copyImg->setMIA(iband);
+//         imRaster_im2.setMIA(iband);
+//         return(copyImg);
+//       }
+//       else{
+//         copyImg->setMIA(iband);
+//         imRaster_im2.setMIA(iband);
+//         std::string errorString="Error: arith() function in MIA failed, returning NULL pointer";
+//         throw(errorString);
+//       }
+//     }
+//     else{
+//       im1=this->getMIA(iband);
+//       if(::arith(im1, im2, op) == NO_ERROR){
+//         this->setMIA(iband);
+//         imRaster_im2.setMIA(iband);
+//         return(this->getShared());
+//       }
+//       else{
+//         this->setMIA(iband);
+//         imRaster_im2.setMIA(iband);
+//         std::string errorString="Error: arith() function in MIA failed, returning NULL pointer";
+//         throw(errorString);
+//       }
+//     }
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     return(0);
+//   }
+//   catch(...){
+//     return(0);
+//   }
+// }
+
 // CPLErr Jim::magnify(int value, int iband){
 //   try{
 //     if(nrOfBand()<=iband){
