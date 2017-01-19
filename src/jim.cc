@@ -23,22 +23,25 @@ IMAGE* Jim::getMIA(int band){
     s << "Error: increase memory to support MIA library functions (now at " << 100.0*getBlockSize()/nrOfRow() << "%)";
     throw(s.str());
   }
-  m_mia=new(IMAGE);
-  m_mia->p_im=m_data[band];/* Pointer to image data */
-  m_mia->DataType=GDAL2MIADataType(getDataType());
-  m_mia->nx=nrOfCol();
-  m_mia->ny=nrOfRow();
-  m_mia->nz=nrOfPlane();
-  m_mia->NByte=m_mia->nx * m_mia->ny * m_mia->nz * (GDALGetDataTypeSize(getDataType())>>3);//assumes image data type is not of bit type!!!
-  //todo: remove m_mia->vol and only rely on the getVolume function
-  m_mia->vol=0;//use getVolume() function
-  m_mia->lut=0;
+  if(m_mia.size()<band+1)
+    m_mia.resize(band+1);
+  m_mia[band]=new(IMAGE);
+  m_mia[band]->p_im=m_data[band];/* Pointer to image data */
+  m_mia[band]->DataType=GDAL2MIADataType(getDataType());
+  m_mia[band]->nx=nrOfCol();
+  m_mia[band]->ny=nrOfRow();
+  m_mia[band]->nz=nrOfPlane();
+  m_mia[band]->NByte=m_mia[band]->nx * m_mia[band]->ny * m_mia[band]->nz * (GDALGetDataTypeSize(getDataType())>>3);//assumes image data type is not of bit type!!!
+  //todo: remove m_mia[band]->vol and only rely on the getVolume function
+  m_mia[band]->vol=0;//use getVolume() function
+  m_mia[band]->lut=0;
   //USHORT *lut;   /* Pointer to colour map */
   //mia->g=getgetDataType();//not used
-  return m_mia;
+  return m_mia[band];
 }
+
 /**
- *
+ * set jim data pointer to the m_mia data pointer 
  *
  * @param band the band for which the MIA image pointer needs to be set
  *
@@ -50,14 +53,19 @@ CPLErr Jim::setMIA(int band){
     //   std::string errorString="Error: MIA image with nz>1 not supported";
     //   throw(errorString);
     // }
-    if(m_ncol!=m_mia->nx){
+    if(m_mia.size()<band+1){
       std::ostringstream s;
-      s << "Error: x dimension of image (" << m_ncol << ") does not match MIA (" << m_mia->nx << ")";
+      s << "Error: illegal band number when setting MIA in Jim";
       throw(s.str());
     }
-    if(m_nrow!=m_mia->ny){
+    if(m_ncol!=m_mia[band]->nx){
       std::ostringstream s;
-      s << "Error: y dimension of image (" << m_nrow << ") does not match MIA (" << m_mia->ny << ")";
+      s << "Error: x dimension of image (" << m_ncol << ") does not match MIA (" << m_mia[band]->nx << ")";
+      throw(s.str());
+    }
+    if(m_nrow!=m_mia[band]->ny){
+      std::ostringstream s;
+      s << "Error: y dimension of image (" << m_nrow << ") does not match MIA (" << m_mia[band]->ny << ")";
       throw(s.str());
     }
     if(m_nband<=band){
@@ -65,11 +73,11 @@ CPLErr Jim::setMIA(int band){
       std::string errorString="Error: band exceeds number of bands in target image";
       throw(errorString);
     }
-    if(m_nband>1&&m_dataType!=MIA2GDALDataType(m_mia->DataType)){
+    if(m_nband>1&&m_dataType!=MIA2GDALDataType(m_mia[band]->DataType)){
       std::cout << "Warning: changing data type of multiband image, make sure to process all bands" << std::endl;
     }
-    m_dataType=MIA2GDALDataType(m_mia->DataType);
-    m_data[band]=(unsigned char *)m_mia->p_im + band * nrOfRow() * nrOfCol() * (GDALGetDataTypeSize(getDataType())>>3);
+    m_dataType=MIA2GDALDataType(m_mia[band]->DataType);
+    m_data[band]=(unsigned char *)m_mia[band]->p_im + band * nrOfRow() * nrOfCol() * (GDALGetDataTypeSize(getDataType())>>3);
     m_begin[band]=0;
     m_end[band]=m_begin[band]+getBlockSize();
   }
@@ -84,7 +92,7 @@ CPLErr Jim::setMIA(int band){
 }
 
 /**
- *
+ * set Jim attributes from external MIA image
  *
  * @param mia the MIA image pointer to be set
  * @param band the band for which the MIA image pointer needs to be set
@@ -93,41 +101,44 @@ CPLErr Jim::setMIA(int band){
  */
 CPLErr Jim::setMIA(IMAGE* mia, int band){
   try{
-    if(nrOfBand()>1){
-      // if(mia->nz>1){
-      //   std::string errorString="Error: MIA image with nz>1 not supported";
-      //   throw(errorString);
-      // }
+    if(nrOfBand()){
+      //test
+      std::cout << "debug0" << std::endl;
       if(m_ncol!=mia->nx){
-        std::string errorString="Error: dimensions of images in do not match";
-        throw(errorString);
+        std::ostringstream s;
+        s << "Error: x dimension of image (" << m_ncol << ") does not match MIA (" << mia->nx << ")";
+        throw(s.str());
       }
       if(m_nrow!=mia->ny){
-        std::string errorString="Error: dimensions of images do not match";
+        std::ostringstream s;
+        s << "Error: y dimension of image (" << m_nrow << ") does not match MIA (" << mia->ny << ")";
+        throw(s.str());
+      }
+      if(m_nplane!=mia->nz){
+        std::string errorString="Error: number of planes of images do not match";
         throw(errorString);
       }
-      if(m_nband<=band){
-        std::string errorString="Error: band exceeds number of bands in target image";
+      if(m_dataType!=MIA2GDALDataType(m_mia[band]->DataType)){
+        std::string errorString="Error: inconsistent data types for multiband image";
         throw(errorString);
       }
-      if(m_nband>1&&m_dataType!=MIA2GDALDataType(m_mia->DataType)){
-        std::cout << "Warning: changing data type of multiband image, make sure to process all bands" << std::endl;
-      }
-      m_dataType=MIA2GDALDataType(m_mia->DataType);
     }
-    else{
-      reset();
-      m_nplane=mia->nz;
-      m_ncol=mia->nx;
-      m_nrow=mia->ny;
-      m_nband=1;
-      m_dataType=MIA2GDALDataType(mia->DataType);
-      m_data.resize(m_nband);
-      m_blockSize=m_nrow;
-      m_begin.resize(m_nband);
-      m_end.resize(m_nband);
+    //test
+    std::cout << "band: " << band << std::endl;
+    if(m_mia.size()<band+1){
+      m_mia.resize(band+1);
+      m_nband=band+1;
     }
-    m_mia=mia;
+    if(m_data.size()<band+1){
+      m_data.resize(band+1);
+      m_begin.resize(band+1);
+      m_end.resize(band+1);
+    }
+    m_nplane=mia->nz;
+    m_ncol=mia->nx;
+    m_nrow=mia->ny;
+    m_blockSize=m_nrow;
+    m_mia[band]=mia;
     // setExternalData(true);//todo: need to fix memory leak when setMIA used for single band only! (either create vector<bool> m_externalData or only allow for setMIA all bands)
     this->setMIA(band);
   }
@@ -474,58 +485,26 @@ std::shared_ptr<Jim> Jim::arith(Jim& imRaster_im2, int op, int iband, bool destr
 
 #include "fun2method.cc"
 
-
-std::shared_ptr<Jim> Jim::imrgb2hsx(int x){
-  std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
-  try{
-    IMAGE * imr;
-    IMAGE * img;
-    IMAGE * imb;
-    IMAGE ** imout;
-    app::AppFactory app;
-    imout=::imrgb2hsx(getMIA(0),getMIA(1),getMIA(2),x);
-    if(imout){
-      for(int iim=0;iim<nrOfBand();++iim){
-        std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(*this,false);
-        imgWriter->setMIA(imout[0],0);
-        imgWriter->setMIA(imout[1],1);
-        imgWriter->setMIA(imout[2],2);
-      }
-      return(imgWriter);
-    }
-    else{
-      std::string errorString="Error: imrgb2hsx() function in MIA failed, returning empty list";
-      throw(errorString);
-    }
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    return(imgWriter);
-  }
-  catch(...){
-    return(imgWriter);
-  }
-}
-
-
+//shown as a template function here only (not implemented because imout is composed of images of different datatypes)
 // std::shared_ptr<Jim> Jim::imrgb2hsx(int x){
 //   std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
 //   try{
-//     IMAGE * imr;
-//     IMAGE * img;
-//     IMAGE * imb;
 //     IMAGE ** imout;
 //     app::AppFactory app;
+//     if(nrOfBand()!=3){
+//       std::string errorString="Error: image is not an RGB image";
+//       throw(errorString);
+//     }
 //     imout=::imrgb2hsx(getMIA(0),getMIA(1),getMIA(2),x);
 //     if(imout){
-//       // std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(*this,false);
-//       std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(*this,true);
 //       for(int iim=0;iim<nrOfBand();++iim)
 //         imgWriter->setMIA(imout[iim],iim);
+//       imgWriter->copyGeoTransform(*this);
+//       imgWriter->setProjection(this->getProjectionRef());
 //       return(imgWriter);
 //     }
 //     else{
-//       std::string errorString="Error: imrgb2hsx() function in MIA failed, returning empty list";
+//       std::string errorString="Error: imrgb2hsx() function in MIA failed, returning empty image";
 //       throw(errorString);
 //     }
 //   }
@@ -737,43 +716,6 @@ bool Jim::operator==(std::shared_ptr<Jim> refImg)
 //     }
 //   }
 //   return(isEqual);
-// }
-
-
-// /**
-//  *
-//  *
-//  * @param filename raster dataset filename
-//  * @param band: index of band to read (0 for first band).
-//  * @param nXOff: The pixel offset to the top left corner of the region of the band to be accessed.
-//  *               This would be zero to start from the left side.
-//  * @param nYOff: The line offset to the top left corner of the region of the band to be accessed.
-//  *               This would be zero to start from the top.
-//  * @param nXSize: The width of the region of the band to be accessed in pixels.
-//  * @param nYSize: The height of the region of the band to be accessed in lines.
-//  * @param nBufXSize: the width of the buffer image into which the desired region is to be read,
-//                      or from which it is to be written.
-//  * @param nBufYSize: the height of the buffer image into which the desired region is to be read,
-//                      or from which it is to be written.
-//  * @return CE_None if successful or CE_Failure if failure
-//  */
-// CPLErr Jim::GDALRead(const std::string filename, int band, int nXOff, int nYOff, int nXSize, int nYSize, int nBufXSize, int nBufYSize){
-//   try{
-//     if(nBufXSize<=0)
-//       nBufXSize=nXOff;
-//     if(nBufYSize<=0)
-//       nBufYSize=nYOff;
-//     reset();
-//     IMAGE *mia=::GDALRead(const_cast<char*>(filename.c_str()), band, nXOff, nYOff, nXSize, nYSize, nBufXSize, nBufYSize);
-//     setMIA(mia);
-//   }
-//   catch(std::string errorString){
-//     std::cerr << errorString << std::endl;
-//     return(CE_Failure);
-//   }
-//   catch(...){
-//     return(CE_Failure);
-//   }
 // }
 
 // double Jim::getVolume(int iband){

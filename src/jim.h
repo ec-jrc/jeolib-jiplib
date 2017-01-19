@@ -46,28 +46,33 @@ namespace jiplib{
   {
   public:
     ///default constructor
-  Jim() : m_nplane(1), m_mia(0), ImgRaster(){};
+  Jim() : m_nplane(1), ImgRaster(){};
     ///constructor opening an image in memory using an external data pointer (not tested yet)
   Jim(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType) : Jim() {open(dataPointer,ncol,nrow,dataType);};
     ///constructor input image
   Jim(IMAGE *mia) : Jim() {setMIA(mia,0);};
     ///constructor input image
-  Jim(const std::string& filename, unsigned int memory=0) : m_nplane(1), m_mia(0), ImgRaster(filename,memory){};
+  Jim(const std::string& filename, unsigned int memory=0) : m_nplane(1), ImgRaster(filename,memory){};
     ///constructor input image
-  Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : m_nplane(1), m_mia(0), ImgRaster(filename,imgSrc,memory,options){};
+  Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : m_nplane(1), ImgRaster(filename,imgSrc,memory,options){};
     ///constructor input image
-    /* Jim(std::shared_ptr<ImgRaster> imgSrc, bool copyData=true) : m_nplane(1), m_mia(0), ImgRaster(imgSrc, copyData){}; */
+    /* Jim(std::shared_ptr<ImgRaster> imgSrc, bool copyData=true) : m_nplane(1), ImgRaster(imgSrc, copyData){}; */
     ///constructor input image
-  Jim(Jim& imgSrc, bool copyData=true) : m_nplane(1), m_mia(0), ImgRaster(imgSrc, copyData){};
+  Jim(Jim& imgSrc, bool copyData=true) : m_nplane(1), ImgRaster(imgSrc, copyData){};
     ///constructor output image
-  Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : m_nplane(1), m_mia(0), ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){};
+  Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : m_nplane(1), ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){};
     ///constructor output image
-  Jim(int ncol, int nrow, int nband, const GDALDataType& dataType) : m_nplane(1), m_mia(0), ImgRaster(ncol, nrow, nband, dataType){};
+  Jim(int ncol, int nrow, int nband, const GDALDataType& dataType) : m_nplane(1), ImgRaster(ncol, nrow, nband, dataType){};
     ///constructor from app
-  Jim(app::AppFactory &theApp): m_nplane(1), m_mia(0), ImgRaster(theApp){};
+  Jim(app::AppFactory &theApp): m_nplane(1), ImgRaster(theApp){};
     ///destructor
-    ~Jim(void){if(m_mia) delete(m_mia);m_mia=0;};
-
+    ~Jim(void){
+      if(m_mia.size()){
+        for(int iband=0;iband<m_mia.size();++iband)
+          delete(m_mia[iband]);
+        m_mia.clear();
+      }
+    }
     ///Open an image for writing in memory, defining image attributes.
     /* void open(int ncol, int nrow, int nband, int dataType); */
 
@@ -113,7 +118,7 @@ namespace jiplib{
     static std::shared_ptr<Jim> createImg(app::AppFactory &theApp){
       std::shared_ptr<Jim> pJim=std::make_shared<Jim>(theApp);
       return(pJim);
-    }
+    };
     ///this is a testFunction
     static void testFunction(){}
     /* ///Create new shared pointer to Jim object */
@@ -422,7 +427,6 @@ CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int i
 //end insert from fun2method
 //functions returning image list
 ///functions from mialib
- std::shared_ptr<Jim> imrgb2hsx(int x=0);
 
 //
     /* /\* CPLErr arith(std::shared_ptr<Jim> imgRaster, int theOperation, int band=0); *\/ */
@@ -633,7 +637,13 @@ CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int i
 
   protected:
     ///reset all member variables
-    void reset(void){ImgRaster::reset();m_nplane=1;m_mia=0;};
+    void reset(void){
+      ImgRaster::reset();
+      m_nplane=1;
+      for(int iband=0;iband<m_mia.size();++iband)
+        delete(m_mia[iband]);
+      m_mia.clear();
+    }
     ///number of planes in this dataset
     int m_nplane;
   private:
@@ -643,7 +653,7 @@ CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int i
       return std::make_shared<Jim>(*this,copyData);
       /* return(std::make_shared<Jim>()); */
     };
-    IMAGE* m_mia;
+    std::vector<IMAGE*> m_mia;
   };
 }
 #endif // _JIM_H_
