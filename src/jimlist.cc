@@ -232,15 +232,19 @@ std::shared_ptr<jiplib::Jim> JimList::statProfile(app::AppFactory& app){
 
 ///functions from mialib
 JimList JimList::imrgb2hsx(int x){
+  int ninput=3;
+  int noutput=3;
   JimList listout;
   try{
-    IMAGE * imr;
-    IMAGE * img;
-    IMAGE * imb;
+    if(size()!=ninput){
+      std::ostringstream ess;
+      ess << "Error: input image list should have " << ninput << " images (got " << size() << ")";
+      throw(ess.str());
+    }
     IMAGE ** imout;
     imout=::imrgb2hsx(this->getImage(0)->getMIA(),this->getImage(1)->getMIA(),this->getImage(2)->getMIA(),x);
     if(imout){
-      for(int iim=0;iim<size();++iim){
+      for(int iim=0;iim<noutput;++iim){
         std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);
         imgWriter->copyGeoTransform(*front());
         imgWriter->setProjection(front()->getProjectionRef());
@@ -250,6 +254,111 @@ JimList JimList::imrgb2hsx(int x){
     }
     else{
       std::string errorString="Error: imrgb2hsx() function in MIA failed, returning empty list";
+      throw(errorString);
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    return(listout);
+  }
+  catch(...){
+    return(listout);
+  }
+}
+
+JimList JimList::alphaTree(int alphaMax){
+  int ninput=2;
+  int noutput=5;
+  JimList listout;
+  if(size()!=ninput){
+    std::ostringstream ess;
+    ess << "Error: input image list should have " << ninput << " images (got " << size() << ")";
+    throw(ess.str());
+  }
+  try{
+    IMAGE ** imout;
+    imout=::alphatree(this->getImage(0)->getMIA(),this->getImage(1)->getMIA(),alphaMax);
+    if(imout){
+      for(int iim=0;iim<noutput;++iim){
+        std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);
+        imgWriter->copyGeoTransform(*front());
+        imgWriter->setProjection(front()->getProjectionRef());
+        listout.pushImage(imgWriter);
+      }
+      return(listout);
+    }
+    else{
+      std::string errorString="Error: alphatree() function in MIA failed, returning empty list";
+      throw(errorString);
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    return(listout);
+  }
+  catch(...){
+    return(listout);
+  }
+}
+
+JimList JimList::histrgbmatch(){
+  int ninput=4;
+  int noutput=3;
+  JimList listout;
+  if(size()!=ninput){
+    std::ostringstream ess;
+    ess << "Error: input image list should have " << ninput << " images (got " << size() << ")";
+    throw(ess.str());
+  }
+  try{
+    IMAGE ** imout;
+    imout=::histrgbmatch(this->getImage(0)->getMIA(),this->getImage(1)->getMIA(),this->getImage(2)->getMIA(),this->getImage(3)->getMIA());
+    if(imout){
+      for(int iim=0;iim<noutput;++iim){
+        std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);
+        imgWriter->copyGeoTransform(*front());
+        imgWriter->setProjection(front()->getProjectionRef());
+        listout.pushImage(imgWriter);
+      }
+      return(listout);
+    }
+    else{
+      std::string errorString="Error: histrgbmatch() function in MIA failed, returning empty list";
+      throw(errorString);
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    return(listout);
+  }
+  catch(...){
+    return(listout);
+  }
+}
+
+JimList JimList::histrgb3dmatch (){
+  int ninput=4;
+  int noutput=3;
+  JimList listout;
+  if(size()!=ninput){
+    std::ostringstream ess;
+    ess << "Error: input image list should have " << ninput << " images (got " << size() << ")";
+    throw(ess.str());
+  }
+  try{
+    IMAGE ** imout;
+    imout=::histrgb3dmatch(this->getImage(0)->getMIA(),this->getImage(1)->getMIA(),this->getImage(2)->getMIA(),this->getImage(3)->getMIA());
+    if(imout){
+      for(int iim=0;iim<noutput;++iim){
+        std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);
+        imgWriter->copyGeoTransform(*front());
+        imgWriter->setProjection(front()->getProjectionRef());
+        listout.pushImage(imgWriter);
+      }
+      return(listout);
+    }
+    else{
+      std::string errorString="Error: histrgb3dmatch() function in MIA failed, returning empty list";
       throw(errorString);
     }
   }

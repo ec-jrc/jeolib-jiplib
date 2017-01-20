@@ -733,10 +733,8 @@ std::shared_ptr<Jim> Jim::mean2d(int width, int iband){
       std::string errorString="Error: band number exceeds number of bands in input image";
       throw(errorString);
     }
-    IMAGE * imin;
     IMAGE * imout;
-    imin=this->getMIA(iband);
-    imout=::mean2d(imin,width);
+    imout=::mean2d(this->getMIA(iband),width);
     this->setMIA(iband);
     if(imout){
       std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout);
@@ -761,18 +759,16 @@ std::shared_ptr<Jim> Jim::mean2d(int width, int iband){
 JimList Jim::rotatecoor(double theta, int iband){
   JimList listout;
   try{
-    int nc=2;//depends on mialib function
+    int noutput=2;//depends on mialib function
     if(nrOfBand()<=iband){
       std::string errorString="Error: band number exceeds number of bands in input image";
       throw(errorString);
     }
-    IMAGE * imin;
     IMAGE ** imout;
-    imin=this->getMIA(iband);
-    imout=::rotatecoor(imin,theta);
+    imout=::rotatecoor(this->getMIA(iband),theta);
     this->setMIA(iband);
     if(imout){
-      for(int iim=0;iim<nc;++iim){
+      for(int iim=0;iim<noutput;++iim){
         std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);
         imgWriter->copyGeoTransform(*this);
         imgWriter->setProjection(getProjectionRef());
@@ -782,6 +778,40 @@ JimList Jim::rotatecoor(double theta, int iband){
     }
     else{
       std::string errorString="Error: rotatecoor() function in MIA failed, returning empty list";
+      throw(errorString);
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    return(listout);
+  }
+  catch(...){
+    return(listout);
+  }
+}
+
+JimList Jim::imgc(int iband){
+  JimList listout;
+  try{
+    int noutput=2;//depends on mialib function
+    if(nrOfBand()<=iband){
+      std::string errorString="Error: band number exceeds number of bands in input image";
+      throw(errorString);
+    }
+    IMAGE ** imout;
+    imout=::imgc(this->getMIA(iband));
+    this->setMIA(iband);
+    if(imout){
+      for(int iim=0;iim<noutput;++iim){
+        std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);
+        imgWriter->copyGeoTransform(*this);
+        imgWriter->setProjection(getProjectionRef());
+        listout.pushImage(imgWriter);
+      }
+      return(listout);
+    }
+    else{
+      std::string errorString="Error: imgc() function in MIA failed, returning empty list";
       throw(errorString);
     }
   }

@@ -57,6 +57,9 @@ namespace jiplib{
     std::shared_ptr<jiplib::Jim> statProfile(app::AppFactory& app);
     ///functions from mialib
     JimList imrgb2hsx(int x=0);
+    JimList alphaTree(int alphaMax);
+    JimList histrgbmatch();
+    JimList histrgb3dmatch();
   };
 }
 #endif // _JIMLIST_H_

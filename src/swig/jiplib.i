@@ -174,21 +174,6 @@ namespace jiplib{
       SWIG_exception_fail(SWIG_ArgError(res2), "in method " "$symname");
     /* $result=$self; */
   }
-
-  //todo: clear typemap
-  /* //return the object itself for all functions in JimList returning CPLErr */
-  /* %typemap(out) CPLErr jiplib::JimList::pushImage { */
-    /* std::cout << "we are in typemap(out) CPLErr for jiplib::JimList::$symname" << std::endl; */
-    /* if($1==CE_Failure) */
-    /*   std::cout << "Warning: CE_Failure" << std::endl; */
-    /* $result=$self; */
-  /* } */
-  /* %typemap(out) CPLErr jiplib::JimList::popImage { */
-  /*   std::cout << "we are in typemap(out) CPLErr for jiplib::JimList::$symname" << std::endl; */
-  /*   if($1==CE_Failure) */
-  /*     std::cout << "Warning: CE_Failure" << std::endl; */
-  /*   /\* $result=$self; *\/ */
-  /* } */
 }
 
 %{
