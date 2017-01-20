@@ -20,6 +20,8 @@ include(CTest)
 set (JIPLIB_VERSION_MAJOR 0)
 set (JIPLIB_VERSION_MINOR 1)
 set (JIPLIB_VERSION_PATCH 0)
+set (JIPLIB_VERSION "${JIPLIB_VERSION_MAJOR}.${JIPLIB_VERSION_MINOR}.${JIPLIB_VERSION_PATCH}")
+set (JIPLIB_SOVERSION "${JIPLIB_VERSION_MAJOR}")
 
 set(CLASSIF 0 CACHE STRING "set a variable that can be used in jim.cc")
 set(ODOITHIN 0 CACHE STRING "set a variable that can be used in jim.cc")
@@ -126,7 +128,8 @@ configure_file ( "cmake.pc.in" "jiplib.pc"  @ONLY)
 include_directories("${PROJECT_BINARY_DIR}")
 
 # Name of C++ library
-set(JIPLIB_LIB_NAME jiplib-${JIPLIB_VERSION_MAJOR}.${JIPLIB_VERSION_MINOR}.${JIPLIB_VERSION_PATCH})
+set(JIPLIB_LIB_NAME jiplib)
+# set(JIPLIB_LIB_NAME jiplib-${JIPLIB_VERSION_MAJOR}.${JIPLIB_VERSION_MINOR}.${JIPLIB_VERSION_PATCH})
 
 # Include directories
 ###############################################################################
@@ -141,6 +144,13 @@ set(JIPLIB_CC ${PROJECT_SOURCE_DIR}/jim.cc ${PROJECT_SOURCE_DIR}/jimlist.cc)
 set(JIPLIB_H ${PROJECT_SOURCE_DIR}/jim.h ${PROJECT_SOURCE_DIR}/jimlist.h)
 # Define the jiplib library.
 add_library( ${JIPLIB_LIB_NAME} ${JIPLIB_H} ${JIPLIB_CC})
+
+SET_TARGET_PROPERTIES(${JIPLIB_LIB_NAME}
+  PROPERTIES
+  SOVERSION ${JIPLIB_SOVERSION}
+  VERSION ${JIPLIB_VERSION}
+)
+
 target_link_libraries(
   ${JIPLIB_LIB_NAME}
   ${MIA_LIB_NAME}
