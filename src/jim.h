@@ -429,6 +429,7 @@ CPLErr clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int i
     //end insert from fun2method
 ///functions from mialib returning an image (example only must be wrapped automated via Python script)
  std::shared_ptr<Jim> mean2d(int width, int iband=0);
+ std::shared_ptr<Jim> copy_image(int iband=0);
  //functions from mialib returning image list (manually wrapped)
  JimList rotatecoor(double theta, int iband=0);
  JimList imgc(int iband=0);

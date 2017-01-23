@@ -25,6 +25,8 @@ IMAGE* Jim::getMIA(int band){
   }
   if(m_mia.size()<band+1)
     m_mia.resize(band+1);
+  if(m_mia[band])
+    delete(m_mia[band]);
   m_mia[band]=new(IMAGE);
   m_mia[band]->p_im=m_data[band];/* Pointer to image data */
   m_mia[band]->DataType=GDAL2MIADataType(getDataType());
@@ -73,11 +75,13 @@ CPLErr Jim::setMIA(int band){
       std::string errorString="Error: band exceeds number of bands in target image";
       throw(errorString);
     }
-    if(m_nband>1&&m_dataType!=MIA2GDALDataType(m_mia[band]->DataType)){
-      std::cout << "Warning: changing data type of multiband image, make sure to process all bands" << std::endl;
+    // if(m_nband>1&&m_dataType!=MIA2GDALDataType(m_mia[band]->DataType)){
+    if(m_dataType!=MIA2GDALDataType(m_mia[band]->DataType)){
+      std::cout << "Warning: changing data type of multiband image, make sure to set all bands" << std::endl;
     }
     m_dataType=MIA2GDALDataType(m_mia[band]->DataType);
-    m_data[band]=(unsigned char *)m_mia[band]->p_im + band * nrOfRow() * nrOfCol() * (GDALGetDataTypeSize(getDataType())>>3);
+    m_data[band]=(unsigned char *)m_mia[band]->p_im;
+    // m_data[band]=(unsigned char *)m_mia[band]->p_im + band * nrOfRow() * nrOfCol() * (GDALGetDataTypeSize(getDataType())>>3);
     m_begin[band]=0;
     m_end[band]=m_begin[band]+getBlockSize();
   }
@@ -744,6 +748,36 @@ std::shared_ptr<Jim> Jim::mean2d(int width, int iband){
     }
     else{
       std::string errorString="Error: mean2d() function in MIA failed, returning NULL pointer";
+      throw(errorString);
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    return(0);
+  }
+  catch(...){
+    return(0);
+  }
+}
+
+
+std::shared_ptr<Jim> Jim::copy_image(int iband){
+  try{
+    if(nrOfBand()<=iband){
+      std::string errorString="Error: band number exceeds number of bands in input image";
+      throw(errorString);
+    }
+    IMAGE * imout;
+    imout=::copy_image(this->getMIA(iband));
+    this->setMIA(iband);
+    if(imout){
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout);
+      imgWriter->copyGeoTransform(*this);
+      imgWriter->setProjection(getProjectionRef());
+      return(imgWriter);
+    }
+    else{
+      std::string errorString="Error: copy_image() function in MIA failed, returning NULL pointer";
       throw(errorString);
     }
   }
