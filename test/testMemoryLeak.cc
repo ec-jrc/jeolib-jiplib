@@ -32,6 +32,9 @@ int main(int argc, char *argv[])
     for(int i=0;i<number_opt[0];++i){
       std::cout << "Creating shared pointer to image " << i << std::endl;
       imgRaster=jiplib::Jim::createImg(app);
+      std::cout << "Number of rows, cols, bands: "  << imgRaster->nrOfRow() << ", " << imgRaster->nrOfCol() << ", " << imgRaster->nrOfBand() << std::endl;
+      std::cout << "getMax(): "  << imgRaster->getMax() << std::endl;
+      imgRaster->close();
     }
   }
   catch(string helpString){

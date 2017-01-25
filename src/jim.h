@@ -66,7 +66,7 @@ namespace jiplib{
     ///constructor from app
   /* Jim(app::AppFactory &theApp): m_nplane(1), ImgRaster(theApp){}; */
     //test
-  Jim(app::AppFactory &theApp): m_nplane(1), ImgRaster(theApp){std::cout << "number of bands: " << nrOfBand() << std::endl;};
+  Jim(app::AppFactory &theApp): m_nplane(1), ImgRaster(theApp){};
     ///destructor
     ~Jim(void){
       if(m_mia.size()){
