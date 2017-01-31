@@ -48,6 +48,6 @@ int main(int argc, char *argv[])
     cout << "Usage: testCreateImg --ncol columns --ncol rows [--nband bands] -o output" << endl;
     return(1);
   }
-  std::cout << "test1: success" << std::endl;
+  std::cout << "test1: done" << std::endl;
   return(0);
 }

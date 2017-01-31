@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     shared_ptr<Jim> outputImg=Jim::createImg(app);
     outputImg->setFile(output_opt[0],oformat_opt[0]);
     outputImg->close();
-    std::cout << "test2: success" << std::endl;
+    std::cout << "test2: done" << std::endl;
   }
   catch(string helpString){//help was invoked
     std::cout << helpString << std::endl;
