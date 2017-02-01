@@ -743,6 +743,21 @@ std::shared_ptr<Jim> Jim::mean2d(int width, int iband){
     if(imout){
       std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout);
       imgWriter->copyGeoTransform(*this);
+
+
+/**
+ * @param gt pointer to the six geotransform parameters:
+ * @param adfGeoTransform[0] top left x
+ * @param GeoTransform[1] w-e pixel resolution
+ * @param GeoTransform[2] rotation, 0 if image is "north up"
+ * @param GeoTransform[3] top left y
+ * @param GeoTransform[4] rotation, 0 if image is "north up"
+ * @param GeoTransform[5] n-s pixel resolution
+ **/
+      //if (this->isGeoRef()){
+      //double gt[6]={...};
+      //imgWriter->setGeoTransform(gt);
+      
       imgWriter->setProjection(getProjectionRef());
       return(imgWriter);
     }
