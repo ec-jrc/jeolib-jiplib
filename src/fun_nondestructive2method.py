@@ -24,7 +24,7 @@ def fun2method(inputfile, outputfile_basename):
     for line in lines:
         print line
 
-        name=re.match(r'extern ERROR_TYPE (.*)\((.*)\);',line)
+        name=re.match(r'extern IMAGE \*(.*)\((.*)\);',line)
         args=re.split(',', name.group(2))
         re.sub('\**', '', re.sub('.* ', '', args[0]))
 
@@ -87,9 +87,9 @@ def fun2method(inputfile, outputfile_basename):
             cCall+=cSeparator+arg[1]
             separator=', '
 
-        fh.write(re.sub(r'Jim::','',methodDeclaration+separator+'int iband=0'+cSeparator+'bool destructive=false);\n'))
+        fh.write(re.sub(r'Jim::','',methodDeclaration+separator+'int iband=0);\n'))
         
-        methodDeclaration+=separator+'int iband'+cSeparator+'bool destructive)'
+        methodDeclaration+=separator+'int iband)'
 
         f.write(methodDeclaration+'{')
         f.write('\n\ttry{')
@@ -102,9 +102,10 @@ def fun2method(inputfile, outputfile_basename):
             f.write('\n\t\t\tstd::string errorString=\"Error: band number exceeds number of bands in input image\";')
             f.write('\n\t\t\tthrow(errorString);')
             f.write('\n\t\t}')
-        f.write('\n\t\t'+a.get("arguments")[0][0]+' '+a.get("arguments")[0][1]+' = 0;') # assigned later depending on destructive or not
+        #f.write('\n\t\t'+a.get("arguments")[0][0]+' '+a.get("arguments")[0][1]+' = 0;') # assigned later depending on destructive or not
+        f.write('\n\t\t'+'IMAGE * imout = 0;')
         llen=len(imDeclare)
-        for i in range(1,llen):  # skip first argument since it depends on whether destructive or not
+        for i in range(0,llen):
             f.write('\n\t\t'+imDeclare[i])
         for i in GTDeclare:
             f.write('\n\t\t'+i)
@@ -125,48 +126,25 @@ def fun2method(inputfile, outputfile_basename):
     \t\t\tbreak;
             \t\t}''')
 
-        f.write('\n\t\tif(!destructive){')
-        f.write('\n\t\t\t//make a copy of this')
-        f.write('\n\t\t\tstd::shared_ptr<Jim> copyImg=this->clone();')
-        f.write('\n\t\t\t'+a.get("arguments")[0][1]+'=copyImg->getMIA(iband);')
 
-        f.write('\n\t\t\tif(::'+a.get("name")+'('+cCall+') == NO_ERROR){')
-        f.write('\n\t\t\t\tcopyImg->setMIA(iband);')
-        for i in imRasterArray:
-          f.write('\n\t\t\t\t'+i+'.setMIA(iband);')
-        f.write('\n\t\t\t\treturn(copyImg);')
+        f.write('\n\t\timout =::'+a.get("name")+'('+cCall+');')
+        f.write('\n\t\t\tthis->getMIA(iband);')
+
+        f.write('\n\t\t\tif (imout){')
+        f.write('\n\t\t\t\tstd::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout);')
+        f.write('\n\t\t\t\timgWriter->copyGeoTransform(*this);')
+        f.write('\n\t\t\t\timgWriter->setProjection(getProjectionRef());')
+        f.write('\n\t\t\t\treturn(imgWriter);')
         f.write('\n\t\t\t}')
+
 
         f.write('\n\t\t\telse{')
-        f.write('\n\t\t\t\tcopyImg->setMIA(iband);')
-        for i in imRasterArray:
-           f.write('\n\t\t\t\t'+i+'.setMIA(iband);')
-        f.write('\n\t\t\t\tstd::string errorString="Error: '+a.get("name")+'() function in MIA failed, returning NULL pointer";')
-        f.write('\n\t\t\t\tthrow(errorString);')
-        f.write('\n\t\t\t}')
-        f.write('\n\t\t}')
-
-        f.write('\n\t\telse{')
-
-        f.write('\n\t\t\t'+a.get("arguments")[0][1]+'=this->getMIA(iband);')
-        f.write('\n\t\t\tif(::'+a.get("name")+'('+cCall+') == NO_ERROR){')
-        f.write('\n\t\t\t\tthis->setMIA(iband);')
-        for i in imRasterArray:
-           f.write('\n\t\t\t\t'+i+'.setMIA(iband);')
-           f.write('\n\t\t\t\treturn(this->getShared());')
-        f.write('\n\t\t\t}')
-
-        f.write('\n\t\t\telse{')
-        f.write('\n\t\t\t\tthis->setMIA(iband);')
-        for i in imRasterArray:
-           f.write('\n\t\t\t\t'+i+'.setMIA(iband);')
         f.write('\n\t\t\t\tstd::string errorString="Error: '+a.get("name")+'() function in MIA failed, returning NULL pointer";')
         f.write('\n\t\t\t\tthrow(errorString);')
         f.write('\n\t\t\t}')
 
         f.write('\n\t\t}')
 
-        f.write('\n\t}')
 
         f.write('''
         catch(std::string errorString){
@@ -176,7 +154,7 @@ def fun2method(inputfile, outputfile_basename):
         catch(...){
             \treturn(0);
         }
-}\n''')
+ }\n''')
 
     ifp.close()
 
@@ -216,10 +194,7 @@ if __name__ == "__main__":
    main(sys.argv[1:])
 
 
-
-
-# cat /home/soillpi/workstation/jip/mia//core/c/mialib_*.h | grep '^extern ERROR'  > mialib_error_type
-# cat /home/soillpi/work/jip20170201/mia//core/c/mialib_*.h | grep '^extern ERROR'  > mialib_error_type
-# python fun_destructive2method.py  -i mialib_error_type -o fun_destructive2method
+# cat /home/soillpi/work/jip20161114/mia//core/c/mialib_*.h | grep '^extern IMAGE \*[^\*]'  > mialib_image_type
+# python fun_nondestructive2method.py  -i mialib_image_type -o fun_nondestructive2method
 # to automatically insert content of fun2method in jim.h within placeholder //start insert from fun2method -> //end insert from fun2method
 # sed -i -ne '/\/\/start insert from fun2method/ {p; r fun2method.h' -e ':a; n; /\/\/end insert from fun2method/ {p; b}; ba}; p' jim.h

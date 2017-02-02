@@ -314,9 +314,114 @@ namespace jiplib{
     }
     //used as a template for functions returning IMAGE* with destructive flag
     /* std::shared_ptr<Jim> arith(Jim& imRaster_im2, int op, int iband=0, bool destructive=false); */
-    //#include "fun2method.h"
+    //#include "fun_nondestructive2method.h"
+    //start insert from fun_destructive2method
+std::shared_ptr<Jim> convolve(Jim& imRaster_imse, Jim& imRaster_imweight, int  ox, int  oy, int  oz, int iband=0);
+std::shared_ptr<Jim> convolvedownsample(Jim& imRaster_imse, Jim& imRaster_imweight, int  w, int  ox, int  oy, int  oz, int iband=0);
+std::shared_ptr<Jim> rsum2d(int iband=0);
+std::shared_ptr<Jim> rsum3d(int iband=0);
+std::shared_ptr<Jim> rsumsq2d(int iband=0);
+std::shared_ptr<Jim> mean2d(int  width, int iband=0);
+std::shared_ptr<Jim> mean2dse(Jim& imRaster_imse, int  ox, int  oy, int iband=0);
+std::shared_ptr<Jim> variance2dse(Jim& imRaster_imse, int  ox, int  oy, int iband=0);
+std::shared_ptr<Jim> phase_correlation(Jim& imRaster_im_template, int iband=0);
+std::shared_ptr<Jim> d8(int iband=0);
+std::shared_ptr<Jim> slope8(int iband=0);
+std::shared_ptr<Jim> flow(int  graph, int iband=0);
+std::shared_ptr<Jim> flownew(Jim& imRaster_imdir, int  graph, int iband=0);
+std::shared_ptr<Jim> cda(int  graph, int iband=0);
+std::shared_ptr<Jim> stratify(Jim& imRaster_thresh, Jim& imRaster_dir, int iband=0);
+std::shared_ptr<Jim> dinf(int iband=0);
+std::shared_ptr<Jim> cdainf(int iband=0);
+std::shared_ptr<Jim> slopeinf(int iband=0);
+std::shared_ptr<Jim> aflood(Jim& imRaster_imr, int  graph, int  maxfl, int iband=0);
+std::shared_ptr<Jim> fillocarve(Jim& imRaster_imr, int  graph, int  maxfl, int  flag, int iband=0);
+std::shared_ptr<Jim> FlatDir(Jim& imRaster_im, int  graph, int iband=0);
+std::shared_ptr<Jim> htop(Jim& imRaster_d8, int iband=0);
+std::shared_ptr<Jim> shade(int  dir, int iband=0);
+std::shared_ptr<Jim> LineDilate3D(float  dh, int iband=0);
+std::shared_ptr<Jim> sqedt(int iband=0);
+std::shared_ptr<Jim> iz(int iband=0);
+std::shared_ptr<Jim> ced(Jim& imRaster_mask, int iband=0);
+std::shared_ptr<Jim> erode(Jim& imRaster_imse, int  ox, int  oy, int  oz, int  trflag, int iband=0);
+std::shared_ptr<Jim> dilate(Jim& imRaster_imse, int  ox, int  oy, int  oz, int  trflag, int iband=0);
+std::shared_ptr<Jim> volerode(Jim& imRaster_imse, Jim& imRaster_imweight, int  ox, int  oy, int  oz, int iband=0);
+std::shared_ptr<Jim> rank(Jim& imRaster_imse, int  rank, int  ox, int  oy, int  oz, int  trflag, int iband=0);
+std::shared_ptr<Jim> squarerank(int  k, int  rank, int  ox, int  oy, int iband=0);
+std::shared_ptr<Jim> squarevol(int  k, int  ox, int  oy, int iband=0);
+std::shared_ptr<Jim> lrankti(int  dx, int  dy, int  k, int  rank, int  o, int  t, int  tr, int iband=0);
+std::shared_ptr<Jim> erodelabel(int  graph, int iband=0);
+std::shared_ptr<Jim> to_tiff1bitpp(int iband=0);
+std::shared_ptr<Jim> to_tiff4bitpp(int iband=0);
+std::shared_ptr<Jim> to_ushort(int iband=0);
+std::shared_ptr<Jim> to_int32(int iband=0);
+std::shared_ptr<Jim> to_float(int iband=0);
+std::shared_ptr<Jim> to_double(int iband=0);
+std::shared_ptr<Jim> deinterleave(int iband=0);
+std::shared_ptr<Jim> imhsi2rgb(Jim& imRaster_ims, Jim& imRaster_imi, int iband=0);
+std::shared_ptr<Jim> imhls2rgb(Jim& imRaster_ims, Jim& imRaster_imi, int iband=0);
+std::shared_ptr<Jim> crgb2rgb(Jim& imRaster_ims, Jim& imRaster_imi, int iband=0);
+std::shared_ptr<Jim> minima(int  graph, int iband=0);
+std::shared_ptr<Jim> sqtgsym(Jim& imRaster_im_r, int  graph, int iband=0);
+std::shared_ptr<Jim> imcut(int  x1, int  y1, int  z1, int  x2, int  y2, int  z2, int iband=0);
+std::shared_ptr<Jim> getboundingbox(int iband=0);
+std::shared_ptr<Jim> magnify(int  n, int iband=0);
+std::shared_ptr<Jim> epc(Jim& imRaster_lut, int iband=0);
+std::shared_ptr<Jim> epcgrey(Jim& imRaster_lut, int iband=0);
+std::shared_ptr<Jim> switchop(Jim& imRaster_imse, int  ox, int  oy, int  oz, int iband=0);
+std::shared_ptr<Jim> copy_image(int iband=0);
+std::shared_ptr<Jim> imtoarray(Jim& imRaster_imroi, int iband=0);
+std::shared_ptr<Jim> arraytoim(Jim& imRaster_imroi, int iband=0);
+std::shared_ptr<Jim> region_lut(int  graph, int  type, int  param1, int  param2, int iband=0);
+std::shared_ptr<Jim> region_lut_seq(int  graph, int  type, int iband=0);
+std::shared_ptr<Jim> region_im_lut(Jim& imRaster_im, int  graph, int  type, float  aval, int iband=0);
+std::shared_ptr<Jim> contortion_lut(int  graph, int iband=0);
+std::shared_ptr<Jim> alphacc(Jim& imRaster_dissy, int  alpha, int iband=0);
+std::shared_ptr<Jim> labelvertex(int  alpha, int  graph, int iband=0);
+std::shared_ptr<Jim> vertexseparation(int  graph, int  type, int iband=0);
+std::shared_ptr<Jim> labelvertexconnectedness(int  alpha, int  graph, int  deg, int iband=0);
+std::shared_ptr<Jim> labelcc(Jim& imRaster_imse, int  ox, int  oy, int  oz, int  rg, int  rl, int iband=0);
+std::shared_ptr<Jim> labelccmi(Jim& imRaster_immi, Jim& imRaster_imse, int  ox, int  oy, int  oz, int  rg, int  rl, int iband=0);
+std::shared_ptr<Jim> labelci(Jim& imRaster_imse, int  ox, int  oy, int  oz, int  rl, int iband=0);
+std::shared_ptr<Jim> labelccdissim(Jim& imRaster_imh, Jim& imRaster_imv, int  rg, int  rl, int iband=0);
+std::shared_ptr<Jim> labelccvar(Jim& imRaster_imse, int  ox, int  oy, int  oz, int  rg, int  rl, double  varmax, int iband=0);
+std::shared_ptr<Jim> labelccattr(int  graph, int  rg, int  rl, int iband=0);
+std::shared_ptr<Jim> edgeweight(int  dir, int  type, int iband=0);
+std::shared_ptr<Jim> dbscan(double  eps, int  MinPts, int iband=0);
+std::shared_ptr<Jim> outeredgelut(Jim& imRaster_iedgelbl, int iband=0);
+std::shared_ptr<Jim> outeredge(int  graph, int iband=0);
+std::shared_ptr<Jim> outercontour(int  graph, int iband=0);
+std::shared_ptr<Jim> dirmean(Jim& imRaster_imy, Jim& imRaster_imse, int  ox, int  oy, int  oz, int iband=0);
+std::shared_ptr<Jim> coherence(Jim& imRaster_imy, Jim& imRaster_imse, int  ox, int  oy, int  oz, int iband=0);
+std::shared_ptr<Jim> coor_extrema_paraboloid(int iband=0);
+std::shared_ptr<Jim> fitlinear(IMAGE  * yarray, int iband=0);
+std::shared_ptr<Jim> transgrad(int  graph, int iband=0);
+std::shared_ptr<Jim> attribute(int  type, int  oporclo, double  lambdaVal, int  graph, int iband=0);
+std::shared_ptr<Jim> GreyAreaOpening(int  lambdaVal, int  graph, int iband=0);
+std::shared_ptr<Jim> GreyAreaClosing(int  lambdaVal, int  graph, int iband=0);
+std::shared_ptr<Jim> GreyAreaOpeningROI(int  lambdaVal, int  graph, int iband=0);
+std::shared_ptr<Jim> GreyAreaClosingROI(int  lambdaVal, int  graph, int iband=0);
+std::shared_ptr<Jim> chull(int  graph, int iband=0);
+std::shared_ptr<Jim> hpclose(int  dx, int  dy, int iband=0);
+std::shared_ptr<Jim> hpcloseti(int  dx, int  dy, int iband=0);
+std::shared_ptr<Jim> grid(Jim& imRaster_roi, Jim& imRaster_imx, Jim& imRaster_imy, float  alpha, int iband=0);
+std::shared_ptr<Jim> ws(int  graph, int iband=0);
+std::shared_ptr<Jim> histo1d(int iband=0);
+std::shared_ptr<Jim> histo2d(Jim& imRaster_im2, int iband=0);
+std::shared_ptr<Jim> histo3d(Jim& imRaster_im2, Jim& imRaster_im3, int iband=0);
+std::shared_ptr<Jim> rsum(int iband=0);
+std::shared_ptr<Jim> lookuprgb(Jim& imRaster_img, Jim& imRaster_imb, Jim& imRaster_imlut, int iband=0);
+std::shared_ptr<Jim> class2d(Jim& imRaster_im2, Jim& imRaster_imlut, int iband=0);
+std::shared_ptr<Jim> area(int  r, int  type, int iband=0);
+std::shared_ptr<Jim> dirsum(int  dir, int iband=0);
+std::shared_ptr<Jim> sortindex(int iband=0);
+std::shared_ptr<Jim> ssda(Jim& imRaster_imt, int  xi, int  yi, int  w, int iband=0);
+std::shared_ptr<Jim> ncclewis(Jim& imRaster_imt, Jim& imRaster_sim, Jim& imRaster_ssqim, int  xi, int  yi, int  w, int iband=0);
+std::shared_ptr<Jim> ncc(Jim& imRaster_imt, int  xi, int  yi, int  w, int iband=0);
+    //end insert from fun_nondestructive2method
 
-    //start insert from fun2method
+    //#include "fun_destruct2method.h"
+    //start insert from fun_destructive2method
 std::shared_ptr<Jim> azimuth(Jim& imRaster_iy, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> mapori(int  ox, int  oy, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> dir(int  graph, int iband=0, bool destructive=false);
@@ -428,8 +533,8 @@ std::shared_ptr<Jim> clmaha(Jim& imRaster_imin, int  bklabel, int  mode, double 
 std::shared_ptr<Jim> clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int iband=0, bool destructive=false);
     //end insert from fun2method
 ///functions from mialib returning an image (example only must be wrapped automated via Python script)
- std::shared_ptr<Jim> mean2d(int width, int iband=0);
- std::shared_ptr<Jim> copy_image(int iband=0);
+// std::shared_ptr<Jim> mean2d(int width, int iband=0);
+// std::shared_ptr<Jim> copy_image(int iband=0);
  //functions from mialib returning image list (manually wrapped)
  JimList rotatecoor(double theta, int iband=0);
  JimList imgc(int iband=0);

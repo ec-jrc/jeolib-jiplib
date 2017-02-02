@@ -483,9 +483,7 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
 //   }
 // }
 
-
-
-#include "fun2method.cc"
+#include "fun_destructive2method.cc"
 
 //shown as a template function here only (not implemented because imout is composed of images of different datatypes)
 // std::shared_ptr<Jim> Jim::imrgb2hsx(int x){
@@ -731,79 +729,81 @@ bool Jim::operator==(std::shared_ptr<Jim> refImg)
 //   return(theVolume);
 // }
 
-std::shared_ptr<Jim> Jim::mean2d(int width, int iband){
-  try{
-    if(nrOfBand()<=iband){
-      std::string errorString="Error: band number exceeds number of bands in input image";
-      throw(errorString);
-    }
-    IMAGE * imout;
-    imout=::mean2d(this->getMIA(iband),width);
-    this->setMIA(iband);
-    if(imout){
-      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout);
-      imgWriter->copyGeoTransform(*this);
+#include "fun_nondestructive2method.cc"
+
+// std::shared_ptr<Jim> Jim::mean2d(int width, int iband){
+//   try{
+//     if(nrOfBand()<=iband){
+//       std::string errorString="Error: band number exceeds number of bands in input image";
+//       throw(errorString);
+//     }
+//     IMAGE * imout;
+//     imout=::mean2d(this->getMIA(iband),width);
+//     this->setMIA(iband);
+//     if(imout){
+//       std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout);
+//       imgWriter->copyGeoTransform(*this);
 
 
-/**
- * @param gt pointer to the six geotransform parameters:
- * @param adfGeoTransform[0] top left x
- * @param GeoTransform[1] w-e pixel resolution
- * @param GeoTransform[2] rotation, 0 if image is "north up"
- * @param GeoTransform[3] top left y
- * @param GeoTransform[4] rotation, 0 if image is "north up"
- * @param GeoTransform[5] n-s pixel resolution
- **/
-      //if (this->isGeoRef()){
-      //double gt[6]={...};
-      //imgWriter->setGeoTransform(gt);
+// /**
+//  * @param gt pointer to the six geotransform parameters:
+//  * @param adfGeoTransform[0] top left x
+//  * @param GeoTransform[1] w-e pixel resolution
+//  * @param GeoTransform[2] rotation, 0 if image is "north up"
+//  * @param GeoTransform[3] top left y
+//  * @param GeoTransform[4] rotation, 0 if image is "north up"
+//  * @param GeoTransform[5] n-s pixel resolution
+//  **/
+//       //if (this->isGeoRef()){
+//       //double gt[6]={...};
+//       //imgWriter->setGeoTransform(gt);
       
-      imgWriter->setProjection(getProjectionRef());
-      return(imgWriter);
-    }
-    else{
-      std::string errorString="Error: mean2d() function in MIA failed, returning NULL pointer";
-      throw(errorString);
-    }
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    return(0);
-  }
-  catch(...){
-    return(0);
-  }
-}
+//       imgWriter->setProjection(getProjectionRef());
+//       return(imgWriter);
+//     }
+//     else{
+//       std::string errorString="Error: mean2d() function in MIA failed, returning NULL pointer";
+//       throw(errorString);
+//     }
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     return(0);
+//   }
+//   catch(...){
+//     return(0);
+//   }
+// }
 
 
-std::shared_ptr<Jim> Jim::copy_image(int iband){
-  try{
-    if(nrOfBand()<=iband){
-      std::string errorString="Error: band number exceeds number of bands in input image";
-      throw(errorString);
-    }
-    IMAGE * imout;
-    imout=::copy_image(this->getMIA(iband));
-    this->setMIA(iband);
-    if(imout){
-      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout);
-      imgWriter->copyGeoTransform(*this);
-      imgWriter->setProjection(getProjectionRef());
-      return(imgWriter);
-    }
-    else{
-      std::string errorString="Error: copy_image() function in MIA failed, returning NULL pointer";
-      throw(errorString);
-    }
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    return(0);
-  }
-  catch(...){
-    return(0);
-  }
-}
+// std::shared_ptr<Jim> Jim::copy_image(int iband){
+//   try{
+//     if(nrOfBand()<=iband){
+//       std::string errorString="Error: band number exceeds number of bands in input image";
+//       throw(errorString);
+//     }
+//     IMAGE * imout;
+//     imout=::copy_image(this->getMIA(iband));
+//     this->setMIA(iband);
+//     if(imout){
+//       std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout);
+//       imgWriter->copyGeoTransform(*this);
+//       imgWriter->setProjection(getProjectionRef());
+//       return(imgWriter);
+//     }
+//     else{
+//       std::string errorString="Error: copy_image() function in MIA failed, returning NULL pointer";
+//       throw(errorString);
+//     }
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     return(0);
+//   }
+//   catch(...){
+//     return(0);
+//   }
+// }
 
 JimList Jim::rotatecoor(double theta, int iband){
   JimList listout;
