@@ -43,7 +43,7 @@ IMAGE* Jim::getMIA(int band){
 }
 
 /**
- * set jim data pointer to the m_mia data pointer 
+ * set jim data pointer to the m_mia data pointer
  *
  * @param band the band for which the MIA image pointer needs to be set
  *
@@ -152,7 +152,41 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
   return(CE_None);
 }
 
-//used as a template for functions returning IMAGE* with destructive flag
+//used as a template for destructive functions returning IMAGE*
+// CPLErr Jim::d_arith(Jim& imRaster_im2, int op, int iband){
+//   try{
+//     if(nrOfBand()<=iband){
+//       std::string errorString="Error: band number exceeds number of bands in input image";
+//       throw(errorString);
+//     }
+//     if(imRaster_im2.nrOfBand()<=iband){
+//       std::string errorString="Error: band number exceeds number of bands in input image";
+//       throw(errorString);
+//     }
+//     IMAGE * im1;
+//     IMAGE * im2=imRaster_im2.getMIA(iband);
+//     im1=this->getMIA(iband);
+//     if(::arith(im1, im2, op) == NO_ERROR){
+//       this->setMIA(iband);
+//       imRaster_im2.setMIA(iband);
+//       return(CE_None);
+//     }
+//     else{
+//       this->setMIA(iband);
+//       imRaster_im2.setMIA(iband);
+//       std::string errorString="Error: arith() function in MIA failed, returning NULL pointer";
+//       throw(errorString);
+//     }
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     return(CE_Failure);
+//   }
+//   catch(...){
+//     return(CE_Failure);
+//   }
+// }
+//used as a template for non-destructive functions returning IMAGE*
 // std::shared_ptr<Jim> Jim::arith(Jim& imRaster_im2, int op, int iband, bool destructive){
 //   try{
 //     if(nrOfBand()<=iband){
@@ -757,7 +791,7 @@ std::shared_ptr<Jim> Jim::mean2d(int width, int iband){
       //if (this->isGeoRef()){
       //double gt[6]={...};
       //imgWriter->setGeoTransform(gt);
-      
+
       imgWriter->setProjection(getProjectionRef());
       return(imgWriter);
     }
