@@ -5,10 +5,14 @@
   - Add binding of mialib functions in cmake (PK)
   - Add from and to numpy functions, see mialib_python.i (PK)
   - Add UINT64 data type in Jim (PK)
-  - Automatic binding of functions returning an IMAGE * (see template in mean2d in jim.cc) (PS)
   - ERROR_TYPE functions that do not modify the input image (e.g. iminfo) should not use the bool variable destructive: create list (PS)
   - Address those functions with pointer arguments (besides IMAGE * or IMAGE **): create list (PS), define desired behaviour at python level (PS-PK), and then solve (at interface file level?).
   - Confirm that arguments of overloaded methods with default argument values cannot be used as keys (PK)
   - Solve the problem related to ERROR_TYPE return in a functional call (refers to a memory leak and returned ERROR_TYPE * !!!)
   - Address mialib functions modifying GeoTransform/Projection: create list (PS) and then ad hoc procedure to be put in place.
+
+
+
+* Done:
+  - Automatic binding of functions returning an IMAGE * (see template in mean2d in jim.cc) (PS on 20170202)
 
