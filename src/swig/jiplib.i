@@ -196,6 +196,7 @@ namespace jiplib{
 //Parse the header file
 //%include "swig/pktools.i"
 %include "swig/mialib_tmp.i"
+%include "swig/jiplib_python.i"
 %include "imageclasses/ImgCollection.h"
 %include "imageclasses/ImgRaster.h"
 %include "imageclasses/ImgReaderOgr.h"

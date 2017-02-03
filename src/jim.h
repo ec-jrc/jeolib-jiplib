@@ -314,14 +314,15 @@ namespace jiplib{
     }
     //used as a template for functions returning IMAGE* with destructive flag
     /* std::shared_ptr<Jim> arith(Jim& imRaster_im2, int op, int iband=0, bool destructive=false); */
-    //start insert from fun_nondestructive2method
-    //end insert from fun_nondestructive2method
+    //start insert from fun2method_imagetype
+    //end insert from fun2method_imagetype
     //start insert from fun2method_errortype
     //end insert from fun2method_errortype
     //start insert from fun2method_errortype_d
     //end insert from fun2method_errortype_d
     /* std::shared_ptr<Jim> arith(Jim& imRaster_im2, int op, int iband=0, bool destructive=false); */
     /* CPLErr d_arith(Jim& imRaster_im2, int op, int iband=0); */
+
 ///functions from mialib returning an image (example only must be wrapped automated via Python script)
 // std::shared_ptr<Jim> mean2d(int width, int iband=0);
 // std::shared_ptr<Jim> copy_image(int iband=0);

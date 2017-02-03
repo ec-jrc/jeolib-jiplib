@@ -273,7 +273,7 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
   IMAGE *imp=(IMAGE *)$1;
   std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>();
   /* std::shared_ptr<jiplib::Jim> result=jiplib::Jim::createImg(); */
-  std::shared_ptr<jiplib::Jim> result=std::make_shared<jiplib::Jim>();
+  std::shared_ptr<jiplib::Jim> result = std::make_shared<jiplib::Jim>();
   result->setMIA(imp);
   PyObject* o=0;
   std::shared_ptr<  jiplib::Jim > *smartresult = result ? new std::shared_ptr<  jiplib::Jim >(result) : 0;

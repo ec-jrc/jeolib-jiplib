@@ -76,11 +76,11 @@ CPLErr Jim::setMIA(int band){
       throw(errorString);
     }
     // if(m_nband>1&&m_dataType!=MIA2GDALDataType(m_mia[band]->DataType)){
-    if(m_dataType!=MIA2GDALDataType(m_mia[band]->DataType)){
+    if( (m_dataType!=MIA2GDALDataType(m_mia[band]->DataType)) && nrOfBand() > 1){
       std::cout << "Warning: changing data type of multiband image, make sure to set all bands" << std::endl;
     }
     m_dataType=MIA2GDALDataType(m_mia[band]->DataType);
-    m_data[band]=(unsigned char *)m_mia[band]->p_im;
+    m_data[band]=(void *)m_mia[band]->p_im;
     // m_data[band]=(unsigned char *)m_mia[band]->p_im + band * nrOfRow() * nrOfCol() * (GDALGetDataTypeSize(getDataType())>>3);
     m_begin[band]=0;
     m_end[band]=m_begin[band]+getBlockSize();
