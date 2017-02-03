@@ -161,7 +161,16 @@ target_link_libraries(
   )
 # add_subdirectory ("${PROJECT_SOURCE_DIR}")
 ###############################################################################
+execute_process(COMMAND bash "-c" "echo -n hello | sed 's/hello/world/;'" OUTPUT_VARIABLE FOO)
 
+execute_process(COMMAND bash "cat /usr/local/include/mialib/mialib_*.h | grep '^extern IMAGE \*[^\*]'" OUTPUT_FILE ${PROJECT_SOURCE_DIR}/mialib_image_type)
+execute_process(COMMAND bash "cat /usr/local/include/mialib/mialib_*.h | grep '^extern ERROR'" OUTPUT_FILE ${PROJECT_SOURCE_DIR}/mialib_error_type)
+execute_process(COMMAND "${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/fun2method_imagetype.py  -i ${PROJECT_SOURCE_DIR}/mialib_image_type -o fun2method_imagetype")
+execute_process(COMMAND "${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/fun2method_errortype.py  -i ${PROJECT_SOURCE_DIR}/mialib_error_type -o fun2method_errortype")
+execute_process(COMMAND "${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/fun2method_errortype_d.py  -i ${PROJECT_SOURCE_DIR}/mialib_error_type -o fun2method_errortype_d")
+execute_process(COMMAND bash "sed -i -ne '/\/\/start insert from fun2method_imagetype/ {p; r fun2method_imagetype.h' -e ':a; n; /\/\/end insert from fun2method_imagetype/ {p; b}; ba}; p' jim.h")
+execute_process(COMMAND bash "sed -i -ne '/\/\/start insert from fun2method_errortype/ {p; r fun2method_errortype.h' -e ':a; n; /\/\/end insert from fun2method_errortype/ {p; b}; ba}; p' jim.h")
+execute_process(COMMAND bash "sed -i -ne '/\/\/start insert from fun2method_errortype_d/ {p; r fun2method_errortype_d.h' -e ':a; n; /\/\/end insert from fun2method_errortype_d/ {p; b}; ba}; p' jim.h")
 ########## SWIG #############
 FIND_PACKAGE(SWIG REQUIRED)
 FIND_PACKAGE(PythonLibs)

@@ -7,7 +7,7 @@ def fun2method(inputfile, outputfile_basename):
     :param inputfile: string for input file containing extern declarations
     :param outputfile_basename: string for output file basename (i.e. without extension)
     :returns: True on success, False otherwise
-    :rtype: 
+    :rtype:
 
     """
 
@@ -17,8 +17,8 @@ def fun2method(inputfile, outputfile_basename):
 
     f = open(outputfile_basename+'.cc', 'w')
     fh = open(outputfile_basename+'.h', 'w')
-   
-    
+
+
     lines=ifp.readlines()
 
     for line in lines:
@@ -51,7 +51,7 @@ def fun2method(inputfile, outputfile_basename):
         MIATypes = ['uc_', 's_', 'us_', 'i32_', 'u32_', 'f_', 'd_']
         CTypes = ['unsigned char', 'short int', 'unsigned short int', 'int', 'unsigned int', 'float', 'double']
 
-        methodDeclaration='CPLErr Jim::'+a.get("name")+'('
+        methodDeclaration='CPLErr Jim::d_'+a.get("name")+'('
         print methodDeclaration
 
         cSeparator=', '
@@ -72,7 +72,7 @@ def fun2method(inputfile, outputfile_basename):
             print separator
             print arg
             print arg[0]
-            
+
             if (arg[0]=='IMAGE *'):
                 methodDeclaration+=separator+'Jim& imRaster_'+arg[1]
                 imRasterArray.append('imRaster_'+arg[1])
@@ -88,22 +88,24 @@ def fun2method(inputfile, outputfile_basename):
             separator=', '
 
         fh.write(re.sub(r'Jim::','',methodDeclaration+separator+'int iband=0);\n'))
-        
+
         methodDeclaration+=separator+'int iband)'
 
         f.write(methodDeclaration+'{')
-        f.write('\n\t try{')
-        f.write('\n\t\t if(nrOfBand()<=iband){')
-        f.write('\n\t\t\t std::string errorString=\"Error: band number exceeds number of bands in input image\";')
-        f.write('\n\t\t\t throw(errorString);')
-        f.write('\n\t\t }')
+        f.write('\n\ttry{')
+        f.write('\n\t\tif(nrOfBand()<=iband){')
+        f.write('\n\t\t\tstd::string errorString=\"Error: band number exceeds number of bands in input image\";')
+        f.write('\n\t\t\tthrow(errorString);')
+        f.write('\n\t\t}')
         for i in imRasterArray:
-            f.write('\n\t\t if('+i+'.nrOfBand()<=iband){')
-            f.write('\n\t\t\t std::string errorString=\"Error: band number exceeds number of bands in input image\";')
-            f.write('\n\t\t\t throw(errorString);')
-            f.write('\n\t\t }')
-        for i in imDeclare:
-            f.write('\n\t\t'+i)
+            f.write('\n\t\tif('+i+'.nrOfBand()<=iband){')
+            f.write('\n\t\t\tstd::string errorString=\"Error: band number exceeds number of bands in input image\";')
+            f.write('\n\t\t\tthrow(errorString);')
+            f.write('\n\t\t}')
+        f.write('\n\t\t'+a.get("arguments")[0][0]+' '+a.get("arguments")[0][1]+' = 0;') # assigned later depending on destructive or not
+        llen=len(imDeclare)
+        for i in range(1,llen):  # skip first argument since it depends on whether destructive or not
+            f.write('\n\t\t'+imDeclare[i])
         for i in GTDeclare:
             f.write('\n\t\t'+i)
 
@@ -121,34 +123,34 @@ def fun2method(inputfile, outputfile_basename):
     \t\t\tstd::string errorString="Error: data type not supported";
     \t\t\tthrow(errorString);
     \t\t\tbreak;
-    \t\t}''')
+            \t\t}''')
 
-
-
+        f.write('\n\t\t'+a.get("arguments")[0][1]+'=this->getMIA(iband);')
         f.write('\n\t\tif(::'+a.get("name")+'('+cCall+') == NO_ERROR){')
         f.write('\n\t\t\tthis->setMIA(iband);')
         for i in imRasterArray:
-            f.write('\n\t\t\t'+i+'.setMIA(iband);')
-        f.write('\n\t\t\treturn(CE_None);')
+           f.write('\n\t\t\t'+i+'.setMIA(iband);')
+           f.write('\n\t\t\treturn(CE_None);')
         f.write('\n\t\t}')
+
         f.write('\n\t\telse{')
         f.write('\n\t\t\tthis->setMIA(iband);')
         for i in imRasterArray:
-            f.write('\n\t\t\t'+i+'.setMIA(iband);')
-        f.write('\n\t\t\tstd::string errorString="Error: '+name.group(1)+'() function in MIA failed";')
+           f.write('\n\t\t\t'+i+'.setMIA(iband);')
+        f.write('\n\t\t\tstd::string errorString="Error: '+a.get("name")+'() function in MIA failed";')
         f.write('\n\t\t\tthrow(errorString);')
         f.write('\n\t\t}')
-        f.write('\n\t}')
+
         f.write('''
-        \tcatch(std::string errorString){
-        \t\tstd::cerr << errorString << std::endl;
-        \t\treturn(CE_Failure);
-        \t}
-        \tcatch(...){
-        \t\treturn(CE_Failure);
-        \t}
         }
-    ''')
+        catch(std::string errorString){
+        \tstd::cerr << errorString << std::endl;
+            \treturn(CE_Failure);
+        }
+        catch(...){
+            \treturn(CE_Failure);
+        }
+}\n''')
 
     ifp.close()
 
@@ -190,7 +192,9 @@ if __name__ == "__main__":
 
 
 
-# cat /home/soillpi/workstation/jip/mia//core/c/mialib_*.h | grep '^extern ERROR'  > toto
-# python fun2method.py  -i toto -o fun2method
+# cat /home/soillpi/workstation/jip/mia//core/c/mialib_*.h | grep '^extern ERROR'  > mialib_error_type
+# cat /home/soillpi/work/jip20170201/mia//core/c/mialib_*.h | grep '^extern ERROR'  > mialib_error_type
+# cat /usr/local/include/mialib/mialib_*.h | grep '^extern ERROR'  > mialib_error_type
+# python fun2method_errortype_d.py  -i mialib_error_type -o fun2method_errortype_d
 # to automatically insert content of fun2method in jim.h within placeholder //start insert from fun2method -> //end insert from fun2method
-# sed -i -ne '/\/\/start insert from fun2method/ {p; r fun2method.h' -e ':a; n; /\/\/end insert from fun2method/ {p; b}; ba}; p' jim.h
+# sed -i -ne '/\/\/start insert from fun2method_errortype_d/ {p; r fun2method_errortype_d.h' -e ':a; n; /\/\/end insert from fun2method_errortype_d/ {p; b}; ba}; p' jim.h

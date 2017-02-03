@@ -125,45 +125,23 @@ def fun2method(inputfile, outputfile_basename):
     \t\t\tbreak;
             \t\t}''')
 
-        f.write('\n\t\tif(!destructive){')
-        f.write('\n\t\t\t//make a copy of this')
-        f.write('\n\t\t\tstd::shared_ptr<Jim> copyImg=this->clone();')
-        f.write('\n\t\t\t'+a.get("arguments")[0][1]+'=copyImg->getMIA(iband);')
+        f.write('\n\t\t//make a copy of this')
+        f.write('\n\t\tstd::shared_ptr<Jim> copyImg=this->clone();')
+        f.write('\n\t\t'+a.get("arguments")[0][1]+'=copyImg->getMIA(iband);')
 
-        f.write('\n\t\t\tif(::'+a.get("name")+'('+cCall+') == NO_ERROR){')
-        f.write('\n\t\t\t\tcopyImg->setMIA(iband);')
+        f.write('\n\t\tif(::'+a.get("name")+'('+cCall+') == NO_ERROR){')
+        f.write('\n\t\t\tcopyImg->setMIA(iband);')
         for i in imRasterArray:
-          f.write('\n\t\t\t\t'+i+'.setMIA(iband);')
-        f.write('\n\t\t\t\treturn(copyImg);')
-        f.write('\n\t\t\t}')
-
-        f.write('\n\t\t\telse{')
-        f.write('\n\t\t\t\tcopyImg->setMIA(iband);')
-        for i in imRasterArray:
-           f.write('\n\t\t\t\t'+i+'.setMIA(iband);')
-        f.write('\n\t\t\t\tstd::string errorString="Error: '+a.get("name")+'() function in MIA failed, returning NULL pointer";')
-        f.write('\n\t\t\t\tthrow(errorString);')
-        f.write('\n\t\t\t}')
+          f.write('\n\t\t\t'+i+'.setMIA(iband);')
+        f.write('\n\t\t\treturn(copyImg);')
         f.write('\n\t\t}')
 
         f.write('\n\t\telse{')
-
-        f.write('\n\t\t\t'+a.get("arguments")[0][1]+'=this->getMIA(iband);')
-        f.write('\n\t\t\tif(::'+a.get("name")+'('+cCall+') == NO_ERROR){')
-        f.write('\n\t\t\t\tthis->setMIA(iband);')
+        f.write('\n\t\t\tcopyImg->setMIA(iband);')
         for i in imRasterArray:
-           f.write('\n\t\t\t\t'+i+'.setMIA(iband);')
-           f.write('\n\t\t\t\treturn(this->getShared());')
-        f.write('\n\t\t\t}')
-
-        f.write('\n\t\t\telse{')
-        f.write('\n\t\t\t\tthis->setMIA(iband);')
-        for i in imRasterArray:
-           f.write('\n\t\t\t\t'+i+'.setMIA(iband);')
-        f.write('\n\t\t\t\tstd::string errorString="Error: '+a.get("name")+'() function in MIA failed, returning NULL pointer";')
-        f.write('\n\t\t\t\tthrow(errorString);')
-        f.write('\n\t\t\t}')
-
+           f.write('\n\t\t\t'+i+'.setMIA(iband);')
+        f.write('\n\t\t\tstd::string errorString="Error: '+a.get("name")+'() function in MIA failed, returning NULL pointer";')
+        f.write('\n\t\t\tthrow(errorString);')
         f.write('\n\t\t}')
 
         f.write('\n\t}')
@@ -220,6 +198,6 @@ if __name__ == "__main__":
 
 # cat /home/soillpi/workstation/jip/mia//core/c/mialib_*.h | grep '^extern ERROR'  > mialib_error_type
 # cat /home/soillpi/work/jip20170201/mia//core/c/mialib_*.h | grep '^extern ERROR'  > mialib_error_type
-# python fun_destructive2method.py  -i mialib_error_type -o fun_destructive2method
+# python fun2method_errortype.py  -i mialib_error_type -o fun2method_errortype
 # to automatically insert content of fun2method in jim.h within placeholder //start insert from fun2method -> //end insert from fun2method
-# sed -i -ne '/\/\/start insert from fun_destructive2method/ {p; r fun_destructive2method.h' -e ':a; n; /\/\/end insert from fun_destructive2method/ {p; b}; ba}; p' jim.h
+# sed -i -ne '/\/\/start insert from fun2method_errortype/ {p; r fun2method_errortype.h' -e ':a; n; /\/\/end insert from fun2method_errortype/ {p; b}; ba}; p' jim.h
