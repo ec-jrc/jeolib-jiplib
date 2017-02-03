@@ -40,10 +40,11 @@
     IMAGE *im=ajim->getMIA();
     printf("coucou\n");
     im->p_im=memcpy( (void *)GetImPtr(im), (void *)(psArray->data), GetImNx(im)*GetImNy(im)*(GetImBitPerPixel(im)/8));
+    ajim->setMIA();
     return NO_ERROR;
   }
 
-  ERROR_TYPE RasterIOJim( std::shared_ptr< jiplib::Jim > *ajim, PyArrayObject *psArray) {
+  ERROR_TYPE RasterIOJim( std::shared_ptr< jiplib::Jim > ajim, PyArrayObject *psArray) {
     //IMAGE *im=ajim->getMIA();
     printf("coucou\n");
     //psArray->data = (char *)memcpy((void *)(psArray->data), (void *)GetImPtr(im), GetImNx(im)*GetImNy(im)*(GetImBitPerPixel(im)/8) );
@@ -188,10 +189,17 @@ def ConvertNumPyArrayToMIALibImage( psArray ):
 def np2jim( psArray):
     """Pure python implementation of converting a numpy array into
     a JIPLib image.  Data values are copied!"""
-    jim=_jiplib.create_image(NumPyToImDataTypeCode(psArray.dtype),psArray.shape[0],psArray.shape[1],1)
+    print psArray.dtype
+    print NumPyToImDataTypeCode(psArray.dtype)
+    print psArray.shape[0]
+    print psArray.shape[1]
+    #jim=create_image(NumPyToImDataTypeCode(psArray.dtype),psArray.shape[0],psArray.shape[1],1)
+    jim=Jim.createImg({'nrow': psArray.shape[0], 'ncol': psArray.shape[1], 'otype': 'GDT_Float64','mean':10})
 
-    if _ConvertNumPyArrayToJim( psArray, jim) != NO_ERROR:
-        return None
+    #jim.iminfo()
+
+    #if _ConvertNumPyArrayToJim( psArray, jim) != NO_ERROR:
+    #   return None
 
     return jim
 

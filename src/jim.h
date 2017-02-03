@@ -420,7 +420,7 @@ std::shared_ptr<Jim> ncclewis(Jim& imRaster_imt, Jim& imRaster_sim, Jim& imRaste
 std::shared_ptr<Jim> ncc(Jim& imRaster_imt, int  xi, int  yi, int  w, int iband=0);
     //end insert from fun_nondestructive2method
 
-    //#include "fun_destruct2method.h"
+    //#include "fun_destructive2method.h"
     //start insert from fun_destructive2method
 std::shared_ptr<Jim> azimuth(Jim& imRaster_iy, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> mapori(int  ox, int  oy, int iband=0, bool destructive=false);
@@ -531,7 +531,8 @@ std::shared_ptr<Jim> clmindist(Jim& imRaster_imin, int  bklabel, int  mode, doub
 std::shared_ptr<Jim> clparpip(Jim& imRaster_imin, int  bklabel, int  mode, double  mult, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> clmaha(Jim& imRaster_imin, int  bklabel, int  mode, double  thr, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int iband=0, bool destructive=false);
-    //end insert from fun2method
+    //end insert from fun_destuctive2method
+
 ///functions from mialib returning an image (example only must be wrapped automated via Python script)
 // std::shared_ptr<Jim> mean2d(int width, int iband=0);
 // std::shared_ptr<Jim> copy_image(int iband=0);

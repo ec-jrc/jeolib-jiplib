@@ -10,6 +10,7 @@
   - Confirm that arguments of overloaded methods with default argument values cannot be used as keys (PK)
   - Solve the problem related to ERROR_TYPE return in a functional call (refers to a memory leak and returned ERROR_TYPE * !!!)
   - Address mialib functions modifying GeoTransform/Projection: create list (PS) and then ad hoc procedure to be put in place.
+  - Write a clone at jim level with memcpy to secure correct behaviour for all data types including Int64/UInt64.
 
 
 
