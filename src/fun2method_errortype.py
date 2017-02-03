@@ -170,8 +170,8 @@ def fun2method(inputfile, outputfile_basename):
 import sys, getopt
 
 def main(argv):
-   inputfile = ''
-   outputfile = ''
+   inputfile="mialib_errortype"
+   outputfile="fun2method_errortype"
    try:
       opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
    except getopt.GetoptError:

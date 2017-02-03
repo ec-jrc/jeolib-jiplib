@@ -517,8 +517,9 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
 //   }
 // }
 
-#include "fun_destructive2method_1.cc"
-#include "fun_destructive2method_2.cc"
+#include "fun2method_imagetype.cc"
+#include "fun2method_errortype.cc"
+#include "fun2method_errortype_d.cc"
 
 //shown as a template function here only (not implemented because imout is composed of images of different datatypes)
 // std::shared_ptr<Jim> Jim::imrgb2hsx(int x){
@@ -763,8 +764,6 @@ bool Jim::operator==(std::shared_ptr<Jim> refImg)
 //   }
 //   return(theVolume);
 // }
-
-#include "fun_nondestructive2method.cc"
 
 // std::shared_ptr<Jim> Jim::mean2d(int width, int iband){
 //   try{
