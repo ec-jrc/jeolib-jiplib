@@ -1,8 +1,6 @@
 
 
 * List of issues/functions to address (20170201) with decreasing order of priority:
-  - Change malloc to calloc in createImg (PK)
-  - Add binding of mialib functions in cmake (PK)
   - Add from and to numpy functions, see mialib_python.i (PK)
   - Add UINT64 data type in Jim (PK)
   - ERROR_TYPE functions that do not modify the input image (e.g. iminfo) should not use the bool variable destructive: create list (PS)
@@ -16,4 +14,6 @@
 
 * Done:
   - Automatic binding of functions returning an IMAGE * (see template in mean2d in jim.cc) (PS on 20170202)
+  - Change malloc to calloc in createImg (PK)
+  - Add binding of mialib functions in cmake (PK)
 

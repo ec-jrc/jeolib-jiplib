@@ -145,11 +145,130 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 /*   } */
 /*  } */
 
+//Forgetting to place these commands will show itself as an ugly segmentation fault (crash) as soon as any C-API subroutine is actually called
+//see also: https://docs.scipy.org/doc/numpy-1.10.0/user/c-info.how-to-extend.html
+%init %{
+  import_array();
+  %}
+
 //typemaps for jiplib::Jim
 %{
 #include <memory>
  %}
 namespace jiplib{
+#    NPY_INT8, NPY_INT16, NPY_INT32, NPY_INT64, NPY_UINT8, NPY_UINT16, NPY_UINT32, NPY_UINT64, NPY_FLOAT32, NPY_FLOAT64, NPY_COMPLEX64, NPY_COMPLEX128.
+
+  %extend PyArrayObject {
+    PyObject* np2jim() {
+      GDALDataType jDataType;
+      int typ=PyArray_TYPE(MyArray);
+
+      switch(PyArray_TYPE($self)){
+      case NPY_UINT8:
+        jDataType=GDT_Byte;
+        break;
+      case NPY_UINT16:
+        jDataType=GDT_UInt16;
+        break;
+      case NPY_INT16:
+        jDataType=GDT_Int16;
+        break;
+      case NPY_UINT32:
+        jDataType=GDT_UInt32;
+        break;
+      case NPY_INT32:
+        jDataType=GDT_Int16;
+        break;
+      case NPY_FLOAT32:
+        jDataType=GDT_Float32;
+        break;
+      case NPY_FLOAT64:
+        jDataType=GDT_Float64;
+        break;
+        // case NPY_UINT64:
+        //   jDataType=;
+        // break;
+        // case NPY_INT64:
+        //   jDataType=;
+        // break;
+      default:
+        std::string errorString="Error: Unknown data type";
+        throw(errorString);
+      }
+      npy_intp dims[3];
+      int dim=(PyArray_NDIM($self))? 3 : 2;
+      int nplane=(PyArray_NDIM($self)==3) ? PyArray_DIM($self,2): 1;//todo: check if nth dim starts from 0
+      int nrow=PyArray_DIM($self,0);
+      int ncol=PyArray_DIM($self,1);
+      int nband=1;//only single band supported for now
+      std::shared_ptr<Jim> imgWriter=Jim::createImg(nrow,ncol,nband,jDataType);
+      imgRaster.copyData((void*)($this->data));
+    }
+  }
+  %extend Jim {
+    PyObject* jim2np(int band=0) {
+      if(band>=$self->nrOfBand()){
+        std::string errorString="Error: band out of range";
+        throw(errorString);
+      }
+      int npDataType;
+      switch ($self->getDataType()){
+      case GDT_Byte:
+        npDataType=NPY_UINT8;
+        break;
+      case GDT_UInt16:
+        npDataType=NPY_UINT16;
+        break;
+      case GDT_Int16:
+        npDataType=NPY_INT16;
+        break;
+      case GDT_UInt32:
+        npDataType=NPY_UINT32;
+        break;
+      case GDT_Int32:
+        npDataType=NPY_INT32;
+        break;
+      case GDT_Float32:
+        npDataType=NPY_FLOAT32;
+        break;
+      case GDT_Float64:
+        npDataType=NPY_FLOAT64;
+        break;
+        // case JDT_UInt64:
+        //   npDataType=NPY_UINT64;
+        // break;
+        // case JDT_Int64:
+        //   npDataType=NPY_INT64;
+        // break;
+      case GDT_Unknown:
+      default:
+        std::string errorString="Error: Unknown data type";
+        throw(errorString);
+      }
+      int dim=($self->nrOfPlane()>1)? 3 : 2;
+      if($self->nrOfPlane()>1){
+        npy_intp dims[3];
+        dims[0]=$self->nrOfRow();
+        dims[1]=$self->nrOfCol();
+        dims[2]=$self->nrOfPlane();
+        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,(void*)$self->getDataPointer(band));
+        if(npArray)
+          return(PyArray_Return(npArray));
+        else
+          return(0);
+      }
+      else{
+        npy_intp dims[2];
+        dims[0]=$self->nrOfRow();
+        dims[1]=$self->nrOfCol();
+        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,(void*)$self->getDataPointer(band));
+        if(npArray)
+          return(PyArray_Return(npArray));
+        else
+          return(0);
+      }
+    }
+  }
   //return the object itself for all functions returning CPLErr
   %typemap(out) CPLErr {
     std::cout << "we are in typemap(out) CPLErr for jiplib::Jim::$symname" << std::endl;

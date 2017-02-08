@@ -58,8 +58,8 @@ endforeach()
 
 
 ########## CTEST ############
-add_test(test1 ${CMAKE_CURRENT_BINARY_DIR}/testCreateImg -o ../Testing/test1.tif --ncol 1 --nrow 1 -of GTiff -ot Byte -seed 100 -mean 0 -sigma 100)
-add_test(test2 ${CMAKE_CURRENT_BINARY_DIR}/test2 -o ../Testing/test2.tif --ncol 100 --nrow 100 -of GTiff -ot Byte -seed 100 -mean 0 -sigma 100)
+add_test(test1 ${CMAKE_CURRENT_BINARY_DIR}/testCreateImg --output ../Testing/test1.tif --ncol 1 --nrow 1 --oformat GTiff --otype Byte --seed 100 --mean 0 --stdev 100)
+add_test(test2 ${CMAKE_CURRENT_BINARY_DIR}/test2 --output ../Testing/test2.tif --ncol 100 --nrow 100 --oformat GTiff --otype Byte --seed 100 --mean 0 --stdev 100)
 add_test(test3 ${CMAKE_CURRENT_BINARY_DIR}/testMemoryLeak --number 10 --ncol 1024 --nrow 1024 --nband 10 --otype GDT_Byte)
 set_tests_properties (test1
   PROPERTIES PASS_REGULAR_EXPRESSION "done")
