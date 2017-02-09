@@ -16,4 +16,7 @@
   - Automatic binding of functions returning an IMAGE * (see template in mean2d in jim.cc) (PS on 20170202)
   - Change malloc to calloc in createImg (PK)
   - Add binding of mialib functions in cmake (PK)
+  - From and to numpy functions implemented (PK)
+  - Problem related to ERROR_TYPE return in a functional call seems to be fixed (PK)
+
 

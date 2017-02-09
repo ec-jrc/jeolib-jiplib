@@ -48,7 +48,7 @@ namespace jiplib{
     ///default constructor
   Jim() : m_nplane(1), ImgRaster(){};
     ///constructor opening an image in memory using an external data pointer (not tested yet)
-  Jim(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType) : Jim() {open(dataPointer,ncol,nrow,dataType);};
+  Jim(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType) : Jim() {open(dataPointer,ncol,nrow,nplane,dataType);};
     ///constructor input image
   Jim(IMAGE *mia) : Jim() {setMIA(mia,0);};
     ///constructor input image
@@ -76,6 +76,8 @@ namespace jiplib{
         m_mia.clear();
       }
     }
+    ///Open an image for writing using an external data pointer (not tested yet)
+    CPLErr open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType);
     ///Open an image for writing in memory, defining image attributes.
     /* void open(int ncol, int nrow, int nband, int dataType); */
 

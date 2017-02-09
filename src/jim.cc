@@ -10,6 +10,29 @@ Change log
 
 using namespace jiplib;
 
+CPLErr Jim::open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType){
+  m_ncol=ncol;
+  m_nrow=nrow;
+  m_nplane=nplane;
+  m_nband=1;
+  m_dataType=dataType;
+  m_data.resize(m_nband);
+  m_begin.resize(m_nband);
+  m_end.resize(m_nband);
+  m_blockSize=nrow;//memory contains entire image and has been read already
+  if(dataPointer){
+    for(int iband=0;iband<m_nband;++iband){
+      m_data[iband]=dataPointer+iband*ncol*nrow*nplane*(GDALGetDataTypeSize(getDataType())>>3);
+      m_begin[iband]=0;
+      m_end[iband]=m_begin[iband]+m_blockSize;
+    }
+    // m_externalData=true;
+    return(CE_None);
+  }
+  else
+    return(CE_Failure);
+}
+
 /**
  *
  *
@@ -791,7 +814,7 @@ bool Jim::operator==(std::shared_ptr<Jim> refImg)
 //       //if (this->isGeoRef()){
 //       //double gt[6]={...};
 //       //imgWriter->setGeoTransform(gt);
-      
+
 //       imgWriter->setProjection(getProjectionRef());
 //       return(imgWriter);
 //     }

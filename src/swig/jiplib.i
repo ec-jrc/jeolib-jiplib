@@ -17,7 +17,7 @@
     PyErr_SetString(PyExc_SystemError,errorString.c_str());
     SWIG_fail;
   }
-}
+ }
 
 %define DOCJIPLIB
 "Joint image processing library (jiplib)
@@ -33,12 +33,12 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 
  /* %template(Float64Vector) std::vector<double>; */
 
-/* %apply int &INOUT{ int &nbin }; */
-/* %apply double &INOUT{ double &min }; */
-/* %apply double &INOUT{ double &max }; */
-/* %apply Float64Vector &INOUT{ std::vector<double>& }; */
+ /* %apply int &INOUT{ int &nbin }; */
+ /* %apply double &INOUT{ double &min }; */
+ /* %apply double &INOUT{ double &max }; */
+ /* %apply Float64Vector &INOUT{ std::vector<double>& }; */
 
-/* to resolve naming conflicts with mialib library*/
+ /* to resolve naming conflicts with mialib library*/
 %rename(filter2d_erode) filter2d::erode;
 %rename(filter2d_dilate) filter2d::dilate;
 %rename(filter2d_shift) filter2d::shift;
@@ -154,58 +154,64 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 //typemaps for jiplib::Jim
 %{
 #include <memory>
- %}
+  %}
+
 namespace jiplib{
 #    NPY_INT8, NPY_INT16, NPY_INT32, NPY_INT64, NPY_UINT8, NPY_UINT16, NPY_UINT32, NPY_UINT64, NPY_FLOAT32, NPY_FLOAT64, NPY_COMPLEX64, NPY_COMPLEX128.
 
-  %extend PyArrayObject {
-    PyObject* np2jim() {
-      GDALDataType jDataType;
-      int typ=PyArray_TYPE(MyArray);
-
-      switch(PyArray_TYPE($self)){
-      case NPY_UINT8:
-        jDataType=GDT_Byte;
-        break;
-      case NPY_UINT16:
-        jDataType=GDT_UInt16;
-        break;
-      case NPY_INT16:
-        jDataType=GDT_Int16;
-        break;
-      case NPY_UINT32:
-        jDataType=GDT_UInt32;
-        break;
-      case NPY_INT32:
-        jDataType=GDT_Int16;
-        break;
-      case NPY_FLOAT32:
-        jDataType=GDT_Float32;
-        break;
-      case NPY_FLOAT64:
-        jDataType=GDT_Float64;
-        break;
-        // case NPY_UINT64:
-        //   jDataType=;
-        // break;
-        // case NPY_INT64:
-        //   jDataType=;
-        // break;
-      default:
-        std::string errorString="Error: Unknown data type";
-        throw(errorString);
-      }
-      npy_intp dims[3];
-      int dim=(PyArray_NDIM($self))? 3 : 2;
-      int nplane=(PyArray_NDIM($self)==3) ? PyArray_DIM($self,2): 1;//todo: check if nth dim starts from 0
-      int nrow=PyArray_DIM($self,0);
-      int ncol=PyArray_DIM($self,1);
-      int nband=1;//only single band supported for now
-      std::shared_ptr<Jim> imgWriter=Jim::createImg(nrow,ncol,nband,jDataType);
-      imgRaster.copyData((void*)($this->data));
-    }
-  }
   %extend Jim {
+    static std::shared_ptr<jiplib::Jim> np2jim(PyObject* npArray) {
+      if(PyArray_Check(npArray)){
+        PyArrayObject *obj=(PyArrayObject *)npArray;
+        GDALDataType jDataType;
+        int typ=PyArray_TYPE((PyArrayObject *)npArray);
+
+        switch(PyArray_TYPE((PyArrayObject*)npArray)){
+        case NPY_UINT8:
+          jDataType=GDT_Byte;
+          break;
+        case NPY_UINT16:
+          jDataType=GDT_UInt16;
+          break;
+        case NPY_INT16:
+          jDataType=GDT_Int16;
+          break;
+        case NPY_UINT32:
+          jDataType=GDT_UInt32;
+          break;
+        case NPY_INT32:
+          jDataType=GDT_Int16;
+          break;
+        case NPY_FLOAT32:
+          jDataType=GDT_Float32;
+          break;
+        case NPY_FLOAT64:
+          jDataType=GDT_Float64;
+          break;
+          // case NPY_UINT64:
+          //   jDataType=;
+          // break;
+          // case NPY_INT64:
+          //   jDataType=;
+          // break;
+        default:
+          std::string errorString="Error: Unknown data type";
+          throw(errorString);
+        }
+        int dim=(PyArray_NDIM((PyArrayObject*)npArray))? 3 : 2;
+        int nplane=(PyArray_NDIM((PyArrayObject*)npArray)==3) ? PyArray_DIM((PyArrayObject*)npArray,2): 1;//todo: check if nth dim starts from 0
+        int nrow=PyArray_DIM((PyArrayObject*)npArray,0);
+        int ncol=PyArray_DIM((PyArrayObject*)npArray,1);
+        int nband=1;//only single band supported for now
+        std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>(((PyArrayObject*)npArray)->data,ncol,nrow,nplane,jDataType);
+        return(imgWriter);
+      }
+      else{
+        std::cerr << "Error: expected a numpy array as input" << std::endl;
+        return(0);
+      }
+    }
+
     PyObject* jim2np(int band=0) {
       if(band>=$self->nrOfBand()){
         std::string errorString="Error: band out of range";
