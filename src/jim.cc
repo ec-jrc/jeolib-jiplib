@@ -862,6 +862,20 @@ bool Jim::operator==(std::shared_ptr<Jim> refImg)
 //   }
 // }
 
+std::shared_ptr<Jim> Jim::setMask(JimList& maskList, app::AppFactory& app){
+  std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
+  ImgCollection maskReader;
+  for(int imask=0;imask<maskList.size();++imask){
+    maskReader.pushImage(maskList.getImage(imask));
+    // std::shared_ptr<Jim> pJim=maskList.getImage(imask);
+  }
+  // std::list<std::shared_ptr<jiplib::Jim> >::iterator lit=maskList.begin();
+  // for(lit=maskList.begin();lit!=maskList.end();++lit)
+  //   maskReader.pushImage(*lit);
+  ImgRaster::setMask(maskReader,*imgWriter, app);
+  return(imgWriter);
+}
+
 JimList Jim::rotatecoor(double theta, int iband){
   JimList listout;
   try{

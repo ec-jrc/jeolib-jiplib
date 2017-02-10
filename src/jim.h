@@ -843,6 +843,12 @@ CPLErr d_FindPixWithVal(double d_gval, unsigned long int * ofs, int iband=0);
       ImgRaster::setThreshold(*imgWriter,t1,t2,value);
       return(imgWriter);
     }
+    ///Get mask
+    std::shared_ptr<Jim> getMask(app::AppFactory& app){
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
+      ImgRaster::getMask(*imgWriter,app);
+      return(imgWriter);
+    }
     ///Check for difference with reference image
     CPLErr diff(std::shared_ptr<Jim> refImage,app::AppFactory& app){
       return(ImgRaster::diff(*refImage,app));
@@ -850,11 +856,7 @@ CPLErr d_FindPixWithVal(double d_gval, unsigned long int * ofs, int iband=0);
     ///Clear all no data values, including the one in GDAL dataset if it is set
     CPLErr clearNoData(int band=0){return(ImgRaster::clearNoData(band));}
     ///set mask to raster dataset
-    std::shared_ptr<Jim> setMask(app::AppFactory& app){
-      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
-      ImgRaster::setMask(*imgWriter, app);
-      return(imgWriter);
-    }
+    std::shared_ptr<Jim> setMask(JimList& maskList, app::AppFactory& app);
 
   protected:
     ///reset all member variables
