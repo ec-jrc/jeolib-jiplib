@@ -856,6 +856,8 @@ CPLErr d_FindPixWithVal(double d_gval, unsigned long int * ofs, int iband=0);
     ///Clear all no data values, including the one in GDAL dataset if it is set
     CPLErr clearNoData(int band=0){return(ImgRaster::clearNoData(band));}
     ///set mask to raster dataset
+    std::shared_ptr<Jim> setMask(app::AppFactory& app);
+    ///set mask to raster dataset
     std::shared_ptr<Jim> setMask(JimList& maskList, app::AppFactory& app);
 
   protected:

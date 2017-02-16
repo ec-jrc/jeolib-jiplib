@@ -862,6 +862,12 @@ bool Jim::operator==(std::shared_ptr<Jim> refImg)
 //   }
 // }
 
+std::shared_ptr<Jim> Jim::setMask(app::AppFactory& app){
+  std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
+  ImgRaster::setMask(*imgWriter, app);
+  return(imgWriter);
+}
+
 std::shared_ptr<Jim> Jim::setMask(JimList& maskList, app::AppFactory& app){
   std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
   ImgCollection maskReader;
