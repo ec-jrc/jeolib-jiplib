@@ -22,7 +22,7 @@ CPLErr Jim::open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDa
   m_blockSize=nrow;//memory contains entire image and has been read already
   if(dataPointer){
     for(int iband=0;iband<m_nband;++iband){
-      m_data[iband]=dataPointer+iband*ncol*nrow*nplane*(GDALGetDataTypeSize(getDataType())>>3);
+      m_data[iband]=dataPointer+iband*ncol*nrow*nplane*getDataTypeSizeBytes();
       m_begin[iband]=0;
       m_end[iband]=m_begin[iband]+m_blockSize;
     }
@@ -52,11 +52,11 @@ IMAGE* Jim::getMIA(int band){
     delete(m_mia[band]);
   m_mia[band]=new(IMAGE);
   m_mia[band]->p_im=m_data[band];/* Pointer to image data */
-  m_mia[band]->DataType=GDAL2MIADataType(getDataType());
+  m_mia[band]->DataType=getMIADataType();
   m_mia[band]->nx=nrOfCol();
   m_mia[band]->ny=nrOfRow();
   m_mia[band]->nz=nrOfPlane();
-  m_mia[band]->NByte=m_mia[band]->nx * m_mia[band]->ny * m_mia[band]->nz * (GDALGetDataTypeSize(getDataType())>>3);//assumes image data type is not of bit type!!!
+  m_mia[band]->NByte=m_mia[band]->nx * m_mia[band]->ny * m_mia[band]->nz * getDataTypeSizeBytes();//assumes image data type is not of bit type!!!
   //todo: remove m_mia[band]->vol and only rely on the getVolume function
   m_mia[band]->vol=0;//use getVolume() function
   m_mia[band]->lut=0;
@@ -99,10 +99,10 @@ CPLErr Jim::setMIA(int band){
       throw(errorString);
     }
     // if(m_nband>1&&m_dataType!=MIA2GDALDataType(m_mia[band]->DataType)){
-    if( (m_dataType!=MIA2GDALDataType(m_mia[band]->DataType)) && nrOfBand() > 1){
+    if( (m_dataType!=MIA2JIPLIBDataType(m_mia[band]->DataType)) && nrOfBand() > 1){
       std::cout << "Warning: changing data type of multiband image, make sure to set all bands" << std::endl;
     }
-    m_dataType=MIA2GDALDataType(m_mia[band]->DataType);
+    m_dataType=MIA2JIPLIBDataType(m_mia[band]->DataType);
     m_data[band]=(void *)m_mia[band]->p_im;
     // m_data[band]=(unsigned char *)m_mia[band]->p_im + band * nrOfRow() * nrOfCol() * (GDALGetDataTypeSize(getDataType())>>3);
     m_begin[band]=0;
@@ -143,7 +143,7 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
         std::string errorString="Error: number of planes of images do not match";
         throw(errorString);
       }
-      if(m_dataType!=MIA2GDALDataType(m_mia[band]->DataType)){
+      if(m_dataType!=MIA2JIPLIBDataType(m_mia[band]->DataType)){
         std::string errorString="Error: inconsistent data types for multiband image";
         throw(errorString);
       }
@@ -543,6 +543,7 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
 #include "fun2method_imagetype.cc"
 #include "fun2method_errortype.cc"
 #include "fun2method_errortype_d.cc"
+#include "fun2method_errortype_nd.cc"
 
 //shown as a template function here only (not implemented because imout is composed of images of different datatypes)
 // std::shared_ptr<Jim> Jim::imrgb2hsx(int x){

@@ -41,6 +41,7 @@ extern "C" {
    Name space jiplib
 **/
 namespace jiplib{
+  enum JIPLIBDataType {JDT_Int64=14, JDT_UInt64=15};
   class JimList;
   class Jim : public ImgRaster
   {
@@ -80,6 +81,30 @@ namespace jiplib{
     CPLErr open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType);
     ///Open an image for writing in memory, defining image attributes.
     /* void open(int ncol, int nrow, int nband, int dataType); */
+    CPLErr open(Jim& imgSrc, bool copyData=true){
+      m_ncol=imgSrc.nrOfCol();
+      m_nrow=imgSrc.nrOfRow();
+      m_nband=imgSrc.nrOfBand();
+      m_dataType=imgSrc.getDataType();
+      setProjection(imgSrc.getProjection());
+      copyGeoTransform(imgSrc);
+      imgSrc.getNoDataValues(m_noDataValues);
+      imgSrc.getScale(m_scale);
+      imgSrc.getOffset(m_offset);
+      initMem(0);
+      for(int iband=0;iband<m_nband;++iband){
+        m_begin[iband]=0;
+        m_end[iband]=m_begin[iband]+m_blockSize;
+        if(copyData)
+          imgSrc.copyData(m_data[iband],iband);
+      }
+      //todo: check if filename needs to be set, but as is it is used for writing, I don't think so.
+      // if(imgSrc.getFileName()!=""){
+      //   m_filename=imgSrc.getFileName();
+      // std::cerr << "Warning: filename not set, dataset not defined yet" << std::endl;
+      // }
+      return(CE_None);
+    }
 
     ///Clone as new shared pointer to ImgRaster object
     /**
@@ -184,6 +209,15 @@ namespace jiplib{
       return(pJim);
     }
 
+    size_t getDataTypeSizeBytes(int band=0) const {
+      switch (getDataType()){
+      case JDT_UInt64:
+      case JDT_Int64:
+        return(static_cast<size_t>(8));
+      default:
+        return(ImgRaster::getDataTypeSizeBytes());
+      }
+    }
     ///Get the number of planes of this dataset
     int nrOfPlane(void) const { return m_nplane;};
     /// convert single plane multiband image to single band image with multiple planes
@@ -204,6 +238,32 @@ namespace jiplib{
      *
      * @return MIA data type
      */
+    int getMIADataType(){
+      switch (getDataType()){
+      case GDT_Byte:
+        return t_UCHAR;
+      case GDT_UInt16:
+        return t_USHORT;
+      case GDT_Int16:
+        return t_SHORT;
+      case GDT_UInt32:
+        return t_UINT32;
+      case GDT_Int32:
+        return t_INT32;
+      case GDT_Float32:
+        return t_FLOAT;
+      case GDT_Float64:
+        return t_DOUBLE;
+      case JDT_UInt64:
+        return t_UINT64;
+      case JDT_Int64:
+        return t_INT64;
+      case t_UNSUPPORTED:
+        return GDT_Unknown;
+      default:
+        return GDT_Unknown;
+      }
+    }
     int GDAL2MIADataType(GDALDataType aGDALDataType){
       //function exists, but introduced for naming consistency
       return(GDAL2MIALDataType(aGDALDataType));
@@ -216,7 +276,7 @@ namespace jiplib{
      *
      * @return GDAL data type (GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GDT_Int32, GDT_Float32, GDT_Float64)
      */
-    GDALDataType MIA2GDALDataType(int aMIADataType)
+    GDALDataType MIA2JIPLIBDataType(int aMIADataType)
     {
       switch (aMIADataType){
       case t_UCHAR:
@@ -454,21 +514,15 @@ std::shared_ptr<Jim> to_uchar(int iband=0, bool destructive=false);
 std::shared_ptr<Jim> dbltofloat(int iband=0, bool destructive=false);
 std::shared_ptr<Jim> uint32_to_float(int iband=0, bool destructive=false);
 std::shared_ptr<Jim> swap(int iband=0, bool destructive=false);
-std::shared_ptr<Jim> getfirstmaxpos(unsigned long int * pos, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> histcompress(int iband=0, bool destructive=false);
 std::shared_ptr<Jim> lookup(Jim& imRaster_imlut, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> lookuptypematch(Jim& imRaster_imlut, int iband=0, bool destructive=false);
-std::shared_ptr<Jim> volume(int iband=0, bool destructive=false);
 std::shared_ptr<Jim> dirmax(int  dir, int iband=0, bool destructive=false);
-std::shared_ptr<Jim> imequalp(Jim& imRaster_im2, int iband=0, bool destructive=false);
-std::shared_ptr<Jim> getmax(double * maxval, int iband=0, bool destructive=false);
-std::shared_ptr<Jim> getminmax(double * minval, double * maxval, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> classstatsinfo(Jim& imRaster_imin, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> clmindist(Jim& imRaster_imin, int  bklabel, int  mode, double  thr, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> clparpip(Jim& imRaster_imin, int  bklabel, int  mode, double  mult, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> clmaha(Jim& imRaster_imin, int  bklabel, int  mode, double  thr, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int iband=0, bool destructive=false);
-std::shared_ptr<Jim> iminfo(int iband=0, bool destructive=false);
 std::shared_ptr<Jim> copy_lut(Jim& imRaster_im2, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> create_lut(int iband=0, bool destructive=false);
 std::shared_ptr<Jim> setpixval(unsigned long  offset, double d_g, int iband=0, bool destructive=false);
@@ -497,16 +551,11 @@ std::shared_ptr<Jim> skelfah2(Jim& imRaster_impskp, int  n, int  graph, int iban
 std::shared_ptr<Jim> compose(Jim& imRaster_mask, Jim& imRaster_g, Jim& imRaster_lbl, int  graph, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> oiws(int iband=0, bool destructive=false);
 std::shared_ptr<Jim> srg(Jim& imRaster_im2, Jim& imRaster_im3, int  ox, int  oy, int  oz, int iband=0, bool destructive=false);
-std::shared_ptr<Jim> IsPartitionEqual(Jim& imRaster_im2, int * result, int iband=0, bool destructive=false);
-std::shared_ptr<Jim> IsPartitionFiner(Jim& imRaster_im2, int  graph, unsigned long int * res, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> framebox(int * box, double d_gval, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> addframebox(int * box, double d_gval, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> subframebox(int * box, int iband=0, bool destructive=false);
-std::shared_ptr<Jim> dumpxyz(int  x, int  y, int  z, int  dx, int  dy, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> imputop(Jim& imRaster_im2, int  x, int  y, int  z, int  op, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> imputcompose(Jim& imRaster_imlbl, Jim& imRaster_im2, int  x, int  y, int  z, int  val, int iband=0, bool destructive=false);
-std::shared_ptr<Jim> szcompat(Jim& imRaster_im2, int iband=0, bool destructive=false);
-std::shared_ptr<Jim> szgeocompat(Jim& imRaster_im2, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> plotline(int  x1, int  y1, int  x2, int  y2, int  val, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> ovlmatrix(Jim& imRaster_maxg_array, char * odir, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> bitwise_op(Jim& imRaster_im2, int  op, int iband=0, bool destructive=false);
@@ -565,21 +614,15 @@ CPLErr d_to_uchar(int iband=0);
 CPLErr d_dbltofloat(int iband=0);
 CPLErr d_uint32_to_float(int iband=0);
 CPLErr d_swap(int iband=0);
-CPLErr d_getfirstmaxpos(unsigned long int * pos, int iband=0);
 CPLErr d_histcompress(int iband=0);
 CPLErr d_lookup(Jim& imRaster_imlut, int iband=0);
 CPLErr d_lookuptypematch(Jim& imRaster_imlut, int iband=0);
-CPLErr d_volume(int iband=0);
 CPLErr d_dirmax(int  dir, int iband=0);
-CPLErr d_imequalp(Jim& imRaster_im2, int iband=0);
-CPLErr d_getmax(double * maxval, int iband=0);
-CPLErr d_getminmax(double * minval, double * maxval, int iband=0);
 CPLErr d_classstatsinfo(Jim& imRaster_imin, int iband=0);
 CPLErr d_clmindist(Jim& imRaster_imin, int  bklabel, int  mode, double  thr, int iband=0);
 CPLErr d_clparpip(Jim& imRaster_imin, int  bklabel, int  mode, double  mult, int iband=0);
 CPLErr d_clmaha(Jim& imRaster_imin, int  bklabel, int  mode, double  thr, int iband=0);
 CPLErr d_clmaxlike(Jim& imRaster_imin, int  bklabel, int  type, double  thr, int iband=0);
-CPLErr d_iminfo(int iband=0);
 CPLErr d_copy_lut(Jim& imRaster_im2, int iband=0);
 CPLErr d_create_lut(int iband=0);
 CPLErr d_setpixval(unsigned long  offset, double d_g, int iband=0);
@@ -608,16 +651,11 @@ CPLErr d_skelfah2(Jim& imRaster_impskp, int  n, int  graph, int iband=0);
 CPLErr d_compose(Jim& imRaster_mask, Jim& imRaster_g, Jim& imRaster_lbl, int  graph, int iband=0);
 CPLErr d_oiws(int iband=0);
 CPLErr d_srg(Jim& imRaster_im2, Jim& imRaster_im3, int  ox, int  oy, int  oz, int iband=0);
-CPLErr d_IsPartitionEqual(Jim& imRaster_im2, int * result, int iband=0);
-CPLErr d_IsPartitionFiner(Jim& imRaster_im2, int  graph, unsigned long int * res, int iband=0);
 CPLErr d_framebox(int * box, double d_gval, int iband=0);
 CPLErr d_addframebox(int * box, double d_gval, int iband=0);
 CPLErr d_subframebox(int * box, int iband=0);
-CPLErr d_dumpxyz(int  x, int  y, int  z, int  dx, int  dy, int iband=0);
 CPLErr d_imputop(Jim& imRaster_im2, int  x, int  y, int  z, int  op, int iband=0);
 CPLErr d_imputcompose(Jim& imRaster_imlbl, Jim& imRaster_im2, int  x, int  y, int  z, int  val, int iband=0);
-CPLErr d_szcompat(Jim& imRaster_im2, int iband=0);
-CPLErr d_szgeocompat(Jim& imRaster_im2, int iband=0);
 CPLErr d_plotline(int  x1, int  y1, int  x2, int  y2, int  val, int iband=0);
 CPLErr d_ovlmatrix(Jim& imRaster_maxg_array, char * odir, int iband=0);
 CPLErr d_bitwise_op(Jim& imRaster_im2, int  op, int iband=0);
@@ -642,6 +680,19 @@ CPLErr d_shift(int  val, int iband=0);
 CPLErr d_setrange(double d_gt1, double d_gt2, int iband=0);
 CPLErr d_FindPixWithVal(double d_gval, unsigned long int * ofs, int iband=0);
     //end insert from fun2method_errortype_d
+    //start insert from fun2method_errortype_nd
+CPLErr getfirstmaxpos(unsigned long int * pos, int iband=0);
+CPLErr volume(int iband=0);
+CPLErr imequalp(Jim& imRaster_im2, int iband=0);
+CPLErr getmax(double * maxval, int iband=0);
+CPLErr getminmax(double * minval, double * maxval, int iband=0);
+CPLErr iminfo(int iband=0);
+CPLErr IsPartitionEqual(Jim& imRaster_im2, int * result, int iband=0);
+CPLErr IsPartitionFiner(Jim& imRaster_im2, int  graph, unsigned long int * res, int iband=0);
+CPLErr dumpxyz(int  x, int  y, int  z, int  dx, int  dy, int iband=0);
+CPLErr szcompat(Jim& imRaster_im2, int iband=0);
+CPLErr szgeocompat(Jim& imRaster_im2, int iband=0);
+    //end insert from fun2method_errortype_nd
     /* std::shared_ptr<Jim> arith(Jim& imRaster_im2, int op, int iband=0, bool destructive=false); */
     /* CPLErr d_arith(Jim& imRaster_im2, int op, int iband=0); */
 
@@ -882,4 +933,3 @@ CPLErr d_FindPixWithVal(double d_gval, unsigned long int * ofs, int iband=0);
   };
 }
 #endif // _JIM_H_
-

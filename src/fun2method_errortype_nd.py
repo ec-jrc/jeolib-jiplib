@@ -1,4 +1,6 @@
 # first 20161111 by Pierre.Soille@jrc.ec.europa.eu
+# 20170216 Pieter Kempeneers: adapted for functions that do not modify the input image
+
 
 def fun2method(inputfile, outputfile_basename):
     """converts MIALib C function declarations into JIPLib C++ methods (outputfile_basename.cc file) and C++ method declarations (outputfile_basename.h file).  Currently only convert desctuctive functions, i.e., ERROR_TYPE functions, with IMAGE * as first argument (IMAGE ** not yet taken into account).
@@ -50,7 +52,7 @@ def fun2method(inputfile, outputfile_basename):
         MIATypes = ['uc_', 's_', 'us_', 'i32_', 'u32_', 'f_', 'd_']
         CTypes = ['unsigned char', 'short int', 'unsigned short int', 'int', 'unsigned int', 'float', 'double']
 
-        methodDeclaration='std::shared_ptr<Jim> Jim::'+a.get("name")+'('
+        methodDeclaration='CPLErr Jim::'+a.get("name")+'('
         print methodDeclaration
 
         cSeparator=', '
@@ -86,9 +88,9 @@ def fun2method(inputfile, outputfile_basename):
             cCall+=cSeparator+arg[1]
             separator=', '
 
-        fh.write(re.sub(r'Jim::','',methodDeclaration+separator+'int iband=0'+cSeparator+'bool destructive=false);\n'))
+        fh.write(re.sub(r'Jim::','',methodDeclaration+separator+'int iband=0);\n'))
 
-        methodDeclaration+=separator+'int iband'+cSeparator+'bool destructive)'
+        methodDeclaration+=separator+'int iband)'
 
         f.write(methodDeclaration+'{')
         f.write('\n\ttry{')
@@ -124,34 +126,30 @@ def fun2method(inputfile, outputfile_basename):
     \t\t\tbreak;
             \t\t}''')
 
-        f.write('\n\t\t//make a copy of this')
-        f.write('\n\t\tstd::shared_ptr<Jim> copyImg=this->clone();')
-        f.write('\n\t\t'+a.get("arguments")[0][1]+'=copyImg->getMIA(iband);')
-
+        f.write('\n\t\t'+a.get("arguments")[0][1]+'=this->getMIA(iband);')
         f.write('\n\t\tif(::'+a.get("name")+'('+cCall+') == NO_ERROR){')
-        f.write('\n\t\t\tcopyImg->setMIA(iband);')
+        f.write('\n\t\t\tthis->setMIA(iband);')
         for i in imRasterArray:
-          f.write('\n\t\t\t'+i+'.setMIA(iband);')
-        f.write('\n\t\t\treturn(copyImg);')
+           f.write('\n\t\t\t'+i+'.setMIA(iband);')
+           f.write('\n\t\t\treturn(CE_None);')
         f.write('\n\t\t}')
 
         f.write('\n\t\telse{')
-        f.write('\n\t\t\tcopyImg->setMIA(iband);')
+        f.write('\n\t\t\tthis->setMIA(iband);')
         for i in imRasterArray:
            f.write('\n\t\t\t'+i+'.setMIA(iband);')
-        f.write('\n\t\t\tstd::string errorString="Error: '+a.get("name")+'() function in MIA failed, returning NULL pointer";')
+        f.write('\n\t\t\tstd::string errorString="Error: '+a.get("name")+'() function in MIA failed";')
         f.write('\n\t\t\tthrow(errorString);')
         f.write('\n\t\t}')
 
-        f.write('\n\t}')
-
         f.write('''
+        }
         catch(std::string errorString){
         \tstd::cerr << errorString << std::endl;
-            \treturn(0);
+            \treturn(CE_Failure);
         }
         catch(...){
-            \treturn(0);
+            \treturn(CE_Failure);
         }
 }\n''')
 
@@ -169,8 +167,8 @@ def fun2method(inputfile, outputfile_basename):
 import sys, getopt
 
 def main(argv):
-   inputfile="mialib_errortype"
-   outputfile="fun2method_errortype"
+   inputfile="mialib_errortype_nd"
+   outputfile="fun2method_errortype_nd"
    try:
       opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
    except getopt.GetoptError:
@@ -191,12 +189,3 @@ def main(argv):
 
 if __name__ == "__main__":
    main(sys.argv[1:])
-
-
-
-
-# cat /home/soillpi/workstation/jip/mia//core/c/mialib_*.h | grep '^extern ERROR'  > mialib_error_type
-# cat /home/soillpi/work/jip20170201/mia//core/c/mialib_*.h | grep '^extern ERROR'  > mialib_error_type
-# python fun2method_errortype.py  -i mialib_error_type -o fun2method_errortype
-# to automatically insert content of fun2method in jim.h within placeholder //start insert from fun2method -> //end insert from fun2method
-# sed -i -ne '/\/\/start insert from fun2method_errortype/ {p; r fun2method_errortype.h' -e ':a; n; /\/\/end insert from fun2method_errortype/ {p; b}; ba}; p' jim.h

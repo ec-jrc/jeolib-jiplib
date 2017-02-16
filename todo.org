@@ -1,13 +1,12 @@
 
 
 * List of issues/functions to address (20170201) with decreasing order of priority:
-  - Add from and to numpy functions, see mialib_python.i (PK)
   - Add UINT64 data type in Jim (PK)
   - Address those functions with pointer arguments (besides IMAGE * or IMAGE **): create list (PS), define desired behaviour at python level (PS-PK), and then solve (at interface file level?).
   - Confirm that arguments of overloaded methods with default argument values cannot be used as keys (PK)
-  - Solve the problem related to ERROR_TYPE return in a functional call (refers to a memory leak and returned ERROR_TYPE * !!!)
+  - Solve the problem related to ERROR_TYPE return in a functional call (refers to a memory leak and returned ERROR_TYPE * !!!) (PK)
   - Address mialib functions modifying GeoTransform/Projection: create list (PS) and then ad hoc procedure to be put in place.
-  - Write a clone at jim level with memcpy to secure correct behaviour for all data types including Int64/UInt64.
+  - Write a clone at jim level with memcpy to secure correct behaviour for all data types including Int64/UInt64 (PK)
 
 
 
@@ -17,6 +16,9 @@
   - Add binding of mialib functions in cmake (PK)
   - From and to numpy functions implemented (PK)
   - Problem related to ERROR_TYPE return in a functional call seems to be fixed (PK)
+  - Handled ERRORTYPE functions that do not modify the input image (e.g., iminfo). They are treated as the destructive functions but without the prefix d_ (PK)
+  - Added Int64 and UInt64 data type in Jim (PK)
+  - Constructor written with copyData specific to Jim with memcopy (this also implements the clone) (PK)
 
 
   - ERROR_TYPE functions that do not modify the input image (e.g. iminfo) should not use the bool variable destructive: create list (PS)
