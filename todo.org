@@ -3,7 +3,6 @@
 * List of issues/functions to address (20170201) with decreasing order of priority:
   - Add from and to numpy functions, see mialib_python.i (PK)
   - Add UINT64 data type in Jim (PK)
-  - ERROR_TYPE functions that do not modify the input image (e.g. iminfo) should not use the bool variable destructive: create list (PS)
   - Address those functions with pointer arguments (besides IMAGE * or IMAGE **): create list (PS), define desired behaviour at python level (PS-PK), and then solve (at interface file level?).
   - Confirm that arguments of overloaded methods with default argument values cannot be used as keys (PK)
   - Solve the problem related to ERROR_TYPE return in a functional call (refers to a memory leak and returned ERROR_TYPE * !!!)
@@ -20,3 +19,21 @@
   - Problem related to ERROR_TYPE return in a functional call seems to be fixed (PK)
 
 
+  - ERROR_TYPE functions that do not modify the input image (e.g. iminfo) should not use the bool variable destructive: create list (PS)
+
+extern ERROR_TYPE dumpxyz(IMAGE *im, int x, int y, int z, int dx, int dy);
+extern ERROR_TYPE szcompat(IMAGE *im1, IMAGE *im2);
+extern ERROR_TYPE szgeocompat(IMAGE *im1, IMAGE *im2);
+extern ERROR_TYPE iminfo(IMAGE *im);
+extern ERROR_TYPE tiffinfo(char *fn, char *field, float *val);
+extern ERROR_TYPE writeGnuPlot3D(IMAGE **imap, int nc, int graph, int regionSize, int varianz, char *fileName);
+extern ERROR_TYPE vectorizeImage(IMAGE **imap, int nc, char *filename, int format, double simplifyBorderLines);
+extern ERROR_TYPE IsPartitionEqual(IMAGE *im1, IMAGE *im2, int *result);
+extern ERROR_TYPE IsPartitionFiner(IMAGE *im1, IMAGE *im2, int graph, unsigned long int *res);
+extern ERROR_TYPE dendro(IMAGE **imap, int nc, char *fn);
+extern ERROR_TYPE getfirstmaxpos(IMAGE *im, unsigned long int *pos);
+extern ERROR_TYPE volume(IMAGE *im);
+extern ERROR_TYPE imequalp(IMAGE *im1, IMAGE *im2);
+extern ERROR_TYPE getmax(IMAGE *im, double *maxval);
+extern ERROR_TYPE getminmax(IMAGE *im, double *minval, double *maxval);
+    
