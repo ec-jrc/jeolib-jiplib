@@ -104,6 +104,11 @@ if(GSL_FOUND)
   add_definitions(-DGSL_DLL)
 endif()
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(JSONCPP jsoncpp)
+# link_libraries(${JSONCPP_LIBRARIES})
+include_directories(${JSONCPP_INCLUDE_DIRS})
+
 #todo: use find_library pktools instead of setting target_link_libraries
 # set(PKTOOLS_INCLUDE_DIRS /usr/local/include/pktools)
 # set(PKTOOLS_LIBRARY_DIR /usr/local/lib)
@@ -158,6 +163,7 @@ target_link_libraries(
   ${PYTHON_LIBRARIES}
   gomp
   ${GDAL_LIBRARIES}
+  ${JSONCPP_LIBRARIES}
   # base
   # algorithms
   # imageClasses

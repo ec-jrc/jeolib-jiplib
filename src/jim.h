@@ -815,16 +815,23 @@ CPLErr szgeocompat(Jim& imRaster_im2, int iband=0);
       ImgRaster::getMask(*imgWriter,app);
       return(imgWriter);
     }
+    ///set mask to raster dataset (needs to be implemented in jim.cc because of JimList)
+    std::shared_ptr<Jim> setMask(app::AppFactory& app);
+    ///set mask to raster dataset (needs to be implemented in jim.cc because of JimList)
+    std::shared_ptr<Jim> setMask(JimList& maskList, app::AppFactory& app);
     ///Check for difference with reference image
     CPLErr diff(std::shared_ptr<Jim> refImage,app::AppFactory& app){
       return(ImgRaster::diff(*refImage,app));
     }
     ///Clear all no data values, including the one in GDAL dataset if it is set
     CPLErr clearNoData(int band=0){return(ImgRaster::clearNoData(band));}
-    ///set mask to raster dataset
-    std::shared_ptr<Jim> setMask(app::AppFactory& app);
-    ///set mask to raster dataset
-    std::shared_ptr<Jim> setMask(JimList& maskList, app::AppFactory& app);
+    ///reclass raster dataset
+    std::shared_ptr<Jim> reclass(app::AppFactory& app){
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
+      ImgRaster::reclass(*imgWriter, app);
+      return(imgWriter);
+    }
+
 
   protected:
     ///reset all member variables
