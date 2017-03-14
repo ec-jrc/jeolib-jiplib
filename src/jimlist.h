@@ -7,7 +7,6 @@ Change log
 #ifndef _JIMLIST_H_
 #define _JIMLIST_H_
 
-#include "json/json.h"
 #include "jim.h"
 extern "C" {
 #include "config.h"

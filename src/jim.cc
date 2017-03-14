@@ -5,6 +5,7 @@ History
 Change log
 ***********************************************************************/
 #include "config.h"
+#include "json/json.h"
 #include "jim.h"
 
 
@@ -119,6 +120,28 @@ CPLErr Jim::open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDa
   }
   else
     return(CE_Failure);
+}
+
+///Create a JSON string from a Jim image
+std::string Jim::jim2json(){
+  Json::Value custom;
+  custom["size"]=static_cast<int>(1);
+  int iimg=0;
+  Json::Value image;
+  image["path"]=getFileName();
+  std::string wktString=getProjectionRef();
+  std::string key("EPSG");
+  std::size_t foundEPSG=wktString.rfind(key);
+  std::string fromEPSG=wktString.substr(foundEPSG);//EPSG","32633"]]'
+  std::size_t foundFirstDigit=fromEPSG.find_first_of("0123456789");
+  std::size_t foundLastDigit=fromEPSG.find_last_of("0123456789");
+  std::string epsgString=fromEPSG.substr(foundFirstDigit,foundLastDigit-foundFirstDigit+1);
+  image["epsg"]=epsgString;
+  std::ostringstream os;
+  os << iimg++;
+  custom["0"]=image;
+  Json::FastWriter fastWriter;
+  return(fastWriter.write(custom));
 }
 
 /**

@@ -110,6 +110,8 @@ namespace jiplib{
       return(CE_None);
     }
 
+    ///Create a JSON string from a Jim image
+    std::string jim2json();
     ///Clone as new shared pointer to ImgRaster object
     /**
      *
@@ -420,6 +422,8 @@ std::shared_ptr<Jim> linero(int  dx, int  dy, int  n, int  line_type, int iband=
 std::shared_ptr<Jim> lindil(int  dx, int  dy, int  n, int  line_type, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> herkpldil(int  dx, int  dy, int  k, int  o, int  t, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> herkplero(int  dx, int  dy, int  k, int  o, int  t, int iband=0, bool destructive=false);
+std::shared_ptr<Jim> erode4(int  ox, int  oy, int iband=0, bool destructive=false);
+std::shared_ptr<Jim> dilate4(int  ox, int  oy, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> linerank(int  dx, int  dy, int  k, int  rank, int  o, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> write_ColorMap_tiff(char * fn, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> write_tiff(char * fn, int iband=0, bool destructive=false);
@@ -520,6 +524,8 @@ CPLErr d_linero(int  dx, int  dy, int  n, int  line_type, int iband=0);
 CPLErr d_lindil(int  dx, int  dy, int  n, int  line_type, int iband=0);
 CPLErr d_herkpldil(int  dx, int  dy, int  k, int  o, int  t, int iband=0);
 CPLErr d_herkplero(int  dx, int  dy, int  k, int  o, int  t, int iband=0);
+CPLErr d_erode4(int  ox, int  oy, int iband=0);
+CPLErr d_dilate4(int  ox, int  oy, int iband=0);
 CPLErr d_linerank(int  dx, int  dy, int  k, int  rank, int  o, int iband=0);
 CPLErr d_write_ColorMap_tiff(char * fn, int iband=0);
 CPLErr d_write_tiff(char * fn, int iband=0);

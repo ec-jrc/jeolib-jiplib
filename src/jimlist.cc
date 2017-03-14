@@ -5,6 +5,7 @@ History
 Change log
 ***********************************************************************/
 #include "base/Optionpk.h"
+#include "json/json.h"
 #include "jimlist.h"
 
 using namespace jiplib;
@@ -106,20 +107,13 @@ std::string JimList::jl2json(){
     Json::Value image;
     image["path"]=(*lit)->getFileName();
     std::string wktString=(*lit)->getProjectionRef();
-    int  uz;
-    char uc;
-    int epsg;
-    if( sscanf(wktString.c_str(),"PROJCS[\"WGS 84 / UTM zone %d%c",&uz,&uc) == 2 ){
-      if( uc == 'N' ){
-        //NorthEmisphere = true;
-        epsg = 32600 + uz;
-      }
-      else{
-        //NorthEmisphere = false;
-        epsg = 32700 + uz;
-      }
-    }
-    image["epsg"]=epsg;
+    std::string key("EPSG");
+    std::size_t foundEPSG=wktString.rfind(key);
+    std::string fromEPSG=wktString.substr(foundEPSG);//EPSG","32633"]]'
+    std::size_t foundFirstDigit=fromEPSG.find_first_of("0123456789");
+    std::size_t foundLastDigit=fromEPSG.find_last_of("0123456789");
+    std::string epsgString=fromEPSG.substr(foundFirstDigit,foundLastDigit-foundFirstDigit+1);
+    image["epsg"]=epsgString;
     std::ostringstream os;
     os << iimg++;
     custom[os.str()]=image;
