@@ -136,7 +136,7 @@ std::string Jim::jim2json(){
   std::size_t foundFirstDigit=fromEPSG.find_first_of("0123456789");
   std::size_t foundLastDigit=fromEPSG.find_last_of("0123456789");
   std::string epsgString=fromEPSG.substr(foundFirstDigit,foundLastDigit-foundFirstDigit+1);
-  image["epsg"]=epsgString;
+  image["epsg"]=atoi(epsgString.c_str());
   std::ostringstream os;
   os << iimg++;
   custom["0"]=image;
