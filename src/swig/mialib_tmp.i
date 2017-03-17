@@ -395,37 +395,6 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
 
 
 
-
-// define a typemap to handle the box arguments (array of 6 integer values in C)
-%typemap(in) (int *box) {
-  int dim, array_size=6;
-  void *argp1 = 0 ;
-  if (!PySequence_Check($input)) {
-    PyErr_SetString(PyExc_ValueError,"Expected a sequence");
-    return NULL;
-  }
-  dim=PySequence_Length($input);
-  if (dim>array_size){
-    PyErr_SetString(PyExc_ValueError,"The size of the sequence cannot contain more than 6 elements");
-    return NULL;
-  }
-  printf("message: dim=%d\n", dim);
-  $1 = malloc(array_size*sizeof(int))(IMAGE **) malloc(dim*sizeof(IMAGE **));
-  for (i = 0; i < dim; i++) {
-    PyObject *o = PySequence_GetItem($input,i);
-    res1 = SWIG_ConvertPtr(o, &argp1,SWIGTYPE_p_int, 0 |  0 );
-    if (SWIG_IsOK(res1)) {
-      print("argp1=%d\n", argp1);
-      $1[i] = argp1;
-    }
-    else {
-      PyErr_SetString(PyExc_ValueError,"Sequence elements must be IMAGE pointers");      
-      free($1);
-      return NULL;
-    }
-  }
- }
-
 // typemap for mialib functions returning a G_TYPE
 %typemap(out) G_TYPE getpixval {
   double dval=0.0;

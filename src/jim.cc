@@ -111,7 +111,7 @@ CPLErr Jim::open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDa
   m_blockSize=nrow;//memory contains entire image and has been read already
   if(dataPointer){
     for(int iband=0;iband<m_nband;++iband){
-      m_data[iband]=dataPointer+iband*ncol*nrow*nplane*getDataTypeSizeBytes();
+      m_data[iband]=(char *)dataPointer+iband*ncol*nrow*nplane*getDataTypeSizeBytes();
       m_begin[iband]=0;
       m_end[iband]=m_begin[iband]+m_blockSize;
     }

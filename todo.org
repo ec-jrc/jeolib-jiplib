@@ -1,11 +1,19 @@
 
 
 * List of issues/functions to address (20170201) with decreasing order of priority:
-  - Address those functions with pointer arguments (besides IMAGE * or IMAGE **): create list (PS), define desired behaviour at python level (PS-PK), and then solve (at interface file level?).
-  - Confirm that arguments of overloaded methods with default argument values cannot be used as keys (PK)
-  - Solve the problem related to ERROR_TYPE return in a functional call (refers to a memory leak and returned ERROR_TYPE * !!!) (PK)
-  - Add a jim.write() method behaving like .close() but not releasing the image in memory (PK)
-  - Address mialib functions modifying GeoTransform/Projection: create list (PS) and then ad hoc procedure to be put in place.
+  - jim.h should be in build since it is modified by scripts upon
+    compilation.
+  - Address those functions with pointer arguments (besides IMAGE * or
+    IMAGE **): create list (PS), define desired behaviour at python
+    level (PS-PK), and then solve (at interface file level?).
+  - Confirm that arguments of overloaded methods with default argument
+    values cannot be used as keys (PK)
+  - Solve the problem related to ERROR_TYPE return in a functional
+    call (refers to a memory leak and returned ERROR_TYPE * !!!) (PK)
+  - Add a jim.write() method behaving like .close() but not releasing
+    the image in memory (PK)
+  - Address mialib functions modifying GeoTransform/Projection: create
+    list (PS) and then ad hoc procedure to be put in place.
   - Automatic binding of GTYPE functions (e.g. getpixval) 
 
 
