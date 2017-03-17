@@ -77,6 +77,7 @@ namespace jiplib{
             delete(m_mia[iband]);
         m_mia.clear();
       }
+      ImgRaster::reset();
     }
     static std::shared_ptr<Jim> createImg(app::AppFactory &theApp);
     static std::shared_ptr<Jim> createImg();
@@ -109,7 +110,20 @@ namespace jiplib{
       // }
       return(CE_None);
     }
+    ///Open dataset (specialization of the open member function of ImgRaster, closing the dataset after reading in memory)
+    ///open dataset, read data and close (keep data in memory)
+    //CPLErr open(app::AppFactory &app);
+    ///write to file previously set (eg., with setFile). Specialization of the writeData member function of ImgRaster, avoiding reset of the memory.
+    CPLErr write();
+    ///write to file Specialization of the writeData member function of ImgRaster, avoiding reset of the memory.
+    CPLErr write(app::AppFactory &app);
+    ///Close dataset (specialization of the close member function of ImgRaster, avoiding writing the data)
+    CPLErr close(){ImgRaster::reset();};
 
+    ///Create a JSON string from a Jim image
+    std::string jim2json();
+    ///Create a custom collection from a Jim image
+    /* std::string jim2custom(); */
     ///Clone as new shared pointer to ImgRaster object
     /**
      *
@@ -420,6 +434,8 @@ std::shared_ptr<Jim> linero(int  dx, int  dy, int  n, int  line_type, int iband=
 std::shared_ptr<Jim> lindil(int  dx, int  dy, int  n, int  line_type, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> herkpldil(int  dx, int  dy, int  k, int  o, int  t, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> herkplero(int  dx, int  dy, int  k, int  o, int  t, int iband=0, bool destructive=false);
+std::shared_ptr<Jim> erode4(int  ox, int  oy, int iband=0, bool destructive=false);
+std::shared_ptr<Jim> dilate4(int  ox, int  oy, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> linerank(int  dx, int  dy, int  k, int  rank, int  o, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> write_ColorMap_tiff(char * fn, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> write_tiff(char * fn, int iband=0, bool destructive=false);
@@ -520,6 +536,8 @@ CPLErr d_linero(int  dx, int  dy, int  n, int  line_type, int iband=0);
 CPLErr d_lindil(int  dx, int  dy, int  n, int  line_type, int iband=0);
 CPLErr d_herkpldil(int  dx, int  dy, int  k, int  o, int  t, int iband=0);
 CPLErr d_herkplero(int  dx, int  dy, int  k, int  o, int  t, int iband=0);
+CPLErr d_erode4(int  ox, int  oy, int iband=0);
+CPLErr d_dilate4(int  ox, int  oy, int iband=0);
 CPLErr d_linerank(int  dx, int  dy, int  k, int  rank, int  o, int iband=0);
 CPLErr d_write_ColorMap_tiff(char * fn, int iband=0);
 CPLErr d_write_tiff(char * fn, int iband=0);
@@ -815,16 +833,23 @@ CPLErr szgeocompat(Jim& imRaster_im2, int iband=0);
       ImgRaster::getMask(*imgWriter,app);
       return(imgWriter);
     }
+    ///set mask to raster dataset (needs to be implemented in jim.cc because of JimList)
+    std::shared_ptr<Jim> setMask(app::AppFactory& app);
+    ///set mask to raster dataset (needs to be implemented in jim.cc because of JimList)
+    std::shared_ptr<Jim> setMask(JimList& maskList, app::AppFactory& app);
     ///Check for difference with reference image
     CPLErr diff(std::shared_ptr<Jim> refImage,app::AppFactory& app){
       return(ImgRaster::diff(*refImage,app));
     }
     ///Clear all no data values, including the one in GDAL dataset if it is set
     CPLErr clearNoData(int band=0){return(ImgRaster::clearNoData(band));}
-    ///set mask to raster dataset
-    std::shared_ptr<Jim> setMask(app::AppFactory& app);
-    ///set mask to raster dataset
-    std::shared_ptr<Jim> setMask(JimList& maskList, app::AppFactory& app);
+    ///reclass raster dataset
+    std::shared_ptr<Jim> reclass(app::AppFactory& app){
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
+      ImgRaster::reclass(*imgWriter, app);
+      return(imgWriter);
+    }
+
 
   protected:
     ///reset all member variables

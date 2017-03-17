@@ -38,6 +38,12 @@ namespace jiplib{
     JimList(){ImgCollection();};
     ///constructor using vector of images
     JimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist);
+    ///constructor from an AppFactory
+    JimList(app::AppFactory& theApp){open(theApp);};
+    ///constructor from a JSON string
+    CPLErr open(const std::string& strjson);
+    ///constructor from a JSON string
+    CPLErr open(app::AppFactory& theApp);
     ///push image to collection
     JimList& pushImage(const std::shared_ptr<jiplib::Jim> imgRaster);
     //CPLErr pushImage(const std::shared_ptr<jiplib::Jim> imgRaster);
@@ -55,6 +61,8 @@ namespace jiplib{
     std::shared_ptr<jiplib::Jim> stack();
     ///create statistical profile from a collection
     std::shared_ptr<jiplib::Jim> statProfile(app::AppFactory& app);
+    ///create a JSON string from a list
+    std::string jl2json();
     ///functions from mialib
     JimList imrgb2hsx(int x=0);
     JimList alphaTree(int alphaMax);

@@ -4,6 +4,8 @@ History
 2016/12/05 - Created by Pieter Kempeneers
 Change log
 ***********************************************************************/
+#include "base/Optionpk.h"
+#include "json/json.h"
 #include "jimlist.h"
 
 using namespace jiplib;
@@ -16,6 +18,68 @@ JimList::JimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist) : ImgC
     // pushImage(jimVector[ijim]);
   // }
 }
+
+///construtor using a json string coming from a custom colllection
+///example:
+///str = '{"size": 1, "0": {"epsg": 4326, "path":"/eos/jeodpp/data/base/Soil/GLOBAL/HWSD/VER1-2/Data/GeoTIFF/hwsd.tif"} }'
+CPLErr JimList::open(const std::string& strjson){
+  Json::Value custom;
+  Json::Reader reader;
+  bool parsedSuccess=reader.parse(strjson,custom,false);
+  if(parsedSuccess){
+    for(int iimg=0;iimg<custom["size"].asInt();++iimg){
+      std::ostringstream os;
+      os << iimg;
+      Json::Value image=custom[os.str()];
+      std::string filename=image["path"].asString();
+      //todo: open without reading?
+      app::AppFactory theApp;
+      theApp.setLongOption("filename",filename);
+      std::shared_ptr<jiplib::Jim> theImage=jiplib::Jim::createImg(theApp);
+      pushImage(theImage);
+    }
+  }
+  return(CE_None);
+}
+
+CPLErr JimList::open(app::AppFactory& theApp){
+  Optionpk<std::string> json_opt("json", "json", "The json object");
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=json_opt.retrieveOption(theApp);
+  }
+  catch(std::string predefinedString){
+    std::cout << predefinedString << std::endl;
+  }
+  if(!doProcess){
+    std::cout << std::endl;
+    std::ostringstream helpStream;
+    helpStream << "exception thrown due to help info";
+    throw(helpStream.str());//help was invoked, stop processing
+  }
+
+  std::vector<std::string> badKeys;
+  theApp.badKeys(badKeys);
+  if(badKeys.size()){
+    std::ostringstream errorStream;
+    if(badKeys.size()>1)
+      errorStream << "Error: unknown keys: ";
+    else
+      errorStream << "Error: unknown key: ";
+    for(int ikey=0;ikey<badKeys.size();++ikey){
+      errorStream << badKeys[ikey] << " ";
+    }
+    errorStream << std::endl;
+    throw(errorStream.str());
+  }
+  if(json_opt.empty()){
+    std::string errorString="Error: json string is empty";
+    throw(errorString);
+  }
+  return(open(json_opt[0]));
+  // JimList(std::string(""));
+}
+
 ///push image to collection
 //CPLErr JimList::pushImage(const std::shared_ptr<jiplib::Jim> imgRaster){
 JimList& JimList::pushImage(const std::shared_ptr<jiplib::Jim> imgRaster){
@@ -34,6 +98,30 @@ JimList& JimList::popImage(){
 const std::shared_ptr<jiplib::Jim> JimList::getImage(int index){
   return(std::dynamic_pointer_cast<jiplib::Jim>(ImgCollection::getImage(index)));
 }
+
+std::string JimList::jl2json(){
+  Json::Value custom;
+  custom["size"]=static_cast<int>(size());
+  int iimg=0;
+  for(std::list<std::shared_ptr<ImgRaster> >::iterator lit=begin();lit!=end();++lit){
+    Json::Value image;
+    image["path"]=(*lit)->getFileName();
+    std::string wktString=(*lit)->getProjectionRef();
+    std::string key("EPSG");
+    std::size_t foundEPSG=wktString.rfind(key);
+    std::string fromEPSG=wktString.substr(foundEPSG);//EPSG","32633"]]'
+    std::size_t foundFirstDigit=fromEPSG.find_first_of("0123456789");
+    std::size_t foundLastDigit=fromEPSG.find_last_of("0123456789");
+    std::string epsgString=fromEPSG.substr(foundFirstDigit,foundLastDigit-foundFirstDigit+1);
+    image["epsg"]=atoi(epsgString.c_str());
+    std::ostringstream os;
+    os << iimg++;
+    custom[os.str()]=image;
+  }
+  Json::FastWriter fastWriter;
+  return(fastWriter.write(custom));
+}
+
 ///composite image only for in memory
 /**
  * @param input (type: std::string) Input image file(s). If input contains multiple images, a multi-band output is created
