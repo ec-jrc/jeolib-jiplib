@@ -77,6 +77,7 @@ namespace jiplib{
             delete(m_mia[iband]);
         m_mia.clear();
       }
+      ImgRaster::reset();
     }
     static std::shared_ptr<Jim> createImg(app::AppFactory &theApp);
     static std::shared_ptr<Jim> createImg();
@@ -109,9 +110,20 @@ namespace jiplib{
       // }
       return(CE_None);
     }
+    ///Open dataset (specialization of the open member function of ImgRaster, closing the dataset after reading in memory)
+    ///open dataset, read data and close (keep data in memory)
+    //CPLErr open(app::AppFactory &app);
+    ///write to file previously set (eg., with setFile). Specialization of the writeData member function of ImgRaster, avoiding reset of the memory.
+    CPLErr write();
+    ///write to file Specialization of the writeData member function of ImgRaster, avoiding reset of the memory.
+    CPLErr write(app::AppFactory &app);
+    ///Close dataset (specialization of the close member function of ImgRaster, avoiding writing the data)
+    CPLErr close(){ImgRaster::reset();};
 
     ///Create a JSON string from a Jim image
     std::string jim2json();
+    ///Create a custom collection from a Jim image
+    /* std::string jim2custom(); */
     ///Clone as new shared pointer to ImgRaster object
     /**
      *

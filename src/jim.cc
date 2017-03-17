@@ -122,6 +122,36 @@ CPLErr Jim::open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDa
     return(CE_Failure);
 }
 
+///open dataset, read data and close (keep data in memory)
+// CPLErr Jim::open(app::AppFactory &app) {
+//   ImgRaster::open(app);
+//   if(m_gds)
+//     GDALClose(m_gds);
+// }
+
+///write to file previously set (eg., with setFile) without reset (keep data in memory)
+CPLErr Jim::write(){
+  //write, but do not reset
+  if(m_data.size()&&m_filename.size()){
+    for(int iband=0;iband<nrOfBand();++iband)
+      writeNewBlock(nrOfRow(),iband);
+  }
+  char **papszOptions=NULL;
+  for(std::vector<std::string>::const_iterator optionIt=m_options.begin();optionIt!=m_options.end();++optionIt)
+    papszOptions=CSLAddString(papszOptions,optionIt->c_str());
+  if(papszOptions)
+    CSLDestroy(papszOptions);
+  if(m_gds)
+    GDALClose(m_gds);
+  // reset();
+}
+
+///write to file without reset (keep data in memory)
+CPLErr Jim::write(app::AppFactory &app){
+  setFile(app);
+  write();
+}
+
 ///Create a JSON string from a Jim image
 std::string Jim::jim2json(){
   Json::Value custom;
@@ -144,6 +174,16 @@ std::string Jim::jim2json(){
   return(fastWriter.write(custom));
 }
 
+///Create a custom collection from a Jim image
+// std::string Jim::jim2custom(){
+//   //todo:set directory as tmpnam will return path in /tmp
+//   std::string custName = std::tmpnam(0);
+//   std::vector<std::string> co;
+//   co.push_back("COMPRESS=LZW");
+//   setFile(custName,"GTiff",0,co);
+//   write();
+//   return(jim2json());
+// }
 /**
  *
  *
