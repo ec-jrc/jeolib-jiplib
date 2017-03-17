@@ -391,3 +391,72 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
 /* #if defined(SWIGPYTHON) */
 /* %include "mialib_python.i" */
 /* #endif */
+
+
+
+
+
+// define a typemap to handle the box arguments (array of 6 integer values in C)
+%typemap(in) (int *box) {
+  int dim, array_size=6;
+  void *argp1 = 0 ;
+  if (!PySequence_Check($input)) {
+    PyErr_SetString(PyExc_ValueError,"Expected a sequence");
+    return NULL;
+  }
+  dim=PySequence_Length($input);
+  if (dim>array_size){
+    PyErr_SetString(PyExc_ValueError,"The size of the sequence cannot contain more than 6 elements");
+    return NULL;
+  }
+  printf("message: dim=%d\n", dim);
+  $1 = malloc(array_size*sizeof(int))(IMAGE **) malloc(dim*sizeof(IMAGE **));
+  for (i = 0; i < dim; i++) {
+    PyObject *o = PySequence_GetItem($input,i);
+    res1 = SWIG_ConvertPtr(o, &argp1,SWIGTYPE_p_int, 0 |  0 );
+    if (SWIG_IsOK(res1)) {
+      print("argp1=%d\n", argp1);
+      $1[i] = argp1;
+    }
+    else {
+      PyErr_SetString(PyExc_ValueError,"Sequence elements must be IMAGE pointers");      
+      free($1);
+      return NULL;
+    }
+  }
+ }
+
+// typemap for mialib functions returning a G_TYPE
+%typemap(out) G_TYPE getpixval {
+  double dval=0.0;
+  switch (GetImDataType(arg1)) {
+  case t_UCHAR:
+    dval=(double)$1.uc_val;
+    break;
+  case t_SHORT:
+    dval=(double)$1.s_val;
+    break;
+  case t_USHORT:
+    dval=(double)$1.us_val;
+    break;
+  case t_INT32:
+    dval=(double)$1.i32_val;
+    break;
+  case t_UINT32:
+    dval=(double)$1.u32_val;
+    break;
+  case t_INT64:
+    dval=(double)$1.i64_val;
+    break;
+  case t_UINT64:
+    dval=(double)$1.u64_val;
+    break;
+  case t_MIAFLOAT:
+    dval=(double)$1.f_val;
+    break;
+  case t_DOUBLE:
+    dval=(double)$1.d_val;
+    break;
+  }
+  $result=PyFloat_FromDouble(dval);
+ }
