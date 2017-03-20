@@ -314,6 +314,54 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
     $1[i]=(std::dynamic_pointer_cast< jiplib::Jim >(jimList[i]))->getMIA();
  }
 
+
+// 20170317
+// integer box array with 2,4, or 6 size parameters (1-D, 2-D, or 3-D images respectively)
+%typemap(in) (int *box) {
+  int i, dim;
+  $1 =  (int *) calloc(6, sizeof(int));
+  if (!PySequence_Check($input)) {
+    PyErr_SetString(PyExc_ValueError,"Expected a sequence");
+    return NULL;
+  }
+  dim=PySequence_Length($input);
+  if ((dim!=2) || (dim!=4) || (dim!=6)){
+    for (i = 0; i < dim; i++) {
+      PyObject *o = PySequence_GetItem($input,i);
+      // https://docs.python.org/3.5/c-api/long.html
+      if (PyInt_Check(o)) {
+	$1[i] = (int)PyInt_AsLong(o);
+      }
+      else {
+	PyErr_SetString(PyExc_ValueError,"Sequence elements must be integers");      
+	free($1);
+	return NULL;
+      }
+    }
+  }
+  else {
+      PyErr_SetString(PyExc_ValueError,"Sequence elements must be equal to 2, 4, or 6 for the size of the [left, right], [left, right, top, bottom], or [left, right, top, bottom, up, down] borders respectively.");  
+      return NULL;
+  }
+ }
+
+// Free the box array
+%typemap(freearg) (int *box) {
+  free($1);
+}
+
+// make sure box parameters are non-negative
+%typemap(check) int *box {
+  int i;
+  for (i=0; i<6; i++){
+    if ($1[i] < 0) {
+      SWIG_exception(SWIG_ValueError, "Expected non-negative value.");
+    }
+  }
+ }
+
+
+
 /* %typemap(out) IMAGE **rotatecoor { */
 /*   std::cout << "we are in typemap(out) IMAGE** rotatecoor" << std::endl; */
 /*   void *argp2 = 0 ; */
@@ -395,6 +443,8 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
 
 
 
+
+
 // typemap for mialib functions returning a G_TYPE
 %typemap(out) G_TYPE getpixval {
   double dval=0.0;
@@ -426,6 +476,8 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
   case t_DOUBLE:
     dval=(double)$1.d_val;
     break;
+  default:
+    printf("getpixval(): undefined pixel type (%d) !\n)", GetImDataType(arg1));
   }
   $result=PyFloat_FromDouble(dval);
  }

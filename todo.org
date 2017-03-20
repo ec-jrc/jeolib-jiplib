@@ -1,20 +1,46 @@
 
 
 * List of issues/functions to address (20170201) with decreasing order of priority:
+  - function getpixval not warpted correctly (existing typemap in
+    mialib_tmp.i should return a value and not a G_TYPE * swig object!
+  - typemap for mia function argument int *box introduced in
+    mialib_tmp.i works only for functional call in jiplib (method
+    calls, whether destructive or not do not work).  (PK to
+    investigate).
+  - implement in jiplib mialib functions that return an IMAGE ** (PK),
+    see solution with typemaps implemented in mia (master.i).  This
+    requires a 3rd python script for warping to python (as for
+    ERROR_TYPE and IMAGE * functions).  Note that it seems desirable
+    to define at python level a list of images as a python list.
+
+  - ERROR_TYPE functions that do not modify the input image
+    (e.g. iminfo) should not use the bool variable destructive (see
+    list in done).  These functions should not return a new image and
+    indeed not an image at all! (PK to implement).
+
   - jim.h should be in build since it is modified by scripts upon
-    compilation.
+    compilation. (PK to implement).
+
   - Address those functions with pointer arguments (besides IMAGE * or
-    IMAGE **): create list (PS), define desired behaviour at python
-    level (PS-PK), and then solve (at interface file level?).
+    IMAGE **): create list (PS see Done below as well as master.i in
+    mia), define desired behaviour at python level (PK from examples
+    in mia master.i), and then solve (at interface file level).
+
   - Confirm that arguments of overloaded methods with default argument
-    values cannot be used as keys (PK)
+    values cannot be used as keys (PK).
+
   - Solve the problem related to ERROR_TYPE return in a functional
     call (refers to a memory leak and returned ERROR_TYPE * !!!) (PK)
+
   - Add a jim.write() method behaving like .close() but not releasing
     the image in memory (PK)
+
   - Address mialib functions modifying GeoTransform/Projection: create
     list (PS) and then ad hoc procedure to be put in place.
-  - Automatic binding of GTYPE functions (e.g. getpixval) 
+
+  - Automatic binding of GTYPE functions (e.g. getpixval)
+
+  - integration of lut in jim
 
 
 
@@ -31,7 +57,9 @@
   - Constructor written with copyData specific to Jim with memcopy (this also implements the clone) (PK)
 
 
-  - ERROR_TYPE functions that do not modify the input image (e.g. iminfo) should not use the bool variable destructive: create list (PS)
+  - ERROR_TYPE functions that do not modify the input image
+    (e.g. iminfo) should not use the bool variable destructive: create
+    list (PS)
 
 extern ERROR_TYPE dumpxyz(IMAGE *im, int x, int y, int z, int dx, int dy);
 extern ERROR_TYPE szcompat(IMAGE *im1, IMAGE *im2);
@@ -48,4 +76,12 @@ extern ERROR_TYPE volume(IMAGE *im);
 extern ERROR_TYPE imequalp(IMAGE *im1, IMAGE *im2);
 extern ERROR_TYPE getmax(IMAGE *im, double *maxval);
 extern ERROR_TYPE getminmax(IMAGE *im, double *minval, double *maxval);
+
+   - mialib functions with pointer arguments other than IMAGE * (see
+     also corresponding typemaps in master.i in mia):
     
+extern ERROR_TYPE FindPixWithVal(IMAGE *im, G_TYPE gval, unsigned long int *ofs);
+extern IMAGE **cs2cs(double ulc_e, double ulc_n, int nx, int ny, double res, char *parmsi[], int ni, char *parmso[], int no);
+extern ERROR_TYPE framebox(IMAGE *im, int *box, G_TYPE gval);
+extern ERROR_TYPE addframebox(IMAGE *im, int *box, G_TYPE gval);
+extern ERROR_TYPE subframebox(IMAGE *im, int *box);

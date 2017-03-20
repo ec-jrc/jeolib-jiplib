@@ -470,6 +470,8 @@ std::shared_ptr<Jim> linero(int  dx, int  dy, int  n, int  line_type, int iband=
 std::shared_ptr<Jim> lindil(int  dx, int  dy, int  n, int  line_type, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> herkpldil(int  dx, int  dy, int  k, int  o, int  t, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> herkplero(int  dx, int  dy, int  k, int  o, int  t, int iband=0, bool destructive=false);
+std::shared_ptr<Jim> erode4(int  ox, int  oy, int iband=0, bool destructive=false);
+std::shared_ptr<Jim> dilate4(int  ox, int  oy, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> linerank(int  dx, int  dy, int  k, int  rank, int  o, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> bitwise_op(Jim& imRaster_im2, int  op, int iband=0, bool destructive=false);
 std::shared_ptr<Jim> negation(int iband=0, bool destructive=false);
@@ -570,6 +572,8 @@ CPLErr d_linero(int  dx, int  dy, int  n, int  line_type, int iband=0);
 CPLErr d_lindil(int  dx, int  dy, int  n, int  line_type, int iband=0);
 CPLErr d_herkpldil(int  dx, int  dy, int  k, int  o, int  t, int iband=0);
 CPLErr d_herkplero(int  dx, int  dy, int  k, int  o, int  t, int iband=0);
+CPLErr d_erode4(int  ox, int  oy, int iband=0);
+CPLErr d_dilate4(int  ox, int  oy, int iband=0);
 CPLErr d_linerank(int  dx, int  dy, int  k, int  rank, int  o, int iband=0);
 CPLErr d_bitwise_op(Jim& imRaster_im2, int  op, int iband=0);
 CPLErr d_negation(int iband=0);
