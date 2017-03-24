@@ -299,7 +299,29 @@ namespace jiplib{
       SWIG_exception_fail(SWIG_ArgError(res2), "in method " "$symname");
     /* $result=$self; */
   }
+  //convert std::string to Python string or PyList of strings if multi-line string
+  /* %typemap(out) std::string { */
+    /* PySys_WriteStdout($1.c_str()); */
+    /* Py_RETURN_NONE; */
+
+    /* std::cout << "we are in typemap(out) std::string for jiplib::Jim::$symname" << std::endl; */
+    /* std::string::size_type prevpos = 0; // Must initialize */
+    /* std::string::size_type pos = 0; // Must initialize */
+    /* std::string theString=$1; */
+    /* $result = PyList_New(0); */
+    /* while ( ( pos = theString.find ("\n",pos) ) != std::string::npos ){ */
+    /*   std::string astring=theString.substr(prevpos,pos-prevpos); */
+    /*   prevpos=pos; */
+    /*   theString.erase ( pos, 1 ); */
+    /*   //test */
+    /*   std::cout << aString << std::endl; */
+    /*   PyList_Append($result,PyString_FromString(astring.c_str())); */
+    /* } */
+    /* if(PyList_Size($result)<2) */
+    /*   $result=PyString_FromString($1.c_str()); */
+  /* } */
 }
+
 
 %{
 #include <memory>

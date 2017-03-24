@@ -69,5 +69,8 @@ namespace jiplib{
     JimList histrgbmatch();
     JimList histrgb3dmatch();
   };
+  /* JimList createJimList(); */
+  /* JimList createJimList(app::AppFactory &theApp); */
+  /* JimList createJimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist); */
 }
 #endif // _JIMLIST_H_

@@ -318,6 +318,11 @@ std::shared_ptr<jiplib::Jim> JimList::statProfile(app::AppFactory& app){
   return(imgWriter);
 }
 
+
+// JimList createJimList(){JimList theList; return(theList);};
+// JimList createJimList(app::AppFactory &theApp){JimList theList(theApp); return(theList);};
+// JimList createJimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist){JimList theList(jimlist); return(theList);};
+
 ///functions from mialib
 JimList JimList::imrgb2hsx(int x){
   int ninput=3;

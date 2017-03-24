@@ -307,6 +307,8 @@ namespace jiplib{
     /* std::shared_ptr<Jim> d_arith(Jim& imRaster_im2, int op, int iband=0); */
     //start insert from fun2method_imagetype
     //end insert from fun2method_imagetype
+    //start insert from fun2method_imagelisttype
+    //end insert from fun2method_imagelisttype
     //start insert from fun2method_errortype
     //end insert from fun2method_errortype
     //start insert from fun2method_errortype_d
@@ -320,8 +322,8 @@ namespace jiplib{
 // std::shared_ptr<Jim> mean2d(int width, int iband=0);
 // std::shared_ptr<Jim> copy_image(int iband=0);
  //functions from mialib returning image list (manually wrapped)
- JimList rotatecoor(double theta, int iband=0);
- JimList imgc(int iband=0);
+ /* JimList rotatecoor(double theta, int iband=0); */
+ /* JimList imgc(int iband=0); */
 //
     /* /\* CPLErr arith(std::shared_ptr<Jim> imgRaster, int theOperation, int band=0); *\/ */
     /* /// perform arithmetic operation for a particular band (non-destructive version) */
