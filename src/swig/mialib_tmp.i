@@ -318,6 +318,7 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
 // 20170317
 // integer box array with 2,4, or 6 size parameters (1-D, 2-D, or 3-D images respectively)
 %typemap(in) (int *box) {
+    std::cout << "we are in typemap(in) int *box for jiplib::Jim::$symname" << std::endl;
   int i, dim;
   $1 =  (int *) calloc(6, sizeof(int));
   if (!PySequence_Check($input)) {
@@ -333,18 +334,32 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
 	$1[i] = (int)PyInt_AsLong(o);
       }
       else {
-	PyErr_SetString(PyExc_ValueError,"Sequence elements must be integers");      
+	PyErr_SetString(PyExc_ValueError,"Sequence elements must be integers");
 	free($1);
 	return NULL;
       }
     }
   }
   else {
-      PyErr_SetString(PyExc_ValueError,"Sequence elements must be equal to 2, 4, or 6 for the size of the [left, right], [left, right, top, bottom], or [left, right, top, bottom, up, down] borders respectively.");  
+      PyErr_SetString(PyExc_ValueError,"Sequence elements must be equal to 2, 4, or 6 for the size of the [left, right], [left, right, top, bottom], or [left, right, top, bottom, up, down] borders respectively.");
       return NULL;
   }
  }
 
+//allow for overloading (due to int iband)
+%typemap(typecheck) (int *box) = PyObject *;
+  %typemap(typecheck) (int *box, double d_gval, int iband){
+  $1=PySequence_Check($input) ? 1 : 0;
+ }
+%typemap(typecheck) (int *box, double d_gval){
+  $1=PySequence_Check($input) ? 1 : 0;
+ }
+%typemap(typecheck) (int *box, int iband){
+  $1=PySequence_Check($input) ? 1 : 0;
+ }
+%typemap(typecheck) (int *box){
+  $1=PySequence_Check($input) ? 1 : 0;
+ }
 // Free the box array
 %typemap(freearg) (int *box) {
   free($1);
@@ -446,7 +461,7 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
 
 
 // typemap for mialib functions returning a G_TYPE
-%typemap(out) G_TYPE getpixval {
+%typemap(out) G_TYPE getPixVal {
   double dval=0.0;
   switch (GetImDataType(arg1)) {
   case t_UCHAR:
