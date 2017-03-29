@@ -1,4 +1,5 @@
-# first 20161111 by Pierre.Soille@jrc.ec.europa.eu
+# first 20172403 by pieter.kempeneers@ec.europa.eu
+
 
 def fun2method(inputfile, outputfile_basename):
     """converts MIALib C function declarations into JIPLib C++ methods (outputfile_basename.cc file) and C++ method declarations (outputfile_basename.h file).  Currently only convert desctuctive functions, i.e., ERROR_TYPE functions, with IMAGE * as first argument (IMAGE ** not yet taken into account).
@@ -11,11 +12,6 @@ def fun2method(inputfile, outputfile_basename):
     """
 
     import re
-    import json
-    # for writing a dictionary in json file
-    #j son.dump(old2NewDict, open("text.txt",'w'))
-    # reading dictionary in json file
-    old2newDic = json.load(open("/home/soillpi/work/jip20170317/mia/core/c/old2NewNames.txt"))
 
     ifp=open(inputfile, 'r')
 
@@ -28,7 +24,7 @@ def fun2method(inputfile, outputfile_basename):
     for line in lines:
         print line
 
-        name=re.match(r'extern ERROR_TYPE (.*)\((.*)\);',line)
+        name=re.match(r'extern IMAGE \*\*(.*)\((.*)\);',line)
         args=re.split(',', name.group(2))
         re.sub('\**', '', re.sub('.* ', '', args[0]))
 
@@ -55,7 +51,7 @@ def fun2method(inputfile, outputfile_basename):
         MIATypes = ['uc_', 's_', 'us_', 'i32_', 'u32_', 'f_', 'd_']
         CTypes = ['unsigned char', 'short int', 'unsigned short int', 'int', 'unsigned int', 'float', 'double']
 
-        methodDeclaration='std::shared_ptr<Jim> Jim::'+old2newDic.get(a.get("name"))+'('
+        methodDeclaration='JimList Jim::'+a.get("name")+'('
         print methodDeclaration
 
         cSeparator=', '
@@ -91,14 +87,14 @@ def fun2method(inputfile, outputfile_basename):
             cCall+=cSeparator+arg[1]
             separator=', '
 
-        # fh.write(re.sub(r'Jim::','',methodDeclaration+separator+'int iband=0'+cSeparator+'bool destructive=false);\n'))
         fh.write(re.sub(r'Jim::','',methodDeclaration+separator+'int iband=0);\n'))
 
-        # methodDeclaration+=separator+'int iband'+cSeparator+'bool destructive)'
         methodDeclaration+=separator+'int iband)'
 
         f.write(methodDeclaration+'{')
+        f.write('\n\tJimList listout;')
         f.write('\n\ttry{')
+        f.write('\n\t\tint noutput=2;//todo: depends on mialib function')
         f.write('\n\t\tif(nrOfBand()<=iband){')
         f.write('\n\t\t\tstd::string errorString=\"Error: band number exceeds number of bands in input image\";')
         f.write('\n\t\t\tthrow(errorString);')
@@ -108,9 +104,10 @@ def fun2method(inputfile, outputfile_basename):
             f.write('\n\t\t\tstd::string errorString=\"Error: band number exceeds number of bands in input image\";')
             f.write('\n\t\t\tthrow(errorString);')
             f.write('\n\t\t}')
-        f.write('\n\t\t'+a.get("arguments")[0][0]+' '+a.get("arguments")[0][1]+' = 0;') # assigned later depending on destructive or not
+        #f.write('\n\t\t'+a.get("arguments")[0][0]+' '+a.get("arguments")[0][1]+' = 0;') # assigned later depending on destructive or not
+        f.write('\n\t\t'+'IMAGE ** imout = 0;')
         llen=len(imDeclare)
-        for i in range(1,llen):  # skip first argument since it depends on whether destructive or not
+        for i in range(0,llen):
             f.write('\n\t\t'+imDeclare[i])
         for i in GTDeclare:
             f.write('\n\t\t'+i)
@@ -131,36 +128,38 @@ def fun2method(inputfile, outputfile_basename):
     \t\t\tbreak;
             \t\t}''')
 
-        f.write('\n\t\t//make a copy of this')
-        f.write('\n\t\tstd::shared_ptr<Jim> copyImg=this->clone();')
-        f.write('\n\t\t'+a.get("arguments")[0][1]+'=copyImg->getMIA(iband);')
 
-        f.write('\n\t\tif(::'+a.get("name")+'('+cCall+') == NO_ERROR){')
-        f.write('\n\t\t\tcopyImg->setMIA(iband);')
-        for i in imRasterArray:
-          f.write('\n\t\t\t'+i+'.setMIA(iband);')
-        f.write('\n\t\t\treturn(copyImg);')
+        f.write('\n\t\timout =::'+a.get("name")+'('+cCall+');')
+        f.write('\n\t\tthis->setMIA(iband);')
+
+        f.write('\n\t\tif (imout){')
+        f.write('\n\t\t\tfor(int iim=0;iim<noutput;++iim){')
+        f.write('\n\t\t\t\tstd::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);')
+        f.write('\n\t\t\t\timgWriter->copyGeoTransform(*this);')
+        f.write('\n\t\t\t\timgWriter->setProjection(getProjectionRef());')
+        f.write('\n\t\t\t\tlistout.pushImage(imgWriter);')
+        f.write('\n\t\t\t}')
+        f.write('\n\t\t\treturn(listout);')
         f.write('\n\t\t}')
 
+
         f.write('\n\t\telse{')
-        f.write('\n\t\t\tcopyImg->setMIA(iband);')
-        for i in imRasterArray:
-           f.write('\n\t\t\t'+i+'.setMIA(iband);')
         f.write('\n\t\t\tstd::string errorString="Error: '+a.get("name")+'() function in MIA failed, returning NULL pointer";')
         f.write('\n\t\t\tthrow(errorString);')
         f.write('\n\t\t}')
 
         f.write('\n\t}')
 
+
         f.write('''
         catch(std::string errorString){
         \tstd::cerr << errorString << std::endl;
-            \treturn(0);
+            \treturn(listout);
         }
         catch(...){
-            \treturn(0);
+            \treturn(listout);
         }
-}\n''')
+ }\n''')
 
     ifp.close()
 
@@ -176,16 +175,16 @@ def fun2method(inputfile, outputfile_basename):
 import sys, getopt
 
 def main(argv):
-   inputfile="mialib_errortype"
-   outputfile="fun2method_errortype"
+   inputfile="mialib_imagelisttype"
+   outputfile="fun2method_imagelisttype"
    try:
       opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
    except getopt.GetoptError:
-      print 'fun2method.py -i <inputfile> -o <outputfilebasename>'
+      print 'fun2method_imagelisttype.py -i <inputfile> -o <outputfilebasename>'
       sys.exit(2)
    for opt, arg in opts:
       if opt == '-h':
-         print 'fun2method.py -i <inputfile> -o <outputfilebasename>'
+         print 'fun2method_imagelisttype.py -i <inputfile> -o <outputfilebasename>'
          sys.exit()
       elif opt in ("-i", "--ifile"):
          inputfile = arg
@@ -200,10 +199,7 @@ if __name__ == "__main__":
    main(sys.argv[1:])
 
 
-
-
-# cat /home/soillpi/workstation/jip/mia//core/c/mialib_*.h | grep '^extern ERROR'  > mialib_error_type
-# cat /home/soillpi/work/jip20170201/mia//core/c/mialib_*.h | grep '^extern ERROR'  > mialib_error_type
-# python fun2method_errortype.py  -i mialib_error_type -o fun2method_errortype
+# cat /usr/local/include/mialib/mialib_*.h | grep '^extern IMAGE \*\*[^\*]'  > mialib_imagelist_type
+# python fun2method_imagelisttype.py  -i mialib_imagelist_type -o fun2method_imagelisttype
 # to automatically insert content of fun2method in jim.h within placeholder //start insert from fun2method -> //end insert from fun2method
-# sed -i -ne '/\/\/start insert from fun2method_errortype/ {p; r fun2method_errortype.h' -e ':a; n; /\/\/end insert from fun2method_errortype/ {p; b}; ba}; p' jim.h
+# sed -i -ne '/\/\/start insert from fun2method_imagelisttype/ {p; r fun2method_imagelisttype.h' -e ':a; n; /\/\/end insert from fun2method_imagelisttype/ {p; b}; ba}; p' jim.h

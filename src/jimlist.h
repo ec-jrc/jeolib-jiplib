@@ -41,16 +41,37 @@ namespace jiplib{
     ///constructor from an AppFactory
     JimList(app::AppFactory& theApp){open(theApp);};
     ///constructor from a JSON string
-    CPLErr open(const std::string& strjson);
-    ///constructor from a JSON string
-    CPLErr open(app::AppFactory& theApp);
+    JimList& open(const std::string& strjson);
+    ///constructor from an app
+    JimList& open(app::AppFactory& theApp);
+    ///create a JSON string from a list
+    std::string jl2json();
     ///push image to collection
     JimList& pushImage(const std::shared_ptr<jiplib::Jim> imgRaster);
-    //CPLErr pushImage(const std::shared_ptr<jiplib::Jim> imgRaster);
     ///pop image from collection
-    JimList& popImage();
+    JimList& popImage(){ImgCollection::popImage();return(*this);};
     ///get image from collection
     const std::shared_ptr<jiplib::Jim> getImage(int index);
+
+    ///functions from ImgCollection in pktools
+
+    ///select a geographical region based on bounding box
+    JimList& selectGeo(double ulx, double uly, double lrx, double lry){ImgCollection::selectGeo(ulx,uly,lrx,lry);return(*this);};
+    ///select a geographical region based on a position
+    JimList& selectGeo(double x, double y){ImgCollection::selectGeo(x,y);return(*this);};
+    ///return an empty collection
+    JimList& clean(){ImgCollection::clean();return(*this);};
+    ///close all images in collection
+    JimList& close(){ImgCollection::close();return(*this);};
+    ///Get the no data values of this dataset as a standard template library (stl) vector
+    JimList& getNoDataValues(std::vector<double>& noDataValues){ImgCollection::getNoDataValues(noDataValues);return(*this);};
+    ///push a no data value
+    JimList& pushNoDataValue(double noDataValue){ImgCollection::pushNoDataValue(noDataValue);return(*this);};
+    ///set no data values based on a vector
+    JimList& setNoData(const std::vector<double>& nodata){ImgCollection::setNoData(nodata);return(*this);};
+    ///Clear the no data values
+    JimList& clearNoData(){ImgCollection::clearNoData();return(*this);}
+
     ///composite image only for in memory
     std::shared_ptr<jiplib::Jim> composite(app::AppFactory& app);
     ///crop image only for in memory
@@ -61,13 +82,20 @@ namespace jiplib{
     std::shared_ptr<jiplib::Jim> stack();
     ///create statistical profile from a collection
     std::shared_ptr<jiplib::Jim> statProfile(app::AppFactory& app);
-    ///create a JSON string from a list
-    std::string jl2json();
+    ///get statistics
+    JimList& getStats(app::AppFactory& app);
+    ///validate image based on reference vector dataset (-ref)
+    JimList& validate(app::AppFactory& app);
+
     ///functions from mialib
+
     JimList imrgb2hsx(int x=0);
     JimList alphaTree(int alphaMax);
     JimList histrgbmatch();
     JimList histrgb3dmatch();
   };
+  /* JimList createJimList(); */
+  /* JimList createJimList(app::AppFactory &theApp); */
+  /* JimList createJimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist); */
 }
 #endif // _JIMLIST_H_
