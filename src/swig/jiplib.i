@@ -152,8 +152,24 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
   %}
 
 //typemaps for jiplib::Jim
+///SWIG applies typemaps in the order in which they are defined in the interface file. This means that typemaps only take effect for declarations that follow the typemap definition
+///therefore: define typemaps before including the classes with %include!!! (https://github.com/swig/swig/wiki/FAQ)
 %{
 #include <memory>
+  %}
+
+%{
+#include <memory>
+#include "config.h"
+#include "imageclasses/ImgRaster.h"
+#include "imageclasses/ImgReaderOgr.h"
+#include "imageclasses/ImgCollection.h"
+#include "apps/AppFactory.h"
+#include "algorithms/Filter2d.h"
+#include "jim.h"
+#include "jimlist.h"
+#include "mialib_swig.h"
+#include <cpl_error.h>
   %}
 
 namespace jiplib{
@@ -275,6 +291,7 @@ namespace jiplib{
       }
     }
   }
+
   //return the object itself for all functions returning CPLErr
   %typemap(out) CPLErr {
     std::cout << "we are in typemap(out) CPLErr for jiplib::Jim::$symname" << std::endl;
@@ -297,8 +314,30 @@ namespace jiplib{
       $result=o;
     else
       SWIG_exception_fail(SWIG_ArgError(res2), "in method " "$symname");
-    /* $result=$self; */
   }
+  //return the object itself for all functions returning CPLErr
+  /* %typemap(out) CPLErr JimList::getStats { */
+  /*   std::cout << "we are in typemap(out) CPLErr for jiplib::JimList::$symname" << std::endl; */
+  /*   if($1==CE_Failure) */
+  /*     std::cout << "Warning: CE_Failure" << std::endl; */
+  /*   void *argp1=0; */
+  /*   int res1=0; */
+  /*   res1 = SWIG_ConvertPtr($self, &argp1, SWIGTYPE_p_jiplib__JimList,  0  | 0); */
+  /*   if (!SWIG_IsOK(res1)) { */
+  /*     SWIG_exception_fail(SWIG_ArgError(res1), "in method " "$symname"); */
+  /*   } */
+  /*   if (!argp1) { */
+  /*     SWIG_exception_fail(SWIG_ValueError, "invalid null reference , argument " "1"" of type '" "jiplib::JimList&""'"); */
+  /*   } */
+  /*   arg1 = reinterpret_cast< jiplib::JimList * >(argp1); */
+  /*   jiplib::JimList *result=reinterpret_cast< jiplib::JimList * >(argp1); */
+  /*   PyObject* o=0; */
+  /*   o = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_jiplib__JimList, 0 | 0); */
+  /*   if(o) */
+  /*     $result=o; */
+  /*   else */
+  /*     SWIG_exception_fail(SWIG_ArgError(res1), "in method " "$symname"); */
+  /* } */
   //convert std::string to Python string or PyList of strings if multi-line string
   /* %typemap(out) std::string { */
     /* PySys_WriteStdout($1.c_str()); */
@@ -323,22 +362,10 @@ namespace jiplib{
 }
 
 
-%{
-#include <memory>
-#include "config.h"
-#include "imageclasses/ImgRaster.h"
-#include "imageclasses/ImgReaderOgr.h"
-#include "imageclasses/ImgCollection.h"
-#include "apps/AppFactory.h"
-#include "algorithms/Filter2d.h"
-#include "jim.h"
-#include "jimlist.h"
-#include "mialib_swig.h"
-#include <cpl_error.h>
-  %}
 
 %template(ImgVectorJim) std::vector< std::shared_ptr< jiplib::Jim > >;
 %template(ImgListJim) std::list< std::shared_ptr< jiplib::Jim > >;
+
 
 //Parse the header file
 //%include "swig/pktools.i"
@@ -352,8 +379,5 @@ namespace jiplib{
 %include "jim.h"
 %include "jimlist.h"
 
-
-
 enum CPLErr {CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4};
 enum GDALDataType {GDT_Unknown = 0, GDT_Byte = 1, GDT_UInt16 = 2, GDT_Int16 = 3, GDT_UInt32 = 4, GDT_Int32 = 5, GDT_Float32 = 6, GDT_Float64 = 7, GDT_CInt16 = 8, GDT_CInt32 = 9, GDT_CFloat32 = 10, GDT_CFloat64 = 11, GDT_TypeCount = 12};
-

@@ -193,6 +193,15 @@ namespace jiplib{
         return GDT_Unknown;
       }
     }
+    int JIPLIB2MIADataType(int aJIPLIBDataType){
+      //function exists, but introduced for naming consistency
+      if(aJIPLIBDataType==JDT_UInt64)
+        return(t_UINT64);
+      else if(aJIPLIBDataType==JDT_Int64)
+        return(t_INT64);
+      else
+        return(GDAL2MIALDataType(aJIPLIBDataType));
+    };
     int GDAL2MIADataType(GDALDataType aGDALDataType){
       //function exists, but introduced for naming consistency
       return(GDAL2MIALDataType(aGDALDataType));
@@ -205,7 +214,8 @@ namespace jiplib{
      *
      * @return GDAL data type (GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GDT_Int32, GDT_Float32, GDT_Float64)
      */
-    GDALDataType MIA2JIPLIBDataType(int aMIADataType)
+    /* GDALDataType MIA2JIPLIBDataType(int aMIADataType) */
+    int MIA2JIPLIBDataType(int aMIADataType)
     {
       switch (aMIADataType){
       case t_UCHAR:
@@ -222,10 +232,10 @@ namespace jiplib{
         return GDT_Float32;
       case t_DOUBLE:
         return GDT_Float64;
-        // case t_UINT64:
-        //   return GDT_UInt64;
-        // case t_INT64:
-        //   return GDT_Int64;
+      case t_UINT64:
+        return JDT_UInt64;
+      case t_INT64:
+        return JDT_Int64;
       case t_UNSUPPORTED:
         return GDT_Unknown;
       default:
@@ -392,13 +402,25 @@ namespace jiplib{
      * @param description  (type: std::string)Set image description
      * @param align  (type: bool) (default: 0) Align output bounding box to input image
      **/
-    std::shared_ptr<Jim> filter(app::AppFactory& theApp){
+    std::shared_ptr<Jim> filter1d(app::AppFactory& theApp){
       std::shared_ptr<Jim> imgWriter=Jim::createImg();
       /* std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(); */
-      ImgRaster::filter(*imgWriter,theApp);
+      ImgRaster::filter1d(*imgWriter,theApp);
       return(imgWriter);
     }
-    ///create statistical profile from a collection
+    std::shared_ptr<Jim> filter2d(app::AppFactory& theApp){
+      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      /* std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(); */
+      ImgRaster::filter2d(*imgWriter,theApp);
+      return(imgWriter);
+    }
+    ///create statistical profile
+    std::shared_ptr<Jim> statProfile(app::AppFactory& theApp){
+      std::shared_ptr<Jim> imgWriter=Jim::createImg();
+      /* std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(); */
+      ImgRaster::statProfile(*imgWriter,theApp);
+      return(imgWriter);
+    }
     /**
      * @param input (type: std::string) input image
      * @param reference (type: std::string) Reference (raster or vector) dataset

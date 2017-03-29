@@ -22,7 +22,7 @@ JimList::JimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist) : ImgC
 ///construtor using a json string coming from a custom colllection
 ///example:
 ///str = '{"size": 1, "0": {"epsg": 4326, "path":"/eos/jeodpp/data/base/Soil/GLOBAL/HWSD/VER1-2/Data/GeoTIFF/hwsd.tif"} }'
-CPLErr JimList::open(const std::string& strjson){
+JimList& JimList::open(const std::string& strjson){
   Json::Value custom;
   Json::Reader reader;
   bool parsedSuccess=reader.parse(strjson,custom,false);
@@ -39,10 +39,10 @@ CPLErr JimList::open(const std::string& strjson){
       pushImage(theImage);
     }
   }
-  return(CE_None);
+  return(*this);
 }
 
-CPLErr JimList::open(app::AppFactory& theApp){
+JimList& JimList::open(app::AppFactory& theApp){
   Optionpk<std::string> json_opt("json", "json", "The json object");
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
@@ -80,20 +80,6 @@ CPLErr JimList::open(app::AppFactory& theApp){
   // JimList(std::string(""));
 }
 
-///push image to collection
-//CPLErr JimList::pushImage(const std::shared_ptr<jiplib::Jim> imgRaster){
-JimList& JimList::pushImage(const std::shared_ptr<jiplib::Jim> imgRaster){
-  ImgCollection::pushImage(imgRaster);
-  return(*this);
-  /* this->emplace_back(imgRaster); */
-  /* return(CE_None); */
-};
-///pop image from collection
-JimList& JimList::popImage(){
-  ImgCollection::popImage();
-  return(*this);
-};
-
 ///get image from collection
 const std::shared_ptr<jiplib::Jim> JimList::getImage(int index){
   return(std::dynamic_pointer_cast<jiplib::Jim>(ImgCollection::getImage(index)));
@@ -120,6 +106,12 @@ std::string JimList::jl2json(){
   }
   Json::FastWriter fastWriter;
   return(fastWriter.write(custom));
+}
+
+///push image to collection
+JimList& JimList::pushImage(const std::shared_ptr<jiplib::Jim> imgRaster){
+  this->emplace_back(imgRaster);
+  return(*this);
 }
 
 ///composite image only for in memory
@@ -163,7 +155,6 @@ std::string JimList::jl2json(){
  * @return output image
  **/
 std::shared_ptr<jiplib::Jim> JimList::composite(app::AppFactory& app){
-  /* std::shared_ptr<jiplib::Jim> imgWriter=Jim::createImg(); */
   std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>();
   ImgCollection::composite(*imgWriter, app);
   return(imgWriter);
@@ -312,12 +303,20 @@ std::shared_ptr<jiplib::Jim> JimList::stack(){app::AppFactory app;return(stack(a
  * @return output image
  **/
 std::shared_ptr<jiplib::Jim> JimList::statProfile(app::AppFactory& app){
-  /* std::shared_ptr<jiplib::Jim> imgWriter=Jim::createImg(); */
   std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>();
   ImgCollection::statProfile(*imgWriter, app);
   return(imgWriter);
 }
 
+JimList& JimList::getStats(app::AppFactory& app){
+  ImgCollection::getStats(app);
+  return(*this);
+}
+
+JimList& JimList::validate(app::AppFactory& app){
+  ImgCollection::validate(app);
+  return(*this);
+}
 
 // JimList createJimList(){JimList theList; return(theList);};
 // JimList createJimList(app::AppFactory &theApp){JimList theList(theApp); return(theList);};

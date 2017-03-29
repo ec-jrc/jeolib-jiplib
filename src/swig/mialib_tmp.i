@@ -441,6 +441,7 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
 
 
 
+
 // Addtional code for IMAGE<->NumPy array conversions [20160729]
 // adapted from gdal_array.i
 
@@ -461,38 +462,38 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
 
 
 // typemap for mialib functions returning a G_TYPE
-%typemap(out) G_TYPE getPixVal {
-  double dval=0.0;
-  switch (GetImDataType(arg1)) {
-  case t_UCHAR:
-    dval=(double)$1.uc_val;
-    break;
-  case t_SHORT:
-    dval=(double)$1.s_val;
-    break;
-  case t_USHORT:
-    dval=(double)$1.us_val;
-    break;
-  case t_INT32:
-    dval=(double)$1.i32_val;
-    break;
-  case t_UINT32:
-    dval=(double)$1.u32_val;
-    break;
-  case t_INT64:
-    dval=(double)$1.i64_val;
-    break;
-  case t_UINT64:
-    dval=(double)$1.u64_val;
-    break;
-  case t_MIAFLOAT:
-    dval=(double)$1.f_val;
-    break;
-  case t_DOUBLE:
-    dval=(double)$1.d_val;
-    break;
-  default:
-    printf("getpixval(): undefined pixel type (%d) !\n)", GetImDataType(arg1));
-  }
-  $result=PyFloat_FromDouble(dval);
- }
+/* %typemap(out) G_TYPE getPixVal { */
+/*   double dval=0.0; */
+/*   switch (GetImDataType(arg1)) { */
+/*   case t_UCHAR: */
+/*     dval=(double)$1.uc_val; */
+/*     break; */
+/*   case t_SHORT: */
+/*     dval=(double)$1.s_val; */
+/*     break; */
+/*   case t_USHORT: */
+/*     dval=(double)$1.us_val; */
+/*     break; */
+/*   case t_INT32: */
+/*     dval=(double)$1.i32_val; */
+/*     break; */
+/*   case t_UINT32: */
+/*     dval=(double)$1.u32_val; */
+/*     break; */
+/*   case t_INT64: */
+/*     dval=(double)$1.i64_val; */
+/*     break; */
+/*   case t_UINT64: */
+/*     dval=(double)$1.u64_val; */
+/*     break; */
+/*   case t_MIAFLOAT: */
+/*     dval=(double)$1.f_val; */
+/*     break; */
+/*   case t_DOUBLE: */
+/*     dval=(double)$1.d_val; */
+/*     break; */
+/*   default: */
+/*     printf("getpixval(): undefined pixel type (%d) !\n)", GetImDataType(arg1)); */
+/*   } */
+/*   $result=PyFloat_FromDouble(dval); */
+/*  } */

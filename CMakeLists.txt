@@ -67,6 +67,7 @@ include (CPack)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 find_package(PKTOOLS CONFIG REQUIRED)
 if(PKTOOLS_FOUND)
+  message(STATUS "Found pktools: ${PKTOOLS_LIBRARIES}")
   include_directories(${PKTOOLS_INCLUDE_DIRS})
 else(PKTOOLS_FOUND)
   message(WARNING "pktools not found, set manually")
@@ -92,6 +93,7 @@ endif()
 
 find_package(GSL REQUIRED)
 if(GSL_FOUND)
+  message(STATUS "Found GSL: ${GSL_LIBRARIES}")
   include_directories(${GSL_INCLUDE_DIRS})
   add_definitions(-DGSL_DLL)
 endif()
@@ -200,6 +202,12 @@ endif(BUILD_WITH_MIALIB)
 ###############################################################################
 find_package(PythonInterp)
 if(PYTHONINTERP_FOUND)
+  #todo: treat mialib functions that return: int, long int, double, G_TYPE
+  # G_TYPE: getpixval
+  # G_TYPE* min_max
+  # long int thresholdRegion_Size
+  # long int thresholdRegion_Contrast
+  # double julian_date
   if(BUILD_WITH_MIALIB)
     MESSAGE(STATUS "PythonInterp was found")
     file(COPY ${PROJECT_SOURCE_DIR}/fun2method_imagetype.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src)
