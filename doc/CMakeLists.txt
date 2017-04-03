@@ -3,7 +3,7 @@
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
   # SET(DOXY2SWIG ${CMAKE_CURRENT_SOURCE_DIR}/doxy2swig.py)
-  find_program(DOXY2SWIG doxy2swig.py HINTS ${CMAKE_SOURCE_DIR})
+  find_program(DOXY2SWIG doxy2swig.py HINTS ${CMAKE_CURRENT_SOURCE_DIR})
   if(NOT DOXY2SWIG)
     message(WARNING "doxy2swig.py not found!")
   endif()
