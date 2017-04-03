@@ -124,8 +124,7 @@ add_definitions(-DHAVE_CONFIG_H)
 configure_file ( "cmake-config.in" "${CMAKE_CURRENT_BINARY_DIR}/jiplib-config" @ONLY )
 configure_file ( "cmake.pc.in" "jiplib.pc"  @ONLY)
 
-# add the binary tree to the search path for include files so that we will find config.h
-include_directories("${PROJECT_BINARY_DIR}")
+
 
 # Name of C++ library
 set(JIPLIB_LIB_NAME jiplib)
@@ -136,9 +135,10 @@ set(BUILD_WITH_MIALIB TRUE CACHE BOOL "JIPlib needs to be built with mialiab")
 ###############################################################################
 # include_directories("${PROJECT_SOURCE_DIR}")
 # include_directories("${CMAKE_SOURCE_DIR}")
-# this is where jim.h will go
-include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+include_directories("${PROJECT_BINARY_DIR}")# needed for config.h
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")# this is where jim.h will go
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/src/")
+include_directories("${CMAKE_CURRENT_BINARY_DIR}/doc")#needed for jiplib_doc.i
 ###############################################################################
 # Instruct CMake to inspect the following subfolders (with CMakeLists.txt in each subfolder)
 add_subdirectory ("${PROJECT_DOC_DIR}")
@@ -168,9 +168,10 @@ if (BUILD_WITH_MIALIB)
 endif(BUILD_WITH_MIALIB)
 set(JIPLIB_H ${JIM_H} ${JIMLIST_H})
 set(JIPLIB_CC ${JIM_CC} ${JIMLIST_CC})
+set(JIPLIB_DOC ${CMAKE_CURRENT_BINARY_DIR}/doc/jiplib_doc.i)
 
 # Define the jiplib library.
-add_library( ${JIPLIB_LIB_NAME} ${JIPLIB_H} ${JIPLIB_CC})
+add_library( ${JIPLIB_LIB_NAME} ${JIPLIB_H} ${JIPLIB_CC} ${JIPLIB_DOC})
 
 SET_TARGET_PROPERTIES(${JIPLIB_LIB_NAME}
   PROPERTIES
@@ -198,10 +199,10 @@ else(BUILD_WITH_MIALIB)
     ${PKTOOLS_LIBRARIES}
     )
 endif(BUILD_WITH_MIALIB)
-# add_subdirectory ("${PROJECT_SOURCE_DIR}")
 ###############################################################################
 find_package(PythonInterp)
 if(PYTHONINTERP_FOUND)
+  file(WRITE ${JIPLIB_DOC} "#This is an automatically generated doc file, do not edit")
   #todo: treat mialib functions that return: int, long int, double, G_TYPE
   # G_TYPE: getpixval
   # G_TYPE* min_max
@@ -281,6 +282,8 @@ INCLUDE(${SWIG_USE_FILE})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/doc)
+FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/swig)
 SET(CMAKE_SWIG_FLAGS "")
 SET_PROPERTY(SOURCE ${PYTHON_SRC_DIR}/jiplib.i PROPERTY CPLUSPLUS ON)
 SWIG_ADD_MODULE(jiplib python ${PYTHON_SRC_DIR}/jiplib.i)

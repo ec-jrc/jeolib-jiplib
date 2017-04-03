@@ -27,6 +27,7 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 
 %feature("autodoc", "2");
 
+//uncomment if documentation is needed (make sure to execute make doc before make!!!)
 %import "jiplib_doc.i"
 
 %module(docstring=DOCJIPLIB) jiplib

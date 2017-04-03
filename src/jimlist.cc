@@ -19,9 +19,13 @@ JimList::JimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist) : ImgC
   // }
 }
 
-///construtor using a json string coming from a custom colllection
+///constructor using a json string coming from a custom colllection
 ///example:
 ///str = '{"size": 1, "0": {"epsg": 4326, "path":"/eos/jeodpp/data/base/Soil/GLOBAL/HWSD/VER1-2/Data/GeoTIFF/hwsd.tif"} }'
+/**
+ * @param strjson string coming from a custom collection
+ * @return JimList object
+ **/
 JimList& JimList::open(const std::string& strjson){
   Json::Value custom;
   Json::Reader reader;
@@ -42,6 +46,10 @@ JimList& JimList::open(const std::string& strjson){
   return(*this);
 }
 
+/**
+ * @param json string coming from a custom collection
+ * @return JimList object
+ **/
 JimList& JimList::open(app::AppFactory& theApp){
   Optionpk<std::string> json_opt("json", "json", "The json object");
   bool doProcess;//stop process when program was invoked with help option (-h --help)
@@ -81,10 +89,18 @@ JimList& JimList::open(app::AppFactory& theApp){
 }
 
 ///get image from collection
+/**
+ * @param index index of the image
+ * @return shared pointer to image object
+ **/
 const std::shared_ptr<jiplib::Jim> JimList::getImage(int index){
   return(std::dynamic_pointer_cast<jiplib::Jim>(ImgCollection::getImage(index)));
 }
 
+///convert a JimList to a json string
+/**
+ * @return shared pointer to image object
+ **/
 std::string JimList::jl2json(){
   Json::Value custom;
   custom["size"]=static_cast<int>(size());
@@ -109,6 +125,10 @@ std::string JimList::jl2json(){
 }
 
 ///push image to collection
+/**
+ * @param shared pointer to image object
+ * @return JimList object
+ **/
 JimList& JimList::pushImage(const std::shared_ptr<jiplib::Jim> imgRaster){
   this->emplace_back(imgRaster);
   return(*this);
@@ -116,19 +136,11 @@ JimList& JimList::pushImage(const std::shared_ptr<jiplib::Jim> imgRaster){
 
 ///composite image only for in memory
 /**
- * @param input (type: std::string) Input image file(s). If input contains multiple images, a multi-band output is created
- * @param output (type: std::string) Output image file
- * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
- * @param co (type: std::string) Creation option for output file. Multiple options can be specified.
- * @param scale (type: double) output=scale*input+offset
- * @param offset (type: double) output=scale*input+offset
- * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
  * @param band (type: unsigned int) band index(es) to crop (leave empty if all bands must be retained)
  * @param dx (type: double) Output resolution in x (in meter) (empty: keep original resolution)
  * @param dy (type: double) Output resolution in y (in meter) (empty: keep original resolution)
  * @param extent (type: std::string) get boundary from extent from polygons in vector file
  * @param crop_to_cutline (type: bool) (default: 0) Crop the extent of the target dataset to the extent of the cutline.
- * @param eo (type: std::string) special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname
  * @param mask (type: std::string) Use the specified file as a validity mask.
  * @param msknodata (type: float) (default: 0) Mask value not to consider for composite.
  * @param mskband (type: unsigned int) (default: 0) Mask band to read (0 indexed)
@@ -152,7 +164,7 @@ JimList& JimList::pushImage(const std::shared_ptr<jiplib::Jim> imgRaster){
  * @param ct (type: std::string) color table file with 5 columns: id R G B ALFA (0: transparent, 255: solid)
  * @param description (type: std::string) Set image description
  * @param align (type: bool) (default: 0) Align output bounding box to input image
- * @return output image
+ * @return shared pointer to composite image object
  **/
 std::shared_ptr<jiplib::Jim> JimList::composite(app::AppFactory& app){
   std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>();
@@ -160,10 +172,6 @@ std::shared_ptr<jiplib::Jim> JimList::composite(app::AppFactory& app){
   return(imgWriter);
 }
 /**
- * @param input (type: std::string) Input image file(s). If input contains multiple images, a multi-band output is created
- * @param output (type: std::string) Output image file
- * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
- * @param co (type: std::string) Creation option for output file. Multiple options can be specified.
  * @param a_srs (type: std::string) Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
  * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
  * @param a_srs (type: std::string) Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
@@ -198,7 +206,7 @@ std::shared_ptr<jiplib::Jim> JimList::composite(app::AppFactory& app){
  * @param nodata (type: double) Nodata value to put in image if out of bounds.
  * @param description (type: std::string) Set image description
  * @param align (type: bool) (default: 0) Align output bounding box to input image
- * @return output image
+ * @return shared pointer to cropped image object
  **/
 std::shared_ptr<jiplib::Jim> JimList::crop(app::AppFactory& app){
   /* std::shared_ptr<jiplib::Jim> imgWriter=Jim::createImg(); */
@@ -208,10 +216,6 @@ std::shared_ptr<jiplib::Jim> JimList::crop(app::AppFactory& app){
 }
 ///stack all images in collection to multiband image (alias for crop)
 /**
- * @param input (type: std::string) Input image file(s). If input contains multiple images, a multi-band output is created
- * @param output (type: std::string) Output image file
- * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
- * @param co (type: std::string) Creation option for output file. Multiple options can be specified.
  * @param a_srs (type: std::string) Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
  * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
  * @param a_srs (type: std::string) Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
@@ -248,12 +252,8 @@ std::shared_ptr<jiplib::Jim> JimList::crop(app::AppFactory& app){
  * @return output image
  **/
 std::shared_ptr<jiplib::Jim> JimList::stack(app::AppFactory& app){return(crop(app));};
-///stack all images in collection to multiband image (alias for crop)
+////stack all images in collection to multiband image (alias for crop)
 /**
- * @param input (type: std::string) Input image file(s). If input contains multiple images, a multi-band output is created
- * @param output (type: std::string) Output image file
- * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
- * @param co (type: std::string) Creation option for output file. Multiple options can be specified.
  * @param a_srs (type: std::string) Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
  * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
  * @param a_srs (type: std::string) Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
@@ -288,14 +288,10 @@ std::shared_ptr<jiplib::Jim> JimList::stack(app::AppFactory& app){return(crop(ap
  * @param description (type: std::string) Set image description
  * @param align (type: bool) (default: 0) Align output bounding box to input image
  * @return output image
- **/
+ **///stack all images in collection to multiband image (alias for crop)
 std::shared_ptr<jiplib::Jim> JimList::stack(){app::AppFactory app;return(stack(app));};
 ///create statistical profile from a collection
 /**
- * @param input (type: std::string) input image file
- * @param output (type: std::string) Output image file
- * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate)
- * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
  * @param function (type: std::string) Statistics function (mean, median, var, stdev, min, max, sum, mode (provide classes), ismin, ismax, proportion (provide classes), percentile, nvalid
  * @param perc (type: double) Percentile value(s) used for rule percentile
  * @param nodata (type: double) nodata value(s)
@@ -303,16 +299,59 @@ std::shared_ptr<jiplib::Jim> JimList::stack(){app::AppFactory app;return(stack(a
  * @return output image
  **/
 std::shared_ptr<jiplib::Jim> JimList::statProfile(app::AppFactory& app){
-  std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>();
+  std::shared_ptr<Jim> imgWriter=Jim::createImg();
   ImgCollection::statProfile(*imgWriter, app);
   return(imgWriter);
 }
-
+///get statistics on image list
+/**
+ * @param scale (type: double) output=scale*input+offset
+ * @param offset (type: double) output=scale*input+offset
+ * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
+ * @param function (type: std::string) (default: basic) Statistics function (invalid, valid, filename, basic, gdal, mean, median, var, skewness, kurtosis,stdev, sum, minmax, min, max, histogram, histogram2d, rmse, regression, regressionError, regressionPerpendicular
+ * @param band (type: unsigned short) (default: 0) band(s) on which to calculate statistics
+ * @param nodata (type: double) Set nodata value(s)
+ * @param nbin (type: short) number of bins to calculate histogram
+ * @param relative (type: bool) (default: 0) use percentiles for histogram to calculate histogram
+ * @param ulx (type: double) Upper left x value bounding box
+ * @param uly (type: double) Upper left y value bounding box
+ * @param lrx (type: double) Lower right x value bounding box
+ * @param lry (type: double) Lower right y value bounding box
+ * @param down (type: short) (default: 1) Down sampling factor (for raster sample datasets only). Can be used to create grid points
+ * @param rnd (type: unsigned int) (default: 0) generate random numbers
+ * @param scale (type: double) Scale(s) for reading input image(s)
+ * @param offset (type: double) Offset(s) for reading input image(s)
+ * @param src_min (type: double) start reading source from this minimum value
+ * @param src_max (type: double) stop reading source from this maximum value
+ * @param kde (type: bool) (default: 0) Use Kernel density estimation when producing histogram. The standard deviation is estimated based on Silverman's rule of thumb
+ * @return this object
+ **/
 JimList& JimList::getStats(app::AppFactory& app){
   ImgCollection::getStats(app);
   return(*this);
 }
-
+/**
+ * @param reference (type: std::string) Reference vector dataset
+ * @param ln (type: std::string) Layer name(s) in sample. Leave empty to select all (for vector reference datasets only)
+ * @param band (type: unsigned int) (default: 0) Input (reference) raster band. Optionally, you can define different bands for input and reference bands respectively: -b 1 -b 0.
+ * @param confusion (type: bool) (default: 1) Create confusion matrix (to std out)
+ * @param lref (type: std::string) (default: label) Attribute name of the reference label (for vector reference datasets only)
+ * @param class (type: std::string) List of class names.
+ * @param reclass (type: short) List of class values (use same order as in classname option).
+ * @param nodata (type: double) No data value(s) in input or reference dataset are ignored
+ * @param mask (type: std::string) Use the first band of the specified file as a validity mask. Nodata values can be set with the option msknodata.
+ * @param msknodata (type: double) (default: 0) Mask value(s) where image is invalid. Use negative value for valid data (example: use -t -1: if only -1 is valid value)
+ * @param output (type: std::string) Output dataset (optional)
+ * @param f (type: std::string) (default: SQLite) OGR format for output vector
+ * @param lclass (type: std::string) (default: class) Attribute name of the classified label
+ * @param cmf (type: std::string) (default: ascii) Format for confusion matrix (ascii or latex)
+ * @param cmo (type: std::string) Output file for confusion matrix
+ * @param se95 (type: bool) (default: 0) Report standard error for 95 confidence interval
+ * @param boundary (type: short) (default: 1) Boundary for selecting the sample
+ * @param homogeneous (type: bool) (default: 0) Only take regions with homogeneous boundary into account (for reference datasets only)
+ * @param circular (type: bool) (default: 0) Use circular boundary
+ * @return reference to JimList object
+ **/
 JimList& JimList::validate(app::AppFactory& app){
   ImgCollection::validate(app);
   return(*this);
@@ -323,7 +362,11 @@ JimList& JimList::validate(app::AppFactory& app){
 // JimList createJimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist){JimList theList(jimlist); return(theList);};
 
 ///functions from mialib
-JimList JimList::imrgb2hsx(int x){
+/**
+ * @param x
+ * @return JimList object
+**/
+JimList JimList::rgb2hsx(int x){
   int ninput=3;
   int noutput=3;
   JimList listout;
@@ -358,7 +401,11 @@ JimList JimList::imrgb2hsx(int x){
   }
 }
 
-JimList JimList::alphaTree(int alphaMax){
+/**
+ * @param alphaMax
+ * @return JimList object
+ **/
+JimList JimList::alphaTreeDissimGet(int alphaMax){
   int ninput=2;
   int noutput=5;
   JimList listout;
@@ -393,7 +440,10 @@ JimList JimList::alphaTree(int alphaMax){
   }
 }
 
-JimList JimList::histrgbmatch(){
+/**
+ * @return JimList object
+ **/
+JimList JimList::histoMatchRgb(){
   int ninput=4;
   int noutput=3;
   JimList listout;
@@ -428,7 +478,10 @@ JimList JimList::histrgbmatch(){
   }
 }
 
-JimList JimList::histrgb3dmatch (){
+/**
+ * @return JimList object
+ **/
+JimList JimList::histoMatch3dRgb(){
   int ninput=4;
   int noutput=3;
   JimList listout;
