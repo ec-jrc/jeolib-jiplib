@@ -211,6 +211,7 @@ if(PYTHONINTERP_FOUND)
   # double julian_date
   if(BUILD_WITH_MIALIB)
     MESSAGE(STATUS "PythonInterp was found")
+    file(COPY ${PROJECT_SOURCE_DIR}/old2NewNames.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src)
     file(COPY ${PROJECT_SOURCE_DIR}/fun2method_imagetype.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src)
     file(COPY ${PROJECT_SOURCE_DIR}/fun2method_imagelisttype.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src)
     file(COPY ${PROJECT_SOURCE_DIR}/fun2method_errortype.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src)

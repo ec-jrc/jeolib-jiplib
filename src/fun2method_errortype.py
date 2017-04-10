@@ -15,7 +15,7 @@ def fun2method(inputfile, outputfile_basename):
     # for writing a dictionary in json file
     #j son.dump(old2NewDict, open("text.txt",'w'))
     # reading dictionary in json file
-    old2newDic = json.load(open("/home/soillpi/work/jip20170317/mia/core/c/old2NewNames.txt"))
+    old2newDic = json.load(open("old2NewNames.json"))
 
     ifp=open(inputfile, 'r')
 

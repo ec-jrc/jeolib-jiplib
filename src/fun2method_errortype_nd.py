@@ -14,7 +14,7 @@ def fun2method(inputfile, outputfile_basename):
 
     import re
     import json
-    old2newDic = json.load(open("/home/soillpi/work/jip20170317/mia/core/c/old2NewNames.txt"))
+    old2newDic = json.load(open("old2NewNames.json"))
 
     ifp=open(inputfile, 'r')
 
@@ -56,7 +56,7 @@ def fun2method(inputfile, outputfile_basename):
         MIATypes = ['uc_', 's_', 'us_', 'i32_', 'u32_', 'f_', 'd_']
         CTypes = ['unsigned char', 'short int', 'unsigned short int', 'int', 'unsigned int', 'float', 'double']
 
-        methodDeclaration='CPLErr Jim::'+old2newDic(a.get("name"))+'('
+        methodDeclaration='CPLErr Jim::'+old2newDic.get(a.get("name"))+'('
         print methodDeclaration
 
         cSeparator=', '
