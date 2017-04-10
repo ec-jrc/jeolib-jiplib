@@ -82,17 +82,17 @@ namespace jiplib{
     std::shared_ptr<jiplib::Jim> stack();
     ///create statistical profile from a collection
     std::shared_ptr<jiplib::Jim> statProfile(app::AppFactory& app);
-    ///get statistics
+    ///get statistics on image list
     JimList& getStats(app::AppFactory& app);
     ///validate image based on reference vector dataset (-ref)
     JimList& validate(app::AppFactory& app);
 
     ///functions from mialib
 
-    JimList imrgb2hsx(int x=0);
-    JimList alphaTree(int alphaMax);
-    JimList histrgbmatch();
-    JimList histrgb3dmatch();
+    JimList rgb2hsx(int x=0);//from imrgb2hsx
+    JimList alphaTreeDissimGet(int alphaMax);//from alphatree
+    JimList histoMatchRgb();//from histrgbmatch
+    JimList histoMatch3dRgb();//from histrgb3dmatch
   };
   /* JimList createJimList(); */
   /* JimList createJimList(app::AppFactory &theApp); */
