@@ -11,6 +11,11 @@ def fun2method(inputfile, outputfile_basename):
     """
 
     import re
+    import json
+    # for writing a dictionary in json file
+    #j son.dump(old2NewDict, open("text.txt",'w'))
+    # reading dictionary in json file
+    old2newDic = json.load(open("old2NewNames.json"))
 
     ifp=open(inputfile, 'r')
 
@@ -50,7 +55,7 @@ def fun2method(inputfile, outputfile_basename):
         MIATypes = ['uc_', 's_', 'us_', 'i32_', 'u32_', 'f_', 'd_']
         CTypes = ['unsigned char', 'short int', 'unsigned short int', 'int', 'unsigned int', 'float', 'double']
 
-        methodDeclaration='std::shared_ptr<Jim> Jim::'+a.get("name")+'('
+        methodDeclaration='std::shared_ptr<Jim> Jim::'+old2newDic.get(a.get("name"))+'('
         print methodDeclaration
 
         cSeparator=', '

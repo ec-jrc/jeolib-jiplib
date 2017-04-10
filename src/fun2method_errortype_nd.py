@@ -13,6 +13,8 @@ def fun2method(inputfile, outputfile_basename):
     """
 
     import re
+    import json
+    old2newDic = json.load(open("old2NewNames.json"))
 
     ifp=open(inputfile, 'r')
 
@@ -26,6 +28,7 @@ def fun2method(inputfile, outputfile_basename):
         print line
 
         name=re.match(r'extern ERROR_TYPE (.*)\((.*)\);',line)
+
         args=re.split(',', name.group(2))
         re.sub('\**', '', re.sub('.* ', '', args[0]))
 
@@ -36,6 +39,7 @@ def fun2method(inputfile, outputfile_basename):
             aname=re.sub('\**', '', re.sub('.* ', '', i))
             arglist.append([atype, aname])
 
+	print name.group(1)
 
         a= { "name" : name.group(1),
              "arguments" : arglist }
@@ -52,7 +56,7 @@ def fun2method(inputfile, outputfile_basename):
         MIATypes = ['uc_', 's_', 'us_', 'i32_', 'u32_', 'f_', 'd_']
         CTypes = ['unsigned char', 'short int', 'unsigned short int', 'int', 'unsigned int', 'float', 'double']
 
-        methodDeclaration='CPLErr Jim::'+a.get("name")+'('
+        methodDeclaration='CPLErr Jim::'+old2newDic.get(a.get("name"))+'('
         print methodDeclaration
 
         cSeparator=', '
