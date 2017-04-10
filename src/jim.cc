@@ -179,6 +179,7 @@ CPLErr Jim::write(){
     CSLDestroy(papszOptions);
   if(m_gds)
     GDALClose(m_gds);
+  m_gds=0;
   // reset();
 }
 
