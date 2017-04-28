@@ -48,11 +48,11 @@ namespace jiplib{
   {
   public:
     ///default constructor
-  Jim() : m_nplane(1), ImgRaster(){};
+  Jim() : m_nplane(1) {};
     ///constructor opening an image in memory using an external data pointer (not tested yet)
-  Jim(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType) : Jim() {open(dataPointer,ncol,nrow,nplane,dataType);};
+  Jim(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType) {open(dataPointer,ncol,nrow,nplane,dataType);};
     ///constructor input image
-  Jim(IMAGE *mia) : Jim() {setMIA(mia,0);};
+  Jim(IMAGE *mia) : m_nplane(1) {setMIA(mia,0);};
     ///constructor input image
   Jim(const std::string& filename, unsigned int memory=0) : m_nplane(1), ImgRaster(filename,memory){};
     ///constructor input image
