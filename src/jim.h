@@ -56,7 +56,7 @@ namespace jiplib{
     ///constructor input image
   Jim(const std::string& filename, unsigned int memory=0) : m_nplane(1), ImgRaster(filename,memory){};
     ///constructor input image
-  Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : m_nplane(1), ImgRaster(filename,imgSrc,memory,options){};
+  Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : m_nplane(1), ImgRaster(filename, imgSrc, memory, options){};
     ///constructor input image
     /* Jim(std::shared_ptr<ImgRaster> imgSrc, bool copyData=true) : m_nplane(1), ImgRaster(imgSrc, copyData){}; */
     ///constructor input image
@@ -77,13 +77,16 @@ namespace jiplib{
     static std::shared_ptr<Jim> createImg();
     ///Create new shared pointer to Jim object using existing image object
     static std::shared_ptr<Jim> createImg(const std::shared_ptr<Jim> pSrc, bool copyData=true);
+    ///Create new shared pointer to Jim object using existing image object
+    static std::shared_ptr<Jim> createImg(const std::string filename, unsigned int memory=0);
     ///Open an image for writing using an external data pointer (not tested yet)
     CPLErr open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType);
     ///Open an image for writing in memory, defining image attributes.
     /* void open(int ncol, int nrow, int nband, int dataType); */
     ///Open an image for writing, based on an existing image object
     CPLErr open(Jim& imgSrc, bool copyData=true);
-    ///Open dataset (specialization of the open member function of ImgRaster, closing the dataset after reading in memory)
+    ///Open dataset
+    /* CPLErr open(const std::string& filename, unsigned int memory=0); */
     ///open dataset, read data and close (keep data in memory)
     //CPLErr open(app::AppFactory &app);
     ///write to file previously set (eg., with setFile). Specialization of the writeData member function of ImgRaster, avoiding reset of the memory.
@@ -248,5 +251,6 @@ namespace jiplib{
   static std::shared_ptr<Jim> createJim(app::AppFactory &theApp){return(Jim::createImg(theApp));};
   static std::shared_ptr<Jim> createJim(){return Jim::createImg();};
   static std::shared_ptr<Jim> createJim(const std::shared_ptr<Jim> pSrc, bool copyData=true){return(Jim::createImg(pSrc, copyData));};
+  static std::shared_ptr<Jim> createJim(const std::string filename){return(Jim::createImg(filename));};
 }
 #endif // _JIM_H_
