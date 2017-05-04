@@ -101,8 +101,7 @@ namespace jiplib{
      **/
     CPLErr write(app::AppFactory &app);
     ///Close dataset (specialization of the close member function of ImgRaster, avoiding writing the data)
-    CPLErr close(){ImgRaster::reset();};
-
+    CPLErr close();
     ///Create a JSON string from a Jim image
     std::string jim2json();
     ///Create a custom collection from a Jim image
