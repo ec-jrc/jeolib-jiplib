@@ -11,6 +11,32 @@ Change log
 
 using namespace jiplib;
 
+///constructors
+Jim::Jim() : m_nplane(1) {};
+///constructor opening an image in memory using an external data pointer (not tested yet)
+Jim::Jim(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType){
+  open(dataPointer,ncol,nrow,nplane,dataType);
+}
+///constructor input image
+Jim::Jim(IMAGE *mia) : m_nplane(1){
+  setMIA(mia,0);
+}
+///constructor input image
+Jim::Jim(const std::string& filename, unsigned int memory) : m_nplane(1), ImgRaster(filename,memory){
+  for(int iband=0;iband<nrOfBand();++iband)
+    readDataDS(iband,iband);
+}
+///constructor input image
+Jim::Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory, const std::vector<std::string>& options) : m_nplane(1), ImgRaster(filename, imgSrc, memory, options){}
+///constructor input image
+Jim::Jim(Jim& imgSrc, bool copyData) : m_nplane(1), ImgRaster(imgSrc, copyData){};
+///constructor output image
+Jim::Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory, const std::vector<std::string>& options) : m_nplane(1), ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){};
+///constructor output image
+Jim::Jim(int ncol, int nrow, int nband, const GDALDataType& dataType) : m_nplane(1), ImgRaster(ncol, nrow, nband, dataType){};
+//test
+Jim::Jim(app::AppFactory &theApp): m_nplane(1), ImgRaster(theApp){};
+
 ///destructor
 Jim::~Jim(void){
   if(m_mia.size()){
@@ -693,7 +719,7 @@ std::shared_ptr<Jim> Jim::filter2d(app::AppFactory& theApp){
  * @param kde (type: bool) (default: 0) Use Kernel density estimation when producing histogram. The standard deviation is estimated based on Silverman's rule of thumb
  * @return this object
  **/
-CPLErr Jim::getStats(app::AppFactory& theApp){return(ImgRaster::getStats(theApp));};
+std::map<std::string,std::string> Jim::getStats(app::AppFactory& theApp){return(ImgRaster::getStats(theApp));};
 
 ///create statistical profile
 /**

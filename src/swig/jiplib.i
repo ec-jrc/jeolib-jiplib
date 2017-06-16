@@ -71,7 +71,7 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
   $1 = PyDict_Check($input) ? 1 : 0;
  }
 %typemap(in) app::AppFactory& (app::AppFactory tempFactory){
-  std::cout << "we are in typemap AppFactory" << std::endl;
+  //std::cout << "we are in typemap AppFactory" << std::endl;
   if(PyDict_Check($input)){
     PyObject *pKey, *pValue;
     Py_ssize_t ppos=0;
@@ -295,7 +295,7 @@ namespace jiplib{
 
   //return the object itself for all functions returning CPLErr
   %typemap(out) CPLErr {
-    std::cout << "we are in typemap(out) CPLErr for jiplib::Jim::$symname" << std::endl;
+    //std::cout << "we are in typemap(out) CPLErr for jiplib::Jim::$symname" << std::endl;
     if($1==CE_Failure)
       std::cout << "Warning: CE_Failure" << std::endl;
     void *argp2;
@@ -360,6 +360,47 @@ namespace jiplib{
     /* if(PyList_Size($result)<2) */
     /*   $result=PyString_FromString($1.c_str()); */
   /* } */
+
+  %typemap(out) std::vector<double> {
+    PyObject *l = PyList_New($1.size());
+    for(int index=0;index<$1.size();++index)
+      PyList_SetItem(l,index,PyFloat_FromDouble($1.at(index)));
+    $result=l;
+  }
+
+  //return the object itself for all functions returning CPLErr
+  %typemap(out) std::map<std::string,std::string> getStats {
+    PyObject *d = PyDict_New();
+    std::map<std::string,std::string>::const_iterator mit=$1.begin();
+    while(mit!=$1.end()){
+      std::string key=mit->first;
+      std::string val=mit->second;
+      if(key.find("histogram")!=std::string::npos){
+        //for creating PyArrayObject from c array, check https://codereview.stackexchange.com/questions/92266/sending-a-c-array-to-python-numpy-and-back/92353#92353
+        PyObject *lb = PyList_New(0);
+        PyObject *lh = PyList_New(0);
+        //construct dictionary as list of values
+        std::istringstream buf(val);
+        std::istream_iterator<std::string> beg(buf), end;
+        std::vector<std::string> tokens(beg, end); // done!
+        for(int ibin=0;ibin<tokens.size()-1;ibin=ibin+2){
+          double binValue=std::stod(tokens[ibin].c_str());
+          std::string histString=tokens[ibin+1];
+          histString.erase(std::remove(histString.begin(), histString.end(), '\n'), histString.end());
+          double histValue=std::stod(histString.c_str());
+          PyList_Append(lb,PyFloat_FromDouble(binValue));
+          PyList_Append(lh,PyFloat_FromDouble(histValue));
+        }
+        std::string keyBin="bin";
+        PyDict_SetItem(d, PyString_FromString(keyBin.c_str()), lb);
+        PyDict_SetItem(d, PyString_FromString(key.c_str()), lh);
+      }
+      else
+        PyDict_SetItem(d, PyString_FromString(key.c_str()), PyFloat_FromDouble(std::stod(val.c_str())));
+      ++mit;
+    }
+    $result=d;
+  }
 }
 
 

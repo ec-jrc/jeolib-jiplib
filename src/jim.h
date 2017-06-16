@@ -48,27 +48,27 @@ namespace jiplib{
   {
   public:
     ///default constructor
-  Jim() : m_nplane(1) {};
+  Jim();
     ///constructor opening an image in memory using an external data pointer (not tested yet)
-  Jim(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType) {open(dataPointer,ncol,nrow,nplane,dataType);};
+  Jim(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType);
     ///constructor input image
-  Jim(IMAGE *mia) : m_nplane(1) {setMIA(mia,0);};
+  Jim(IMAGE *mia);
     ///constructor input image
-  Jim(const std::string& filename, unsigned int memory=0) : m_nplane(1), ImgRaster(filename,memory){};
+  Jim(const std::string& filename, unsigned int memory=0);
     ///constructor input image
-  Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : m_nplane(1), ImgRaster(filename, imgSrc, memory, options){};
+  Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>());
     ///constructor input image
     /* Jim(std::shared_ptr<ImgRaster> imgSrc, bool copyData=true) : m_nplane(1), ImgRaster(imgSrc, copyData){}; */
     ///constructor input image
-  Jim(Jim& imgSrc, bool copyData=true) : m_nplane(1), ImgRaster(imgSrc, copyData){};
+  Jim(Jim& imgSrc, bool copyData=true);
     ///constructor output image
-  Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) : m_nplane(1), ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){};
+  Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>());
     ///constructor output image
-  Jim(int ncol, int nrow, int nband, const GDALDataType& dataType) : m_nplane(1), ImgRaster(ncol, nrow, nband, dataType){};
+  Jim(int ncol, int nrow, int nband, const GDALDataType& dataType);
     ///constructor from app
     /* Jim(app::AppFactory &theApp): m_nplane(1), ImgRaster(theApp){}; */
     //test
-  Jim(app::AppFactory &theApp): m_nplane(1), ImgRaster(theApp){};
+  Jim(app::AppFactory &theApp);
     ///destructor
     ~Jim(void);
     ///Create new shared pointer to Jim object using app
@@ -168,7 +168,7 @@ namespace jiplib{
     ///filter Jim image in spatial domain
     std::shared_ptr<Jim> filter2d(app::AppFactory& theApp);
     ///get statistics on image list
-    CPLErr getStats(app::AppFactory& theApp);
+    std::map<std::string,std::string> getStats(app::AppFactory& theApp);
     ///create statistical profile
     std::shared_ptr<Jim> statProfile(app::AppFactory& theApp);
     ///check the difference between two images
@@ -215,8 +215,6 @@ namespace jiplib{
     int m_nplane;
   private:
     std::shared_ptr<Jim> cloneImpl(bool copyData) {
-      //test
-      std::cout << "clone Jim object" << std::endl;
       return std::make_shared<Jim>(*this,copyData);
       /* return(std::make_shared<Jim>()); */
     };

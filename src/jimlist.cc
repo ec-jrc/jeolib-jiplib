@@ -326,9 +326,8 @@ std::shared_ptr<jiplib::Jim> JimList::statProfile(app::AppFactory& app){
  * @param kde (type: bool) (default: 0) Use Kernel density estimation when producing histogram. The standard deviation is estimated based on Silverman's rule of thumb
  * @return this object
  **/
-JimList& JimList::getStats(app::AppFactory& app){
-  ImgCollection::getStats(app);
-  return(*this);
+std::map<std::string,std::string> JimList::getStats(app::AppFactory& app){
+  return(ImgCollection::getStats(app));
 }
 /**
  * @param reference (type: std::string) Reference vector dataset
