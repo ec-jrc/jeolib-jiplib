@@ -951,6 +951,7 @@ std::shared_ptr<Jim> Jim::getMask(app::AppFactory& app){
  * @param msknodata (type: int) (default: 1) Mask value(s) where image has nodata. Use one value for each mask, or multiple values for a single mask.
  * @param mskband (type: short) (default: 0) Mask band to read (0 indexed). Provide band for each mask.
  * @param nodata (type: double) (default: 0) nodata value to put in image if not valid
+ * @param eoption special options controlling rasterization (ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG)
  * @param operator (type: char) (default: =) Operator: < = > !. Use operator for each msknodata option
  * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
  * @return shared pointer to classified image object
