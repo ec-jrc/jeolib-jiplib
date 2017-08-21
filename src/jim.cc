@@ -13,9 +13,13 @@ using namespace jiplib;
 
 ///constructors
 Jim::Jim() : m_nplane(1) {};
-///constructor opening an image in memory using an external data pointer (not tested yet)
+///constructor opening an image in memory using an external data pointer
 Jim::Jim(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType){
   open(dataPointer,ncol,nrow,nplane,dataType);
+}
+///constructor opening a multiband image in memory using an external data pointer
+Jim::Jim(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType){
+  open(dataPointers,ncol,nrow,nplane,dataType);
 }
 ///constructor input image
 Jim::Jim(IMAGE *mia) : m_nplane(1){
@@ -163,6 +167,32 @@ CPLErr Jim::open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDa
       m_data[iband]=(char *)dataPointer+iband*ncol*nrow*nplane*getDataTypeSizeBytes();
       m_begin[iband]=0;
       m_end[iband]=m_begin[iband]+m_blockSize;
+    }
+    // m_externalData=true;
+    return(CE_None);
+  }
+  else
+    return(CE_Failure);
+}
+
+///Open a multiband image for writing, based on an existing image object
+CPLErr Jim::open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType){
+  m_ncol=ncol;
+  m_nrow=nrow;
+  m_nplane=nplane;
+  m_nband=dataPointers.size();
+  m_dataType=dataType;
+  m_data.resize(m_nband);
+  m_begin.resize(m_nband);
+  m_end.resize(m_nband);
+  m_blockSize=nrow;//memory contains entire image and has been read already
+  if(dataPointers.size()){
+    for(int iband=0;iband<m_nband;++iband){
+      if(dataPointers[iband]){
+        m_data[iband]=(char *)dataPointers[iband]+iband*ncol*nrow*nplane*getDataTypeSizeBytes();
+        m_begin[iband]=0;
+        m_end[iband]=m_begin[iband]+m_blockSize;
+      }
     }
     // m_externalData=true;
     return(CE_None);

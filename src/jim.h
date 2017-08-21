@@ -49,8 +49,9 @@ namespace jiplib{
   public:
     ///default constructor
   Jim();
-    ///constructor opening an image in memory using an external data pointer (not tested yet)
+    ///constructor opening an image in memory using an external data pointer
   Jim(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType);
+  Jim(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType);
     ///constructor input image
   Jim(IMAGE *mia);
     ///constructor input image
@@ -79,8 +80,10 @@ namespace jiplib{
     static std::shared_ptr<Jim> createImg(const std::shared_ptr<Jim> pSrc, bool copyData=true);
     ///Create new shared pointer to Jim object using existing image object
     static std::shared_ptr<Jim> createImg(const std::string filename, unsigned int memory=0);
-    ///Open an image for writing using an external data pointer (not tested yet)
+    ///Open an image for writing using an external data pointer
     CPLErr open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType);
+    ///Open a multiband image for writing using a external data pointers
+    CPLErr open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType);
     ///Open an image for writing in memory, defining image attributes.
     /* void open(int ncol, int nrow, int nband, int dataType); */
     ///Open an image for writing, based on an existing image object
