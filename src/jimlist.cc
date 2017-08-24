@@ -361,6 +361,35 @@ JimList& JimList::validate(app::AppFactory& app){
 // JimList createJimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist){JimList theList(jimlist); return(theList);};
 
 ///functions from mialib
+std::shared_ptr<jiplib::Jim> JimList::labelConstrainedCCsMultiband(Jim &imgRaster, int ox, int oy, int oz, int r1, int r2){
+  try{
+    IMAGE * imout = 0;
+    IMAGE * imse=imgRaster.getMIA();
+    IMAGE ** imap;
+    imap = (IMAGE **) malloc(this->size()*sizeof(IMAGE **));
+    for(int iimg=0;iimg=this->size();++iimg)
+      imap[iimg]=getImage(iimg)->getMIA();
+    imout =::labelccms(imap,this->size(),imse,ox,oy,oz,r1,r2);
+    if (imout){
+      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout);
+      imgWriter->copyGeoTransform(*front());
+      imgWriter->setProjection(front()->getProjectionRef());
+      return(imgWriter);
+    }
+    else{
+      std::string errorString="Error: labelConstrainedCCsMultiband() function in MIA failed, returning NULL pointer";
+      throw(errorString);
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    return(0);
+  }
+  catch(...){
+    return(0);
+  }
+}
+
 /**
  * @param x
  * @return JimList object

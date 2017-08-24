@@ -205,6 +205,8 @@ namespace jiplib{
     std::shared_ptr<Jim> getShared(){
       return(std::dynamic_pointer_cast<Jim>(shared_from_this()));
     }
+    //todo: manual for now, but need to be done with Python script
+    std::shared_ptr<jiplib::Jim> labelConstrainedCCsMultiband(Jim &imgRaster, int ox, int oy, int oz, int r1, int r2);
   protected:
     ///reset all member variables
     void reset(void){
@@ -252,5 +254,8 @@ namespace jiplib{
   static std::shared_ptr<Jim> createJim(){return Jim::createImg();};
   static std::shared_ptr<Jim> createJim(const std::shared_ptr<Jim> pSrc, bool copyData=true){return(Jim::createImg(pSrc, copyData));};
   static std::shared_ptr<Jim> createJim(const std::string filename){return(Jim::createImg(filename));};
+
 }
+
+
 #endif // _JIM_H_
