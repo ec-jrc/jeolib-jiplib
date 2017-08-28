@@ -1033,7 +1033,7 @@ std::shared_ptr<jiplib::Jim> Jim::labelConstrainedCCsMultiband(Jim &imgRaster, i
     IMAGE * imse=imgRaster.getMIA();
     IMAGE ** imap;
     imap = (IMAGE **) malloc(this->nrOfBand()*sizeof(IMAGE **));
-    for(int iband=0;iband=nrOfBand();++iband)
+    for(int iband=0;iband<nrOfBand();++iband)
       imap[iband]=getMIA(iband);
     imout =::labelccms(imap,this->nrOfBand(),imse,ox,oy,oz,r1,r2);
     if (imout){
