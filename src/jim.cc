@@ -1024,10 +1024,10 @@ std::shared_ptr<Jim> Jim::reclass(app::AppFactory& app){
 
 std::shared_ptr<jiplib::Jim> Jim::labelConstrainedCCsMultiband(Jim &imgRaster, int ox, int oy, int oz, int r1, int r2){
   try{
-		if(nrOfBand()<=1){
-			std::string errorString="Error: number of bands must be larger than 1";
-			throw(errorString);
-		}
+		//if(nrOfBand()<=1){
+		//	std::string errorString="Error: number of bands must be larger than 1";
+		//	throw(errorString);
+		//}
     int nc=nrOfBand();
     IMAGE * imout = 0;
     IMAGE * imse=imgRaster.getMIA();
