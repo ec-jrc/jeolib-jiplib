@@ -163,11 +163,16 @@ CPLErr Jim::open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDa
   m_end.resize(m_nband);
   m_blockSize=nrow;//memory contains entire image and has been read already
   if(dataPointer){
+      m_data[0]=(char *)dataPointer;
+      m_begin[0]=0;
+      m_end[0]=m_begin[0]+m_blockSize;
+/*
     for(int iband=0;iband<m_nband;++iband){
       m_data[iband]=(char *)dataPointer+iband*ncol*nrow*nplane*getDataTypeSizeBytes();
       m_begin[iband]=0;
       m_end[iband]=m_begin[iband]+m_blockSize;
     }
+*/
     // m_externalData=true;
     return(CE_None);
   }
@@ -189,7 +194,7 @@ CPLErr Jim::open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane
   if(dataPointers.size()){
     for(int iband=0;iband<m_nband;++iband){
       if(dataPointers[iband]){
-        m_data[iband]=(char *)dataPointers[iband]+iband*ncol*nrow*nplane*getDataTypeSizeBytes();
+        m_data[iband]=(char *)dataPointers[iband];
         m_begin[iband]=0;
         m_end[iband]=m_begin[iband]+m_blockSize;
       }
@@ -1036,11 +1041,7 @@ std::shared_ptr<jiplib::Jim> Jim::labelConstrainedCCsMultiband(Jim &imgRaster, i
     for(int iband=0;iband<nrOfBand();++iband){
       imap[iband]=getMIA(iband);
       //test
-      // double theMin=0;
-      // double theMax=0;
-      // getminmax(imap[iband],&theMin,&theMax);
-      // PySys_WriteStdout("min: %f,max: %f\n",theMin,theMax);
-      iminfo(imap[iband]);
+      //iminfo(imap[iband]);
     }
     imout =::labelccms(imap,this->nrOfBand(),imse,ox,oy,oz,r1,r2);
     if (imout){
