@@ -7,7 +7,7 @@ Change log
 #include "config.h"
 #include "json/json.h"
 #include "jim.h"
-
+// #include "Python.h"
 
 using namespace jiplib;
 
@@ -1033,8 +1033,15 @@ std::shared_ptr<jiplib::Jim> Jim::labelConstrainedCCsMultiband(Jim &imgRaster, i
     IMAGE * imse=imgRaster.getMIA();
     IMAGE ** imap;
     imap = (IMAGE **) malloc(this->nrOfBand()*sizeof(IMAGE **));
-    for(int iband=0;iband<nrOfBand();++iband)
+    for(int iband=0;iband<nrOfBand();++iband){
       imap[iband]=getMIA(iband);
+      //test
+      // double theMin=0;
+      // double theMax=0;
+      // getminmax(imap[iband],&theMin,&theMax);
+      // PySys_WriteStdout("min: %f,max: %f\n",theMin,theMax);
+      iminfo(imap[iband]);
+    }
     imout =::labelccms(imap,this->nrOfBand(),imse,ox,oy,oz,r1,r2);
     if (imout){
       std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout);
