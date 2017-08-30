@@ -89,7 +89,10 @@ namespace jiplib{
 
     ///functions from mialib
     //todo: manual for now, but need to be done with Python script
-    std::shared_ptr<jiplib::Jim> labelConstrainedCCsMultiband(Jim &imgRaster, int ox, int oy, int oz, int r1, int r2);
+    /* std::shared_ptr<jiplib::Jim> labelConstrainedCCsMultiband(Jim &imgRaster, int ox, int oy, int oz, int r1, int r2); */
+
+    //start insert from fun2method_imagetype_jimlist
+    //end insert from fun2method_imagetype_jimlist
 
     JimList rgb2hsx(int x=0);//from imrgb2hsx
     JimList alphaTreeDissimGet(int alphaMax);//from alphatree

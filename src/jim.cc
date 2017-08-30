@@ -1027,39 +1027,36 @@ std::shared_ptr<Jim> Jim::reclass(app::AppFactory& app){
   return(imgWriter);
 }
 
-std::shared_ptr<jiplib::Jim> Jim::labelConstrainedCCsMultiband(Jim &imgRaster, int ox, int oy, int oz, int r1, int r2){
-  try{
-		//if(nrOfBand()<=1){
-		//	std::string errorString="Error: number of bands must be larger than 1";
-		//	throw(errorString);
-		//}
-    int nc=nrOfBand();
-    IMAGE * imout = 0;
-    IMAGE * imse=imgRaster.getMIA();
-    IMAGE ** imap;
-    imap = (IMAGE **) malloc(this->nrOfBand()*sizeof(IMAGE **));
-    for(int iband=0;iband<nrOfBand();++iband){
-      imap[iband]=getMIA(iband);
-      //test
-      //iminfo(imap[iband]);
-    }
-    imout =::labelccms(imap,this->nrOfBand(),imse,ox,oy,oz,r1,r2);
-    if (imout){
-      std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout);
-      imgWriter->copyGeoTransform(*this);
-      imgWriter->setProjection(getProjectionRef());
-      return(imgWriter);
-    }
-    else{
-      std::string errorString="Error: labelConstrainedCCsMultiband() function in MIA failed, returning NULL pointer";
-      throw(errorString);
-    }
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    return(0);
-  }
-  catch(...){
-    return(0);
-  }
-}
+// std::shared_ptr<jiplib::Jim> Jim::labelConstrainedCCsMultiband(Jim &imgRaster, int ox, int oy, int oz, int r1, int r2){
+//   try{
+// 		//if(nrOfBand()<=1){
+// 		//	std::string errorString="Error: number of bands must be larger than 1";
+// 		//	throw(errorString);
+// 		//}
+//     int nc=nrOfBand();
+//     IMAGE * imout = 0;
+//     IMAGE * imse=imgRaster.getMIA();
+//     IMAGE ** imap;
+//     imap = (IMAGE **) malloc(this->nrOfBand()*sizeof(IMAGE **));
+//     for(int iband=0;iband<nrOfBand();++iband)
+//       imap[iband]=getMIA(iband);
+//     imout =::labelccms(imap,this->nrOfBand(),imse,ox,oy,oz,r1,r2);
+//     if (imout){
+//       std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout);
+//       imgWriter->copyGeoTransform(*this);
+//       imgWriter->setProjection(getProjectionRef());
+//       return(imgWriter);
+//     }
+//     else{
+//       std::string errorString="Error: labelConstrainedCCsMultiband() function in MIA failed, returning NULL pointer";
+//       throw(errorString);
+//     }
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     return(0);
+//   }
+//   catch(...){
+//     return(0);
+//   }
+// }

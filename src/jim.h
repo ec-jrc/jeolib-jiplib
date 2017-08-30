@@ -150,6 +150,8 @@ namespace jiplib{
 
     //start insert from fun2method_imagetype
     //end insert from fun2method_imagetype
+    //start insert from fun2method_imagetype_multi
+    //end insert from fun2method_imagetype_multi
     //start insert from fun2method_imagelisttype
     //end insert from fun2method_imagelisttype
     //start insert from fun2method_errortype
@@ -206,7 +208,7 @@ namespace jiplib{
       return(std::dynamic_pointer_cast<Jim>(shared_from_this()));
     }
     //todo: manual for now, but need to be done with Python script
-    std::shared_ptr<jiplib::Jim> labelConstrainedCCsMultiband(Jim &imgRaster, int ox, int oy, int oz, int r1, int r2);
+    /* std::shared_ptr<jiplib::Jim> labelConstrainedCCsMultiband(Jim &imgRaster, int ox, int oy, int oz, int r1, int r2); */
   protected:
     ///reset all member variables
     void reset(void){
