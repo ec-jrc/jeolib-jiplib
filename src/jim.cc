@@ -724,9 +724,9 @@ std::shared_ptr<Jim> Jim::filter1d(app::AppFactory& theApp){
  * @param circular (type: bool) (default: 0) circular disc kernel for dilation and erosion
  * @return shared pointer to image object
  **/
-std::shared_ptr<Jim> Jim::filter2d(app::AppFactory& theApp){
+std::shared_ptr<Jim> Jim::filter2d(const app::AppFactory& theApp){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
-  /* std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(); */
+  // std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
   ImgRaster::filter2d(*imgWriter,theApp);
   return(imgWriter);
 }

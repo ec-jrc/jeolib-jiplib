@@ -171,7 +171,7 @@ namespace jiplib{
     ///filter Jim image in spectral/temporal domain
     std::shared_ptr<Jim> filter1d(app::AppFactory& theApp);
     ///filter Jim image in spatial domain
-    std::shared_ptr<Jim> filter2d(app::AppFactory& theApp);
+    std::shared_ptr<Jim> filter2d(const app::AppFactory& theApp);
     ///get statistics on image list
     std::map<std::string,std::string> getStats(app::AppFactory& theApp);
     ///create statistical profile
