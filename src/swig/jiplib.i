@@ -6,6 +6,7 @@
 %include <std_shared_ptr.i>
 %shared_ptr(ImgRaster)
 %shared_ptr(jiplib::Jim)
+%shared_ptr(VectorOgr)
 
  //catch all exceptions thrown in C++
 %include "exception.i"
@@ -165,6 +166,7 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 #include "imageclasses/ImgRaster.h"
 #include "imageclasses/ImgReaderOgr.h"
 #include "imageclasses/ImgCollection.h"
+#include "imageclasses/VectorOgr.h"
 #include "apps/AppFactory.h"
 #include "algorithms/Filter2d.h"
 #include "jim.h"
@@ -220,7 +222,7 @@ namespace jiplib{
         int nrow=PyArray_DIM((PyArrayObject*)npArray,0);
         int ncol=PyArray_DIM((PyArrayObject*)npArray,1);
         int nband=1;//only single band supported for now
-        std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>(((PyArrayObject*)npArray)->data,ncol,nrow,nplane,jDataType);
+        std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>((void*)(((PyArrayObject*)npArray)->data),ncol,nrow,nplane,jDataType);
         return(imgWriter);
       }
       else{
@@ -361,6 +363,30 @@ namespace jiplib{
     /*   $result=PyString_FromString($1.c_str()); */
   /* } */
 
+  //return the object itself for all functions returning OGRErr
+  %typemap(out) OGRErr {
+    //std::cout << "we are in typemap(out) OGRErr for jiplib::VectorOgr::$symname" << std::endl;
+    if($1==OGRERR_FAILURE)
+      std::cout << "Warning: OGRERR_FAILURE" << std::endl;
+    void *argp2;
+    int res2=0;
+    res2 = SWIG_ConvertPtr($self, &argp2, SWIGTYPE_p_std__shared_ptrT_VectorOgr_t,  0  | 0);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method " "$symname");
+    }
+    if (!argp2) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference , argument " "2"" of type '" "shared_ptr<const VectorOgr&>""'");
+    }
+    std::shared_ptr<VectorOgr> result=(*(reinterpret_cast< std::shared_ptr< VectorOgr > * >(argp2)))->getShared();
+    PyObject* o=0;
+    std::shared_ptr<  VectorOgr > *smartresult = result ? new std::shared_ptr<  VectorOgr >(result) : 0;
+    o = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_VectorOgr_t, SWIG_POINTER_OWN | 0);
+    if(o)
+      $result=o;
+    else
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method " "$symname");
+  }
+
   %typemap(out) std::vector<double> {
     PyObject *l = PyList_New($1.size());
     for(int index=0;index<$1.size();++index)
@@ -416,6 +442,7 @@ namespace jiplib{
 %include "imageclasses/ImgCollection.h"
 %include "imageclasses/ImgRaster.h"
 %include "imageclasses/ImgReaderOgr.h"
+%include "imageclasses/VectorOgr.h"
 %include "apps/AppFactory.h"
 %include "algorithms/Filter2d.h"
 %include "jim.h"

@@ -184,6 +184,8 @@ namespace jiplib{
     CPLErr validate(app::AppFactory& app);
     ///supervised classification (train with extractImg/extractOgr)
     std::shared_ptr<Jim> classify(app::AppFactory& app);
+    ///supervised classification using support vector machine (train with trainSVM)
+    std::shared_ptr<Jim> classifySVM(app::AppFactory& app);
     ///supervised classification using support vector machine (train with extractImg/extractOgr)
     std::shared_ptr<Jim> svm(app::AppFactory& app);
     ///supervised classification using support artificial neural network (train with extractImg/extractOgr)

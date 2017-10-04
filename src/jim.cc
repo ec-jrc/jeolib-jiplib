@@ -891,6 +891,13 @@ std::shared_ptr<Jim> Jim::classify(app::AppFactory& app){
 }
 
 
+std::shared_ptr<Jim> Jim::classifySVM(app::AppFactory& app){
+  std::shared_ptr<Jim> imgWriter=Jim::createImg();
+  /* std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(); */
+  ImgRaster::classifySVM(*imgWriter, app);
+  return(imgWriter);
+}
+
 ///supervised classification using support vector machine (train with extractImg/extractOgr)
 /**
  * @param svmtype (type: std::string) (default: C_SVC) Type of SVM (C_SVC, nu_SVC,one_class, epsilon_SVR, nu_SVR)
