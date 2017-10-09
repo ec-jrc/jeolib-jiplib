@@ -184,12 +184,14 @@ namespace jiplib{
     CPLErr validate(app::AppFactory& app);
     ///supervised classification (train with extractImg/extractOgr)
     std::shared_ptr<Jim> classify(app::AppFactory& app);
+    ///supervised classification using Artificial Neural Network (train with trainANN)
+    /* std::shared_ptr<Jim> classifyANN(app::AppFactory& app); */
     ///supervised classification using support vector machine (train with trainSVM)
-    std::shared_ptr<Jim> classifySVM(app::AppFactory& app);
+    /* std::shared_ptr<Jim> classifySVM(app::AppFactory& app); */
     ///supervised classification using support vector machine (train with extractImg/extractOgr)
-    std::shared_ptr<Jim> svm(app::AppFactory& app);
+    /* std::shared_ptr<Jim> svm(app::AppFactory& app); */
     ///supervised classification using support artificial neural network (train with extractImg/extractOgr)
-    std::shared_ptr<Jim> ann(app::AppFactory& app);
+    /* std::shared_ptr<Jim> ann(app::AppFactory& app); */
     ///stretch Jim image and return stretched image as shared pointer
     std::shared_ptr<Jim> stretch(app::AppFactory& app);
     ///Apply thresholds: set to no data if not within thresholds t1 and t2

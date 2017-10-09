@@ -891,12 +891,19 @@ std::shared_ptr<Jim> Jim::classify(app::AppFactory& app){
 }
 
 
-std::shared_ptr<Jim> Jim::classifySVM(app::AppFactory& app){
-  std::shared_ptr<Jim> imgWriter=Jim::createImg();
-  /* std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(); */
-  ImgRaster::classifySVM(*imgWriter, app);
-  return(imgWriter);
-}
+// std::shared_ptr<Jim> Jim::classifySVM(app::AppFactory& app){
+//   std::shared_ptr<Jim> imgWriter=Jim::createImg();
+//   /* std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(); */
+//   ImgRaster::classifySVM(*imgWriter, app);
+//   return(imgWriter);
+// }
+
+// std::shared_ptr<Jim> Jim::classifyANN(app::AppFactory& app){
+//   std::shared_ptr<Jim> imgWriter=Jim::createImg();
+//   /* std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(); */
+//   ImgRaster::classifyANN(*imgWriter, app);
+//   return(imgWriter);
+// }
 
 ///supervised classification using support vector machine (train with extractImg/extractOgr)
 /**
@@ -912,12 +919,12 @@ std::shared_ptr<Jim> Jim::classifySVM(app::AppFactory& app){
  * @param probest (type: bool) (default: 1) Whether to train a SVC or SVR model for probability estimates
  * @return shared pointer to output image object
  **/
-std::shared_ptr<Jim> Jim::svm(app::AppFactory& app){
-  std::shared_ptr<Jim> imgWriter=Jim::createImg();
-  /* std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(); */
-  ImgRaster::svm(*imgWriter, app);
-  return(imgWriter);
-}
+// std::shared_ptr<Jim> Jim::svm(app::AppFactory& app){
+//   std::shared_ptr<Jim> imgWriter=Jim::createImg();
+//   /* std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(); */
+//   ImgRaster::svm(*imgWriter, app);
+//   return(imgWriter);
+// }
 
 ///supervised classification using support artificial neural network (train with extractImg/extractOgr)
 /**
@@ -929,12 +936,12 @@ std::shared_ptr<Jim> Jim::svm(app::AppFactory& app){
  * @param maxit (type: unsigned int) (default: 500) number of maximum iterations (epoch) (default: 500)
  * @return shared pointer to output image object
  **/
-std::shared_ptr<Jim> Jim::ann(app::AppFactory& app){
-  std::shared_ptr<Jim> imgWriter=Jim::createImg();
-  /* std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(); */
-  ImgRaster::ann(*imgWriter, app);
-  return(imgWriter);
-}
+// std::shared_ptr<Jim> Jim::ann(app::AppFactory& app){
+//   std::shared_ptr<Jim> imgWriter=Jim::createImg();
+//   /* std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(); */
+//   ImgRaster::ann(*imgWriter, app);
+//   return(imgWriter);
+// }
 
 ///stretch Jim image and return stretched image as shared pointer
 /**
