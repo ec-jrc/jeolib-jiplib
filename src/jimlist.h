@@ -9,7 +9,7 @@ Change log
 
 #include "jim.h"
 extern "C" {
-#include "config.h"
+#include "config_jiplib.h"
 #include "mialib/mialib_swig.h"
 #include "mialib/mialib_convolve.h"
 #include "mialib/mialib_dem.h"

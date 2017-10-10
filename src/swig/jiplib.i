@@ -162,7 +162,7 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 
 %{
 #include <memory>
-#include "config.h"
+/* #include "config.h" */
 #include "imageclasses/ImgRaster.h"
 #include "imageclasses/ImgReaderOgr.h"
 #include "imageclasses/ImgCollection.h"

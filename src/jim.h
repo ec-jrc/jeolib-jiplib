@@ -15,7 +15,7 @@ Change log
 #include "pktools/apps/AppFactory.h"
 #include "jimlist.h"
 extern "C" {
-#include "config.h"
+#include "config_jiplib.h"
 #include "mialib/mialib_swig.h"
 #include "mialib/mialib_convolve.h"
 #include "mialib/mialib_dem.h"

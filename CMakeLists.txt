@@ -37,7 +37,7 @@ set (PROJECT_TEST_DIR test)
 # configure a header file to pass some of the CMake settings to the source code
 configure_file (
   "cmake-config.h.in"
-  "config.h"
+  "config_jiplib.h"
   )
 
 option (BUILD_SHARED_LIBS "Build with shared library" ON)
@@ -116,13 +116,14 @@ include_directories(${JSONCPP_INCLUDE_DIRS})
 ###############################################################################
 # Setup configure file
 
-# configure_file ( "cmake-config.in" "${CMAKE_CURRENT_BINARY_DIR}/config" @ONLY )
-configure_file ( "cmake-config.h.in" "${CMAKE_SOURCE_DIR}/config.h" @ONLY )
+configure_file ( "cmake-config.in" "${CMAKE_CURRENT_BINARY_DIR}/jiplib-config" @ONLY )
+# configure_file ( "cmake-config.h.in" "${CMAKE_SOURCE_DIR}/config_jiplib.h" @ONLY )
 # configure_file ( "cmake.pc.in" "jiplib.pc"  @ONLY)
 add_definitions(-DHAVE_CONFIG_H)
 
 
-configure_file ( "cmake-config.in" "${CMAKE_CURRENT_BINARY_DIR}/jiplib-config" @ONLY )
+# configure_file ( "cmake-config.in" "${CMAKE_CURRENT_BINARY_DIR}/jiplib-config" @ONLY )
+# configure_file ( "cmake-config.in" "${CMAKE_CURRENT_BINARY_DIR}/config_jiplib" @ONLY )
 configure_file ( "cmake.pc.in" "jiplib.pc"  @ONLY)
 
 
@@ -136,7 +137,7 @@ set(BUILD_WITH_MIALIB TRUE CACHE BOOL "JIPlib needs to be built with mialiab")
 ###############################################################################
 # include_directories("${PROJECT_SOURCE_DIR}")
 # include_directories("${CMAKE_SOURCE_DIR}")
-include_directories("${PROJECT_BINARY_DIR}")# needed for config.h
+include_directories("${PROJECT_BINARY_DIR}")# needed for config_jiplib.h
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")# this is where jim.h will go
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/src/")
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/doc")#needed for jiplib_doc.i
@@ -324,4 +325,5 @@ EXECUTE_PROCESS(COMMAND python -c "from distutils.sysconfig import get_python_li
 SET(PYTHON_INSTALL_DIR ${PYTHON_SITE_PACKAGES} CACHE PATH "Install directory for Python library")
 INSTALL(TARGETS ${SWIG_MODULE_jiplib_REAL_NAME} LIBRARY DESTINATION ${PYTHON_INSTALL_DIR})
 INSTALL(FILES ${CMAKE_BINARY_DIR}/jiplib.py DESTINATION ${PYTHON_INSTALL_DIR})
+install (FILES "${CMAKE_CURRENT_BINARY_DIR}/config_jiplib.h" DESTINATION ${PROJECT_INCLUDE_DIR})
 ###############################################################################
