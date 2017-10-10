@@ -4,7 +4,7 @@ History
 2016/06/24 - Created by Pieter Kempeneers
 Change log
 ***********************************************************************/
-#include "config.h"
+// #include "config.h"
 #include "json/json.h"
 #include "jim.h"
 // #include "Python.h"
