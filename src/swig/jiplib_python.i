@@ -4,7 +4,7 @@
 
 
 %{
-/* #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION */
+// #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "Python.h"
 #include "numpy/arrayobject.h"
 %}
@@ -26,7 +26,7 @@ std::cout << "debug1" << std::endl;
   }
 }
 
-#    NPY_INT8, NPY_INT16, NPY_INT32, NPY_INT64, NPY_UINT8, NPY_UINT16, NPY_UINT32, NPY_UINT64, NPY_FLOAT32, NPY_FLOAT64, NPY_COMPLEX64, NPY_COMPLEX128.
+//    NPY_INT8, NPY_INT16, NPY_INT32, NPY_INT64, NPY_UINT8, NPY_UINT16, NPY_UINT32, NPY_UINT64, NPY_FLOAT32, NPY_FLOAT64, NPY_COMPLEX64, NPY_COMPLEX128.
 
 /* %extend Jim { */
 /*   void jim2np() { */

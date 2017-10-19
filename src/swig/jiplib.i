@@ -29,7 +29,9 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 %feature("autodoc", "2");
 
 //uncomment if documentation is needed (make sure to execute make doc before make!!!)
+%pythoncode %{
 %import "jiplib_doc.i"
+     %}
 
 %module(docstring=DOCJIPLIB) jiplib
 
@@ -162,7 +164,6 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 
 %{
 #include <memory>
-/* #include "config.h" */
 #include "imageclasses/ImgRaster.h"
 #include "imageclasses/ImgReaderOgr.h"
 #include "imageclasses/ImgCollection.h"

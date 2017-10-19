@@ -39,7 +39,7 @@ def fun2method(inputfile, outputfile_basename):
             aname=re.sub('\**', '', re.sub('.* ', '', i))
             arglist.append([atype, aname])
 
-	print(name.group(1))
+        print(name.group(1))
 
         a= { "name" : name.group(1),
              "arguments" : arglist }
