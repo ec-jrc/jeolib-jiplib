@@ -261,6 +261,7 @@ if(PYTHONINTERP_FOUND)
           file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/mialib_errortype "${fun}\n")
         ENDIF("${fun}" MATCHES "${F_ND}")
       ENDFOREACH(fun)
+      MESSAGE(STATUS "End process file: ${infileName}")
     ENDFOREACH(infileName)
 
     #Create headers with new names in build directory
