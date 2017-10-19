@@ -24,7 +24,7 @@ def fun2method(inputfile, outputfile_basename):
     lines=ifp.readlines()
 
     for line in lines:
-        print line
+        print(line)
 
         name=re.match(r'extern IMAGE \*(.*)\((.*)\);',line)
         args=re.split(',', name.group(2))
@@ -41,7 +41,7 @@ def fun2method(inputfile, outputfile_basename):
         a= { "name" : name.group(1),
              "arguments" : arglist }
 
-        print a
+        print(a)
 
         imDeclare=[]
         imRasterArray=[]
@@ -54,13 +54,13 @@ def fun2method(inputfile, outputfile_basename):
         CTypes = ['unsigned char', 'short int', 'unsigned short int', 'int', 'unsigned int', 'float', 'double']
 
         methodDeclaration='std::shared_ptr<Jim> JimList::'+old2newDic.get(a.get("name"))+'('
-        print methodDeclaration
+        print(methodDeclaration)
 
         cSeparator=', '
         separator = '' # default value in case there are no arguments besides the input image
 
         if a.get("arguments")[0][0] != 'IMAGE **':
-            print 'WARNING: '+line+' does not have IMAGE ** as first argument'
+            print('WARNING: ',line,' does not have IMAGE ** as first argument')
             continue
         else:
             imDeclare.append(a.get("arguments")[0][0]+' '+a.get("arguments")[0][1]+';')
@@ -69,12 +69,12 @@ def fun2method(inputfile, outputfile_basename):
         imCount=1
         setNc=False
         for idx, arg in enumerate(a.get("arguments")[1:len(a.get("arguments"))]):
-            print methodDeclaration
-            print idx
-            print idx
-            print separator
-            print arg
-            print arg[0]
+            print(methodDeclaration)
+            print(idx)
+            print(idx)
+            print(separator)
+            print(arg)
+            print(arg[0])
 
             if (arg[0]=='IMAGE *'):
                 methodDeclaration+=separator+'Jim& imRaster_'+arg[1]
@@ -174,18 +174,18 @@ def main(argv):
    try:
       opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
    except getopt.GetoptError:
-      print 'fun2method.py -i <inputfile> -o <outputfilebasename>'
+      print('fun2method.py -i <inputfile> -o <outputfilebasename>')
       sys.exit(2)
    for opt, arg in opts:
       if opt == '-h':
-         print 'fun2method.py -i <inputfile> -o <outputfilebasename>'
+         print('fun2method.py -i <inputfile> -o <outputfilebasename>')
          sys.exit()
       elif opt in ("-i", "--ifile"):
          inputfile = arg
       elif opt in ("-o", "--ofile"):
          outputfile = arg
-   print 'Input file is "', inputfile
-   print 'Output file is "', outputfile
+   print('Input file is "', inputfile)
+   print('Output file is "', outputfile)
 
    fun2method(inputfile, outputfile)
 
