@@ -1,4 +1,4 @@
-# python specific interface file
+// python specific interface file
 
 // provide support for numpy array with mial
 
