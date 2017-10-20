@@ -204,7 +204,7 @@ endif(BUILD_WITH_MIALIB)
 ###############################################################################
 find_package(PythonInterp)
 if(PYTHONINTERP_FOUND)
-  file(WRITE ${JIPLIB_DOC} "#This is an automatically generated doc file, do not edit")
+  file(WRITE ${JIPLIB_DOC} "//This is an automatically generated doc file, do not edit")
   #todo: treat mialib functions that return: int, long int, double, G_TYPE
   # G_TYPE: getpixval
   # G_TYPE* min_max

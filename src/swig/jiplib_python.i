@@ -63,7 +63,6 @@ std::cout << "debug1" << std::endl;
 
   ERROR_TYPE _ConvertNumPyArrayToJim( PyArrayObject *psArray, std::shared_ptr< jiplib::Jim > ajim){
     IMAGE *im=ajim->getMIA();
-    printf("coucou\n");
     im->p_im=memcpy( (void *)GetImPtr(im), (void *)(psArray->data), GetImNx(im)*GetImNy(im)*(GetImBitPerPixel(im)/8));
     ajim->setMIA();
     return NO_ERROR;
@@ -210,10 +209,10 @@ def ConvertNumPyArrayToMIALibImage( psArray ):
 def np2jim( psArray):
     """Pure python implementation of converting a numpy array into
     a JIPLib image.  Data values are copied!"""
-    print psArray.dtype
-    print NumPyToImDataTypeCode(psArray.dtype)
-    print psArray.shape[0]
-    print psArray.shape[1]
+      print(psArray.dtype)
+      print(NumPyToImDataTypeCode(psArray.dtype))
+      print(psArray.shape[0])
+      print(psArray.shape[1])
     #jim=create_image(NumPyToImDataTypeCode(psArray.dtype),psArray.shape[0],psArray.shape[1],1)
     jim=Jim.createImg({'nrow': psArray.shape[0], 'ncol': psArray.shape[1], 'otype': 'GDT_Float64','mean':10})
 
@@ -226,14 +225,14 @@ def np2jim( psArray):
 
 def jim2np( jim ):
 #  #"""Pure python implementation of converting a MIALib image into a numpy array.  Data values are copied!"""
-    print "entering jim2np"
-    print jim.nrOfRow()
-    print jim.nrOfCol()
-    print jim.getDataType()
-    print JimToNumPyTypeCode(jim.getDataType())
+  print("entering jim2np")
+  print(jim.nrOfRow())
+  print(jim.nrOfCol())
+  print(jim.getDataType())
+  print(JimToNumPyTypeCode(jim.getDataType()))
     #buf_obj = numpy.empty([jim.nrOfRow(),jim.nrOfCol()], dtype = JimToNumPyTypeCode(jim.getDataType()))
     buf_obj = numpy.zeros([jim.nrOfRow(),jim.nrOfCol()], dtype = JimToNumPyTypeCode(jim.getDataType()))
-    print "buf_obj created, now calling RasterIOJim()"
+  print("buf_obj created, now calling RasterIOJim()")
     #if(RasterIOJim(jim, buf_obj) != NO_ERROR):
     #RasterIOJim(jim, buf_obj)
     #buf_obj=numpy.add(buf_obj,buf_obj);
@@ -244,10 +243,10 @@ def jim2np( jim ):
 
 def jim2np():
   buf_obj = numpy.zeros([10,10], dtype = numpy.uint32)
-  print "buf_obj created, now calling RasterIOJim()"
+    print("buf_obj created, now calling RasterIOJim()")
   #RasterIOJim(jim, buf_obj)
   #buf_obj=numpy.add(buf_obj,buf_obj);
-  print buf_obj
+    print(buf_obj)
   RasterIOJim(buf_obj)
   return buf_obj
 
