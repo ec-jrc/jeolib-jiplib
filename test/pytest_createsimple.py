@@ -1,4 +1,4 @@
-# pytest6.cc: Create a simple image
+# pytest_createsimple.py: Create a simple image
 # History
 # 2017/10/23 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

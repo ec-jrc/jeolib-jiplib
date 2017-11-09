@@ -1,4 +1,4 @@
-# pytest13.cc: Copy image
+# pytest_copyimage.py: Copy image
 # History
 # 2017/10/24 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

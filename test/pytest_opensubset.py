@@ -1,4 +1,4 @@
-# pytest5.cc: Open spatial subset based on extent of vector dataset
+# pytest_opensubset.py: Open spatial subset based on extent of vector dataset
 # History
 # 2017/10/23 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

@@ -1,6 +1,6 @@
-# pytest12.cc: Create a reference image
+# pytest_randuniform.py: Create a georeferenced image with random pixel values using uniform distribution
 # History
-# 2017/10/24 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
+# 2017/10/23 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log
 
 import argparse
@@ -23,20 +23,12 @@ dict.update({'nrow':args.nrow,'ncol':args.ncol})
 dict.update({'uniform':[args.min,args.max+1]})
 dict.update({'otype':'GDT_UInt16'})
 dict.update({'seed':10915})
-try:
-    jim0=jl.createJim(dict)
-    #create a reference
-    jim1=jim0
-    jim0.d_pointOpBlank(500)
-    if not jim1.isEqual(jim0):
-        print("Failed: isEqual")
-        throw()
-    jim0=None
-    theStats=jim1.getStats({'function':['max']})
-    if theStats['max']!=500:
-        print("Failed: max")
-        throw()
-    print("Success: Create a reference image")
-except:
-    print("Failed: Create a reference image")
-jim1.close()
+jim0=jl.createJim(dict)
+theStats=jim0.getStats({'function':['min','max']})
+if theStats['min']!=args.min:
+    print("Failed: min")
+if theStats['max']!=args.max:
+    print("Failed: max")
+else:
+    print("Success: create georeferenced image with random pixel values using uniform distribution")
+jim0.close()

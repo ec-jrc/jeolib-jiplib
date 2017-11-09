@@ -1,4 +1,4 @@
-# pytest1.cc: open raster dataset and calculate basic statistics
+# pytest_open.py: open raster dataset and calculate basic statistics
 # History
 # 2017/10/23 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

@@ -1,4 +1,4 @@
-# pytest21.cc: extractogr
+# pytest_extractogr.py: extractogr
 # History
 # 2017/10/24 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

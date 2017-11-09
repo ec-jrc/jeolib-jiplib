@@ -1,4 +1,4 @@
-# pytest20.cc: composite min/max
+# pytest_composite.py: composite min/max
 # History
 # 2017/10/24 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

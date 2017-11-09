@@ -1,4 +1,4 @@
-# pytest22.cc: classify
+# pytest_classify.py: classify
 # History
 # 2017/10/24 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log
@@ -30,6 +30,6 @@ try:
     jim_classify.close()
     sample.close()
     jim.close()
-    print("Success: extractogr")
+    print("Success: classify")
 except:
-    print("Failed: extractogr")
+    print("Failed: classify")

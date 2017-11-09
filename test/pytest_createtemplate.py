@@ -1,6 +1,6 @@
-# pytest11.cc: Create a georeferenced image with random pixel values using uniform distribution
+# pytest_createtemplate.py: Create image using template
 # History
-# 2017/10/23 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
+# 2017/10/24 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log
 
 import argparse
@@ -23,12 +23,20 @@ dict.update({'nrow':args.nrow,'ncol':args.ncol})
 dict.update({'uniform':[args.min,args.max+1]})
 dict.update({'otype':'GDT_UInt16'})
 dict.update({'seed':10915})
-jim0=jl.createJim(dict)
-theStats=jim0.getStats({'function':['min','max']})
-if theStats['min']!=args.min:
-    print("Failed: min")
-if theStats['max']!=args.max:
-    print("Failed: max")
-else:
-    print("Success: create georeferenced image with random pixel values using uniform distribution")
-jim0.close()
+try:
+    jim0=jl.createJim(dict)
+    jim0.d_pointOpBlank(500)
+    #create a copy without copying pixel values
+    jim1=jl.createJim(jim0,False)
+    #images should have same geoTransform
+    if jim0.getGeoTransform() != jim0.getGeoTransform():
+        print("Failed: geoTransform")
+        throw()
+    #images should not be identical in pixel values
+    if jim0.isEqual(jim1):
+        print("Failed: isEqual")
+        throw()
+    print("Success: create image using template")
+except:
+    print("Failed: create image using template")
+jim1.close()

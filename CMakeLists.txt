@@ -15,6 +15,7 @@ cmake_minimum_required(VERSION 2.6.0)
 # The project's name and version
 project(jiplib)
 
+enable_testing()
 include(CTest)
 
 set (JIPLIB_VERSION_MAJOR 0)

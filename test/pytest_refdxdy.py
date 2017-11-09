@@ -1,4 +1,4 @@
-# pytest7.cc: Create a georeferenced image
+# pytest_refdxdy.py: Create a georeferenced image
 # History
 # 2017/10/23 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

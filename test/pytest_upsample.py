@@ -1,4 +1,4 @@
-# pytest4.cc: Up-sample: open at increased spatial resolution (ground sampling distance: 5 m)
+# pytest_upsample.py: 5 m)
 # History
 # 2017/10/23 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

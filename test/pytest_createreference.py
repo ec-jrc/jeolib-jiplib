@@ -1,4 +1,4 @@
-# pytest14.cc: Create image using template
+# pytest_createreference.py: Create a reference image
 # History
 # 2017/10/24 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log
@@ -25,18 +25,18 @@ dict.update({'otype':'GDT_UInt16'})
 dict.update({'seed':10915})
 try:
     jim0=jl.createJim(dict)
+    #create a reference
+    jim1=jim0
     jim0.d_pointOpBlank(500)
-    #create a copy without copying pixel values
-    jim1=jl.createJim(jim0,False)
-    #images should have same geoTransform
-    if jim0.getGeoTransform() != jim0.getGeoTransform():
-        print("Failed: geoTransform")
-        throw()
-    #images should not be identical in pixel values
-    if jim0.isEqual(jim1):
+    if not jim1.isEqual(jim0):
         print("Failed: isEqual")
         throw()
-    print("Success: create image using template")
+    jim0=None
+    theStats=jim1.getStats({'function':['max']})
+    if theStats['max']!=500:
+        print("Failed: max")
+        throw()
+    print("Success: Create a reference image")
 except:
-    print("Failed: create image using template")
+    print("Failed: Create a reference image")
 jim1.close()

@@ -1,4 +1,4 @@
-# pytest17.cc: getMask
+# pytest_getmask.py: getMask
 # History
 # 2017/10/24 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

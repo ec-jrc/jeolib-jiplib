@@ -1,4 +1,4 @@
-# pytest8.cc: Create a georeferenced image with bounding box
+# pytest_bb.py: Create a georeferenced image with bounding box
 # History
 # 2017/10/23 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

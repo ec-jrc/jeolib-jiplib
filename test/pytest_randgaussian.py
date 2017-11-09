@@ -1,4 +1,4 @@
-# pytest10.cc: Create a georeferenced image with random pixel values
+# pytest_randgaussian.py: Create a georeferenced image with random pixel values
 # History
 # 2017/10/23 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

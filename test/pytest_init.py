@@ -1,4 +1,4 @@
-# pytest9.cc: Create a georeferenced image with initialized pixel values
+# pytest_init.py: Create a georeferenced image with initialized pixel values
 # History
 # 2017/10/23 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

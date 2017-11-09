@@ -1,4 +1,4 @@
-# pytest2.cc: open raster dataset and write to file
+# pytest_write.py: open raster dataset and write to file
 # History
 # 2017/10/23 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log
