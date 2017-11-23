@@ -396,9 +396,9 @@ namespace jiplib{
   }
 
   //return the object itself for all functions returning CPLErr
-  %typemap(out) std::map<std::string,std::string> getStats {
+  %typemap(out) std::multimap<std::string,std::string> getStats {
     PyObject *d = PyDict_New();
-    std::map<std::string,std::string>::const_iterator mit=$1.begin();
+    std::multimap<std::string,std::string>::const_iterator mit=$1.begin();
     while(mit!=$1.end()){
       std::string key=mit->first;
       std::string val=mit->second;

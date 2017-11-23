@@ -11,8 +11,10 @@ Change log
 #include <vector>
 #include <memory>
 #include "pktools/imageclasses/ImgRaster.h"
+#include "pktools/imageclasses/VectorOgr.h"
 #include "pktools/imageclasses/ImgCollection.h"
 #include "pktools/apps/AppFactory.h"
+#include "pktools/base/Optionpk.h"
 #include "jimlist.h"
 extern "C" {
 #include "config_jiplib.h"
@@ -91,7 +93,7 @@ namespace jiplib{
     ///Open dataset
     /* CPLErr open(const std::string& filename, unsigned int memory=0); */
     ///open dataset, read data and close (keep data in memory)
-    //CPLErr open(app::AppFactory &app);
+    CPLErr open(app::AppFactory &app);
     ///write to file previously set (eg., with setFile). Specialization of the writeData member function of ImgRaster, avoiding reset of the memory.
     CPLErr write();
     ///write to file Specialization of the writeData member function of ImgRaster, avoiding reset of the memory.
@@ -119,8 +121,12 @@ namespace jiplib{
     size_t getDataTypeSizeBytes(int band=0) const;
     ///Get the number of planes of this dataset
     int nrOfPlane(void) const { return m_nplane;};
+    ///Initialize the memory for read/write image in cache
+    CPLErr initMem(unsigned int memory);
     /// convert single plane multiband image to single band image with multiple planes
-    CPLErr band2plane(){};//not implemented yet
+    CPLErr band2plane();
+    ///read data bands into planes
+    CPLErr readDataPlanes(std::vector<int> bands);
     /// convert single band multiple plane image to single plane multiband image
     /* CPLErr plane2band(){};//not implemented yet */
     ///get MIA representation for a particular band
@@ -173,7 +179,7 @@ namespace jiplib{
     ///filter Jim image in spatial domain
     std::shared_ptr<Jim> filter2d(const app::AppFactory& theApp);
     ///get statistics on image list
-    std::map<std::string,std::string> getStats(app::AppFactory& theApp);
+    std::multimap<std::string,std::string> getStats(app::AppFactory& theApp);
     ///create statistical profile
     std::shared_ptr<Jim> statProfile(app::AppFactory& theApp);
     ///check the difference between two images

@@ -83,7 +83,7 @@ namespace jiplib{
     ///create statistical profile from a collection
     std::shared_ptr<jiplib::Jim> statProfile(app::AppFactory& app);
     ///get statistics on image list
-    std::map<std::string,std::string> getStats(app::AppFactory& app);
+    std::multimap<std::string,std::string> getStats(app::AppFactory& app);
     ///validate image based on reference vector dataset (-ref)
     JimList& validate(app::AppFactory& app);
 

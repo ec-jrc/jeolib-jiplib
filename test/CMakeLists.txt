@@ -132,4 +132,6 @@ if(PYTHONINTERP_FOUND)
   # todo: find out about  dwt and dwti: revert process?
   add_test(test35 ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/pytest_filter1d.py --input ${CMAKE_CURRENT_SOURCE_DIR}/modis_ndvi_2010.tif --filter smoothnodata -nodata 0)
   set_tests_properties (test35 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
+  # add_test(test36 ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/pytest_statprofile.py --input ${CMAKE_CURRENT_SOURCE_DIR}/modis_ndvi_2010.tif --function mean -function min -function max)
+  # set_tests_properties (test36 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
 endif(PYTHONINTERP_FOUND)

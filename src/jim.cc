@@ -6,6 +6,7 @@ Change log
 ***********************************************************************/
 // #include "config.h"
 #include "json/json.h"
+#include "pktools/algorithms/Filter.h"
 #include "jim.h"
 // #include "Python.h"
 
@@ -39,7 +40,8 @@ Jim::Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALD
 ///constructor output image
 Jim::Jim(int ncol, int nrow, int nband, const GDALDataType& dataType) : m_nplane(1), ImgRaster(ncol, nrow, nband, dataType){};
 //test
-Jim::Jim(app::AppFactory &theApp): m_nplane(1), ImgRaster(theApp){};
+// Jim::Jim(app::AppFactory &theApp): m_nplane(1), ImgRaster(theApp){};
+Jim::Jim(app::AppFactory &theApp){reset();open(theApp);};
 
 ///destructor
 Jim::~Jim(void){
@@ -255,6 +257,451 @@ CPLErr Jim::open(Jim& imgSrc, bool copyData){
   return(CE_None);
 }
 
+CPLErr Jim::open(app::AppFactory &app) {
+  //input
+  Optionpk<std::string> input_opt("fn", "filename", "filename");
+  Optionpk<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
+  // Optionpk<std::string> extra_opt("extra", "extra", "RGDALRasterIOExtraArg (check http://www.gdal.org/structGDALRasterIOExtraArg.html)");
+  // Optionpk<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference system in EPSG format (e.g., epsg:3035)");//todo
+  //output
+  Optionpk<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.");
+  Optionpk<int> nsample_opt("ns", "ncol", "Number of columns");
+  Optionpk<int> nline_opt("nl", "nrow", "Number of rows");
+  Optionpk<int> nband_opt("nb", "nband", "Number of bands",1);
+  Optionpk<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64})","Byte");
+  Optionpk<std::string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
+  Optionpk<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionpk<unsigned long int> seed_opt("seed", "seed", "seed value for random generator",0);
+  Optionpk<double> mean_opt("mean", "mean", "Mean value for random generator",0);
+  Optionpk<double> stdev_opt("stdev", "stdev", "Standard deviation for Gaussian random generator",0);
+  Optionpk<double> uniform_opt("uniform", "uniform", "start and end values for random value with uniform distribution",0);
+  Optionpk<std::string> assignSRS_opt("a_srs", "a_srs", "Assign the spatial reference for the output file, e.g., psg:3035 to use European projection and force to European grid");
+  // Optionpk<std::string> description_opt("d", "description", "Set image description");
+  //input and output
+  Optionpk<int> band_opt("b", "band", "Bands to open, index starts from 0");
+  Optionpk<std::string> extent_opt("e", "extent", "get boundary from extent from polygons in vector file");
+  Optionpk<double> ulx_opt("ulx", "ulx", "Upper left x value bounding box");
+  Optionpk<double> uly_opt("uly", "uly", "Upper left y value bounding box");
+  Optionpk<double> lrx_opt("lrx", "lrx", "Lower right x value bounding box");
+  Optionpk<double> lry_opt("lry", "lry", "Lower right y value bounding box");
+  Optionpk<double> dx_opt("dx", "dx", "Resolution in x");
+  Optionpk<double> dy_opt("dy", "dy", "Resolution in y");
+  Optionpk<std::string> access_opt("access", "access", "access (READ_ONLY, UPDATE)","READ_ONLY",2);
+  Optionpk<bool> noread_opt("noread", "noread", "do not read data when opening",false);
+  Optionpk<bool> band2plane_opt("band2plane", "band2plane", "read bands as planes",false);
+  Optionpk<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=input_opt.retrieveOption(app);
+    nodata_opt.retrieveOption(app);
+    band_opt.retrieveOption(app);
+    ulx_opt.retrieveOption(app);
+    uly_opt.retrieveOption(app);
+    lrx_opt.retrieveOption(app);
+    lry_opt.retrieveOption(app);
+    dx_opt.retrieveOption(app);
+    dy_opt.retrieveOption(app);
+    resample_opt.retrieveOption(app);
+    extent_opt.retrieveOption(app);
+    // extra_opt.retrieveOption(app);
+    // targetSRS_opt.retrieveOption(app);
+    nsample_opt.retrieveOption(app);
+    nline_opt.retrieveOption(app);
+    nband_opt.retrieveOption(app);
+    otype_opt.retrieveOption(app);
+    oformat_opt.retrieveOption(app);
+    option_opt.retrieveOption(app);
+    seed_opt.retrieveOption(app);
+    mean_opt.retrieveOption(app);
+    stdev_opt.retrieveOption(app);
+    uniform_opt.retrieveOption(app);
+    assignSRS_opt.retrieveOption(app);
+    access_opt.retrieveOption(app);
+    noread_opt.retrieveOption(app);
+    band2plane_opt.retrieveOption(app);
+    memory_opt.retrieveOption(app);
+  }
+  catch(std::string predefinedString){
+    std::cout << predefinedString << std::endl;
+  }
+  if(!doProcess){
+    std::cout << std::endl;
+    std::ostringstream helpStream;
+    helpStream << "exception thrown due to help info";
+    throw(helpStream.str());//help was invoked, stop processing
+  }
+
+  std::vector<std::string> badKeys;
+  app.badKeys(badKeys);
+  if(badKeys.size()){
+    std::ostringstream errorStream;
+    if(badKeys.size()>1)
+      errorStream << "Error: unknown keys: ";
+    else
+      errorStream << "Error: unknown key: ";
+    for(int ikey=0;ikey<badKeys.size();++ikey){
+      errorStream << badKeys[ikey] << " ";
+    }
+    errorStream << std::endl;
+    throw(errorStream.str());
+  }
+  statfactory::StatFactory stat;
+
+  //get bounding box from extentReader if defined
+  VectorOgr extentReader;
+  if(extent_opt.size()){
+    double e_ulx;
+    double e_uly;
+    double e_lrx;
+    double e_lry;
+    for(int iextent=0;iextent<extent_opt.size();++iextent){
+      extentReader.open(extent_opt[iextent]);
+      if(!(extentReader.getExtent(e_ulx,e_uly,e_lrx,e_lry))){
+        std::cerr << "Error: could not get extent from " << extent_opt[0] << std::endl;
+        return(CE_Failure);
+      }
+      ulx_opt.push_back(e_ulx);
+      uly_opt.push_back(e_uly);
+      lrx_opt.push_back(e_lrx);
+      lry_opt.push_back(e_lry);
+      extentReader.close();
+    }
+    e_ulx=stat.mymin(ulx_opt);
+    e_uly=stat.mymax(uly_opt);
+    e_lrx=stat.mymax(lrx_opt);
+    e_lry=stat.mymin(lry_opt);
+    ulx_opt.clear();
+    uly_opt.clear();
+    lrx_opt.clear();
+    lrx_opt.clear();
+    ulx_opt.push_back(e_ulx);
+    uly_opt.push_back(e_uly);
+    lrx_opt.push_back(e_lrx);
+    lry_opt.push_back(e_lry);
+  }
+
+  if(input_opt.empty()){
+    if(dx_opt.size()||dy_opt.size()){
+      if(dx_opt.empty()){
+        std::ostringstream errorStream;
+        errorStream << "Warning: cell size in x not defined (use option --dx)." << std::endl;
+        // ImgRaster();
+        throw(errorStream.str());
+      }
+      if(dy_opt.empty()){
+        std::ostringstream errorStream;
+        errorStream << "Warning: cell size in y not defined (use option --dy)." << std::endl;
+        // ImgRaster();
+        throw(errorStream.str());
+      }
+      if(ulx_opt.empty()||uly_opt.empty()||lrx_opt.empty()||lry_opt.empty()){
+        std::ostringstream errorStream;
+        errorStream << "Warning: bounding box not defined (use options --ulx --uly --lrx --lry)." << std::endl;
+        // ImgRaster();
+        throw(errorStream.str());
+      }
+      nsample_opt.clear();
+      nsample_opt.push_back((lrx_opt[0]-ulx_opt[0])/dx_opt[0]);
+      nline_opt.clear();
+      nline_opt.push_back((uly_opt[0]-lry_opt[0])/dy_opt[0]);
+    }
+    else if(nsample_opt.size()||nline_opt.size()){
+      if(nsample_opt.empty()){
+        std::ostringstream errorStream;
+        errorStream << "Warning: no number of columns (use option --ncol)." << std::endl;
+        // ImgRaster();
+        throw(errorStream.str());
+      }
+      if(nline_opt.empty()){
+        std::ostringstream errorStream;
+        errorStream << "Warning: no number of rows (use option --nrow)." << std::endl;
+        // ImgRaster();
+        throw(errorStream.str());
+      }
+    }
+    GDALDataType theType=string2GDAL(otype_opt[0]);
+    // open(nsample_opt[0],nline_opt[0],nband_opt[0],theType);
+    m_ncol = nsample_opt[0];
+    m_nrow = nline_opt[0];
+    m_nband = nband_opt[0];
+    m_dataType = theType;
+    initMem(0);
+    for(int iband=0;iband<m_nband;++iband){
+      m_begin[iband]=0;
+      m_end[iband]=m_begin[iband]+m_blockSize;
+    }
+    if(m_filename!=""){
+      // m_writeMode=true;
+      m_access=WRITE;
+      registerDriver();
+    }
+    if(ulx_opt.size()&&uly_opt.size()&&lrx_opt.size()&&lry_opt.size()){
+      double gt[6];
+      if(ulx_opt[0]<lrx_opt[0])
+        gt[0]=ulx_opt[0];
+      else
+        gt[0]=0;
+      if(dx_opt.size())
+        gt[1]=dx_opt[0];
+      else if(lrx_opt[0]-ulx_opt[0]>0){
+        gt[1]=lrx_opt[0]-ulx_opt[0];
+        gt[1]/=nrOfCol();
+      }
+      else
+        gt[1]=1;
+      gt[2]=0;
+      if(uly_opt[0]>lry_opt[0])
+        gt[3]=uly_opt[0];
+      else
+        gt[3]=0;
+      gt[4]=0;
+      if(dy_opt.size())
+        gt[5]=-dy_opt[0];
+      else if(uly_opt[0]-lry_opt[0]>0){
+        gt[5]=lry_opt[0]-uly_opt[0];
+        gt[5]/=nrOfRow();
+      }
+      else
+        gt[5]=-1;
+      setGeoTransform(gt);
+      if(assignSRS_opt.size())
+        setProjectionProj4(assignSRS_opt[0]);
+    }
+    gsl_rng* rndgen=stat.getRandomGenerator(seed_opt[0]);
+    double value=mean_opt[0];
+    std::vector<double> lineBuffer(nrOfCol(),value);
+    double a=0;
+    double b=1;
+    std::string distribution="none";
+    if(uniform_opt.size()>1){
+      distribution="uniform";
+      a=uniform_opt[0];
+      b=uniform_opt[1];
+    }
+    else if(stdev_opt[0]>0){
+      distribution="gaussian";
+      a=mean_opt[0];
+      b=stdev_opt[0];
+    }
+    else
+      distribution="none";
+    for(unsigned int iband=0;iband<nrOfBand();++iband){
+      for(unsigned int irow=0;irow<nrOfRow();++irow){
+        for(unsigned int icol=0;icol<nrOfCol();++icol){
+          if(stat.getDistributionType(distribution)==statfactory::StatFactory::none)
+            break;
+          else
+            value=stat.getRandomValue(rndgen,distribution,a,b);
+          lineBuffer[icol]=value;
+        }
+        writeData(lineBuffer,irow,iband);
+      }
+    }
+    stat.freeRandomGenerator(rndgen);
+  }
+  else if(input_opt.size()){
+    setAccess(access_opt[0]);
+    m_filename=input_opt[0];
+    //set class member variables based on GDAL dataset
+    registerDriver();
+    //reset all class member variables according to options provided in app
+    if(band_opt.empty()){
+      while(band_opt.size()<nrOfBand())
+        band_opt.push_back(band_opt.size());
+    }
+    m_nband=band_opt.size();
+    if(ulx_opt.empty())
+      ulx_opt.push_back(getUlx());
+    if(uly_opt.empty())
+      uly_opt.push_back(getUly());
+    if(lrx_opt.empty())
+      lrx_opt.push_back(getLrx());
+    if(lry_opt.empty())
+      lry_opt.push_back(getLry());
+    if(dx_opt.empty())
+      dx_opt.push_back(getDeltaX());
+    if(dy_opt.empty())
+      dy_opt.push_back(getDeltaY());
+
+    //force bounding box to be within dataset
+    if(ulx_opt[0]<getUlx())
+      ulx_opt[0]=getUlx();
+    if(uly_opt[0]>getUly())
+      uly_opt[0]=getUly();
+    if(lrx_opt[0]>getLrx())
+      lrx_opt[0]=getLrx();
+    if(lry_opt[0]<getLry())
+      lry_opt[0]=getLry();
+
+    //todo: reproject on the fly using
+    // OGRSpatialReference::SetFromUserInput
+
+    m_resample=getGDALResample(resample_opt[0]);
+
+    double gt[6];
+    gt[0]=ulx_opt[0];
+    gt[3]=uly_opt[0];
+    gt[1]=dx_opt[0];//todo: adfGeotransform[1]: $cos(\alpha)\cdot\textrm{Xres}$
+    gt[2]=0;//todo: $-sin(\alpha)\cdot\textrm{Xres}$
+    gt[4]=0;//todo: $-sin(\alpha)\cdot\textrm{Yres}$
+    gt[5]=-dy_opt[0];//todo: a$-cos(\alpha)\cdot\textrm{Yres}
+    setGeoTransform(gt);
+
+    int nBufXSize=abs(static_cast<unsigned int>(ceil((lrx_opt[0]-ulx_opt[0])/dx_opt[0]-FLT_EPSILON)));
+    int nBufYSize=abs(static_cast<unsigned int>(ceil((uly_opt[0]-lry_opt[0])/dy_opt[0]-FLT_EPSILON)));
+    m_ncol=nBufXSize;
+    m_nrow=nBufYSize;
+
+    if(band2plane_opt[0]){
+      m_nplane=m_nband;
+      m_nband=1;
+      initMem(memory_opt[0]);
+      m_begin[0]=0;
+      m_end[0]=m_begin[0]+m_blockSize;
+      if(!noread_opt[0]){
+        readDataPlanes(band_opt);
+      }
+    }
+    else{
+      //we initialize memory using class member variables instead of those read from GDAL dataset
+      initMem(memory_opt[0]);
+      for(int iband=0;iband<nrOfBand();++iband){
+        m_begin[iband]=0;
+        m_end[iband]=m_begin[iband]+m_blockSize;
+        if(!noread_opt[0]){
+          //we can not use readData(iband) because sequence of band_opt might not correspond bands in GDAL dataset
+          readDataDS(iband,band_opt[iband]);
+        }
+      }
+    }
+  }
+  else{
+    std::ostringstream errorStream;
+    errorStream << "Warning: no number of rows or columns provided, nor input filename." << std::endl;
+    // ImgRaster();
+    throw(errorStream.str());
+  }
+  setNoData(nodata_opt);
+  return(CE_None);
+}
+
+CPLErr Jim::readDataPlanes(std::vector<int> bands)
+{
+  CPLErr returnValue=CE_None;
+  if(m_gds == NULL){
+    std::string errorString="Error in readNewBlock";
+    throw(errorString);
+  }
+  if(m_end[0]<m_blockSize)//first time
+    m_end[0]=m_blockSize;
+  if(m_end[0]>nrOfRow())
+    m_end[0]=nrOfRow();
+
+  int gds_ncol=m_gds->GetRasterXSize();
+  int gds_nrow=m_gds->GetRasterYSize();
+  int gds_nband=m_gds->GetRasterCount();
+  double gds_gt[6];
+  m_gds->GetGeoTransform(gds_gt);
+  double gds_ulx=gds_gt[0];
+  double gds_uly=gds_gt[3];
+  double gds_lrx=gds_gt[0]+gds_ncol*gds_gt[1]+gds_nrow*gds_gt[2];
+  double gds_lry=gds_gt[3]+gds_ncol*gds_gt[4]+gds_nrow*gds_gt[5];
+  double gds_dx=gds_gt[1];
+  double gds_dy=-gds_gt[5];
+  double diffXm=getUlx()-gds_ulx;
+  // double diffYm=gds_uly-getUly();
+
+  // double dfXSize=diffXm/gds_dx;
+  double dfXSize=(getLrx()-getUlx())/gds_dx;//x-size in pixels of region to read in original image
+  double dfXOff=diffXm/gds_dx;
+  // double dfYSize=diffYm/gds_dy;
+  // double dfYSize=(getUly()-getLry())/gds_dy;//y-size in piyels of region to read in original image
+  // double dfYOff=diffYm/gds_dy;
+  // int nYOff=static_cast<int>(dfYOff);
+  int nXSize=abs(static_cast<unsigned int>(ceil((getLrx()-getUlx())/gds_dx)));//x-size in pixels of region to read in original image
+  int nXOff=static_cast<int>(dfXOff);
+  if(nXSize>gds_ncol)
+    nXSize=gds_ncol;
+
+  double dfYSize=0;
+  double dfYOff=0;
+  int nYSize=0;
+  int nYOff=0;
+
+  GDALRasterIOExtraArg sExtraArg;
+  INIT_RASTERIO_EXTRA_ARG(sExtraArg);
+  sExtraArg.eResampleAlg = m_resample;
+  dfYSize=(m_end[0]-m_begin[0])*getDeltaY()/gds_dy;//y-size in pixels of region to read in original image
+  nYSize=abs(static_cast<unsigned int>(ceil((m_end[0]-m_begin[0])*getDeltaY()/gds_dy)));//y-size in pixels of region to read in original image
+  if(nYSize>gds_nrow)
+    nYSize=gds_nrow;
+  dfYOff=(gds_uly-getUly())/gds_dy+m_begin[0]*getDeltaY()/gds_dy;
+  nYOff=static_cast<int>(dfYOff);
+  if(dfXOff-nXOff>0||dfYOff-nYOff>0||getDeltaX()<gds_dx||getDeltaX()>gds_dx||getDeltaY()<gds_dy||getDeltaY()>gds_dy){
+    sExtraArg.bFloatingPointWindowValidity = TRUE;
+    sExtraArg.dfXOff = dfXOff;
+    sExtraArg.dfYOff = dfYOff;
+    sExtraArg.dfXSize = dfXSize;
+    sExtraArg.dfYSize = dfYSize;
+  }
+  else{
+    sExtraArg.bFloatingPointWindowValidity = FALSE;
+    sExtraArg.dfXOff = 0;
+    sExtraArg.dfYOff = 0;
+    sExtraArg.dfXSize = dfXSize;
+    sExtraArg.dfYSize = dfYSize;
+  }
+  std::vector<int> gdalbands=bands;
+  for(int iband=0;iband<bands.size();++iband)
+    gdalbands[iband]=bands[iband]+1;
+
+// eRWFlag	Either GF_Read to read a region of data, or GF_Write to write a region of data.
+// nXOff	The pixel offset to the top left corner of the region of the band to be accessed. This would be zero to start from the left side.
+// nYOff	The line offset to the top left corner of the region of the band to be accessed. This would be zero to start from the top.
+// nXSize	The width of the region of the band to be accessed in pixels.
+// nYSize	The height of the region of the band to be accessed in lines.
+// pData	The buffer into which the data should be read, or from which it should be written. This buffer must contain at least nBufXSize * nBufYSize * nBandCount words of type eBufType. It is organized in left to right,top to bottom pixel order. Spacing is controlled by the nPixelSpace, and nLineSpace parameters.
+// nBufXSize	the width of the buffer image into which the desired region is to be read, or from which it is to be written.
+// nBufYSize	the height of the buffer image into which the desired region is to be read, or from which it is to be written.
+// eBufType	the type of the pixel values in the pData data buffer. The pixel values will automatically be translated to/from the GDALRasterBand data type as needed.
+// nBandCount	the number of bands being read or written.
+// panBandMap	the list of nBandCount band numbers being read/written. Note band numbers are 1 based. This may be NULL to select the first nBandCount bands.
+// nPixelSpace	The byte offset from the start of one pixel value in pData to the start of the next pixel value within a scanline. If defaulted (0) the size of the datatype eBufType is used.
+// nLineSpace	The byte offset from the start of one scanline in pData to the start of the next. If defaulted (0) the size of the datatype eBufType * nBufXSize is used.
+// nBandSpace	the byte offset from the start of one bands data to the start of the next. If defaulted (0) the value will be nLineSpace * nBufYSize implying band sequential organization of the data buffer.
+// psExtraArg	(new in GDAL 2.0) pointer to a GDALRasterIOExtraArg structure with additional arguments to specify resampling and progress callback, or NULL for default behaviour. The GDAL_RASTERIO_RESAMPLING configuration option can also be defined to override the default resampling to one of BILINEAR, CUBIC, CUBICSPLINE, LANCZOS, AVERAGE or MODE.
+  returnValue=getDataset()->RasterIO(GF_Read,nXOff,nYOff+m_begin[0],nXSize,nYSize,m_data[0],nrOfCol(),m_end[0]-m_begin[0],getGDALDataType(),gdalbands.size(),&gdalbands[0],0,0,0,&sExtraArg);
+  return(returnValue);//new block was read
+}
+
+CPLErr Jim::initMem(unsigned int memory)
+{
+  if(memory<=0)
+    m_blockSize=nrOfRow();
+  else{
+    m_blockSize=static_cast<unsigned int>(memory*1000000/nrOfBand()/nrOfCol());
+    if(getBlockSizeY(0))
+      m_blockSize-=m_blockSize%getBlockSizeY(0);
+  }
+  if(m_blockSize<1)
+    m_blockSize=1;
+  if(m_blockSize>nrOfRow())
+    m_blockSize=nrOfRow();
+  m_begin.resize(nrOfBand());
+  m_end.resize(nrOfBand());
+  freeMem();
+  m_data.resize(nrOfBand());
+  for(int iband=0;iband<nrOfBand();++iband){
+    m_data[iband]=(void *) calloc(static_cast<size_t>(nrOfPlane()*nrOfCol()*m_blockSize),getDataTypeSizeBytes());
+    if(!(m_data[iband])){
+      std::string errorString="Error: could not allocate memory in initMem";
+      throw(errorString);
+    }
+  }
+  return(CE_None);
+}
+
 CPLErr Jim::close(){
   if(m_gds)
     GDALClose(m_gds);
@@ -352,6 +799,32 @@ size_t Jim::getDataTypeSizeBytes(int band) const {
     return(ImgRaster::getDataTypeSizeBytes());
   }
 }
+
+
+/// convert single plane multiband image to single band image with multiple planes
+CPLErr Jim::band2plane(){
+  //temporary buffer
+  m_data.resize(nrOfBand()+1);
+  m_data[nrOfBand()]=(void *) calloc(static_cast<size_t>(nrOfCol()*m_blockSize),getDataTypeSizeBytes());
+  //copy first band
+  memcpy(m_data[nrOfBand()],m_data[0],getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
+  //delete temporary buffer
+  free(m_data[nrOfBand()]);
+  //erase m_data buffer
+  m_data.erase(m_data.begin()+nrOfBand());
+  //allocate memory
+  m_data[0]=(void *) calloc(static_cast<size_t>(nrOfBand()*nrOfCol()*m_blockSize),getDataTypeSizeBytes());
+  //copy rest of the bands
+  for(size_t iband=1;iband<nrOfBand();++iband){
+    //memcp
+    memcpy(m_data[0]+iband*nrOfCol()*nrOfRow(),m_data[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
+    free(m_data[iband]);
+    m_data.erase(m_data.begin()+iband);
+  }
+  m_nplane=nrOfBand();
+  m_nband=1;
+}
+
 /**
  *
  *
@@ -754,7 +1227,7 @@ std::shared_ptr<Jim> Jim::filter2d(const app::AppFactory& theApp){
  * @param kde (type: bool) (default: 0) Use Kernel density estimation when producing histogram. The standard deviation is estimated based on Silverman's rule of thumb
  * @return this object
  **/
-std::map<std::string,std::string> Jim::getStats(app::AppFactory& theApp){return(ImgRaster::getStats(theApp));};
+std::multimap<std::string,std::string> Jim::getStats(app::AppFactory& theApp){return(ImgRaster::getStats(theApp));};
 
 ///create statistical profile
 /**
@@ -766,7 +1239,8 @@ std::map<std::string,std::string> Jim::getStats(app::AppFactory& theApp){return(
  **/
 std::shared_ptr<Jim> Jim::statProfile(app::AppFactory& theApp){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
-  /* std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(); */
+  // ImgRaster::statProfile(*imgWriter,theApp);
+  // ImgRaster::statProfile(*imgWriter,theApp);
   ImgRaster::statProfile(*imgWriter,theApp);
   return(imgWriter);
 }
@@ -1043,10 +1517,10 @@ std::shared_ptr<Jim> Jim::reclass(app::AppFactory& app){
 
 // std::shared_ptr<jiplib::Jim> Jim::labelConstrainedCCsMultiband(Jim &imgRaster, int ox, int oy, int oz, int r1, int r2){
 //   try{
-// 		//if(nrOfBand()<=1){
-// 		//	std::string errorString="Error: number of bands must be larger than 1";
-// 		//	throw(errorString);
-// 		//}
+//    //if(nrOfBand()<=1){
+//    //	std::string errorString="Error: number of bands must be larger than 1";
+//    //	throw(errorString);
+//    //}
 //     int nc=nrOfBand();
 //     IMAGE * imout = 0;
 //     IMAGE * imse=imgRaster.getMIA();

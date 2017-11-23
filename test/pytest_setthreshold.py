@@ -33,7 +33,8 @@ elif(args.min==10 and args.max==50):
     try:
         jim0=jim0.pushNoDataValue(0)
         jim1=jim0.setThreshold(10,50)
-        theStats=jim1.getStats({'function':['min','max']})
+        theStats=jim1.getStats({'function':['min','max'],'nodata':0})
+        print(theStats)
         if theStats['min']!=10:
             print("Failed: min",theStats['min'])
             throw()
@@ -48,6 +49,15 @@ elif(args.min==10 and args.max==50):
         if theStats['max']!=100:
             print("Failed: max",theStats['max'])
             throw()
+        print("Success: masking")
+    except:
+        print("Failed: masking")
+else:
+    try:
+        jim0=jim0.pushNoDataValue(0)
+        jim1=jim0.setThreshold(args.min,args.max)
+        theStats=jim1.getStats({'function':['min','max'],'nodata':0})
+        print(theStats)
         print("Success: masking")
     except:
         print("Failed: masking")
