@@ -202,8 +202,12 @@ namespace jiplib{
     std::shared_ptr<Jim> stretch(app::AppFactory& app);
     ///Apply thresholds: set to no data if not within thresholds t1 and t2
     std::shared_ptr<Jim> setThreshold(double t1, double t2);
+    ///Apply absolute thresholds: set to no data if not within thresholds t1 and t2
+    std::shared_ptr<Jim> setAbsThreshold(double t1, double t2);
     ///Apply thresholds: set to no data if not within thresholds t1 and t2, else set to value
     std::shared_ptr<Jim> setThreshold(double t1, double t2, double value);
+    ///Apply absolute thresholds: set to no data if not within thresholds t1 and t2, else set to value
+    std::shared_ptr<Jim> setAbsThreshold(double t1, double t2, double value);
     ///get mask from a raster dataset
     std::shared_ptr<Jim> getMask(app::AppFactory& app);
     ///set mask to raster dataset

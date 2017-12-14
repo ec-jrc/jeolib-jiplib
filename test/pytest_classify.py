@@ -24,6 +24,7 @@ try:
     jim_classify=jim.classify({'method':'svm','model':args.model})
     jim_classify.write({'filename':args.output})
     jim_classify.close()
+    #ANN classification
     sample.train({'method':'ann','label':'label','model':args.model})
     jim_classify=jim.classify({'method':'ann','model':args.model})
     jim_classify.write({'filename':args.output})
