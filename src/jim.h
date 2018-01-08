@@ -180,6 +180,17 @@ namespace jiplib{
     std::shared_ptr<Jim> filter2d(const app::AppFactory& theApp);
     ///get statistics on image list
     std::multimap<std::string,std::string> getStats(app::AppFactory& theApp);
+    ///get unique pixels
+    /* unsigned int getUniquePixels(){ */
+    /*   std::map<std::vector<char>,std::vector<std::pair<unsigned short,unsigned short> > > theMap; */
+    /*   theMap=ImgRaster::getUniquePixels<char>(); */
+    /*   return(theMap.size()); */
+    /* }; */
+    /* template<typename T> std::map<std::vector<T>,std::vector<std::pair<unsigned short,unsigned short> > > getUniquePixels(){ */
+    /*   std::map<std::vector<T>,std::vector<std::pair<unsigned short,unsigned short> > > theMap; */
+    /*   theMap=ImgRaster::getUniquePixels<T>(); */
+    /*   return(theMap); */
+    /* }; */
     ///create statistical profile
     std::shared_ptr<Jim> statProfile(app::AppFactory& theApp);
     ///check the difference between two images
@@ -194,6 +205,8 @@ namespace jiplib{
     /* std::shared_ptr<Jim> classifyANN(app::AppFactory& app); */
     ///supervised classification using support vector machine (train with trainSVM)
     /* std::shared_ptr<Jim> classifySVM(app::AppFactory& app); */
+    ///supervised classification using SML
+    std::shared_ptr<Jim> classifySML(app::AppFactory& app);
     ///supervised classification using support vector machine (train with extractImg/extractOgr)
     /* std::shared_ptr<Jim> svm(app::AppFactory& app); */
     ///supervised classification using support artificial neural network (train with extractImg/extractOgr)
@@ -272,6 +285,5 @@ namespace jiplib{
   static std::shared_ptr<Jim> createJim(const std::string filename){return(Jim::createImg(filename));};
 
 }
-
 
 #endif // _JIM_H_

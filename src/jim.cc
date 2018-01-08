@@ -7,6 +7,7 @@ Change log
 // #include "config.h"
 #include "json/json.h"
 #include "pktools/algorithms/Filter.h"
+#include "pktools/imageclasses/pksml_lib.h"
 #include "jim.h"
 // #include "Python.h"
 
@@ -1379,6 +1380,13 @@ std::shared_ptr<Jim> Jim::classify(app::AppFactory& app){
 //   return(imgWriter);
 // }
 
+///todo: extend for other types than char
+std::shared_ptr<Jim> Jim::classifySML(app::AppFactory& app){
+  std::shared_ptr<Jim> imgWriter=Jim::createImg();
+  ImgRaster::classifySML<char>(*imgWriter, app);
+  return(imgWriter);
+}
+
 ///supervised classification using support vector machine (train with extractImg/extractOgr)
 /**
  * @param svmtype (type: std::string) (default: C_SVC) Type of SVM (C_SVC, nu_SVC,one_class, epsilon_SVR, nu_SVR)
@@ -1561,3 +1569,4 @@ std::shared_ptr<Jim> Jim::reclass(app::AppFactory& app){
 //     return(0);
 //   }
 // }
+

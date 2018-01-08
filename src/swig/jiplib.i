@@ -1,6 +1,7 @@
 //SWIG interface for jiplib
 %include <std_string.i>
 %include <std_vector.i>
+%include <std_map.i>
 %include <std_list.i>
 %include <std_iostream.i>
 %include <std_shared_ptr.i>
@@ -395,7 +396,7 @@ namespace jiplib{
     $result=l;
   }
 
-  //return the object itself for all functions returning CPLErr
+  //convert multimap to PyDict
   %typemap(out) std::multimap<std::string,std::string> getStats {
     PyObject *d = PyDict_New();
     std::multimap<std::string,std::string>::const_iterator mit=$1.begin();
@@ -429,6 +430,43 @@ namespace jiplib{
     $result=d;
   }
 }
+
+/* %typemap(out) std::string getUniquePixels { */
+/*   $result=PyString_FromString($1.c_str()); */
+/*  } */
+/* %typemap(out) std::map<std::vector<unsigned short>,unsigned short>& getUniquePixels { */
+/*     $result=PyString_FromString("hello"); */
+/* } */
+/* %typemap(out) std::map<unsigned short,unsigned short> getUniquePixels { */
+/*     $result=PyString_FromString("hello"); */
+/* } */
+/* %typemap(out) std::vector<unsigned short> getUniquePixels { */
+/*   $result=PyString_FromString("hello"); */
+/* } */
+//convert map to PyDict
+/* %typemap(out) std::map<std::vector<unsigned short>,std::vector<std::pair<unsigned short,unsigned short> > > getUniquePixels { */
+/*   PyObject *d = PyDict_New(); */
+/*   std::map<std::vector<unsigned short>,std::vector<std::pair<unsigned short,unsigned short> > >::const_iterator mit=$1.begin(); */
+/*   while(mit!=$1.end()){ */
+/*     std::vector<unsigned short> pv=mit->first; */
+/*     PyObject *pyv = PyList_New(mit->first.size()); */
+/*     for(int index=0;index<mit->first.size();++index) */
+/*       PyList_SetItem(pyv, index,PyInt_FromLong(mit->first[index])); */
+/*     PyObject *coordinates = PyList_New(mit->second.size()); */
+/*     //construct dictionary as list of values */
+/*     for(int icoord=0;icoord<mit->second.size();++icoord){ */
+/*       PyObject *lc = PyList_New(2); */
+/*       unsigned int xcoord=mit->second[icoord].first; */
+/*       unsigned int ycoord=mit->second[icoord].second; */
+/*       PyList_SetItem(lc,0,PyInt_FromLong(xcoord)); */
+/*       PyList_SetItem(lc,1,PyInt_FromLong(ycoord)); */
+/*       PyList_SetItem(coordinates,icoord,lc); */
+/*     } */
+/*     PyDict_SetItem(d, pyv, coordinates); */
+/*     ++mit; */
+/*   } */
+/*   $result=d; */
+/* } */
 
 
 
