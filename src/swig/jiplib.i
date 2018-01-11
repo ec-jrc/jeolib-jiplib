@@ -74,6 +74,7 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 %typemap(typecheck) (ImgReaderOgr& ogrReader, const std::vector<std::string>& controlOptions, const std::vector<std::string>& layernames=std::vector<std::string>()) {
   $1 = PyDict_Check($input) ? 1 : 0;
  }
+
 %typemap(in) app::AppFactory& (app::AppFactory tempFactory){
   //std::cout << "we are in typemap AppFactory" << std::endl;
   if(PyDict_Check($input)){

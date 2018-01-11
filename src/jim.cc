@@ -1383,7 +1383,13 @@ std::shared_ptr<Jim> Jim::classify(app::AppFactory& app){
 ///todo: extend for other types than char
 std::shared_ptr<Jim> Jim::classifySML(app::AppFactory& app){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
-  ImgRaster::classifySML<char>(*imgWriter, app);
+  ImgRaster::classifySML<unsigned char>(*imgWriter, app);
+  return(imgWriter);
+}
+
+std::shared_ptr<Jim> Jim::classifySML(ImgCollection& referenceReader, app::AppFactory& app){
+  std::shared_ptr<Jim> imgWriter=Jim::createImg();
+  ImgRaster::classifySML<unsigned char>(referenceReader, *imgWriter, app);
   return(imgWriter);
 }
 

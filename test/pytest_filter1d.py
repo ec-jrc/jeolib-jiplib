@@ -13,15 +13,17 @@ parser=argparse.ArgumentParser()
 parser.add_argument("-input","--input",help="Path of the input raster dataset",dest="input",required=True,type=str)
 parser.add_argument("-filter","--filter",help="filter function",dest="filter",required=False,type=str,default='median')
 parser.add_argument("-nodata","--nodata",help="no data value",dest="nodata",required=False,type=int,nargs='+')
+parser.add_argument("-dz","--dz",help="kernel size",dest="dz",required=False,type=int,default=3)
+parser.add_argument("-threshold","--threshold",help="threshold for dwt cut",dest="threshold",required=False,type=float,default=10)
 parser.add_argument("-output","--output",help="Path of the classification output raster dataset",dest="output",required=False,type=str)
 args = parser.parse_args()
 
 try:
     jim=jl.createJim({'filename':args.input})
     if args.nodata:
-        jim_filtered=jim.filter2d({'filter':args.filter,'dx':3,'dy':3,'nodata':args.nodata})
+        jim_filtered=jim.filter1d({'filter':args.filter,'dz':args.dz,'threshold':args.threshold,'nodata':args.nodata})
     else:
-        jim_filtered=jim.filter2d({'filter':args.filter,'dx':3,'dy':3})
+        jim_filtered=jim.filter1d({'filter':args.filter,'dz':args.dz,'threshold':args.threshold})
     if args.output:
         jim_filtered.write({'filename':args.output})
     jim_filtered.close()

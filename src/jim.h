@@ -206,6 +206,7 @@ namespace jiplib{
     ///supervised classification using support vector machine (train with trainSVM)
     /* std::shared_ptr<Jim> classifySVM(app::AppFactory& app); */
     ///supervised classification using SML
+    std::shared_ptr<Jim> classifySML(ImgCollection& referenceReader, app::AppFactory& app);
     std::shared_ptr<Jim> classifySML(app::AppFactory& app);
     ///supervised classification using support vector machine (train with extractImg/extractOgr)
     /* std::shared_ptr<Jim> svm(app::AppFactory& app); */
