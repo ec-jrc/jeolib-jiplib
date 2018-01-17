@@ -18,20 +18,20 @@ args = parser.parse_args()
 try:
     jim0=jl.createJim({'filename':args.input})
     rules=['min','max','mean','stdev']
-    v01=jim0.extractOgr({'random':20,'buffer':3,'rule':rules,'output':'mem01','oformat':'Memory'})
+    v01=jim0.extractSample({'random':20,'buffer':3,'rule':rules,'output':'mem01','oformat':'Memory'})
     v01.close()
     npoint=100
     gridsize=int(jim0.nrOfCol()*jim0.getDeltaX()/math.sqrt(npoint))
     print(gridsize)
-    v02=jim0.extractOgr({'grid':gridsize,'buffer':3,'rule':rules,'output':'mem02','oformat':'Memory'})
+    v02=jim0.extractSample({'grid':gridsize,'buffer':3,'rule':rules,'output':'mem02','oformat':'Memory'})
     v02.close()
     # check: some segmentation fault due to NULL feature in m_features?
     # v1=jim0.extractOgr({'grid':gridsize,'rule':'point','output':'/tmp/grid.sqlite','oformat':'SQLite'})
     # v1.write()
     # v1.close()
-    v2=jim0.extractOgr({'sample':args.vector,'rule':rules[2],'output':args.output,'oformat':'SQLite'})
-    v2.write()
-    v2.close()
+    # v2=jim0.extractOgr({'sample':args.vector,'rule':rules[2],'output':args.output,'oformat':'SQLite'})
+    # v2.write()
+    # v2.close()
     jim0.close()
     print("Success: extractogr")
 except:
