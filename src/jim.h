@@ -283,7 +283,7 @@ namespace jiplib{
   static std::shared_ptr<Jim> createJim(app::AppFactory &theApp){return(Jim::createImg(theApp));};
   static std::shared_ptr<Jim> createJim(){return Jim::createImg();};
   static std::shared_ptr<Jim> createJim(const std::shared_ptr<Jim> pSrc, bool copyData=true){return(Jim::createImg(pSrc, copyData));};
-  static std::shared_ptr<Jim> createJim(const std::string filename){return(Jim::createImg(filename));};
+  static std::shared_ptr<Jim> createJim(const std::string& filename){return(Jim::createImg(filename));};
 
 }
 
