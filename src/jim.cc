@@ -358,10 +358,7 @@ CPLErr Jim::open(app::AppFactory &app) {
     double e_lry;
     for(int iextent=0;iextent<extent_opt.size();++iextent){
       extentReader.open(extent_opt[iextent]);
-      if(!(extentReader.getExtent(e_ulx,e_uly,e_lrx,e_lry))){
-        std::cerr << "Error: could not get extent from " << extent_opt[0] << std::endl;
-        return(CE_Failure);
-      }
+      extentReader.getExtent(e_ulx,e_uly,e_lrx,e_lry);
       ulx_opt.push_back(e_ulx);
       uly_opt.push_back(e_uly);
       lrx_opt.push_back(e_lrx);

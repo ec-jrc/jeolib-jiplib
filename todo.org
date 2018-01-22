@@ -58,8 +58,7 @@
 
 
   - ERROR_TYPE functions that do not modify the input image
-    (e.g. iminfo) should not use the bool variable destructive: create
-    list (PS)
+    (e.g. iminfo) should not use the bool variable destructive: create list (PS)
 
 extern ERROR_TYPE dumpxyz(IMAGE *im, int x, int y, int z, int dx, int dy);
 extern ERROR_TYPE szcompat(IMAGE *im1, IMAGE *im2);

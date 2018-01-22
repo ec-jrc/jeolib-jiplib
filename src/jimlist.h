@@ -99,7 +99,8 @@ namespace jiplib{
     JimList histoMatchRgb();//from histrgbmatch
     JimList histoMatch3dRgb();//from histrgb3dmatch
   };
-  /* JimList createJimList(); */
+  static JimList createJimList(){JimList alist; return alist;};
+  static JimList createJimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist){JimList alist(jimlist);return alist;};
   /* JimList createJimList(app::AppFactory &theApp); */
   /* JimList createJimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist); */
 }

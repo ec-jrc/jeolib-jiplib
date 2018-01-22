@@ -9,6 +9,9 @@
 %shared_ptr(jiplib::Jim)
 %shared_ptr(VectorOgr)
 
+/* http://www.swig.org/Doc1.3/Arguments.html */
+%include "typemaps.i"
+
  //catch all exceptions thrown in C++
 %include "exception.i"
 %exception {
@@ -135,6 +138,47 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
 %typemap(typecheck) (app::AppFactory& app) {
   $1 = PyDict_Check($input) ? 1 : 0;
  }
+
+/* https://stackoverflow.com/questions/15185010/how-to-receive-reference-and-pointer-arguments-in-python-swig */
+%typemap(in,numinputs=0) double& ulx (double temp) "$1 = &temp;"
+%typemap(in,numinputs=0) double& uly (double temp) "$1 = &temp;"
+%typemap(in,numinputs=0) double& lrx (double temp) "$1 = &temp;"
+%typemap(in,numinputs=0) double& lry (double temp) "$1 = &temp;"
+
+%typemap(argout) double& ulx {
+  %append_output(PyFloat_FromDouble(*$1));
+ }
+
+%typemap(argout) double& uly {
+  %append_output(PyFloat_FromDouble(*$1));
+ }
+
+%typemap(argout) double& lrx {
+  %append_output(PyFloat_FromDouble(*$1));
+ }
+
+%typemap(argout) double& lry {
+  %append_output(PyFloat_FromDouble(*$1));
+}
+
+/* http://biomol.bme.utexas.edu/~mh43854/openmm/archive/openmm-master/wrappers/python/src/swig_doxygen/swig_lib/python/typemaps.i */
+/* The following two typemaps cause a non-const vector<Vec3>& to become a return value. */
+%typemap(in, numinputs=0) std::vector<std::string>& fields (std::vector<std::string> temp) {
+  $1 = &temp;
+ }
+
+%typemap(argout) std::vector<std::string>& fields{
+  int i, n;
+  PyObject *pyList;
+
+  n=(*$1).size();
+  pyList=PyList_New(n);
+  for (i=0; i<n; i++) {
+    std::string theField=(*$1).at(i);
+    PyList_SET_ITEM(pyList, i, PyString_FromString(theField.c_str()));
+  }
+  $result = pyList;
+}
 
 /* %apply std::vector<double> & OUTPUT { std::vector<double>& dVector }; */
 /* %typemap(argout) const std::vector<double>& dVector ""; */
@@ -473,7 +517,7 @@ namespace jiplib{
 
 %template(ImgVectorJim) std::vector< std::shared_ptr< jiplib::Jim > >;
 %template(ImgListJim) std::list< std::shared_ptr< jiplib::Jim > >;
-
+%template(VectorDouble) std::vector<double>;
 
 //Parse the header file
 //%include "swig/pktools.i"
