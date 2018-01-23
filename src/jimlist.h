@@ -94,10 +94,11 @@ namespace jiplib{
     //start insert from fun2method_imagetype_jimlist
     //end insert from fun2method_imagetype_jimlist
 
-    JimList rgb2hsx(int x=0);//from imrgb2hsx
-    JimList alphaTreeDissimGet(int alphaMax);//from alphatree
-    JimList histoMatchRgb();//from histrgbmatch
-    JimList histoMatch3dRgb();//from histrgb3dmatch
+    //automatically ported for now, but should probably better via JimList as implemented here:
+    /* JimList convertRgbToHsx(int x=0);//from imrgb2hsx */
+    /* JimList alphaTreeDissimGet(int alphaMax);//from alphatree */
+    /* JimList histoMatchRgb();//from histrgbmatch */
+    /* JimList histoMatch3dRgb();//from histrgb3dmatch */
   };
   static JimList createJimList(){JimList alist; return alist;};
   static JimList createJimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist){JimList alist(jimlist);return alist;};

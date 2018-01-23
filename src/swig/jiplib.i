@@ -161,8 +161,23 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
   %append_output(PyFloat_FromDouble(*$1));
 }
 
-/* http://biomol.bme.utexas.edu/~mh43854/openmm/archive/openmm-master/wrappers/python/src/swig_doxygen/swig_lib/python/typemaps.i */
-/* The following two typemaps cause a non-const vector<Vec3>& to become a return value. */
+/* Set the input argument to point to a temporary variable */
+%typemap(in, numinputs=0) double *gt (double temp) {
+  $1 = &temp;
+ }
+
+%typemap(argout) double* getGeoTransform{
+  // Append output value $1 to $result
+  int n=6;
+  PyList=PyList_New(n);
+  for(int i=0; i<n; ++i){
+    PyList_SET_ITEM(pyList, i, PyFloat_FromDouble($1[i]));
+  }
+  $result = pyList;
+}
+
+/* From: http://biomol.bme.utexas.edu/~mh43854/openmm/archive/openmm-master/wrappers/python/src/swig_doxygen/swig_lib/python/typemaps.i */
+/* The following two typemaps cause a non-const vector<string>& named fields to become a return list of values. */
 %typemap(in, numinputs=0) std::vector<std::string>& fields (std::vector<std::string> temp) {
   $1 = &temp;
  }

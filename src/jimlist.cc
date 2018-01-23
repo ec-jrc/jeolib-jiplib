@@ -171,6 +171,7 @@ std::shared_ptr<jiplib::Jim> JimList::composite(app::AppFactory& app){
   ImgCollection::composite(*imgWriter, app);
   return(imgWriter);
 }
+
 /**
  * @param a_srs (type: std::string) Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
  * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
@@ -214,6 +215,7 @@ std::shared_ptr<jiplib::Jim> JimList::crop(app::AppFactory& app){
   ImgCollection::crop(*imgWriter, app);
   return(imgWriter);
 }
+
 ///stack all images in collection to multiband image (alias for crop)
 /**
  * @param a_srs (type: std::string) Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
@@ -252,6 +254,7 @@ std::shared_ptr<jiplib::Jim> JimList::crop(app::AppFactory& app){
  * @return output image
  **/
 std::shared_ptr<jiplib::Jim> JimList::stack(app::AppFactory& app){return(crop(app));};
+
 ////stack all images in collection to multiband image (alias for crop)
 /**
  * @param a_srs (type: std::string) Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
@@ -290,6 +293,7 @@ std::shared_ptr<jiplib::Jim> JimList::stack(app::AppFactory& app){return(crop(ap
  * @return output image
  **///stack all images in collection to multiband image (alias for crop)
 std::shared_ptr<jiplib::Jim> JimList::stack(){app::AppFactory app;return(stack(app));};
+
 ///create statistical profile from a collection
 /**
  * @param function (type: std::string) Statistics function (mean, median, var, stdev, min, max, sum, mode (provide classes), ismin, ismax, proportion (provide classes), percentile, nvalid
@@ -303,6 +307,7 @@ std::shared_ptr<jiplib::Jim> JimList::statProfile(app::AppFactory& app){
   ImgCollection::statProfile(*imgWriter, app);
   return(imgWriter);
 }
+
 ///get statistics on image list
 /**
  * @param scale (type: double) output=scale*input+offset
@@ -329,6 +334,7 @@ std::shared_ptr<jiplib::Jim> JimList::statProfile(app::AppFactory& app){
 std::multimap<std::string,std::string> JimList::getStats(app::AppFactory& app){
   return(ImgCollection::getStats(app));
 }
+
 /**
  * @param reference (type: std::string) Reference vector dataset
  * @param ln (type: std::string) Layer name(s) in sample. Leave empty to select all (for vector reference datasets only)
@@ -356,10 +362,7 @@ JimList& JimList::validate(app::AppFactory& app){
   return(*this);
 }
 
-// JimList createJimList(){JimList theList; return(theList);};
-// JimList createJimList(app::AppFactory &theApp){JimList theList(theApp); return(theList);};
-// JimList createJimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist){JimList theList(jimlist); return(theList);};
-
+//automatically ported for now, but should probably better via JimList as implemented here:
 ///functions from mialib
 // std::shared_ptr<jiplib::Jim> JimList::labelConstrainedCCsMultiband(Jim &imgRaster, int ox, int oy, int oz, int r1, int r2){
 //   try{
@@ -390,156 +393,142 @@ JimList& JimList::validate(app::AppFactory& app){
 //   }
 // }
 
-/**
- * @param x
- * @return JimList object
-**/
-JimList JimList::rgb2hsx(int x){
-  int ninput=3;
-  int noutput=3;
-  JimList listout;
-  try{
-    if(size()!=ninput){
-      std::ostringstream ess;
-      ess << "Error: input image list should have " << ninput << " images (got " << size() << ")";
-      throw(ess.str());
-    }
-    IMAGE ** imout;
-    imout=::imrgb2hsx(this->getImage(0)->getMIA(),this->getImage(1)->getMIA(),this->getImage(2)->getMIA(),x);
-    if(imout){
-      for(int iim=0;iim<noutput;++iim){
-        std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);
-        imgWriter->copyGeoTransform(*front());
-        imgWriter->setProjection(front()->getProjectionRef());
-        listout.pushImage(imgWriter);
-      }
-      return(listout);
-    }
-    else{
-      std::string errorString="Error: imrgb2hsx() function in MIA failed, returning empty list";
-      throw(errorString);
-    }
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    return(listout);
-  }
-  catch(...){
-    return(listout);
-  }
-}
+// JimList JimList::convertRgbToHsx(int x){
+//   int ninput=3;
+//   int noutput=3;
+//   JimList listout;
+//   try{
+//     if(size()!=ninput){
+//       std::ostringstream ess;
+//       ess << "Error: input image list should have " << ninput << " images (got " << size() << ")";
+//       throw(ess.str());
+//     }
+//     IMAGE ** imout;
+//     imout=::imrgb2hsx(this->getImage(0)->getMIA(),this->getImage(1)->getMIA(),this->getImage(2)->getMIA(),x);
+//     if(imout){
+//       for(int iim=0;iim<noutput;++iim){
+//         std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);
+//         imgWriter->copyGeoTransform(*front());
+//         imgWriter->setProjection(front()->getProjectionRef());
+//         listout.pushImage(imgWriter);
+//       }
+//       return(listout);
+//     }
+//     else{
+//       std::string errorString="Error: imrgb2hsx() function in MIA failed, returning empty list";
+//       throw(errorString);
+//     }
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     return(listout);
+//   }
+//   catch(...){
+//     return(listout);
+//   }
+// }
 
-/**
- * @param alphaMax
- * @return JimList object
- **/
-JimList JimList::alphaTreeDissimGet(int alphaMax){
-  int ninput=2;
-  int noutput=5;
-  JimList listout;
-  if(size()!=ninput){
-    std::ostringstream ess;
-    ess << "Error: input image list should have " << ninput << " images (got " << size() << ")";
-    throw(ess.str());
-  }
-  try{
-    IMAGE ** imout;
-    imout=::alphatree(this->getImage(0)->getMIA(),this->getImage(1)->getMIA(),alphaMax);
-    if(imout){
-      for(int iim=0;iim<noutput;++iim){
-        std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);
-        imgWriter->copyGeoTransform(*front());
-        imgWriter->setProjection(front()->getProjectionRef());
-        listout.pushImage(imgWriter);
-      }
-      return(listout);
-    }
-    else{
-      std::string errorString="Error: alphatree() function in MIA failed, returning empty list";
-      throw(errorString);
-    }
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    return(listout);
-  }
-  catch(...){
-    return(listout);
-  }
-}
+// JimList JimList::alphaTreeDissimGet(int alphaMax){
+//   int ninput=2;
+//   int noutput=5;
+//   JimList listout;
+//   if(size()!=ninput){
+//     std::ostringstream ess;
+//     ess << "Error: input image list should have " << ninput << " images (got " << size() << ")";
+//     throw(ess.str());
+//   }
+//   try{
+//     IMAGE ** imout;
+//     imout=::alphatree(this->getImage(0)->getMIA(),this->getImage(1)->getMIA(),alphaMax);
+//     if(imout){
+//       for(int iim=0;iim<noutput;++iim){
+//         std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);
+//         imgWriter->copyGeoTransform(*front());
+//         imgWriter->setProjection(front()->getProjectionRef());
+//         listout.pushImage(imgWriter);
+//       }
+//       return(listout);
+//     }
+//     else{
+//       std::string errorString="Error: alphatree() function in MIA failed, returning empty list";
+//       throw(errorString);
+//     }
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     return(listout);
+//   }
+//   catch(...){
+//     return(listout);
+//   }
+// }
 
-/**
- * @return JimList object
- **/
-JimList JimList::histoMatchRgb(){
-  int ninput=4;
-  int noutput=3;
-  JimList listout;
-  if(size()!=ninput){
-    std::ostringstream ess;
-    ess << "Error: input image list should have " << ninput << " images (got " << size() << ")";
-    throw(ess.str());
-  }
-  try{
-    IMAGE ** imout;
-    imout=::histrgbmatch(this->getImage(0)->getMIA(),this->getImage(1)->getMIA(),this->getImage(2)->getMIA(),this->getImage(3)->getMIA());
-    if(imout){
-      for(int iim=0;iim<noutput;++iim){
-        std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);
-        imgWriter->copyGeoTransform(*front());
-        imgWriter->setProjection(front()->getProjectionRef());
-        listout.pushImage(imgWriter);
-      }
-      return(listout);
-    }
-    else{
-      std::string errorString="Error: histrgbmatch() function in MIA failed, returning empty list";
-      throw(errorString);
-    }
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    return(listout);
-  }
-  catch(...){
-    return(listout);
-  }
-}
+// JimList JimList::histoMatchRgb(){
+//   int ninput=4;
+//   int noutput=3;
+//   JimList listout;
+//   if(size()!=ninput){
+//     std::ostringstream ess;
+//     ess << "Error: input image list should have " << ninput << " images (got " << size() << ")";
+//     throw(ess.str());
+//   }
+//   try{
+//     IMAGE ** imout;
+//     imout=::histrgbmatch(this->getImage(0)->getMIA(),this->getImage(1)->getMIA(),this->getImage(2)->getMIA(),this->getImage(3)->getMIA());
+//     if(imout){
+//       for(int iim=0;iim<noutput;++iim){
+//         std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);
+//         imgWriter->copyGeoTransform(*front());
+//         imgWriter->setProjection(front()->getProjectionRef());
+//         listout.pushImage(imgWriter);
+//       }
+//       return(listout);
+//     }
+//     else{
+//       std::string errorString="Error: histrgbmatch() function in MIA failed, returning empty list";
+//       throw(errorString);
+//     }
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     return(listout);
+//   }
+//   catch(...){
+//     return(listout);
+//   }
+// }
 
-/**
- * @return JimList object
- **/
-JimList JimList::histoMatch3dRgb(){
-  int ninput=4;
-  int noutput=3;
-  JimList listout;
-  if(size()!=ninput){
-    std::ostringstream ess;
-    ess << "Error: input image list should have " << ninput << " images (got " << size() << ")";
-    throw(ess.str());
-  }
-  try{
-    IMAGE ** imout;
-    imout=::histrgb3dmatch(this->getImage(0)->getMIA(),this->getImage(1)->getMIA(),this->getImage(2)->getMIA(),this->getImage(3)->getMIA());
-    if(imout){
-      for(int iim=0;iim<noutput;++iim){
-        std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);
-        imgWriter->copyGeoTransform(*front());
-        imgWriter->setProjection(front()->getProjectionRef());
-        listout.pushImage(imgWriter);
-      }
-      return(listout);
-    }
-    else{
-      std::string errorString="Error: histrgb3dmatch() function in MIA failed, returning empty list";
-      throw(errorString);
-    }
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    return(listout);
-  }
-  catch(...){
-    return(listout);
-  }
-}
+// JimList JimList::histoMatch3dRgb(){
+//   int ninput=4;
+//   int noutput=3;
+//   JimList listout;
+//   if(size()!=ninput){
+//     std::ostringstream ess;
+//     ess << "Error: input image list should have " << ninput << " images (got " << size() << ")";
+//     throw(ess.str());
+//   }
+//   try{
+//     IMAGE ** imout;
+//     imout=::histrgb3dmatch(this->getImage(0)->getMIA(),this->getImage(1)->getMIA(),this->getImage(2)->getMIA(),this->getImage(3)->getMIA());
+//     if(imout){
+//       for(int iim=0;iim<noutput;++iim){
+//         std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout[iim]);
+//         imgWriter->copyGeoTransform(*front());
+//         imgWriter->setProjection(front()->getProjectionRef());
+//         listout.pushImage(imgWriter);
+//       }
+//       return(listout);
+//     }
+//     else{
+//       std::string errorString="Error: histrgb3dmatch() function in MIA failed, returning empty list";
+//       throw(errorString);
+//     }
+//   }
+//   catch(std::string errorString){
+//     std::cerr << errorString << std::endl;
+//     return(listout);
+//   }
+//   catch(...){
+//     return(listout);
+//   }
+// }

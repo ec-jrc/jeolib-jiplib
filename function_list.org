@@ -1,0 +1,430 @@
+#+TITLE: List of functions in JIPlib
+* Global functions
+  - createVector
+  - createJim
+  - createJimList
+** Miscelaneous operators (from MIA module miscel)
+   - julianDate
+* Jim
+# ** Constructors
+#    - createJim
+#      - copy constructor
+#      - mean/stdev
+#      - filename
+** Accessing Jim attributes and geospatial information
+   - nrOfCol
+   - nrOfRow
+   - nrOfBand
+   - nrOfPlane (for Jim only)
+   - printNoDataValues
+   - pushNoDataValue (add single value)
+   - setNoDataValue (clear all values and set a single value)
+   - setNoData (list)
+   - clearNoData
+   - getDataType
+*** from MIA module imem
+    - getBitsPerPixel
+*** Get geospatial information
+    - covers
+    - getGeoTransform
+    - setGeoTransform
+    - copyGeoTransform
+    - setProjectionProj4
+    - getProjectionRef
+    - getBoundingBox
+    - getCenterPos
+    - getUlx
+    - getUly
+    - getLrx
+    - getLry
+    - getDeltaX
+    - getDeltaY
+    - getRefPix
+** Input/Output methods
+   - open
+   - close
+   - read
+   - write
+   - setFile
+   - dumpImg
+   - isEqual
+*** from MIA module imem
+    # - imageCreate
+    # - imageCopy
+    # - imageLutCopy
+    # - imageLutCreate
+    # - imageLutFree
+    # - imageDump
+    - setPixVal
+    - getPixVal
+# *** from MIA module io (redundant?)
+#     - gdalInfo
+#     - gdalRead
+#     - readImageBinary
+#     - readImage
+#     - readImageToType
+#     - writeColorMapTiff
+#     - writeTiff
+#     - writeTiffOneStripPerLine
+#     - gdalGetGeoKey
+#     - gdalGetTiffTagGeo
+#     - readImageScale
+#     - readTiffSubset
+#     - tiffInfoFieldValue
+#     - tiffInfo
+#     - writeGeoTiff
+#     - writeMultibandGeoTiff
+** Convolution filters and morphological operators
+*** spatial and spectral domain (3D)
+**** Morphological operators (from MIA module erodil)
+     - morphoErodeVolumic
+*** spatial domain (2D)
+    - filter2d
+**** convolutional filters (from MIA module convolve)
+     - convolve
+     - convolveDownSample
+     - runSum2d
+     - runSum3d
+     - runSumInSquareNgb
+     - meanFilterInSquareNgb
+     - meanFilterIn2dNgb
+     - varianceFilterIn2dNgb
+     - sumInSquareNgb
+     - gradientAzimuth
+     - orientationMap
+     - phaseCorrelation
+**** Morphological operators (from MIA module erodil)
+     - morphoErodeLine
+     - morphoDilateLine
+     - morphoDilateLinePeriodic
+     - morphoErodeLinePeriodic
+     - morphoErodeNgb4
+     - morphoDilateNgb4
+     - morphoErode
+     - morphoDilate
+     - morphoRankFilter
+     - morphoRankFilterSquare
+     - morphoRankFilterLine
+     - morphoRankFilterLineTI
+     - morphoGradientMultibandSquareNgb
+     - morphoGradientMultiband2dNgb
+**** Morphological operators (from MIA module opclo)
+     - morphoOpeningAttribute
+     - morphoOpeningArea
+     - morphoClosingArea
+     - morphoOpeningAreaROI
+     - morphoClosingAreaROI
+     - convexHull
+     - morphoClosingHalfPlane
+     - morphoClosingHalfPlaneTI
+**** Morphological operators (from MIA module hmt)
+     - skeleton
+     - pruneBinary
+     - extractPixelConfigurationBinary
+     - extractPixelConfigurationGrey
+     - switchOperator
+     - skeletonOrderIndependent
+     - skeletonAnchored
+     - orderDependentThin
+     - orderDependentThinFifo
+     - orderIndependentThin
+     - orderIndependentThinFifo
+       
+**** Geodesy operators (from MIA module geodesy)
+     - geodesicReconstructionByDilation
+     - geodesicReconstructionByErosion
+     - geodesicReconstruction
+     - geodesicComplete
+     - getRegionalMinima
+     - geodesicTimeFlat
+     - geodesicTime
+     - geodesicTimeSymmetric
+**** Distance functions (from MIA dist module)
+     - distance2d4
+     - distance2dChamfer57
+     - distance2dChamfer
+     - distance2dEuclideanFifo
+     - distance2dEuclideanSquared
+     - distanceInfluenceZones2dEuclidean
+     - distanceInfluenceZones2dOrderedIndependent
+     - distanceGeodesic
+     - distance2dEuclideanConstrained
+*** spectral/temporal domain (1D)
+    - filter1d
+** Classification methods
+   - classify (can be called as classify with classification method)
+     - ann (can be called directly or via classifyANN)
+     - svm (can be called directly or via classifySVM)
+     - sml (can be called directly or via classifySML)
+   - reclass
+   - validate
+*** from MIA module stats
+    - classStatsInfo
+    - classMinDst
+    - classBox
+    - classMahanalobis
+    - classMaximumLikelihood
+    - similarityDetectionSequential
+    - crosscorrNormalisedLewis
+    - crosscorrNormalised
+** Mask / Threshold methods
+   - setThreshold
+   - setAbsThreshold
+   - getMask
+   - setMask
+***  from MIA module pointop
+    - pointOpThresh
+    - pointOpSetLevel
+    - pointOpSetRange
+** Convert methods
+   - band2plane (for Jim only)
+   - plane2band (for Jim only)
+   # - jim2json (for Jim only)
+   # - json2jim (for Jim only)
+   # - jim2mia (private, for Jim only)
+   # - mia2jim (private, for Jim only)
+   - jim2np (implemented in Python)
+   - np2jim (implemented in Python)
+*** from MIA module format
+    - convertTo1bitPerPixel
+    - convertTo4bitPerPixel
+    - convertToUint16
+    - convertToUint32
+    - convertToFloat32
+    - convertToDouble64
+    - convertToUchar8
+    - convertDouble64ToFloat32
+    - convertUint32toFloat32
+    - convertSwapBytes
+    - convertDeinterleave
+    - convertHsiToRgb
+    - convertHlsToRgb
+    - convertRgbToHsx (can be moved to member function of JimList)
+    - convertRgbTo3d
+# *** from MIA module imem
+#     - imageToArray
+#     - imageFromArray
+** Statistical methods and interpolations
+   - statProfile
+   - getStats
+   - stretch
+   - fillNoData (currently only in pktools, to be ported to jiplib)
+*** from MIA module imem
+    - imageInfo
+    - getFirstPixWithVal
+*** Miscelaneous operators (from MIA module miscel)
+    - orientationMean
+    - orientationCoherence
+    - paraboloidGetCoordinatesExtremum
+    - linearFit
+    - gradientTransition
+*** from MIA module stats
+    - histo1d
+    - histo2d
+    - histo3d
+    - histo1dCumulative
+    - applyLUT3d
+    - applyLUT2d
+    - surfaceArea
+    - runSumDir
+    - getMinMax
+    - getFirstMaxOffset
+    - histoCompress
+    - applyLUT1d
+    - applyLUT1dTypeMatch
+    - getSum
+    - propagateMaxDir
+    - predicateIdentity
+    - getMax
+    - getMinMax
+    - histoMatchRgb (can be moved to member function of JimList)
+    - histoMatch3dRgb (can be moved to member function of JimList)
+    - linearCombinationMultiband (not implemented yet)
+    - meanConditional (not implemented yet)
+    - sortIndex
+*** from MIA module proj
+    - gridding
+    # - cs2cs (not implemented yet)
+** Subset methods and geometry operators
+   - crop (used for both band and area subsets)
+*** Geometry operators (from MIA module gemetry)
+    - imageFrameSet
+    - imageFrameAdd
+    - imageFrameSubstract
+    - imageInsert
+    - imageInsertCompose
+    - imageCut
+    - getBoundingBoxNonZeroDomain
+    - imageMagnify
+    - imageRotateCoor
+    - predicateSizeAndTypeEqual
+    - predicateSizeEqual
+    - plotLine
+    - overlapMatrix
+** Extracting pixel values from overlays and sampling
+   - extractOgr
+   - extractSample
+   - extractImg
+** Digitial elevation model methods
+   - filterdem (currently only in pktools, to be ported to jiplib and renamed to dem2dtm)
+   - dsm2shadow (currently only in pktools, to be ported to jiplib)
+*** (from MIA dem module)
+    - demFlowDirectionD8
+    - demSlopeD8
+    - demFlow
+    - demFlowNew
+    - demContributingDrainageArea
+    - demContributingDrainageAreaStratify
+    - demFlowDirectionDInf
+    - demContributingDrainageAreaDInf
+    - demSlopeDInf
+    - demFloodDirection
+    - demCatchmentBasinOutlet
+    - demCatchmenBasinConfluence
+    - demStrahlerOrder
+    - demPitRemovalCarve
+    - demPitRemovalOptimal
+    - demFlowDirectionFlat
+    - demFlowDirectionFlatGeodesic
+    - demUpstreamMaxHeight
+    - demShade
+    - demLineDilate3d
+** Segmentation methods and label operators
+*** Segment operators (from MIA module segment)
+    - segmentationWatershed
+    - segmentationWatershedFAH
+    - skeletonFah
+    - skeletonFah2
+    - compose
+    - segmentationWatershedOrderIndependent
+    - segmentationSeededRegionGrowing
+    - segmentationSeededRegionGrowingMultiband (not implemented yet)
+    - segmentationSeededRegionGrowingCore (not implemented yet)
+    - labelQuasiFlatZones (not implemented yet)
+    - segmentationSeededRegionGrowingMultiband (error in rename: both mssrg and mcisrg are mapped to same function?)
+    - segmentImageMultiband (not implemented yet)
+    - writeGnuPlot3D (not implemented yet)
+    - vectorizeImage (not implemented yet)
+    - predicatePartitionEqual
+    - predicatePartitionFiner
+    - imgc
+    - dendrogram (not implemented yet)
+    - partitionSimilarity
+*** Label methods (from MIA module label)
+    - labelBinary
+    - labelPixNgb
+    - labelFlatZones
+    - labelFlatZonesSeeded
+    - flatZonesSeeded
+    - labelPix
+    - labelsResolve
+    - labelsReorder
+    - labelErode
+    - propagate
+    - labelsSet
+    - labelsSetGraph
+    - labelsSetArea
+    - labelRelabel
+    - labelsGetLut
+    - labelsGetLutSeq
+    - labelsImageGetLut
+    - labelsGetContortionLut
+    - dissimToAlphaCCs
+    - vertexDegreeAlpha
+    - vertexSeparation
+    - labelVertexConnectedness
+    - labelAlphaCCs
+    - labelConstrainedCCsMi
+    - labelConstrainedCCsCi
+    - labelConstrainedCCs
+    - labelConstrainedCCsVariance
+    - labelConstrainedCCsMultibandDissim
+    - labelConstrainedCCsAttr
+    - alphaTreeDissimGet (can be moved to member function of JimList)
+    - edgeWeight
+    - dbscan
+    - labelsGetOuterEdgeLut
+    - labelsGetOuterEdge
+    - labelsGetOuterContour
+** Arithmetic operators (from MIA module pointop)
+   - pointOpBitwise
+   - pointOpNegation
+   - pointOpArith
+   - pointOpArithCst
+   - pointOpAbs
+   - pointOpSqrt
+   - pointOpLog
+   - pointOpAtan
+   - pointOpCos
+   - pointOpAcos
+   - pointOpSin
+   - pointOpAsin
+   - pointOpModulo
+   - pointOpComplement
+   - pointOpPower2
+   - pointOpBlank
+   - pointOpBitShift
+* JimList
+# ** Constructors
+#     - JimList
+#       - from Python list of Jim images
+#       - filenames
+** Accessing JimList attributes and geospatial information
+   - getImage
+   - pushImage
+   - popImage
+   - pushNoDataValue
+   - clearNoData
+*** Get geospatial information
+    - covers
+    - selectGeo
+    - getBoundingBox
+    - getUlx
+    - getUly
+    - getLrx
+    - getLry
+** Classification methods
+   - validate
+** Reducing methods
+   - composite
+   - stack
+** Statistical methods
+   - getStats
+   - statProfile
+** Segmentation methods and label operators (from MIA module label)
+   - momentsLutsToEllipseLuts
+   - labelConstrainedCCsMultiband
+   - labelStronglyCCsMultiband
+   - labelStronglyCCsMultiband
+   - alphaTree
+   - alphaTreeToCCs
+   - alphaTreeNextLevel
+   - alphaTreeGetPersistenceLut
+   - dissimilarityMatrix
+* VectorOgr
+# ** Constructors
+#    - createVector
+#      - filename
+** Accessing VectorOgr attributes and geospatial information
+   - getLayerCount
+   - getFeatureCount
+*** Get geospatial information
+    - getBoundingBox
+    - getUlx
+    - getUly
+    - getLrx
+    - getLry
+** Input/Output methods
+   - open
+   - close
+   - write
+** Classification methods
+   - train
+     - SVM
+     - ANN
+   - classify (vector and put result in new field, class)
+     - ann (can be called directly or via classifyANN) (todo)
+     - svm (can be called directly or via classifySVM) (todo)
+     - sml (can be called directly or via classifySML) (todo)
+** statistics
+   - getStats (currently only in pktools, to be ported to jiplib)
