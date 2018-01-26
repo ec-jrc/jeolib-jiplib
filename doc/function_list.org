@@ -75,9 +75,8 @@
 #     - writeGeoTiff
 #     - writeMultibandGeoTiff
 ** Convolution filters and morphological operators
-*** spatial and spectral domain (3D)
-**** Morphological operators (from MIA module erodil)
-     - morphoErodeVolumic
+*** spectral/temporal domain (1D)
+    - filter1d
 *** spatial domain (2D)
     - filter2d
 **** convolutional filters (from MIA module convolve)
@@ -149,13 +148,12 @@
      - distanceInfluenceZones2dOrderedIndependent
      - distanceGeodesic
      - distance2dEuclideanConstrained
-*** spectral/temporal domain (1D)
-    - filter1d
+*** spatial and spectral domain (3D)
+**** Morphological operators (from MIA module erodil)
+     - morphoErodeVolumic
 ** Classification methods
-   - classify (can be called as classify with classification method)
-     - ann (can be called directly or via classifyANN)
-     - svm (can be called directly or via classifySVM)
-     - sml (can be called directly or via classifySML)
+   - classify (svm,ann)
+   - classifySML
    - reclass
    - validate
 *** from MIA module stats
@@ -177,12 +175,12 @@
     - pointOpSetLevel
     - pointOpSetRange
 ** Convert methods
-   - band2plane (for Jim only)
-   - plane2band (for Jim only)
-   # - jim2json (for Jim only)
-   # - json2jim (for Jim only)
-   # - jim2mia (private, for Jim only)
-   # - mia2jim (private, for Jim only)
+   # - band2plane
+   # - plane2band
+   # - jim2json
+   # - json2jim
+   # - jim2mia (private)
+   # - mia2jim (private)
    - jim2np (implemented in Python)
    - np2jim (implemented in Python)
 *** from MIA module format
@@ -197,9 +195,10 @@
     - convertUint32toFloat32
     - convertSwapBytes
     - convertDeinterleave
+    # can be moved to member function of JimList
     - convertHsiToRgb
     - convertHlsToRgb
-    - convertRgbToHsx (can be moved to member function of JimList)
+    - convertRgbToHsx
     - convertRgbTo3d
 # *** from MIA module imem
 #     - imageToArray
@@ -385,7 +384,7 @@
     - getLry
 ** Classification methods
    - validate
-** Reducing methods
+** Reduce methods
    - composite
    - stack
 ** Statistical methods
@@ -419,12 +418,8 @@
    - close
    - write
 ** Classification methods
-   - train
-     - SVM
-     - ANN
-   - classify (vector and put result in new field, class)
-     - ann (can be called directly or via classifyANN) (todo)
-     - svm (can be called directly or via classifySVM) (todo)
-     - sml (can be called directly or via classifySML) (todo)
+   - train (svm,ann)
+   - classify (svm,ann) (not implemented yet)
+   - classifySML (not implemented yet)
 ** statistics
    - getStats (currently only in pktools, to be ported to jiplib)

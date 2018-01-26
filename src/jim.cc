@@ -1384,7 +1384,7 @@ std::shared_ptr<Jim> Jim::classifySML(app::AppFactory& app){
   return(imgWriter);
 }
 
-std::shared_ptr<Jim> Jim::classifySML(ImgCollection& referenceReader, app::AppFactory& app){
+std::shared_ptr<Jim> Jim::classifySML(JimList& referenceReader, app::AppFactory& app){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
   ImgRaster::classifySML<unsigned char>(referenceReader, *imgWriter, app);
   return(imgWriter);
