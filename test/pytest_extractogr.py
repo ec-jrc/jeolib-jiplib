@@ -15,7 +15,8 @@ parser.add_argument("-vector","--vector",help="Path of the vector dataset",dest=
 parser.add_argument("-output","--output",help="Path of the output vector dataset",dest="output",required=False,type=str)
 args = parser.parse_args()
 
-try:
+# try:
+if True:
     jim0=jl.createJim({'filename':args.input})
     rules=['min','max','mean','stdev']
     if not args.vector:
@@ -31,13 +32,26 @@ try:
         # v1.write()
         # v1.close()
     else:
-        sample=jl.createVector(args.vector);
-        print("extracting",args.vector)
-        v2=jim0.extractOgr(sample,{'rule':rules[2],'output':args.output,'oformat':'SQLite'})
-        sample.close()
-        v2.write()
-        v2.close()
+        if os.path.basename(args.vector)=='nuts_italy.sqlite':
+            v0=jl.createVector()
+            jim_milano=jim0.crop({'extent':args.vector,'ln':'milano'})
+            jim_lodi=jim0.crop({'extent':args.vector,'ln':'lodi'})
+            jimlist=jl.JimList([jim_milano,jim_lodi])
+            sample=jl.createVector(args.vector);
+            v2=jimlist.extractOgr(sample,{'rule':rules[2],'output':args.output,'oformat':'SQLite','verbose':1})
+            v2.write()
+            v2.close()
+            jim_milano.close()
+            sample.close()
+        else:
+            sample=jl.createVector(args.vector);
+            print("extracting",args.vector)
+            v2=jim0.extractOgr(sample,{'rule':rules[2],'output':args.output,'oformat':'SQLite'})
+            v2.write()
+            v2.close()
+            sample.close()
     jim0.close()
+try:
     print("Success: extractogr")
 except:
     print("Failed: extractogr")

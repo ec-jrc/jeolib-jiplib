@@ -195,6 +195,24 @@ developed in the framework of the JEODPP of the EO&SS@BD pilot project."
   $result = pyList;
 }
 
+%typemap(in, numinputs=0) std::vector<double>& bbvector (std::vector<double> temp) {
+  $1 = &temp;
+ }
+
+%typemap(argout) std::vector<double>& bbvector{
+  int i, n;
+  PyObject *pyList;
+
+  n=(*$1).size();
+  pyList=PyList_New(n);
+  for (i=0; i<n; i++) {
+    double theValue=(*$1).at(i);
+    PyList_SET_ITEM(pyList, i, PyFloat_FromDouble(theValue));
+  }
+  $result = pyList;
+ }
+
+/* %typemap(typecheck) (std::vector<double>&) = PyObject *; */
 /* %apply std::vector<double> & OUTPUT { std::vector<double>& dVector }; */
 /* %typemap(argout) const std::vector<double>& dVector ""; */
 /* %apply const std::vector<double> & { const std::vector<double>& dVector }; */

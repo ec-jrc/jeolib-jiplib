@@ -535,8 +535,6 @@ CPLErr Jim::open(app::AppFactory &app) {
     //todo: reproject on the fly using
     // OGRSpatialReference::SetFromUserInput
 
-    m_resample=getGDALResample(resample_opt[0]);
-
     double gt[6];
     gt[0]=ulx_opt[0];
     gt[3]=uly_opt[0];
@@ -546,6 +544,9 @@ CPLErr Jim::open(app::AppFactory &app) {
     gt[5]=-dy_opt[0];//todo: a$-cos(\alpha)\cdot\textrm{Yres}
     setGeoTransform(gt);
 
+    if(assignSRS_opt.size())
+      setProjectionProj4(assignSRS_opt[0]);
+    m_resample=getGDALResample(resample_opt[0]);
     int nBufXSize=abs(static_cast<unsigned int>(ceil((lrx_opt[0]-ulx_opt[0])/dx_opt[0]-FLT_EPSILON)));
     int nBufYSize=abs(static_cast<unsigned int>(ceil((uly_opt[0]-lry_opt[0])/dy_opt[0]-FLT_EPSILON)));
     m_ncol=nBufXSize;

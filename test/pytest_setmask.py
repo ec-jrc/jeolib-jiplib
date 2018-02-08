@@ -16,8 +16,11 @@ args = parser.parse_args()
 jim0=jl.createJim({'filename':args.input})
 if args.vm:
     try:
+        print("create vector")
         v0=jl.createVector()
+        print("open vector", args.vm)
         v0.open({'filename':args.vm})
+        print("setMask")
         jim1=jim0.setMask({'vectormask':args.vm,'nodata':1})
         if jim1.getNvalid()!=248716:
             print("Failed: nvalid",jim1.getNvalid())

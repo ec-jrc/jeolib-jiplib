@@ -86,6 +86,8 @@ namespace jiplib{
     std::multimap<std::string,std::string> getStats(app::AppFactory& app);
     ///validate image based on reference vector dataset (-ref)
     JimList& validate(app::AppFactory& app);
+    ///extract vector layer from collection only for in memory
+    /* std::shared_ptr<VectorOgr> extractOgr(VectorOgr& sampleReader, app::AppFactory& app); */
 
     ///functions from mialib
     //todo: manual for now, but need to be done with Python script

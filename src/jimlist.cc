@@ -362,6 +362,10 @@ JimList& JimList::validate(app::AppFactory& app){
   return(*this);
 }
 
+// std::shared_ptr<VectorOgr> JimList::extractOgr(VectorOgr& sampleReader, app::AppFactory& app){
+//   return(ImgCollection::extractOgr(sampleReader,app));
+// }
+
 //automatically ported for now, but should probably better via JimList as implemented here:
 ///functions from mialib
 // std::shared_ptr<jiplib::Jim> JimList::labelConstrainedCCsMultiband(Jim &imgRaster, int ox, int oy, int oz, int r1, int r2){

@@ -21,10 +21,12 @@ try:
     jim=jl.createJim({'filename':args.input})
     sample=jl.createVector();
     sample.open(args.vector)
-    training=jim.extractOgr(sample,{'output':'training','oformat':'Memory','verbose':2})
+    training=jim.extractOgr(sample,{'output':'training','oformat':'Memory','copy':'label'})
     if args.classifier == 'svm':
         #SVM classification
+        print("training")
         training.train({'method':'svm','label':'label','model':args.model})
+        print("classification")
         jim_classify=jim.classify({'method':'svm','model':args.model})
         jim_classify.write({'filename':args.output})
         jim_classify.close()

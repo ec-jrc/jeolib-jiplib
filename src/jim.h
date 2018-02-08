@@ -4,6 +4,13 @@ History
 2016/06/24 - Created by Pieter Kempeneers
 Change log
 ***********************************************************************/
+/*! \file jim.h
+  \brief A Documented file.
+
+  Global functions are not documented unless the file itself is documented. The only other way to get this working is EXTRACT_ALL.
+  Details: https://www.stack.nl/%7Edimitri/doxygen/manual/docblocks.html
+  To document global objects (functions, typedefs, enum, macros, etc), you must document the file in which they are defined. In other words, there must at least be a
+*/
 #ifndef _JIM_H_
 #define _JIM_H_
 
