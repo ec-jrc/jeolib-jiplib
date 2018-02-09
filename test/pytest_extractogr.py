@@ -38,7 +38,7 @@ if True:
             jim_lodi=jim0.crop({'extent':args.vector,'ln':'lodi'})
             jimlist=jl.JimList([jim_milano,jim_lodi])
             sample=jl.createVector(args.vector);
-            v2=jimlist.extractOgr(sample,{'rule':rules[2],'output':args.output,'oformat':'SQLite','verbose':1})
+            v2=jimlist.extractOgr(sample,{'rule':rules[2],'output':args.output,'oformat':'SQLite','co':'OVERWRITE=YES'})
             v2.write()
             v2.close()
             jim_milano.close()
@@ -46,7 +46,7 @@ if True:
         else:
             sample=jl.createVector(args.vector);
             print("extracting",args.vector)
-            v2=jim0.extractOgr(sample,{'rule':rules[2],'output':args.output,'oformat':'SQLite'})
+            v2=jim0.extractOgr(sample,{'rule':rules[2],'output':args.output,'oformat':'SQLite','co':'OVERWRITE=YES'})
             v2.write()
             v2.close()
             sample.close()
