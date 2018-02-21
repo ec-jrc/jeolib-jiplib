@@ -89,6 +89,16 @@ namespace jiplib{
     static std::shared_ptr<Jim> createImg(const std::shared_ptr<Jim> pSrc, bool copyData=true);
     ///Create new shared pointer to Jim object using existing image object
     static std::shared_ptr<Jim> createImg(const std::string filename, unsigned int memory=0);
+    ///create shared pointer to Jim using an external data pointer
+    /* static std::shared_ptr<Jim> createImg(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType){ */
+    /*   std::shared_ptr<Jim> pJim=std::make_shared<Jim>(dataPointer,ncol,nrow,nplane,dataType); */
+    /*   return(pJim); */
+    /* } */
+    /* ///create shared pointer to multi-band Jim using external data pointers */
+    /* static std::shared_ptr<Jim> createImg(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType){ */
+    /*   std::shared_ptr<Jim> pJim=std::make_shared<Jim>(dataPointers,ncol,nrow,nplane,dataType); */
+    /*   return(pJim); */
+    /* } */
     ///Open an image for writing using an external data pointer
     CPLErr open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType);
     ///Open a multiband image for writing using a external data pointers
@@ -291,6 +301,8 @@ namespace jiplib{
   static std::shared_ptr<Jim> createJim(){return Jim::createImg();};
   static std::shared_ptr<Jim> createJim(const std::shared_ptr<Jim> pSrc, bool copyData=true){return(Jim::createImg(pSrc, copyData));};
   static std::shared_ptr<Jim> createJim(const std::string& filename){return(Jim::createImg(filename));};
+  /* static std::shared_ptr<Jim> createImg(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType); */
+  /* static std::shared_ptr<Jim> createImg(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType); */
 
 }
 
