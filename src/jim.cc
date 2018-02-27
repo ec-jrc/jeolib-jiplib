@@ -563,14 +563,29 @@ CPLErr Jim::open(app::AppFactory &app) {
       }
     }
     else{
-      //we initialize memory using class member variables instead of those read from GDAL dataset
-      initMem(memory_opt[0]);
-      for(int iband=0;iband<nrOfBand();++iband){
-        m_begin[iband]=0;
-        m_end[iband]=m_begin[iband]+m_blockSize;
-        if(!noread_opt[0]){
-          //we can not use readData(iband) because sequence of band_opt might not correspond bands in GDAL dataset
-          readDataDS(iband,band_opt[iband]);
+      if(!noread_opt[0]){
+        //we initialize memory using class member variables instead of those read from GDAL dataset
+        initMem(memory_opt[0]);
+        for(int iband=0;iband<nrOfBand();++iband){
+          m_begin[iband]=0;
+          m_end[iband]=m_begin[iband]+m_blockSize;
+          if(!noread_opt[0]){
+            //we can not use readData(iband) because sequence of band_opt might not correspond bands in GDAL dataset
+            readDataDS(iband,band_opt[iband]);
+          }
+        }
+      }
+      else{
+        if(memory_opt[0]<=0)
+          m_blockSize=nrOfRow();
+        else{
+          m_blockSize=static_cast<unsigned int>(memory_opt[0]*1000000/nrOfBand()/nrOfCol()/getDataTypeSizeBytes());
+          if(getBlockSizeY(0))
+            m_blockSize-=m_blockSize%getBlockSizeY(0);
+          if(m_blockSize<1)
+            m_blockSize=1;
+          if(m_blockSize>nrOfRow())
+            m_blockSize=nrOfRow();
         }
       }
     }
@@ -679,7 +694,7 @@ CPLErr Jim::initMem(unsigned int memory)
   if(memory<=0)
     m_blockSize=nrOfRow();
   else{
-    m_blockSize=static_cast<unsigned int>(memory*1000000/nrOfBand()/nrOfCol());
+    m_blockSize=static_cast<unsigned int>(memory*1000000/nrOfBand()/nrOfCol()/getDataTypeSizeBytes());
     if(getBlockSizeY(0))
       m_blockSize-=m_blockSize%getBlockSizeY(0);
   }
@@ -1573,4 +1588,3 @@ std::shared_ptr<Jim> Jim::reclass(app::AppFactory& app){
 //     return(0);
 //   }
 // }
-

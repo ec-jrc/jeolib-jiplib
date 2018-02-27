@@ -18,9 +18,13 @@ parser.add_argument("-classifier","--classifier",help="classifier (svm, ann)",de
 args = parser.parse_args()
 
 try:
+    print("createJim")
     jim=jl.createJim({'filename':args.input})
+    print("createVector")
     sample=jl.createVector();
+    print("open vector",args.vector)
     sample.open(args.vector)
+    print("extractOgr")
     training=jim.extractOgr(sample,{'output':'training','oformat':'Memory','copy':'label'})
     if args.classifier == 'svm':
         #SVM classification
