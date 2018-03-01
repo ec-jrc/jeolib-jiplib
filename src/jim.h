@@ -64,7 +64,7 @@ namespace jiplib{
     ///constructor input image
   Jim(IMAGE *mia);
     ///constructor input image
-  Jim(const std::string& filename, unsigned int memory=0);
+  Jim(const std::string& filename, bool readData=true, unsigned int memory=0);
     ///constructor input image
   Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>());
     ///constructor input image
@@ -86,9 +86,9 @@ namespace jiplib{
     ///Create new shared pointer to Jim object
     static std::shared_ptr<Jim> createImg();
     ///Create new shared pointer to Jim object using existing image object
-    static std::shared_ptr<Jim> createImg(const std::shared_ptr<Jim> pSrc, bool copyData=true);
+    static std::shared_ptr<Jim> createImg(const std::string filename, bool readData=true, unsigned int memory=0);
     ///Create new shared pointer to Jim object using existing image object
-    static std::shared_ptr<Jim> createImg(const std::string filename, unsigned int memory=0);
+    static std::shared_ptr<Jim> createImg(const std::shared_ptr<Jim> pSrc, bool copyData=true);
     ///create shared pointer to Jim using an external data pointer
     /* static std::shared_ptr<Jim> createImg(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType){ */
     /*   std::shared_ptr<Jim> pJim=std::make_shared<Jim>(dataPointer,ncol,nrow,nplane,dataType); */
@@ -108,8 +108,8 @@ namespace jiplib{
     ///Open an image for writing, based on an existing image object
     CPLErr open(Jim& imgSrc, bool copyData=true);
     ///Open dataset
-    /* CPLErr open(const std::string& filename, unsigned int memory=0); */
-    ///open dataset, read data and close (keep data in memory)
+    CPLErr open(const std::string& filename, bool readData=true, unsigned int memory=0);
+    //open dataset, read data and close (keep data in memory)
     CPLErr open(app::AppFactory &app);
     ///write to file previously set (eg., with setFile). Specialization of the writeData member function of ImgRaster, avoiding reset of the memory.
     CPLErr write();
@@ -191,6 +191,8 @@ namespace jiplib{
 
     ///crop Jim image in memory returning Jim image
     std::shared_ptr<Jim> crop(app::AppFactory& app);
+    ///crop Jim image in memory returning Jim image
+    std::shared_ptr<Jim> cropOgr(VectorOgr& sampleReader, app::AppFactory& app);
     ///filter Jim image in spectral/temporal domain
     std::shared_ptr<Jim> filter1d(app::AppFactory& theApp);
     ///filter Jim image in spatial domain
@@ -300,7 +302,7 @@ namespace jiplib{
   static std::shared_ptr<Jim> createJim(app::AppFactory &theApp){return(Jim::createImg(theApp));};
   static std::shared_ptr<Jim> createJim(){return Jim::createImg();};
   static std::shared_ptr<Jim> createJim(const std::shared_ptr<Jim> pSrc, bool copyData=true){return(Jim::createImg(pSrc, copyData));};
-  static std::shared_ptr<Jim> createJim(const std::string& filename){return(Jim::createImg(filename));};
+  static std::shared_ptr<Jim> createJim(const std::string& filename, bool readData=true){return(Jim::createImg(filename,readData));};
   /* static std::shared_ptr<Jim> createImg(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType); */
   /* static std::shared_ptr<Jim> createImg(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType); */
 

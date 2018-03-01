@@ -27,14 +27,16 @@ Jim::Jim(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const 
 Jim::Jim(IMAGE *mia) : m_nplane(1){
   setMIA(mia,0);
 }
-///constructor input image
-Jim::Jim(const std::string& filename, unsigned int memory) : m_nplane(1), ImgRaster(filename,memory){
-  for(int iband=0;iband<nrOfBand();++iband)
-    readDataDS(iband,iband);
+///constructor output image
+Jim::Jim(const std::string& filename, bool readData, unsigned int memory) : m_nplane(1), ImgRaster(filename,memory){
+  if(readData){
+    for(int iband=0;iband<nrOfBand();++iband)
+      readDataDS(iband,iband);
+  }
 }
-///constructor input image
+///constructor output image
 Jim::Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory, const std::vector<std::string>& options) : m_nplane(1), ImgRaster(filename, imgSrc, memory, options){}
-///constructor input image
+///constructor output image
 Jim::Jim(Jim& imgSrc, bool copyData) : m_nplane(1), ImgRaster(imgSrc, copyData){};
 ///constructor output image
 Jim::Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory, const std::vector<std::string>& options) : m_nplane(1), ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){};
@@ -148,8 +150,8 @@ std::shared_ptr<Jim> Jim::createImg(const std::shared_ptr<Jim> pSrc, bool copyDa
   * @param input (type: std::string) input filename
   * @return shared pointer to new Jim object
 **/
-std::shared_ptr<Jim> Jim::createImg(const std::string filename, unsigned int memory){
-  std::shared_ptr<Jim> pJim=std::make_shared<Jim>(filename,memory);
+std::shared_ptr<Jim> Jim::createImg(const std::string filename, bool readData, unsigned int memory){
+  std::shared_ptr<Jim> pJim=std::make_shared<Jim>(filename,readData,memory);
   // std::shared_ptr<Jim> pJim=std::make_shared<Jim>(filename,memory);
   return(pJim);
 }
@@ -209,21 +211,27 @@ CPLErr Jim::open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane
     return(CE_Failure);
 }
 
-// /**
-//  * @param filename Open a raster dataset with this filename
-//  * @param memory Available memory to cache image raster data (in MB)
-//  **/
-// CPLErr Jim::open(const std::string& filename, unsigned int memory){
-//   m_access=READ_ONLY;
-//   m_filename = filename;
-//   registerDriver();
-//   initMem(memory);
-//   for(int iband=0;iband<m_nband;++iband){
-//     m_begin[iband]=0;
-//     m_end[iband]=0;
-//   }
-//   return(CE_None);
-// }
+/**
+ * @param filename Open a raster dataset with this filename
+ * @param memory Available memory to cache image raster data (in MB)
+ **/
+CPLErr Jim::open(const std::string& filename, bool readData, unsigned int memory){
+  reset();
+  m_nplane=1;
+  m_access=READ_ONLY;
+  m_filename = filename;
+  registerDriver();
+  initMem(memory);
+  for(int iband=0;iband<m_nband;++iband){
+    m_begin[iband]=0;
+    m_end[iband]=0;
+  }
+  if(readData){
+    for(int iband=0;iband<nrOfBand();++iband)
+      readDataDS(iband,iband);
+  }
+  return(CE_None);
+}
 
 ///open dataset, read data and close (keep data in memory)
 // CPLErr Jim::open(app::AppFactory &app) {
@@ -831,7 +839,8 @@ CPLErr Jim::band2plane(){
   //copy rest of the bands
   for(size_t iband=1;iband<nrOfBand();++iband){
     //memcp
-    memcpy(m_data[0]+iband*nrOfCol()*nrOfRow(),m_data[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
+    memcpy(static_cast<char*>(m_data[0])+iband*nrOfCol()*nrOfRow(),static_cast<char*>(m_data[iband]),getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
+    // memcpy(m_data[0]+iband*nrOfCol()*nrOfRow(),m_data[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
     free(m_data[iband]);
     m_data.erase(m_data.begin()+iband);
   }
@@ -1156,6 +1165,38 @@ CPLErr Jim::clearNoData(int band){return(ImgRaster::clearNoData(band));}
 std::shared_ptr<Jim> Jim::crop(app::AppFactory& app){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
   ImgRaster::crop(*imgWriter, app);
+  return(imgWriter);
+}
+
+///crop Jim image in memory returning Jim image
+/**
+ * @param a_srs (type: std::string) Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
+ * @param ulx (type: double) (default: 0) Upper left x value bounding box
+ * @param uly (type: double) (default: 0) Upper left y value bounding box
+ * @param lrx (type: double) (default: 0) Lower right x value bounding box
+ * @param lry (type: double) (default: 0) Lower right y value bounding box
+ * @param band (type: unsigned int) band index to crop (leave empty to retain all bands)
+ * @param startband (type: unsigned int) Start band sequence number
+ * @param endband (type: unsigned int) End band sequence number
+ * @param autoscale (type: double) scale output to min and max, e.g., --autoscale 0 --autoscale 255
+ * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
+ * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)
+ * @param dx (type: double) Output resolution in x (in meter) (empty: keep original resolution)
+ * @param dy (type: double) Output resolution in y (in meter) (empty: keep original resolution)
+ * @param resample (type: std::string) (default: near) Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).
+ * @param crop_to_cutline (type: bool) (default: 0) Crop the extent of the target dataset to the extent of the cutline.
+ * @param msknodata (type: double) (default: 0) Mask value not to consider for crop.
+ * @param mskband (type: unsigned int) (default: 0) Mask band to read (0 indexed)
+ * @param scale (type: double) output=scale*input+offset
+ * @param offset (type: double) output=scale*input+offset
+ * @param nodata (type: double) Nodata value to put in image if out of bounds.
+ * @param description (type: std::string) Set image description
+ * @param align (type: bool) (default: 0) Align output bounding box to input image
+ * @return shared pointer to output image object
+ **/
+std::shared_ptr<Jim> Jim::cropOgr(VectorOgr& sampleReader, app::AppFactory& app){
+  std::shared_ptr<Jim> imgWriter=Jim::createImg();
+  ImgRaster::cropOgr(sampleReader, *imgWriter, app);
   return(imgWriter);
 }
 
