@@ -1194,9 +1194,9 @@ std::shared_ptr<Jim> Jim::crop(app::AppFactory& app){
  * @param align (type: bool) (default: 0) Align output bounding box to input image
  * @return shared pointer to output image object
  **/
-std::shared_ptr<Jim> Jim::cropOgr(VectorOgr& sampleReader, app::AppFactory& app){
+std::shared_ptr<Jim> Jim::crop(VectorOgr& sampleReader, app::AppFactory& app){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
-  ImgRaster::cropOgr(sampleReader, *imgWriter, app);
+  ImgRaster::crop(sampleReader, *imgWriter, app);
   return(imgWriter);
 }
 
@@ -1560,9 +1560,9 @@ std::shared_ptr<Jim> Jim::getMask(app::AppFactory& app){
  * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
  * @return shared pointer to classified image object
  **/
-std::shared_ptr<Jim> Jim::setMask(app::AppFactory& app){
+std::shared_ptr<Jim> Jim::setMask(VectorOgr& ogrReader, app::AppFactory& app){
   std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
-  ImgRaster::setMask(*imgWriter, app);
+  ImgRaster::setMask(ogrReader, *imgWriter, app);
   return(imgWriter);
 }
 

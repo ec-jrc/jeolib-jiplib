@@ -19,13 +19,15 @@ if args.vm:
         print("create vector")
         v0=jl.createVector()
         print("open vector", args.vm)
-        v0.open({'filename':args.vm})
+        v0.open({'filename':args.vm,'noread':True})
         print("setMask")
-        jim1=jim0.setMask({'vectormask':args.vm,'nodata':1})
-        if jim1.getNvalid()!=248716:
+        jim1=jim0.setMask(v0,{'nodata':255,'eo':'ALL_TOUCHED'})
+        if jim1.getNvalid()!=250568:
+            print(jim1.getNvalid())
             print("Failed: nvalid",jim1.getNvalid())
             throw()
-        if jim1.getNinvalid()!=13428:
+        if jim1.getNinvalid()!=11576:
+            print(jim1.getNinvalid())
             print("Failed: ninvalid",jim1.getNinvalid())
             throw()
         print("Success: setMask with vector")

@@ -192,7 +192,7 @@ namespace jiplib{
     ///crop Jim image in memory returning Jim image
     std::shared_ptr<Jim> crop(app::AppFactory& app);
     ///crop Jim image in memory returning Jim image
-    std::shared_ptr<Jim> cropOgr(VectorOgr& sampleReader, app::AppFactory& app);
+    std::shared_ptr<Jim> crop(VectorOgr& sampleReader, app::AppFactory& app);
     ///filter Jim image in spectral/temporal domain
     std::shared_ptr<Jim> filter1d(app::AppFactory& theApp);
     ///filter Jim image in spatial domain
@@ -244,7 +244,7 @@ namespace jiplib{
     ///get mask from a raster dataset
     std::shared_ptr<Jim> getMask(app::AppFactory& app);
     ///set mask to raster dataset
-    std::shared_ptr<Jim> setMask(app::AppFactory& app);
+    std::shared_ptr<Jim> setMask(VectorOgr& ogrReader, app::AppFactory& app);
     std::shared_ptr<Jim> setMask(JimList& maskList, app::AppFactory& app);
     ///Clear all no data values, including the one in GDAL dataset if it is set
     CPLErr clearNoData(int band=0);
