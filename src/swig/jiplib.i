@@ -24,20 +24,27 @@
   }
  }
 
+
 %define DOCJIPLIB
-"Joint image processing library (jiplib)
-developed in the framework of the JEODPP of the EO&SS@BD pilot project."
+"HELP.MODULE"
 %enddef
 
+%module(docstring=DOCJIPLIB) jiplib
 
-%feature("autodoc", "2");
+/* %define DOCJIPLIB */
+/* "Joint image processing library (jiplib) */
+/* developed in the framework of the JEODPP of the EO&SS@BD pilot project." */
+/* %enddef */
+
+
+/* %feature("autodoc", "2"); */
 
 //uncomment if documentation is needed (make sure to execute make doc before make!!!)
 /* %pythoncode %{ */
-%import "jiplib_doc.i"
+/* %import "jiplib_doc.i" */
      /* %} */
 
-%module(docstring=DOCJIPLIB) jiplib
+/* %module(docstring=DOCJIPLIB) jiplib */
 
  /* %template(Float64Vector) std::vector<double>; */
 

@@ -109,7 +109,10 @@ namespace jiplib{
     CPLErr open(Jim& imgSrc, bool copyData=true);
     ///Open dataset
     CPLErr open(const std::string& filename, bool readData=true, unsigned int memory=0);
-    //open dataset, read data and close (keep data in memory)
+    //open dataset
+#ifdef SWIG
+    %pythonprepend open(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.Jim.open(dict)\"\"\""
+#endif
     CPLErr open(app::AppFactory &app);
     ///write to file previously set (eg., with setFile). Specialization of the writeData member function of ImgRaster, avoiding reset of the memory.
     CPLErr write();
@@ -121,8 +124,14 @@ namespace jiplib{
      * @return CE_None if successful, CE_Failure if not.
      * @param nodata Nodata value to put in image.
      **/
-    CPLErr write(app::AppFactory &app);
+#ifdef SWIG
+    %pythonprepend write(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.Jim.write(dict)\"\"\""
+#endif
+    CPLErr write(app::AppFactory &theApp);
     ///Close dataset (specialization of the close member function of ImgRaster, avoiding writing the data)
+#ifdef SWIG
+    %pythonprepend close()  "\"\"\"HELP.METHOD.Jim.close()\"\"\""
+#endif
     CPLErr close();
     ///Create a JSON string from a Jim image
     std::string jim2json();
@@ -299,8 +308,14 @@ namespace jiplib{
    * @param a_srs (type: std::string) Assign the spatial reference for the output file, e.g., psg:3035 to use European projection and force to European grid
    * @return shared pointer to new Jim object
    **/
-  static std::shared_ptr<Jim> createJim(app::AppFactory &theApp){return(Jim::createImg(theApp));};
+#ifdef SWIG
+  %pythonprepend createJim()  "\"\"\"HELP.METHOD.createJim()\"\"\""
+#endif
   static std::shared_ptr<Jim> createJim(){return Jim::createImg();};
+#ifdef SWIG
+  %pythonprepend createJim(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.createJim(dict)\"\"\""
+#endif
+     static std::shared_ptr<Jim> createJim(app::AppFactory &theApp){return(Jim::createImg(theApp));};
   static std::shared_ptr<Jim> createJim(const std::shared_ptr<Jim> pSrc, bool copyData=true){return(Jim::createImg(pSrc, copyData));};
   static std::shared_ptr<Jim> createJim(const std::string& filename, bool readData=true){return(Jim::createImg(filename,readData));};
   /* static std::shared_ptr<Jim> createImg(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType); */

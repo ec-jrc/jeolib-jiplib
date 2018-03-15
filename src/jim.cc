@@ -278,8 +278,6 @@ CPLErr Jim::open(app::AppFactory &app) {
   Optionpk<int> nline_opt("nl", "nrow", "Number of rows");
   Optionpk<int> nband_opt("nb", "nband", "Number of bands",1);
   Optionpk<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64})","Byte");
-  Optionpk<std::string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
-  Optionpk<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
   Optionpk<unsigned long int> seed_opt("seed", "seed", "seed value for random generator",0);
   Optionpk<double> mean_opt("mean", "mean", "Mean value for random generator",0);
   Optionpk<double> stdev_opt("stdev", "stdev", "Standard deviation for Gaussian random generator",0);
@@ -319,8 +317,6 @@ CPLErr Jim::open(app::AppFactory &app) {
     nline_opt.retrieveOption(app);
     nband_opt.retrieveOption(app);
     otype_opt.retrieveOption(app);
-    oformat_opt.retrieveOption(app);
-    option_opt.retrieveOption(app);
     seed_opt.retrieveOption(app);
     mean_opt.retrieveOption(app);
     stdev_opt.retrieveOption(app);

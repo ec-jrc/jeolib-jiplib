@@ -13,7 +13,7 @@ Emphasis is on morphological image analysis functionalities.
 Contact: Pierre.Soille@jrc.ec.europa.eu"
 %enddef
 
-%feature("autodoc", "1");
+/* %feature("autodoc", "1"); */
 
 // It consists of wrappers of C code underlying mialisp orginally developed
 // by Pierre Soille over the years since 1988.
