@@ -32,6 +32,7 @@ try:
             v1.write()
             v1.close()
     else:
+        print("Open sample vector",args.vector)
         sample=jl.createVector(args.vector);
         if os.path.basename(args.vector)=='nuts_italy.sqlite':
             if args.noread:
@@ -55,7 +56,8 @@ try:
                 v2.write()
                 v2.close()
         else:
-            v2=jim0.extractOgr(sample,{'rule':rules[2],'output':args.output,'oformat':'SQLite','co':'OVERWRITE=YES'})
+            jimlist=jl.JimList([jim0])
+            v2=jimlist.extractOgr(sample,{'rule':'mean','output':args.output,'oformat':'SQLite','co':'OVERWRITE=YES'})
             v2.write()
             v2.close()
         sample.close()
