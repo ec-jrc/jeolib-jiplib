@@ -33,9 +33,9 @@ extern "C" {
 
 namespace jiplib{
   class Jim;
-  class JimList : public ImgCollection{
+  class JimList : public ImgList{
   public:
-    JimList(){ImgCollection();};
+    JimList(){ImgList();};
     ///constructor using vector of images
     JimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist);
     ///constructor from an AppFactory
@@ -49,28 +49,28 @@ namespace jiplib{
     ///push image to collection
     JimList& pushImage(const std::shared_ptr<jiplib::Jim> imgRaster);
     ///pop image from collection
-    JimList& popImage(){ImgCollection::popImage();return(*this);};
+    JimList& popImage(){ImgList::popImage();return(*this);};
     ///get image from collection
     const std::shared_ptr<jiplib::Jim> getImage(int index);
 
-    ///functions from ImgCollection in pktools
+    ///functions from ImgList in pktools
 
     ///select a geographical region based on bounding box
-    JimList& selectGeo(double ulx, double uly, double lrx, double lry){ImgCollection::selectGeo(ulx,uly,lrx,lry);return(*this);};
+    JimList& selectGeo(double ulx, double uly, double lrx, double lry){ImgList::selectGeo(ulx,uly,lrx,lry);return(*this);};
     ///select a geographical region based on a position
-    JimList& selectGeo(double x, double y){ImgCollection::selectGeo(x,y);return(*this);};
+    JimList& selectGeo(double x, double y){ImgList::selectGeo(x,y);return(*this);};
     ///return an empty collection
-    JimList& clean(){ImgCollection::clean();return(*this);};
+    JimList& clean(){ImgList::clean();return(*this);};
     ///close all images in collection
-    JimList& close(){ImgCollection::close();return(*this);};
+    JimList& close(){ImgList::close();return(*this);};
     ///Get the no data values of this dataset as a standard template library (stl) vector
-    JimList& getNoDataValues(std::vector<double>& noDataValues){ImgCollection::getNoDataValues(noDataValues);return(*this);};
+    JimList& getNoDataValues(std::vector<double>& noDataValues){ImgList::getNoDataValues(noDataValues);return(*this);};
     ///push a no data value
-    JimList& pushNoDataValue(double noDataValue){ImgCollection::pushNoDataValue(noDataValue);return(*this);};
+    JimList& pushNoDataValue(double noDataValue){ImgList::pushNoDataValue(noDataValue);return(*this);};
     ///set no data values based on a vector
-    JimList& setNoData(const std::vector<double>& nodata){ImgCollection::setNoData(nodata);return(*this);};
+    JimList& setNoData(const std::vector<double>& nodata){ImgList::setNoData(nodata);return(*this);};
     ///Clear the no data values
-    JimList& clearNoData(){ImgCollection::clearNoData();return(*this);}
+    JimList& clearNoData(){ImgList::clearNoData();return(*this);}
 
     ///composite image only for in memory
     std::shared_ptr<jiplib::Jim> composite(app::AppFactory& app);

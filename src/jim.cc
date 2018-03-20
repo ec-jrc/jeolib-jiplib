@@ -1564,7 +1564,7 @@ std::shared_ptr<Jim> Jim::setMask(VectorOgr& ogrReader, app::AppFactory& app){
 
 std::shared_ptr<Jim> Jim::setMask(JimList& maskList, app::AppFactory& app){
   std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
-  ImgCollection maskReader;
+  ImgList maskReader;
   for(int imask=0;imask<maskList.size();++imask){
     maskReader.pushImage(maskList.getImage(imask));
   }

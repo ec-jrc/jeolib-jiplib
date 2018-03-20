@@ -19,7 +19,6 @@ Change log
 #include <memory>
 #include "pktools/imageclasses/ImgRaster.h"
 #include "pktools/imageclasses/VectorOgr.h"
-/* #include "pktools/imageclasses/ImgCollection.h" */
 #include "pktools/apps/AppFactory.h"
 #include "pktools/base/Optionpk.h"
 #include "jimlist.h"

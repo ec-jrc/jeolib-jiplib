@@ -10,7 +10,7 @@ Change log
 
 using namespace jiplib;
 ///constructor using vector of images
-JimList::JimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist) : ImgCollection(){
+JimList::JimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist) : ImgList(){
   std::list<std::shared_ptr<jiplib::Jim> >::const_iterator lit=jimlist.begin();
   for(lit=jimlist.begin();lit!=jimlist.end();++lit)
     pushImage(*lit);
@@ -94,7 +94,7 @@ JimList& JimList::open(app::AppFactory& theApp){
  * @return shared pointer to image object
  **/
 const std::shared_ptr<jiplib::Jim> JimList::getImage(int index){
-  return(std::dynamic_pointer_cast<jiplib::Jim>(ImgCollection::getImage(index)));
+  return(std::dynamic_pointer_cast<jiplib::Jim>(ImgList::getImage(index)));
 }
 
 ///convert a JimList to a json string
@@ -168,7 +168,7 @@ JimList& JimList::pushImage(const std::shared_ptr<jiplib::Jim> imgRaster){
  **/
 std::shared_ptr<jiplib::Jim> JimList::composite(app::AppFactory& app){
   std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>();
-  ImgCollection::composite(*imgWriter, app);
+  ImgList::composite(*imgWriter, app);
   return(imgWriter);
 }
 
@@ -212,7 +212,7 @@ std::shared_ptr<jiplib::Jim> JimList::composite(app::AppFactory& app){
 std::shared_ptr<jiplib::Jim> JimList::crop(app::AppFactory& app){
   /* std::shared_ptr<jiplib::Jim> imgWriter=Jim::createImg(); */
   std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>();
-  ImgCollection::crop(*imgWriter, app);
+  ImgList::crop(*imgWriter, app);
   return(imgWriter);
 }
 
@@ -304,7 +304,7 @@ std::shared_ptr<jiplib::Jim> JimList::stack(){app::AppFactory app;return(stack(a
  **/
 std::shared_ptr<jiplib::Jim> JimList::statProfile(app::AppFactory& app){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
-  ImgCollection::statProfile(*imgWriter, app);
+  ImgList::statProfile(*imgWriter, app);
   return(imgWriter);
 }
 
@@ -332,7 +332,7 @@ std::shared_ptr<jiplib::Jim> JimList::statProfile(app::AppFactory& app){
  * @return this object
  **/
 std::multimap<std::string,std::string> JimList::getStats(app::AppFactory& app){
-  return(ImgCollection::getStats(app));
+  return(ImgList::getStats(app));
 }
 
 /**
@@ -358,12 +358,12 @@ std::multimap<std::string,std::string> JimList::getStats(app::AppFactory& app){
  * @return reference to JimList object
  **/
 JimList& JimList::validate(app::AppFactory& app){
-  ImgCollection::validate(app);
+  ImgList::validate(app);
   return(*this);
 }
 
 // std::shared_ptr<VectorOgr> JimList::extractOgr(VectorOgr& sampleReader, app::AppFactory& app){
-//   return(ImgCollection::extractOgr(sampleReader,app));
+//   return(ImgList::extractOgr(sampleReader,app));
 // }
 
 //automatically ported for now, but should probably better via JimList as implemented here:

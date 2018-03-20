@@ -252,7 +252,7 @@
 #include <memory>
 #include "imageclasses/ImgRaster.h"
 #include "imageclasses/ImgReaderOgr.h"
-#include "imageclasses/ImgCollection.h"
+#include "imageclasses/ImgList.h"
 #include "imageclasses/VectorOgr.h"
 #include "apps/AppFactory.h"
 #include "algorithms/Filter2d.h"
@@ -563,7 +563,7 @@ namespace jiplib{
 //%include "swig/pktools.i"
 %include "swig/mialib_tmp.i"
 %include "swig/jiplib_python.i"
-%include "imageclasses/ImgCollection.h"
+%include "imageclasses/ImgList.h"
 %include "imageclasses/ImgRaster.h"
 %include "imageclasses/ImgReaderOgr.h"
 %include "imageclasses/VectorOgr.h"
