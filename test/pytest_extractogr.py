@@ -20,11 +20,10 @@ try:
     jim0=jl.createJim({'filename':args.input})
     rules=['centroid','min','max','mean','stdev']
     if not args.vector:
-        v01=jim0.extractSample({'random':20,'buffer':3,'rule':rules,'output':'mem01','oformat':'Memory','verbose':1})
+        v01=jim0.extractSample({'random':20,'buffer':3,'rule':rules,'output':'mem01','oformat':'Memory'})
         v01.close()
         npoint=100
         gridsize=int(jim0.nrOfCol()*jim0.getDeltaX()/math.sqrt(npoint))
-        print("gridsize: ",gridsize)
         v02=jim0.extractSample({'grid':gridsize,'buffer':3,'rule':rules,'output':'mem02','oformat':'Memory'})
         v02.close()
         if args.output:
@@ -32,7 +31,6 @@ try:
             v1.write()
             v1.close()
     else:
-        print("Open sample vector",args.vector)
         sample=jl.createVector(args.vector);
         if os.path.basename(args.vector)=='nuts_italy.sqlite':
             if args.noread:
@@ -56,10 +54,15 @@ try:
                 v2.write()
                 v2.close()
         else:
-            jimlist=jl.JimList([jim0])
-            v2=jimlist.extractOgr(sample,{'rule':'mean','output':args.output,'oformat':'SQLite','co':'OVERWRITE=YES'})
+            jl1=jl.JimList([jim0.crop({'band':0})])
+            jl2=jl.JimList([jim0.crop({'band':1})])
+            v1=jl1.extractOgr(sample,{'rule':'mean','output':'ogr1','oformat':'Memory','bandname':['B01'],'fid':'fid'})
+            v2=jl2.extractOgr(sample,{'rule':'mean','output':'ogr2','oformat':'Memory','bandname':['B02'],'fid':'fid'})
+            v1.write()
             v2.write()
-            v2.close()
+            v3=v1.join(v2,{'output':args.output,'co':'OVERWRITE=YES','key':['fid']});
+            v3.write()
+            v3.close()
         sample.close()
     jim0.close()
     print("Success: extractogr")
