@@ -16,7 +16,8 @@ parser.add_argument("-output","--output",help="Path of the output vector dataset
 parser.add_argument("-noread","--noread",help="Postpone reading raster dataset",dest="noread",required=False,type=bool,default=False)
 args = parser.parse_args()
 
-try:
+# try:
+if True:
     jim0=jl.createJim({'filename':args.input})
     rules=['centroid','min','max','mean','stdev']
     if not args.vector:
@@ -54,17 +55,49 @@ try:
                 v2.write()
                 v2.close()
         else:
-            jl1=jl.JimList([jim0.crop({'band':0})])
-            jl2=jl.JimList([jim0.crop({'band':1})])
-            v1=jl1.extractOgr(sample,{'rule':'mean','output':'ogr1','oformat':'Memory','bandname':['B01'],'fid':'fid'})
-            v2=jl2.extractOgr(sample,{'rule':'mean','output':'ogr2','oformat':'Memory','bandname':['B02'],'fid':'fid'})
-            v1.write()
-            v2.write()
-            v3=v1.join(v2,{'output':args.output,'co':'OVERWRITE=YES','key':['fid']});
-            v3.write()
-            v3.close()
+            v=jl.createVector()
+            for band in range(0,11):
+                print(band)
+                print("create jimlist")
+                jl0=jl.JimList([jim0.crop({'band':band})])
+                bandname='B'+str(band)
+                print("bandname: ",bandname)
+                if not band:
+                    print("first time")
+                    print("extractOgr")
+                    v=jl0.extractOgr(sample,{'rule':'mean','output':args.output,'oformat':'SQLite','co':['OVERWRITE=YES'],'bandname':bandname,'fid':'fid'})
+                    v.write()
+                    v.close()
+                else:
+                    v1=jl.createVector(args.output)
+                    v2=jl0.extractOgr(sample,{'rule':'mean','output':'/vsimem/v2.sqlite','oformat':'SQLite','co':['OVERWRITE=YES'],'bandname':bandname,'fid':'fid'})
+                    v=v1.join(v2,{'output':args.output,'oformat':'SQLite','co':['OVERWRITE=YES'],'key':['fid']});
+                    v1.close()
+                    v2.close()
+                    v.write()
+                    v.close()
+                    # v2=jl0.extractOgr(sample,{'rule':'mean','output':'/vsimem/v2.sqlite','oformat':'SQLite','co':['OVERWRITE=YES'],'bandname':bandname,'fid':'fid'})
+                    # #this seems not to be needed
+                    # # v2.write()
+                    # # v2.close()
+                    # # v2=jl.createVector('/vsimem/v2.sqlite')
+                    # v1=jl.createVector(args.output)
+                    # vtmp=v1.join(v2,{'output':'/vsimem/join.sqlite','oformat':'SQLite','co':['OVERWRITE=YES'],'key':['fid']});
+                    # #but here we need to write and close the result of the join
+                    # vtmp.write()
+                    # vtmp.close()
+                    # vtmp=jl.createVector('/vsimem/join.sqlite')
+                    # v1.close()
+                    # v2.close()
+                    # v=jl.createVector(vtmp,{'filename':args.output,'oformat':'SQLite','co':['OVERWRITE=YES']})
+                    # v.write()
+                    # v.close()
+                    # vtmp.close()
+            jl0.close()
         sample.close()
     jim0.close()
     print("Success: extractogr")
+try:
+    print("ok")
 except:
     print("Failed: extractogr")
