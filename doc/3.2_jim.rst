@@ -1,0 +1,18 @@
+Jim class
+======================================================
+
+.. toctree::
+   :maxdepth: 3
+   
+.. py:module:: jiplib
+
+.. autoclass:: Jim
+
+Jim methods
+^^^^^^^^^^^
+
+.. automethod:: jiplib.Jim.open
+
+.. automethod:: jiplib.Jim.close
+
+.. automethod:: jiplib.Jim.write

@@ -54,7 +54,8 @@ Jim::~Jim(void){
         delete(m_mia[iband]);
     m_mia.clear();
   }
-  ImgRaster::reset();
+  // ImgRaster::reset();
+  close();
 }
 
 ///Create new shared pointer to Jim object
