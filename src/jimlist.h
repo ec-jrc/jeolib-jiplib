@@ -47,6 +47,9 @@ namespace jiplib{
     ///create a JSON string from a list
     std::string jl2json();
     ///push image to collection
+#ifdef SWIG
+    %pythonprepend pushImage(const std::shared_ptr<jiplib::Jim> imgRaster)  "\"\"\"HELP.METHOD.JimList.pushImage(Jim)\"\"\""
+#endif
     JimList& pushImage(const std::shared_ptr<jiplib::Jim> imgRaster);
     ///pop image from collection
     JimList& popImage(){ImgList::popImage();return(*this);};
@@ -62,6 +65,9 @@ namespace jiplib{
     ///return an empty collection
     JimList& clean(){ImgList::clean();return(*this);};
     ///close all images in collection
+#ifdef SWIG
+    %pythonprepend close(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.JimList.close(dict)\"\"\""
+#endif
     JimList& close(){ImgList::close();return(*this);};
     ///Get the no data values of this dataset as a standard template library (stl) vector
     JimList& getNoDataValues(std::vector<double>& noDataValues){ImgList::getNoDataValues(noDataValues);return(*this);};

@@ -1122,8 +1122,6 @@ bool Jim::isEqual(std::shared_ptr<Jim> refImg){
 }
 
 
-///Clear all no data values, including the one in GDAL dataset if it is set
-CPLErr Jim::clearNoData(int band){return(ImgRaster::clearNoData(band));}
 
 ///crop Jim image in memory returning Jim image
 /**

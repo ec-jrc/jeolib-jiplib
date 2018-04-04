@@ -1,0 +1,46 @@
+VectorOgr class
+*************
+
+.. toctree::
+   :maxdepth: 3
+   
+.. py:module:: jiplib
+
+.. autoclass:: VectorOgr
+
+VectorOgr methods
+===============
+
+Accessing VectorOgr attributes and geospatial information
+---------------------------------------------------------
+
+.. automethod:: jiplib.VectorOgr.getLayerCount
+.. automethod:: jiplib.VectorOgr.getFeatureCount
+
+Get geospatial information
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automethod:: jiplib.VectorOgr.getBoundingBox
+.. automethod:: jiplib.VectorOgr.
+.. automethod:: jiplib.VectorOgr.getUly
+.. automethod:: jiplib.VectorOgr.getLrx
+.. automethod:: jiplib.VectorOgr.getLry
+
+Input/Output methods
+--------------------
+
+.. automethod:: jiplib.VectorOgr.open
+.. automethod:: jiplib.VectorOgr.close
+.. automethod:: jiplib.VectorOgr.write
+
+Classification methods
+----------------------
+
+.. automethod:: jiplib.VectorOgr.train (svm,ann)
+.. automethod:: jiplib.VectorOgr.classify (svm,ann) (not implemented yet)
+.. automethod:: jiplib.VectorOgr.classifySML (not implemented yet)
+
+statistics
+----------
+
+.. automethod:: jiplib.VectorOgr.getStats (currently only in pktools, to be ported to jiplib)

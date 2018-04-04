@@ -1,0 +1,67 @@
+JimList class
+*************
+
+.. toctree::
+   :maxdepth: 3
+   
+.. py:module:: jiplib
+
+.. autoclass:: JimList
+
+JimList methods
+===============
+
+Accessing JimList attributes and geospatial information
+-------------------------------------------------------
+
+Access JimList attributes
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automethod:: jiplib.JimList.getImage
+.. automethod:: jiplib.JimList.pushImage
+.. automethod:: jiplib.JimList.
+.. automethod:: jiplib.JimList.pushNoDataValue
+.. automethod:: jiplib.JimList.clearNoData
+
+Get geospatial information
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automethod:: jiplib.JimList.covers
+.. automethod:: jiplib.JimList.selectGeo
+.. automethod:: jiplib.JimList.getBoundingBox
+.. automethod:: jiplib.JimList.getUlx
+.. automethod:: jiplib.JimList.getUly
+.. automethod:: jiplib.JimList.getLrx
+.. automethod:: jiplib.JimList.getLry
+
+Classification methods
+----------------------
+
+.. automethod:: jiplib.JimList.validate
+
+Reduce methods
+--------------
+
+.. automethod:: jiplib.JimList.composite
+.. automethod:: jiplib.JimList.stack
+
+Statistical methods
+-------------------
+
+.. automethod:: jiplib.JimList.getStats
+.. automethod:: jiplib.JimList.statProfile
+
+..
+   Segmentation methods and label operators (from MIA module label)
+   ----------------------------------------
+
+      - momentsLutsToEllipseLuts
+      - labelConstrainedCCsMultiband
+      - labelStronglyCCsMultiband
+      - labelStronglyCCsMultiband
+      - alphaTree
+      - alphaTreeToCCs
+      - alphaTreeNextLevel
+      - alphaTreeGetPersistenceLut
+      - dissimilarityMatrix
+

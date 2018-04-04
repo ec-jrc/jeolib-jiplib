@@ -168,10 +168,34 @@
   %append_output(PyFloat_FromDouble(*$1));
 }
 
-/* Set the input argument to point to a temporary variable */
-%typemap(in, numinputs=0) double *gt (double temp) {
-  $1 = &temp;
+/* %typemap(in) double* setGeoTransform(float temp[6]){ */
+%typemap(in) double* gt(double temp[6]){
+  //std::cout << "we are in typemap(in) setGeoTransform" << std::endl;
+  int i;
+  if (!PySequence_Check($input)) {
+    PyErr_SetString(PyExc_ValueError,"Expected a sequence");
+    return NULL;
+  }
+  if (PySequence_Length($input) != 6) {
+    PyErr_SetString(PyExc_ValueError,"Size mismatch. Expected 6 elements");
+    return NULL;
+  }
+  for (i = 0; i < 6; i++) {
+    PyObject *o = PySequence_GetItem($input,i);
+    if (PyNumber_Check(o)) {
+      temp[i] = PyFloat_AsDouble(o);
+    } else {
+      PyErr_SetString(PyExc_ValueError,"Sequence elements must be numbers");
+      return NULL;
+    }
+  }
+  $1 = temp;
  }
+
+/* /\* Set the input argument to point to a temporary variable *\/ */
+/* %typemap(in, numinputs=0) double *gt (double temp) { */
+/*   $1 = &temp; */
+/*  } */
 
 %typemap(argout) double* getGeoTransform{
   // Append output value $1 to $result

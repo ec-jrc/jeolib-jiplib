@@ -144,8 +144,128 @@ namespace jiplib{
     std::shared_ptr<Jim> clone(bool copyData=true);
     ///get size in Bytes of the current data type
     size_t getDataTypeSizeBytes(int band=0) const;
+    ///Get the number of columns of this dataset
+#ifdef SWIG
+    %pythonprepend nrOfCol()  "\"\"\"HELP.METHOD.Jim.nrOfCol()\"\"\""
+#endif
+       int nrOfCol() const { return ImgRaster::nrOfCol();};
+    ///Get the number of rows of this dataset
+#ifdef SWIG
+    %pythonprepend nrOfRow()  "\"\"\"HELP.METHOD.Jim.nrOfRow()\"\"\""
+#endif
+       int nrOfRow() const { return ImgRaster::nrOfRow();};
     ///Get the number of planes of this dataset
-    int nrOfPlane(void) const { return m_nplane;};
+#ifdef SWIG
+    %pythonprepend nrOfPlane()  "\"\"\"HELP.METHOD.Jim.nrOfPlane()\"\"\""
+#endif
+       int nrOfPlane() const { return m_nplane;};
+    ///printNoDataValues
+#ifdef SWIG
+    %pythonprepend printNoDataValues()  "\"\"\"HELP.METHOD.Jim.printNoDataValues()\"\"\""
+#endif
+    CPLErr printNoDataValues() const { return ImgRaster::printNoDataValues();};
+    //needed in order not to hide this base class function
+    using ImgRaster::getNoDataValues;
+    ///getNoDataValues
+#ifdef SWIG
+    %pythonprepend getNoDataValues()  "\"\"\"HELP.METHOD.Jim.getNoDataValues()\"\"\""
+#endif
+    std::vector<double> getNoDataValues() const { return ImgRaster::getNoDataValues();};
+    ///pushNoDataValue
+#ifdef SWIG
+    %pythonprepend pushNoDataValue(double)  "\"\"\"HELP.METHOD.Jim.pushNoDataValue(*args)\"\"\""
+#endif
+    CPLErr pushNoDataValue(double noDataValue) { return ImgRaster::pushNoDataValue(noDataValue);};
+    ///setNoData
+#ifdef SWIG
+    %pythonprepend setNoData(const std::vector<double>&) "\"\"\"HELP.METHOD.Jim.setNoData(*args)\"\"\""
+#endif
+    CPLErr setNoData(const std::vector<double>& nodata) { return ImgRaster::setNoData(nodata);};
+    ///Clear all no data values, including the one in GDAL dataset if it is set
+#ifdef SWIG
+    %pythonprepend clearNoData(int)  "\"\"\"HELP.METHOD.Jim.clearNoData(band)\"\"\""
+#endif
+    CPLErr clearNoData(int band=0){return(ImgRaster::clearNoData(band));}
+    ///Get the internal datatype for this raster dataset
+#ifdef SWIG
+    %pythonprepend getDataType(int)  "\"\"\"HELP.METHOD.Jim.getDataType(*args)\"\"\""
+#endif
+    int getDataType(int band=0) const { return ImgRaster::getDataType(band);};
+    ///Check if a geolocation is covered by this dataset. Only the bounding box is checked, irrespective of no data values.
+#ifdef SWIG
+    %pythonprepend covers(double, double, OGRCoordinateTransformation*)  "\"\"\"HELP.METHOD.Jim.covers(*args)\"\"\""
+#endif
+    bool covers(double x, double y, OGRCoordinateTransformation *poCT=NULL) const{return ImgRaster::covers(x,y,poCT);};
+    ///Check if a region of interest is (partially or all if all is set) covered by this dataset. Only the bounding box is checked, irrespective of no data values.
+#ifdef SWIG
+    %pythonprepend covers(double, double, double, double, bool, OGRCoordinateTransformation*)  "\"\"\"HELP.METHOD.Jim.covers(*args)\"\"\""
+#endif
+    bool covers(double ulx, double  uly, double lrx, double lry, bool all=false, OGRCoordinateTransformation *poCT=NULL) const{return ImgRaster::covers(ulx,uly,lrx,lry,all,poCT);};
+    ///Get the geotransform data for this dataset
+    using ImgRaster::getGeoTransform;
+#ifdef SWIG
+    %pythonprepend getGeoTransform(double*)  "\"\"\"HELP.METHOD.Jim.getGeoTransform(*args)\"\"\""
+#endif
+       CPLErr getGeoTransform(double* gt) const{return ImgRaster::getGeoTransform(gt);};
+    ///Set the geotransform data for this dataset
+#ifdef SWIG
+    %pythonprepend setGeoTransform(double*)  "\"\"\"HELP.METHOD.Jim.setGeoTransform(*args)\"\"\""
+#endif
+       CPLErr setGeoTransform(double* gt){return ImgRaster::setGeoTransform(gt);};
+    ///Copy geotransform information from another georeferenced image
+#ifdef SWIG
+    %pythonprepend copyGeoTransform(const ImgRaster&)  "\"\"\"HELP.METHOD.Jim.copyGeoTransform(*args)\"\"\""
+#endif
+       CPLErr copyGeoTransform(const ImgRaster& imgSrc){return ImgRaster::copyGeoTransform(imgSrc);};
+    ///Get the projection for this dataget in well known text (wkt) format
+#ifdef SWIG
+    %pythonprepend getProjection()  "\"\"\"HELP.METHOD.Jim.getProjection()\"\"\""
+#endif
+       std::string getProjection(){return ImgRaster::getProjection();};
+    ///Set the projection for this dataset in well known text (wkt) format
+#ifdef SWIG
+    %pythonprepend setProjection(const std::string&)  "\"\"\"HELP.METHOD.Jim.setProjection(*args)\"\"\""
+#endif
+       CPLErr setProjection(const std::string& projection){return ImgRaster::setProjection(projection);};
+    ///Get the bounding box of this dataset in georeferenced coordinates with coordinate transform
+#ifdef SWIG
+    %pythonprepend getBoundingBox(double&, double&, double&, double&, OGRCoordinateTransformation *)  "\"\"\"HELP.METHOD.Jim.getBoundingBox(*args)\"\"\""
+#endif
+       void getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT=NULL) const{return ImgRaster::getBoundingBox(ulx,uly,lrx,lry,poCT);};
+    ///Get the bounding box of this dataset in georeferenced coordinates with coordinate transform
+    void getBoundingBox(std::vector<double> &bbvector, OGRCoordinateTransformation *poCT=NULL) const{return ImgRaster::getBoundingBox(bbvector,poCT);};
+#ifdef SWIG
+    %pythonprepend getCenterPos(double&, double&)  "\"\"\"HELP.METHOD.Jim.getCenterPos(*args)\"\"\""
+#endif
+       void getCenterPos(double& centerX, double& centerY){return ImgRaster::getCenterPos(centerX, centerY);};
+#ifdef SWIG
+    %pythonprepend getUlx()  "\"\"\"HELP.METHOD.Jim.getUlx(*args)\"\"\""
+#endif
+    double getUlx(){return ImgRaster::getUlx();};
+#ifdef SWIG
+    %pythonprepend getUly()  "\"\"\"HELP.METHOD.Jim.getUly(*args)\"\"\""
+#endif
+    double getUly(){return ImgRaster::getUly();};
+#ifdef SWIG
+    %pythonprepend getLrx()  "\"\"\"HELP.METHOD.Jim.getLrx(*args)\"\"\""
+#endif
+    double getLrx(){return ImgRaster::getLrx();};
+#ifdef SWIG
+    %pythonprepend getLry()  "\"\"\"HELP.METHOD.Jim.getLry(*args)\"\"\""
+#endif
+    double getLry(){return ImgRaster::getLry();};
+#ifdef SWIG
+    %pythonprepend getDeltaX()  "\"\"\"HELP.METHOD.Jim.getDeltaX(*args)\"\"\""
+#endif
+    double getDeltaX(){return ImgRaster::getDeltaX();};
+#ifdef SWIG
+    %pythonprepend getDeltaY()  "\"\"\"HELP.METHOD.Jim.getDeltaY(*args)\"\"\""
+#endif
+    double getDeltaY(){return ImgRaster::getDeltaY();};
+#ifdef SWIG
+    %pythonprepend getRefPix(double&, double &, int)  "\"\"\"HELP.METHOD.Jim.getRefPix(*args)\"\"\""
+#endif
+       void getRefPix(double& refX, double &refY, int band=0){return ImgRaster::getRefPix(refX, refY, band);};
     ///Initialize the memory for read/write image in cache
     CPLErr initMem(unsigned int memory);
     /// convert single plane multiband image to single band image with multiple planes
@@ -254,8 +374,6 @@ namespace jiplib{
     ///set mask to raster dataset
     std::shared_ptr<Jim> setMask(VectorOgr& ogrReader, app::AppFactory& app);
     std::shared_ptr<Jim> setMask(JimList& maskList, app::AppFactory& app);
-    ///Clear all no data values, including the one in GDAL dataset if it is set
-    CPLErr clearNoData(int band=0);
     ///reclass raster dataset
     std::shared_ptr<Jim> reclass(app::AppFactory& app);
 

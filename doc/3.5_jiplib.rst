@@ -1,0 +1,32 @@
+Jiplib global functions
+=======================
+
+.. toctree::
+   :maxdepth: 3
+   
+.. py:module:: jiplib
+
+This group of functions contains utility routines that do non belong to a single class. These functions allow users to create object instances from the classes Jim, JimList and VectorOgr
+
+
+Create Jim image raster object
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: jiplib.createJim
+
+Create JimList (list of image rasters) object
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: jiplib.createJimList
+
+Create VectorOgr object
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: jiplib.createVector
+
+Help functions
+^^^^^^^^^^^^^^
+
+ ..
+    .. autofunction:: jiplib.help
+    .. image:: images/help.png

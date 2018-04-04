@@ -1,8 +1,9 @@
 #+TITLE: List of functions in JIPlib
 * Global functions
-  - createVector
   - createJim
   - createJimList
+  - createVector
+  - help
 ** Miscelaneous operators (from MIA module miscel)
    - julianDate
 * Jim
