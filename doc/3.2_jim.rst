@@ -59,7 +59,6 @@ Input/Output methods
 .. automethod:: jiplib.Jim.open
 .. automethod:: jiplib.Jim.close
 .. automethod:: jiplib.Jim.write
-.. automethod:: jiplib.Jim.setFile
 .. automethod:: jiplib.Jim.dumpImg
 .. automethod:: jiplib.Jim.isEqual
 ..

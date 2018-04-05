@@ -98,40 +98,6 @@ namespace jiplib{
     /*   std::shared_ptr<Jim> pJim=std::make_shared<Jim>(dataPointers,ncol,nrow,nplane,dataType); */
     /*   return(pJim); */
     /* } */
-    ///Open an image for writing using an external data pointer
-    CPLErr open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType);
-    ///Open a multiband image for writing using a external data pointers
-    CPLErr open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType);
-    ///Open an image for writing in memory, defining image attributes.
-    /* void open(int ncol, int nrow, int nband, int dataType); */
-    ///Open an image for writing, based on an existing image object
-    CPLErr open(Jim& imgSrc, bool copyData=true);
-    ///Open dataset
-    CPLErr open(const std::string& filename, bool readData=true, unsigned int memory=0);
-    //open dataset
-#ifdef SWIG
-    %pythonprepend open(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.Jim.open(dict)\"\"\""
-#endif
-    CPLErr open(app::AppFactory &app);
-    ///write to file previously set (eg., with setFile). Specialization of the writeData member function of ImgRaster, avoiding reset of the memory.
-    CPLErr write();
-    ///write to file Specialization of the writeData member function of ImgRaster, avoiding reset of the memory.
-    /**
-     * @param output (type: std::string) Output image file
-     * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
-     * @param co (type: std::string) Creation option for output file. Multiple options can be specified.
-     * @return CE_None if successful, CE_Failure if not.
-     * @param nodata Nodata value to put in image.
-     **/
-#ifdef SWIG
-    %pythonprepend write(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.Jim.write(dict)\"\"\""
-#endif
-    CPLErr write(app::AppFactory &theApp);
-    ///Close dataset (specialization of the close member function of ImgRaster, avoiding writing the data)
-#ifdef SWIG
-    %pythonprepend close()  "\"\"\"HELP.METHOD.Jim.close()\"\"\""
-#endif
-    CPLErr close();
     ///Create a JSON string from a Jim image
     std::string jim2json();
     ///Create a custom collection from a Jim image
@@ -144,6 +110,9 @@ namespace jiplib{
     std::shared_ptr<Jim> clone(bool copyData=true);
     ///get size in Bytes of the current data type
     size_t getDataTypeSizeBytes(int band=0) const;
+    /* --------------------- */
+    /* Access Jim attributes */
+    /* --------------------- */
     ///Get the number of columns of this dataset
 #ifdef SWIG
     %pythonprepend nrOfCol()  "\"\"\"HELP.METHOD.Jim.nrOfCol()\"\"\""
@@ -163,44 +132,47 @@ namespace jiplib{
 #ifdef SWIG
     %pythonprepend printNoDataValues()  "\"\"\"HELP.METHOD.Jim.printNoDataValues()\"\"\""
 #endif
-    CPLErr printNoDataValues() const { return ImgRaster::printNoDataValues();};
+       CPLErr printNoDataValues() const { return ImgRaster::printNoDataValues();};
     //needed in order not to hide this base class function
     using ImgRaster::getNoDataValues;
     ///getNoDataValues
 #ifdef SWIG
     %pythonprepend getNoDataValues()  "\"\"\"HELP.METHOD.Jim.getNoDataValues()\"\"\""
 #endif
-    std::vector<double> getNoDataValues() const { return ImgRaster::getNoDataValues();};
+       std::vector<double> getNoDataValues() const { return ImgRaster::getNoDataValues();};
     ///pushNoDataValue
 #ifdef SWIG
     %pythonprepend pushNoDataValue(double)  "\"\"\"HELP.METHOD.Jim.pushNoDataValue(*args)\"\"\""
 #endif
-    CPLErr pushNoDataValue(double noDataValue) { return ImgRaster::pushNoDataValue(noDataValue);};
+       CPLErr pushNoDataValue(double noDataValue) { return ImgRaster::pushNoDataValue(noDataValue);};
     ///setNoData
 #ifdef SWIG
     %pythonprepend setNoData(const std::vector<double>&) "\"\"\"HELP.METHOD.Jim.setNoData(*args)\"\"\""
 #endif
-    CPLErr setNoData(const std::vector<double>& nodata) { return ImgRaster::setNoData(nodata);};
+       CPLErr setNoData(const std::vector<double>& nodata) { return ImgRaster::setNoData(nodata);};
     ///Clear all no data values, including the one in GDAL dataset if it is set
 #ifdef SWIG
     %pythonprepend clearNoData(int)  "\"\"\"HELP.METHOD.Jim.clearNoData(band)\"\"\""
 #endif
-    CPLErr clearNoData(int band=0){return(ImgRaster::clearNoData(band));}
+       CPLErr clearNoData(int band=0){return(ImgRaster::clearNoData(band));}
     ///Get the internal datatype for this raster dataset
 #ifdef SWIG
     %pythonprepend getDataType(int)  "\"\"\"HELP.METHOD.Jim.getDataType(*args)\"\"\""
 #endif
-    int getDataType(int band=0) const { return ImgRaster::getDataType(band);};
+       int getDataType(int band=0) const { return ImgRaster::getDataType(band);};
+    /* -------------------------- */
+    /* Get geospatial information */
+    /* -------------------------- */
     ///Check if a geolocation is covered by this dataset. Only the bounding box is checked, irrespective of no data values.
 #ifdef SWIG
     %pythonprepend covers(double, double, OGRCoordinateTransformation*)  "\"\"\"HELP.METHOD.Jim.covers(*args)\"\"\""
 #endif
-    bool covers(double x, double y, OGRCoordinateTransformation *poCT=NULL) const{return ImgRaster::covers(x,y,poCT);};
+       bool covers(double x, double y, OGRCoordinateTransformation *poCT=NULL) const{return ImgRaster::covers(x,y,poCT);};
     ///Check if a region of interest is (partially or all if all is set) covered by this dataset. Only the bounding box is checked, irrespective of no data values.
 #ifdef SWIG
     %pythonprepend covers(double, double, double, double, bool, OGRCoordinateTransformation*)  "\"\"\"HELP.METHOD.Jim.covers(*args)\"\"\""
 #endif
-    bool covers(double ulx, double  uly, double lrx, double lry, bool all=false, OGRCoordinateTransformation *poCT=NULL) const{return ImgRaster::covers(ulx,uly,lrx,lry,all,poCT);};
+       bool covers(double ulx, double  uly, double lrx, double lry, bool all=false, OGRCoordinateTransformation *poCT=NULL) const{return ImgRaster::covers(ulx,uly,lrx,lry,all,poCT);};
     ///Get the geotransform data for this dataset
     using ImgRaster::getGeoTransform;
 #ifdef SWIG
@@ -241,31 +213,86 @@ namespace jiplib{
 #ifdef SWIG
     %pythonprepend getUlx()  "\"\"\"HELP.METHOD.Jim.getUlx(*args)\"\"\""
 #endif
-    double getUlx(){return ImgRaster::getUlx();};
+       double getUlx(){return ImgRaster::getUlx();};
 #ifdef SWIG
     %pythonprepend getUly()  "\"\"\"HELP.METHOD.Jim.getUly(*args)\"\"\""
 #endif
-    double getUly(){return ImgRaster::getUly();};
+       double getUly(){return ImgRaster::getUly();};
 #ifdef SWIG
     %pythonprepend getLrx()  "\"\"\"HELP.METHOD.Jim.getLrx(*args)\"\"\""
 #endif
-    double getLrx(){return ImgRaster::getLrx();};
+       double getLrx(){return ImgRaster::getLrx();};
 #ifdef SWIG
     %pythonprepend getLry()  "\"\"\"HELP.METHOD.Jim.getLry(*args)\"\"\""
 #endif
-    double getLry(){return ImgRaster::getLry();};
+       double getLry(){return ImgRaster::getLry();};
 #ifdef SWIG
     %pythonprepend getDeltaX()  "\"\"\"HELP.METHOD.Jim.getDeltaX(*args)\"\"\""
 #endif
-    double getDeltaX(){return ImgRaster::getDeltaX();};
+       double getDeltaX(){return ImgRaster::getDeltaX();};
 #ifdef SWIG
     %pythonprepend getDeltaY()  "\"\"\"HELP.METHOD.Jim.getDeltaY(*args)\"\"\""
 #endif
-    double getDeltaY(){return ImgRaster::getDeltaY();};
+       double getDeltaY(){return ImgRaster::getDeltaY();};
 #ifdef SWIG
     %pythonprepend getRefPix(double&, double &, int)  "\"\"\"HELP.METHOD.Jim.getRefPix(*args)\"\"\""
 #endif
        void getRefPix(double& refX, double &refY, int band=0){return ImgRaster::getRefPix(refX, refY, band);};
+    /* -------------------- */
+    /* Input/Output methods */
+    /* -------------------- */
+    ///Open an image for writing using an external data pointer
+    CPLErr open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType);
+    ///Open a multiband image for writing using a external data pointers
+    CPLErr open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType);
+    ///Open an image for writing in memory, defining image attributes.
+    /* void open(int ncol, int nrow, int nband, int dataType); */
+    ///Open an image for writing, based on an existing image object
+    CPLErr open(Jim& imgSrc, bool copyData=true);
+    ///Open dataset
+    CPLErr open(const std::string& filename, bool readData=true, unsigned int memory=0);
+    //open dataset
+#ifdef SWIG
+    %pythonprepend open(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.Jim.open(dict)\"\"\""
+#endif
+    CPLErr open(app::AppFactory &app);
+    ///Close dataset (specialization of the close member function of ImgRaster, avoiding writing the data)
+#ifdef SWIG
+    %pythonprepend close()  "\"\"\"HELP.METHOD.Jim.close()\"\"\""
+#endif
+       CPLErr close();
+    ///write to file previously set (eg., with setFile). Specialization of the writeData member function of ImgRaster, avoiding reset of the memory.
+    CPLErr write();
+    ///write to file Specialization of the writeData member function of ImgRaster, avoiding reset of the memory.
+    /**
+     * @param output (type: std::string) Output image file
+     * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
+     * @param co (type: std::string) Creation option for output file. Multiple options can be specified.
+     * @return CE_None if successful, CE_Failure if not.
+     * @param nodata Nodata value to put in image.
+     **/
+#ifdef SWIG
+    %pythonprepend write(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.Jim.write(dict)\"\"\""
+#endif
+    CPLErr write(app::AppFactory &theApp);
+    ///dump raster dataset
+#ifdef SWIG
+    %pythonprepend dumpImg(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.Jim.dumpImg(dict)\"\"\""
+#endif
+       CPLErr dumpImg(app::AppFactory& app){return ImgRaster::dumpImg(app);};
+    ///assignment operator
+    Jim& operator=(Jim& imgSrc);
+    /* ///relational == operator */
+    /* bool operator==(Jim& refImg); */
+    ///relational == operator
+    /* bool operator==(std::shared_ptr<Jim> refImg); */
+    ///test for equality (relational == operator)
+    /* bool isEqual(Jim& refImg){return(*this==(refImg));}; */
+    ///Test raster dataset for equality.
+#ifdef SWIG
+    %pythonprepend isEqual(std::shared_ptr<Jim> refImg)  "\"\"\"HELP.METHOD.Jim.isEqual(*args)\"\"\""
+#endif
+    bool isEqual(std::shared_ptr<Jim> refImg);
     ///Initialize the memory for read/write image in cache
     CPLErr initMem(unsigned int memory);
     /// convert single plane multiband image to single band image with multiple planes
@@ -288,16 +315,6 @@ namespace jiplib{
     int GDAL2MIADataType(GDALDataType aGDALDataType);
     ///convert a MIA data type to GDAL data type
     int MIA2JIPLIBDataType(int aMIADataType);
-    ///assignment operator
-    Jim& operator=(Jim& imgSrc);
-    /* ///relational == operator */
-    /* bool operator==(Jim& refImg); */
-    ///relational == operator
-    /* bool operator==(std::shared_ptr<Jim> refImg); */
-    ///test for equality (relational == operator)
-    /* bool isEqual(Jim& refImg){return(*this==(refImg));}; */
-    ///relational == operator
-    bool isEqual(std::shared_ptr<Jim> refImg);
 
     //start insert from fun2method_imagetype
     //end insert from fun2method_imagetype
@@ -322,6 +339,9 @@ namespace jiplib{
     ///crop Jim image in memory returning Jim image
     std::shared_ptr<Jim> crop(VectorOgr& sampleReader, app::AppFactory& app);
     ///filter Jim image in spectral/temporal domain
+#ifdef SWIG
+    %pythonprepend filter1d(app::AppFactory& theApp)  "\"\"\"HELP.METHOD.filter1d(dict)\"\"\""
+#endif
     std::shared_ptr<Jim> filter1d(app::AppFactory& theApp);
     ///filter Jim image in spatial domain
     std::shared_ptr<Jim> filter2d(const app::AppFactory& theApp);
@@ -433,7 +453,10 @@ namespace jiplib{
   %pythonprepend createJim(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.createJim(dict)\"\"\""
 #endif
      static std::shared_ptr<Jim> createJim(app::AppFactory &theApp){return(Jim::createImg(theApp));};
-  static std::shared_ptr<Jim> createJim(const std::shared_ptr<Jim> pSrc, bool copyData=true){return(Jim::createImg(pSrc, copyData));};
+#ifdef SWIG
+  %pythonprepend createJim(const std::shared_ptr<Jim>,bool)  "\"\"\"HELP.METHOD.createJim(*args)\"\"\""
+#endif
+     static std::shared_ptr<Jim> createJim(const std::shared_ptr<Jim> pSrc, bool copyData=true){return(Jim::createImg(pSrc, copyData));};
   static std::shared_ptr<Jim> createJim(const std::string& filename, bool readData=true){return(Jim::createImg(filename,readData));};
   /* static std::shared_ptr<Jim> createImg(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType); */
   /* static std::shared_ptr<Jim> createImg(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType); */

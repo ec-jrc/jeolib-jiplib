@@ -43,9 +43,8 @@ extent   get boundary from extent from polygons in vector dataset
 noread   Set this flag to True to not read data when opening
 ======== ===================================================
 
-###
-# resample: (default: GRIORA_NearestNeighbour) Resample algorithm used for reading pixel data in case of interpolation GRIORA_NearestNeighbour | GRIORA_Bilinear | GRIORA_Cubic | GRIORA_CubicSpline | GRIORA_Lanczos | GRIORA_Average | GRIORA_Average | GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)
-###
+..
+   resample: (default: GRIORA_NearestNeighbour) Resample algorithm used for reading pixel data in case of interpolation GRIORA_NearestNeighbour | GRIORA_Bilinear | GRIORA_Cubic | GRIORA_CubicSpline | GRIORA_Lanczos | GRIORA_Average | GRIORA_Average | GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)
 
 Supported keys when creating new Jim image object not read from file:
 ===== =================
@@ -116,6 +115,19 @@ Create a new georeferenced Jim image object for writing by defining the projecti
     jim=jl.Jim.createImg(dict)
     #do stuff with jim ...
     jim.close()
+
+END
+
+FUNC createJim(*args)
+Creates an empty Jim object as an instance of the basis image class of the Joint image processing library.
+
+Args:
+
+    * ``Jim``: A reference Jim object
+    * ``copyData`` (bool): Set to False if reference image is used as a template only, without copying actual pixel dat
+
+Returns:
+   This instance of Jim object (self)
 
 END
 
@@ -402,9 +414,9 @@ Returns:
 
 END
 
-********************
+--------------------
 Input/Output methods
-********************
+--------------------
 
 METHOD open(dict)
 Open a raster dataset
@@ -430,7 +442,8 @@ extent   get boundary from extent from polygons in vector dataset
 noread   Set this flag to True to not read data when opening
 ======== ===================================================
 
-# resample: (default: GRIORA_NearestNeighbour) Resample algorithm used for reading pixel data in case of interpolation GRIORA_NearestNeighbour | GRIORA_Bilinear | GRIORA_Cubic | GRIORA_CubicSpline | GRIORA_Lanczos | GRIORA_Average | GRIORA_Average | GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)
+ ..
+    resample: (default: GRIORA_NearestNeighbour) Resample algorithm used for reading pixel data in case of interpolation GRIORA_NearestNeighbour | GRIORA_Bilinear | GRIORA_Cubic | GRIORA_CubicSpline | GRIORA_Lanczos | GRIORA_Average | GRIORA_Average | GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)
 
 Supported keys when creating new Jim image object not read from file:
 
@@ -460,7 +473,7 @@ See also :py:func:`createJim`
 END
 
 METHOD close()
-Close a raster dataset, releasing resources such as memory and GDAL dataset handle
+Close a raster dataset, releasing resources such as memory and GDAL dataset handle.
 
 END
 
@@ -494,6 +507,247 @@ Create Jim image object by opening an existing file in jp2 format. Then write to
     jim=jl.createJim({'filename':ifn})
     jim.write({'filename':'/tmp/test.tif','co':['COMPRESS=LZW','TILED=YES']})
     jim.close()
+
+END
+
+METHOD dumpImg(dict)
+Dump the raster dataset to output (screen or ASCII file).
+
+Args:
+    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Supported keys in the dict:
+
+=========  =============================================================
+output     Output ascii file (Default is empty: dump to standard output)
+oformat    Output format: matrix or list (x,y,z) form. Default is matrix
+geo        (bool) Set to True to dump x and y in spatial reference system of raster dataset (for list form only). Default is to dump column and row index (starting from 0)
+band       Band index to crop
+srcnodata  Do not dump these no data values (for list form only)
+force      (bool) Set to True to force full dump even for large images (above 100 rows and cols)
+=========  =============================================================
+
+Returns:
+   This instance of Jim object (self)
+
+
+Example:
+Open resampled raster dataset in reduced spatial resolution of 20 km by 20 km and dump to screen (first in matrix then in list format)::
+
+    ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
+    jim=jl.createJim({'filename':ifn, 'dx':20000,'dy':20000,'resample':'GRIORA_Bilinear'})
+    jim.dumpImg({'oformat':'matrix'})
+
+    2503 2794 3148 3194 3042 2892
+    2634 2792 2968 2864 2790 3171
+    2335 2653 2723 2700 2703 2836
+    2510 2814 3027 2946 2889 2814
+    2972 2958 3014 2983 2900 2899
+    2692 2711 2843 2755 2795 2823
+
+    jim.dumpImg({'oformat':'list'})
+
+    0 0 2503
+    1 0 2794
+    2 0 3148
+    3 0 3194
+    4 0 3042
+    5 0 2892
+
+    0 1 2634
+    1 1 2792
+    2 1 2968
+    3 1 2864
+    4 1 2790
+    5 1 3171
+
+    0 2 2335
+    1 2 2653
+    2 2 2723
+    3 2 2700
+    4 2 2703
+    5 2 2836
+
+    0 3 2510
+    1 3 2814
+    2 3 3027
+    3 3 2946
+    4 3 2889
+    5 3 2814
+
+    0 4 2972
+    1 4 2958
+    2 4 3014
+    3 4 2983
+    4 4 2900
+    5 4 2899
+
+    0 5 2692
+    1 5 2711
+    2 5 2843
+    3 5 2755
+    4 5 2795
+    5 5 2823
+
+    jim.close()
+END
+
+METHOD isEqual(*args)
+Test raster dataset for equality.
+
+Args:
+    * ``Jim``: A reference Jim object
+
+Returns:
+   True if raster dataset is equal to reference raster dataset, else False.
+
+END
+
+-----------------------------------------------
+Convolution filters and morphological operators
+-----------------------------------------------
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+spectral/temporal domain (1D)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+METHOD filter1d(dict)
+Filter Jim image in spectral/temporal domain performed on multi-band raster dataset.
+
+Args:
+    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Supported keys in the dict:
+
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++------------------+---------------------------------------------------------------------------------+
+| filter           | filter function (see filter functions in tables below)                          |
++------------------+---------------------------------------------------------------------------------+
+| dz               | filter kernel size in z (spectral/temporal dimension), must be odd (example: 3) |
++------------------+---------------------------------------------------------------------------------+
+| padding          | method for filtering (how to handle edge effects)                               |
++------------------+---------------------------------------------------------------------------------+
+| otype            | Data type for output image                                                      |
++------------------+---------------------------------------------------------------------------------+
+
+
+.. _filters1d-label:
+
+Morphological filters
+
+.. _filters1d-morphological-label:
+
++---------------------+------------------------------------------------------+
+| filter              | description                                          |
++=====================+======================================================+
+| dilate              | morphological dilation                               |
++---------------------+------------------------------------------------------+
+| erode               | morphological erosion                                |
++---------------------+------------------------------------------------------+
+| close               | morpholigical closing (dilate+erode)                 |
++---------------------+------------------------------------------------------+
+| open                | morpholigical opening (erode+dilate)                 |
++---------------------+------------------------------------------------------+
+
+Note:
+    You can use the optional key 'class' with a list value to take only these pixel values into account. For instance, use 'class':[255] to dilate clouds in the raster dataset that have been flagged with value 255.
+
+Statistical filters
+
+.. _filters1d-statistical-label:
+
++--------------+------------------------------------------------------+
+| filter       | description                                          |
++--------------+------------------------------------------------------+
+| smoothnodata | smooth nodata values (set nodata option!)            |
++--------------+------------------------------------------------------+
+| nvalid       | report number of valid (not nodata) values in window |
++--------------+------------------------------------------------------+
+| median       | perform a median filter                              |
++--------------+------------------------------------------------------+
+| var          | calculate variance in window                         |
++--------------+------------------------------------------------------+
+| min          | calculate minimum in window                          |
++--------------+------------------------------------------------------+
+| max          | calculate maximum in window                          |
++--------------+------------------------------------------------------+
+| sum          | calculate sum in window                              |
++--------------+------------------------------------------------------+
+| mean         | calculate mean in window                             |
++--------------+------------------------------------------------------+
+| stdev        | calculate standard deviation in window               |
++--------------+------------------------------------------------------+
+| percentile   | calculate percentile value in window                 |
++--------------+------------------------------------------------------+
+| proportion   | calculate proportion in window                       |
++--------------+------------------------------------------------------+
+
+
+Note:
+    You can specify the no data value for the smoothnodata filter with the extra key 'nodata' and a list of no data values.
+
+Wavelet filters
+
+.. _filters1d-wavelet-label:
+
++----------+------------------------------------+
+| filter   | description                        |
++----------+------------------------------------+
+| dwt      | discrete wavelet transform         |
++----------+------------------------------------+
+| dwti     | discrete inverse wavelet transform |
++----------+------------------------------------+
+
+Note:
+    You can use set the wavelet family with the key 'family' in the dictionary. The following wavelets are supported as values:
+
+    * daubechies
+    * daubechies_centered
+    * haar
+    * haar_centered
+    * bspline
+    * bspline_centered
+
+
+Spectral filters
+
+.. _filters1d-spectral-label:
+
+Spectral filters assume the bands in the raster dataset correspond to wavelenghts. Full width half max (FWHM) and spectral response filters are supported. An example of both is provided.
+
+The FWHM filter expects a list of center wavelenghts and corresponding FWHM values (e.g., expressed in nm). For the FHWM, use the key 'fwhm' and a list of values. The center wavelenghts correspond to the output wavelenghts (use the key 'wavelengthOut' and a list of values). The algorithm needs to know the input wavelenghts that correspond to the bands of the input raster dataset. Use the key 'wavelengthIn' and a list of values (the list size should exactly correspond to the number of bands in the input raster dataset).
+
+Example::
+
+  wavelengths_in=[]
+  #specify the wavelenghts of the input raster dataset
+  
+  jim_rgb=jim_hyperspectral.filter1d({'wavelengthIn:[wavelenghts_in],'wavelengthOut':[650,510,475],'fwhm':[50,50,50]})
+
+Note:
+    The input wavelenghts are automatically interpolated. You can specify the interpolation using the key 'interp' and values as listed interpolation http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html
+
+The spectral response filter (SRF) 
+In the case of the spectral response filter (SRF), the input raster dataset (typically a hyperspectral image with many narrow contiguous spectral bands) is filtered with a spectral response function. For each spectral response function provided, a separate output band is created. The spectral response function(s) must be listed in two column ASCII file(s) with the wavelengths and response listed in the first and second column respectively. Use the key 'srf' and a list of paths to the ASCII file(s). The response functions can but must not be normalized (this is taken care of by the algorithm).
+
+Example::
+
+   wavelengths_in=[]
+   #specify the wavelenghts of the input raster dataset
+
+   jim_rgb=jim_hyperspectral.filter1d({'wavelengthIn:[wavelenghts_in],'srf':['srf_red.txt','srf_green.txt','srf_blue.txt']})
+
+Note:
+    The input wavelenghts are automatically interpolated. You can specify the interpolation using the key 'interp' and values as listed interpolation http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html
+
+
+Custom filters
+
+.. _filters1d-custom-label:
+
+For the custom filter, you can specify your own taps to be used. For instance, to perform a smoothing filter, use the key 'tapz' with the following list of values: 'tapz':[1 1 1].
 
 END
 
