@@ -94,18 +94,26 @@ Input/Output methods
 Convolution filters and morphological operators
 -----------------------------------------------
 
+.. _filter1d:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 spectral/temporal domain (1D)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automethod:: jiplib.Jim.filter1d
 
+.. _filter2d:
 ^^^^^^^^^^^^^^^^^^^
 spatial domain (2D)
 ^^^^^^^^^^^^^^^^^^^
 
 .. automethod:: jiplib.Jim.filter2d
-..
+
+.. _mia_morpho2d:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Advanced spatial morphological operators
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _mia_convolve2d:
    convolutional filters (from MIA module convolve)
         - convolve
         - convolveDownSample
@@ -119,8 +127,9 @@ spatial domain (2D)
         - gradientAzimuth
         - orientationMap
         - phaseCorrelation
-..
-   Morphological operators (from MIA module erodil)
+
+.. _mia_erodil2d:
+Morphological operators (from MIA module erodil)
         - morphoErodeLine
         - morphoDilateLine
         - morphoDilateLinePeriodic
@@ -135,7 +144,8 @@ spatial domain (2D)
         - morphoRankFilterLineTI
         - morphoGradientMultibandSquareNgb
         - morphoGradientMultiband2dNgb
-..
+
+.. _mia_opclo2d:
    Morphological operators (from MIA module opclo)
         - morphoOpeningAttribute
         - morphoOpeningArea
@@ -145,7 +155,8 @@ spatial domain (2D)
         - convexHull
         - morphoClosingHalfPlane
         - morphoClosingHalfPlaneTI
-..
+
+.. _mia_hmt2d:
    Morphological operators (from MIA module hmt)
         - skeleton
         - pruneBinary
@@ -159,7 +170,7 @@ spatial domain (2D)
         - orderIndependentThin
         - orderIndependentThinFifo
        
-..
+.. _mia_geodesy2d:
    Geodesy operators (from MIA module geodesy)
         - geodesicReconstructionByDilation
         - geodesicReconstructionByErosion
@@ -169,7 +180,8 @@ spatial domain (2D)
         - geodesicTimeFlat
         - geodesicTime
         - geodesicTimeSymmetric
-..
+
+.. _mia_dist2d:
    Distance functions (from MIA dist module)
         - distance2d4
         - distance2dChamfer57
@@ -185,7 +197,7 @@ spatial domain (2D)
 spatial and spectral domain (3D)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-..
+.. _mia_erodil3d:
    Morphological operators (from MIA module erodil)
         - morphoErodeVolumic
 

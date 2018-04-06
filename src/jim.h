@@ -206,6 +206,7 @@ namespace jiplib{
        void getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT=NULL) const{return ImgRaster::getBoundingBox(ulx,uly,lrx,lry,poCT);};
     ///Get the bounding box of this dataset in georeferenced coordinates with coordinate transform
     void getBoundingBox(std::vector<double> &bbvector, OGRCoordinateTransformation *poCT=NULL) const{return ImgRaster::getBoundingBox(bbvector,poCT);};
+    ///Get the center position of the image in georeferenced coordinates with coordinate transform
 #ifdef SWIG
     %pythonprepend getCenterPos(double&, double&)  "\"\"\"HELP.METHOD.Jim.getCenterPos(*args)\"\"\""
 #endif
@@ -293,6 +294,47 @@ namespace jiplib{
     %pythonprepend isEqual(std::shared_ptr<Jim> refImg)  "\"\"\"HELP.METHOD.Jim.isEqual(*args)\"\"\""
 #endif
     bool isEqual(std::shared_ptr<Jim> refImg);
+    /* ----------------------------------------------- */
+    /* Convolution filters and morphological operators */
+    /* ----------------------------------------------- */
+    /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
+    /* spectral/temporal domain (1D) */
+    /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
+    ///filter Jim image in spectral/temporal domain
+#ifdef SWIG
+    %pythonprepend filter1d(app::AppFactory& theApp)  "\"\"\"HELP.METHOD.filter1d(dict)\"\"\""
+#endif
+       std::shared_ptr<Jim> filter1d(app::AppFactory& theApp);
+    /* ^^^^^^^^^^^^^^^^^^^ */
+    /* spatial domain (2D) */
+    /* ^^^^^^^^^^^^^^^^^^^ */
+    ///filter Jim image in spatial domain
+    std::shared_ptr<Jim> filter2d(const app::AppFactory& theApp);
+    /* ---------------------- */
+    /* Classification methods */
+    /* ---------------------- */
+    ///Supervised classification (train with extractImg/extractOgr)
+#ifdef SWIG
+    %pythonprepend classify(app::AppFactory&)  "\"\"\"HELP.METHOD.classify(dict)\"\"\""
+#endif
+    std::shared_ptr<Jim> classify(app::AppFactory& app);
+    ///Supervised classification using Symbolic Machine Learning
+#ifdef SWIG
+    %pythonprepend classifySML(JimList&, app::AppFactory&)  "\"\"\"HELP.METHOD.classifySML(dict)\"\"\""
+#endif
+    std::shared_ptr<Jim> classifySML(JimList& referenceReader, app::AppFactory& app);
+    std::shared_ptr<Jim> classifySML(app::AppFactory& app);
+    ///reclass raster dataset
+#ifdef SWIG
+    %pythonprepend reclass(app::AppFactory&)  "\"\"\"HELP.METHOD.reclass(dict)\"\"\""
+#endif
+    std::shared_ptr<Jim> reclass(app::AppFactory& app);
+    ///validate classified image
+#ifdef SWIG
+    %pythonprepend validate(app::AppFactory&)  "\"\"\"HELP.METHOD.validate(dict)\"\"\""
+#endif
+    CPLErr validate(app::AppFactory& app);
+
     ///Initialize the memory for read/write image in cache
     CPLErr initMem(unsigned int memory);
     /// convert single plane multiband image to single band image with multiple planes
@@ -338,13 +380,6 @@ namespace jiplib{
     std::shared_ptr<Jim> crop(app::AppFactory& app);
     ///crop Jim image in memory returning Jim image
     std::shared_ptr<Jim> crop(VectorOgr& sampleReader, app::AppFactory& app);
-    ///filter Jim image in spectral/temporal domain
-#ifdef SWIG
-    %pythonprepend filter1d(app::AppFactory& theApp)  "\"\"\"HELP.METHOD.filter1d(dict)\"\"\""
-#endif
-    std::shared_ptr<Jim> filter1d(app::AppFactory& theApp);
-    ///filter Jim image in spatial domain
-    std::shared_ptr<Jim> filter2d(const app::AppFactory& theApp);
     ///get statistics on image list
     std::multimap<std::string,std::string> getStats(app::AppFactory& theApp);
     ///get unique pixels
@@ -364,21 +399,6 @@ namespace jiplib{
     std::shared_ptr<Jim> diff(app::AppFactory& app);
     ///Check for difference with reference image
     CPLErr diff(std::shared_ptr<Jim> refImage,app::AppFactory& app);
-    ///check the difference between two images
-    CPLErr validate(app::AppFactory& app);
-    ///supervised classification (train with extractImg/extractOgr)
-    std::shared_ptr<Jim> classify(app::AppFactory& app);
-    ///supervised classification using Artificial Neural Network (train with trainANN)
-    /* std::shared_ptr<Jim> classifyANN(app::AppFactory& app); */
-    ///supervised classification using support vector machine (train with trainSVM)
-    /* std::shared_ptr<Jim> classifySVM(app::AppFactory& app); */
-    ///supervised classification using SML
-    std::shared_ptr<Jim> classifySML(JimList& referenceReader, app::AppFactory& app);
-    std::shared_ptr<Jim> classifySML(app::AppFactory& app);
-    ///supervised classification using support vector machine (train with extractImg/extractOgr)
-    /* std::shared_ptr<Jim> svm(app::AppFactory& app); */
-    ///supervised classification using support artificial neural network (train with extractImg/extractOgr)
-    /* std::shared_ptr<Jim> ann(app::AppFactory& app); */
     ///stretch Jim image and return stretched image as shared pointer
     std::shared_ptr<Jim> stretch(app::AppFactory& app);
     ///Apply thresholds: set to no data if not within thresholds t1 and t2
@@ -394,8 +414,6 @@ namespace jiplib{
     ///set mask to raster dataset
     std::shared_ptr<Jim> setMask(VectorOgr& ogrReader, app::AppFactory& app);
     std::shared_ptr<Jim> setMask(JimList& maskList, app::AppFactory& app);
-    ///reclass raster dataset
-    std::shared_ptr<Jim> reclass(app::AppFactory& app);
 
     std::shared_ptr<Jim> getShared(){
       return(std::dynamic_pointer_cast<Jim>(shared_from_this()));

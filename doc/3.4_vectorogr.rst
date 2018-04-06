@@ -36,9 +36,9 @@ Input/Output methods
 Classification methods
 ----------------------
 
-.. automethod:: jiplib.VectorOgr.train (svm,ann)
-.. automethod:: jiplib.VectorOgr.classify (svm,ann) (not implemented yet)
-.. automethod:: jiplib.VectorOgr.classifySML (not implemented yet)
+.. automethod:: jiplib.VectorOgr.train
+.. automethod:: jiplib.VectorOgr.classify
+.. automethod:: jiplib.VectorOgr.classifySML
 
 statistics
 ----------
