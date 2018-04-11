@@ -20,8 +20,7 @@ parser.add_argument("-output","--output",help="Path of the classification output
 parser.add_argument("-interp","--interp",help="Interpolation type",dest="interp",required=False,type=str,default="linear")
 args = parser.parse_args()
 
-# try:
-if True:
+try:
     print("create jim")
     jim=jl.createJim({'filename':args.input})
     print("created jim")
@@ -37,7 +36,6 @@ if True:
         jim_filtered.write({'filename':args.output})
     jim_filtered.close()
     jim.close()
-try:
     print("Success: filter1d")
 except:
     print("Failed: filter1d")
