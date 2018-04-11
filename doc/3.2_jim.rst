@@ -90,6 +90,64 @@ Input/Output methods
    #     - writeGeoTiff
    #     - writeMultibandGeoTiff
 
+---------------
+Convert methods
+---------------
+
+.. automethod:: jiplib.Jim.convert
+   ..
+      # - band2plane
+      # - plane2band
+      # - jim2json
+      # - json2jim
+      # - jim2mia (private)
+      # - mia2jim (private)
+.. automethod:: jiplib.Jim.jim2np (implemented in Python)
+.. automethod:: jiplib.Jim.np2jim (implemented in Python)
+..
+   from MIA module format
+       - convertTo1bitPerPixel
+       - convertTo4bitPerPixel
+       - convertToUint16
+       - convertToUint32
+       - convertToFloat32
+       - convertToDouble64
+       - convertToUchar8
+       - convertDouble64ToFloat32
+       - convertUint32toFloat32
+       - convertSwapBytes
+       - convertDeinterleave
+       # can be moved to member function of JimList
+       - convertHsiToRgb
+       - convertHlsToRgb
+       - convertRgbToHsx
+       - convertRgbTo3d
+..
+   from MIA module imem
+   #     - imageToArray
+   #     - imageFromArray
+
+-------------------------------------
+Subset methods and geometry operators
+-------------------------------------
+
+.. automethod:: jiplib.Jim.crop
+..
+   Geometry operators (from MIA module gemetry)
+       - imageFrameSet
+       - imageFrameAdd
+       - imageFrameSubstract
+       - imageInsert
+       - imageInsertCompose
+       - imageCut
+       - getBoundingBoxNonZeroDomain
+       - imageMagnify
+       - imageRotateCoor
+       - predicateSizeAndTypeEqual
+       - predicateSizeEqual
+       - plotLine
+       - overlapMatrix
+
 -----------------------------------------------
 Convolution filters and morphological operators
 -----------------------------------------------
@@ -208,7 +266,9 @@ Classification methods
 .. automethod:: jiplib.Jim.classify
 .. automethod:: jiplib.Jim.classifySML
 .. automethod:: jiplib.Jim.reclass
-.. automethod:: jiplib.Jim.validate
+..
+   automethod:: jiplib.Jim.validate
+
 ..
    from MIA module stats
        - classStatsInfo
@@ -233,42 +293,6 @@ Mask / Threshold methods
        - pointOpThresh
        - pointOpSetLevel
        - pointOpSetRange
-
----------------
-Convert methods
----------------
-
-   ..
-      # - band2plane
-      # - plane2band
-      # - jim2json
-      # - json2jim
-      # - jim2mia (private)
-      # - mia2jim (private)
-.. automethod:: jiplib.Jim.jim2np (implemented in Python)
-.. automethod:: jiplib.Jim.np2jim (implemented in Python)
-..
-   from MIA module format
-       - convertTo1bitPerPixel
-       - convertTo4bitPerPixel
-       - convertToUint16
-       - convertToUint32
-       - convertToFloat32
-       - convertToDouble64
-       - convertToUchar8
-       - convertDouble64ToFloat32
-       - convertUint32toFloat32
-       - convertSwapBytes
-       - convertDeinterleave
-       # can be moved to member function of JimList
-       - convertHsiToRgb
-       - convertHlsToRgb
-       - convertRgbToHsx
-       - convertRgbTo3d
-..
-   from MIA module imem
-   #     - imageToArray
-   #     - imageFromArray
 
 --------------------------------------
 Statistical methods and interpolations
@@ -321,27 +345,6 @@ Statistical methods and interpolations
    from MIA module proj
        - gridding
        # - cs2cs (not implemented yet)
-
--------------------------------------
-Subset methods and geometry operators
--------------------------------------
-
-.. automethod:: jiplib.Jim.crop
-..
-   Geometry operators (from MIA module gemetry)
-       - imageFrameSet
-       - imageFrameAdd
-       - imageFrameSubstract
-       - imageInsert
-       - imageInsertCompose
-       - imageCut
-       - getBoundingBoxNonZeroDomain
-       - imageMagnify
-       - imageRotateCoor
-       - predicateSizeAndTypeEqual
-       - predicateSizeEqual
-       - plotLine
-       - overlapMatrix
 
 --------------------------------------------------
 Extracting pixel values from overlays and sampling

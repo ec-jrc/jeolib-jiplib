@@ -1121,42 +1121,14 @@ bool Jim::isEqual(std::shared_ptr<Jim> refImg){
   return(isEqual);
 }
 
-
+///convert Jim image in memory returning Jim image (alias for crop)
+std::shared_ptr<Jim> Jim::convert(app::AppFactory& app){
+  std::shared_ptr<Jim> imgWriter=Jim::createImg();
+  ImgRaster::crop(*imgWriter, app);
+  return(imgWriter);
+}
 
 ///crop Jim image in memory returning Jim image
-/**
- * @param a_srs (type: std::string) Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
- * @param ulx (type: double) (default: 0) Upper left x value bounding box
- * @param uly (type: double) (default: 0) Upper left y value bounding box
- * @param lrx (type: double) (default: 0) Lower right x value bounding box
- * @param lry (type: double) (default: 0) Lower right y value bounding box
- * @param band (type: unsigned int) band index to crop (leave empty to retain all bands)
- * @param startband (type: unsigned int) Start band sequence number
- * @param endband (type: unsigned int) End band sequence number
- * @param autoscale (type: double) scale output to min and max, e.g., --autoscale 0 --autoscale 255
- * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
- * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)
- * @param dx (type: double) Output resolution in x (in meter) (empty: keep original resolution)
- * @param dy (type: double) Output resolution in y (in meter) (empty: keep original resolution)
- * @param resample (type: std::string) (default: near) Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).
- * @param extent (type: std::string) get boundary from extent from polygons in vector file
- * @param crop_to_cutline (type: bool) (default: 0) Crop the extent of the target dataset to the extent of the cutline.
- * @param mask (type: std::string) Use the the specified file as a validity mask (0 is nodata).
- * @param msknodata (type: double) (default: 0) Mask value not to consider for crop.
- * @param mskband (type: unsigned int) (default: 0) Mask band to read (0 indexed)
- * @param x (type: double) x-coordinate of image center to crop (in meter)
- * @param y (type: double) y-coordinate of image center to crop (in meter)
- * @param nx (type: double) image size in x to crop (in meter)
- * @param ny (type: double) image size in y to crop (in meter)
- * @param ns (type: unsigned int) number of samples  to crop (in pixels)
- * @param nl (type: unsigned int) number of lines to crop (in pixels)
- * @param scale (type: double) output=scale*input+offset
- * @param offset (type: double) output=scale*input+offset
- * @param nodata (type: double) Nodata value to put in image if out of bounds.
- * @param description (type: std::string) Set image description
- * @param align (type: bool) (default: 0) Align output bounding box to input image
- * @return shared pointer to output image object
- **/
 std::shared_ptr<Jim> Jim::crop(app::AppFactory& app){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
   ImgRaster::crop(*imgWriter, app);
@@ -1164,31 +1136,6 @@ std::shared_ptr<Jim> Jim::crop(app::AppFactory& app){
 }
 
 ///crop Jim image in memory returning Jim image
-/**
- * @param a_srs (type: std::string) Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
- * @param ulx (type: double) (default: 0) Upper left x value bounding box
- * @param uly (type: double) (default: 0) Upper left y value bounding box
- * @param lrx (type: double) (default: 0) Lower right x value bounding box
- * @param lry (type: double) (default: 0) Lower right y value bounding box
- * @param band (type: unsigned int) band index to crop (leave empty to retain all bands)
- * @param startband (type: unsigned int) Start band sequence number
- * @param endband (type: unsigned int) End band sequence number
- * @param autoscale (type: double) scale output to min and max, e.g., --autoscale 0 --autoscale 255
- * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
- * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)
- * @param dx (type: double) Output resolution in x (in meter) (empty: keep original resolution)
- * @param dy (type: double) Output resolution in y (in meter) (empty: keep original resolution)
- * @param resample (type: std::string) (default: near) Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).
- * @param crop_to_cutline (type: bool) (default: 0) Crop the extent of the target dataset to the extent of the cutline.
- * @param msknodata (type: double) (default: 0) Mask value not to consider for crop.
- * @param mskband (type: unsigned int) (default: 0) Mask band to read (0 indexed)
- * @param scale (type: double) output=scale*input+offset
- * @param offset (type: double) output=scale*input+offset
- * @param nodata (type: double) Nodata value to put in image if out of bounds.
- * @param description (type: std::string) Set image description
- * @param align (type: bool) (default: 0) Align output bounding box to input image
- * @return shared pointer to output image object
- **/
 std::shared_ptr<Jim> Jim::crop(VectorOgr& sampleReader, app::AppFactory& app){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
   ImgRaster::crop(sampleReader, *imgWriter, app);

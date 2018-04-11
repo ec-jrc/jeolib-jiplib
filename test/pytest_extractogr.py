@@ -81,23 +81,6 @@ if True:
                     v2.close()
                     v.write()
                     v.close()
-                    # v2=jl0.extractOgr(sample,{'rule':'mean','output':'/vsimem/v2.sqlite','oformat':'SQLite','co':['OVERWRITE=YES'],'bandname':bandname,'fid':'fid'})
-                    # #this seems not to be needed
-                    # # v2.write()
-                    # # v2.close()
-                    # # v2=jl.createVector('/vsimem/v2.sqlite')
-                    # v1=jl.createVector(args.output)
-                    # vtmp=v1.join(v2,{'output':'/vsimem/join.sqlite','oformat':'SQLite','co':['OVERWRITE=YES'],'key':['fid']});
-                    # #but here we need to write and close the result of the join
-                    # vtmp.write()
-                    # vtmp.close()
-                    # vtmp=jl.createVector('/vsimem/join.sqlite')
-                    # v1.close()
-                    # v2.close()
-                    # v=jl.createVector(vtmp,{'filename':args.output,'oformat':'SQLite','co':['OVERWRITE=YES']})
-                    # v.write()
-                    # v.close()
-                    # vtmp.close()
             jl0.close()
         sample.close()
     jim0.close()

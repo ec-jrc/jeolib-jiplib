@@ -67,6 +67,7 @@ Returns:
    This instance of Jim object (self)
 
 Example:
+
 Create Jim image object by opening an existing file (file content will automatically be read in memory)::
 
     ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
@@ -477,6 +478,7 @@ Returns:
    This instance of Jim object (self)
 
 Example:
+
 See also :py:func:`createJim`
 
 END
@@ -510,6 +512,7 @@ Note:
     The image data is kept in memory (unlike using method :py:func:`close``)
 
 Example:
+
 Create Jim image object by opening an existing file in jp2 format. Then write to a compressed and tiled file in the default GeoTIFF format::
 
     ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
@@ -541,6 +544,7 @@ Returns:
 
 
 Example:
+
 Open resampled raster dataset in reduced spatial resolution of 20 km by 20 km and dump to screen (first in matrix then in list format)::
 
     ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
@@ -612,6 +616,120 @@ Returns:
 
 END
 
+---------------
+Convert methods
+---------------
+
+METHOD convert(dict)
+Convert Jim image with respect to data type, creation options (compression, interleave, etc.).
+
+Args:
+    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Supported keys in the dict:
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| co               | Creation option                                                                 |
++------------------+---------------------------------------------------------------------------------+
+| otype            | Data type for output image                                                      |
++------------------+---------------------------------------------------------------------------------+
+| scale            | Scale output: output=scale*input+offset                                         |
++------------------+---------------------------------------------------------------------------------+
+| offset           | Apply offset: output=scale*input+offset                                         |
++------------------+---------------------------------------------------------------------------------+
+| autoscale        | Scale output to min and max, e.g., [0,255]                                      |
++------------------+---------------------------------------------------------------------------------+
+| a_srs            | Override the projection for the output file                                     |
++------------------+---------------------------------------------------------------------------------+
+
+Example:
+
+Convert data type of input image to byte, using autoscale and clipping respectively::
+
+  jim_scaled=jim.convert({'otype':'Byte','autoscale':[0,255]})
+  jim_clipped=jim.setNoDataValue(0).setThreshold(0,255).convert({'otype':'Byte'})
+
+-------------------------------------
+Subset methods and geometry operators
+-------------------------------------
+
+METHOD crop(dict)
+Subset raster dataset according in spatial (subset region) or spectral/temporal domain (subset bands)
+
+Args:
+    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+.. note:: Spatial subsetting only supports nearest neighbor interpolation. Use :py:method:jiplib:`createJim` for more flexible interpolation options
+
+Supported keys in the dict:
+
+.. note:: In addition to the keys defined here, you can use all the keys defined in :py:method:jiplib:Jim:`covert`
+
+**Subset spatial region in coordinates of the image geospatial reference system**
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| extent           | Get boundary from extent from polygons in vector file                           |
++------------------+---------------------------------------------------------------------------------+
+| eo               | Special extent options controlling rasterization                                |
++------------------+---------------------------------------------------------------------------------+
+| ln               | Layer name of extent to crop                                                    |
++------------------+---------------------------------------------------------------------------------+
+| cut_to_cutline   | True will crop the extent of the target dataset to the extent of the cutline    |
+|                  | The outside area will be set to no data (the value defined by the key 'nodata') |
++------------------+---------------------------------------------------------------------------------+
+| cut_in_cutline   | True: inverse operation to cut_to_cutline                                       |
+|                  | The inside area will be set to no data (the value defined by the key 'nodata')  |
++------------------+---------------------------------------------------------------------------------+
+| ulx              | Upper left x value of bounding box to crop                                      |
++------------------+---------------------------------------------------------------------------------+
+| uly              | Upper left y value of bounding box to crop                                      |
++------------------+---------------------------------------------------------------------------------+
+| lrx              | Lower right x value of bounding box to crop                                     |
++------------------+---------------------------------------------------------------------------------+
+| lry              | Lower right y value of bounding box to crop                                     |
++------------------+---------------------------------------------------------------------------------+
+| dx               | Output resolution in x (default: keep original resolution)                      |
++------------------+---------------------------------------------------------------------------------+
+| dy               | Output resolution in y (default: keep original resolution)                      |
++------------------+---------------------------------------------------------------------------------+
+| nodata           | Nodata value to put in image if out of bounds                                   |
++------------------+---------------------------------------------------------------------------------+
+| align            | Align output bounding box to input image                                        |
++------------------+---------------------------------------------------------------------------------+
+
+..note:: Possible values for the key 'eo' are: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG. For instance you can use 'eo':'ATTRIBUTE=fieldname'
+
+**Subset bands**
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| band             | List of band indices to crop (index is 0 based)                                 |
++------------------+---------------------------------------------------------------------------------+
+| startband        | Start band sequence number (index is 0 based)                                   |
++------------------+---------------------------------------------------------------------------------+
+| endband          | End band sequence number (index is 0 based)                                     |
++------------------+---------------------------------------------------------------------------------+
+
+..
+   | mask             | Data type for output image                                                      |
+   +------------------+---------------------------------------------------------------------------------+
+   | msknodata        | Scale output: output=scale*input+offset                                         |
+   +------------------+---------------------------------------------------------------------------------+
+   | mskband          | Apply offset: output=scale*input+offset                                         |
+   +------------------+---------------------------------------------------------------------------------+
+
+Example:
+
+Convert data type of input image to byte, using autoscale and clipping respectively::
+
+  jim_scaled=jim.convert({'otype':'Byte','autoscale':[0,255]})
+  jim_clipped=jim.setNoDataValue(0).setThreshold(0,255).convert({'otype':'Byte'})
+
 -----------------------------------------------
 Convolution filters and morphological operators
 -----------------------------------------------
@@ -657,10 +775,10 @@ Supported keys in the dict:
 | open                | morpholigical opening (erode+dilate)                 |
 +---------------------+------------------------------------------------------+
 
-Note:
-    The morphological filter uses a linear structural element with a size defined by the key 'dz'
+.. note:: The morphological filter uses a linear structural element with a size defined by the key 'dz'
 
-Example
+Example:
+
 Perform a morphological dilation with a linear structural element of size 5::
 
   jim_filtered=jim.filter1d({'filter':'dilate','dz':5})
@@ -696,12 +814,17 @@ Perform a morphological dilation with a linear structural element of size 5::
 
 .. note:: You can specify the no data value for the smoothnodata filter with the extra key 'nodata' and a list of no data values. The interpolation type can be set with the key 'interp' (check complete list of `values <http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html>`_, removing the leading "gsl_interp").
 
-Example
+Example:
+
 Smooth the 0 valued pixel values using a linear interpolation in a spectral/temporal neighborhood of 5 bands::
 
   jim_filtered=jim.filter1d({'filter':'smoothnodata','nodata':0,'interp':'linear','dz':5})
 
 **Wavelet filters**
+
+Perform a wavelet transform (or inverse) in spectral/temporal domain.
+
+.. note:: The wavelet coefficients can be positive and negative. If the input raster dataset has an unsigned data type, make sure to set the output to a signed data type using the key 'otype'.
 
 You can use set the wavelet family with the key 'family' in the dictionary. The following wavelets are supported as values:
 
@@ -724,10 +847,12 @@ You can use set the wavelet family with the key 'family' in the dictionary. The 
 
 .. note:: The filter 'dwt_cut' performs a forward and inverse transform, approximating the input signal. The approximation is performed by discarding a percentile of the wavelet coefficients that can be set with the key 'threshold'. A threshold of 0 (default) retains all and a threshold of 50 discards the lower half of the wavelet coefficients. 
 
-Example
-Approximate the multi-temporal raster dataset by discarding the lower 20 percent of the coefficients after a discrete wavelet transform::
+Example:
 
-  jim_approx=jim_multitemp.filter1d({'filter':'dwt_cut','threshold':20})
+Approximate the multi-temporal raster dataset by discarding the lower 20 percent of the coefficients after a discrete wavelet transform. The input dataset has a Byte data type. We wavelet transform is calculated using an Int16 data type. The approximated image is then converted to a Byte dataset, making sure all values below 0 and above 255 are set to 0::
+
+  jim_approx=jim_multitemp.filter1d({'filter':'dwt_cut','threshold':20, 'otype':Int16})
+  jim_approx=jim_approx.pushNoDataValue(0).setThreshold(0,255).convert({'otype':'Byte'})
 
 **Hyperspectral filters**
 
@@ -735,7 +860,8 @@ Hyperspectral filters assume the bands in the input raster dataset correspond to
 
 The full width half max (FWHM) filter expects a list of M center wavelenghts and a corresponding list of M FWHM values. The M center wavelenghts define the output wavelenghts and must be provided with the key 'wavelengthOut'. For the FHWM, use the key 'fwhm' and a list of M values. The algorithm needs to know the N wavelenghts that correspond to the N bands of the input raster dataset. Use the key 'wavelengthIn' and a list of N values. The units of input, output and FWHM are arbitrary, but should be identical (e.g., nm).
 
-Example
+Example:
+
 Covert the hyperspectral input raster dataset, with the wavelengths defined in the list wavelenghts_in to a multispectral raster dataset with three bands, corresponding to Red, Green, and Blue::
 
   wavelengths_in=[]
@@ -753,7 +879,8 @@ The spectral response filter (SRF)
 
 The input raster dataset is filtered with M of spectral response functions (SRF).  Each spectral response function must be provided by the user in an ASCII file that consists of two columns: wavelengths and response. Use the key 'srf' and a list of paths to the ASCII file(s). The algorithm automatically takes care of the normalization of the SRF.
 
-Example
+Example:
+
 Covert the hyperspectral input raster dataset, to a multispectral raster dataset with three bands, corresponding to Red, Green, and Blue as defined in the ASCII text files 'srf_red.txt', 'srf_green.txt', 'srf_blue.txt'::
 
   wavelengths_in=[]
@@ -772,7 +899,8 @@ Note:
 
 For the custom filter, you can specify your own taps using the keyword 'tapz' and a list of filter tap values. The tap values are automatically normalized by the algorithm.
 
-Example
+Example:
+
 Perform a simple smoothing filter by defining three identical tap values::
 
   jim_filtered=jim.filter1d({'tapz':[1,1,1]})
@@ -810,19 +938,25 @@ Supported keys in the dict:
 
 **Edge detection**
 
-+---------------------+------------------------------------------------------+
-| filter              | description                                          |
-+=====================+======================================================+
-| homog               | morphological dilation                               |
-+---------------------+------------------------------------------------------+
-| heterog             | morphological erosion                                |
-+---------------------+------------------------------------------------------+
-| sobelx              | morpholigical closing (dilate+erode)                 |
-+---------------------+------------------------------------------------------+
-| sobely              | morpholigical opening (erode+dilate)                 |
-+---------------------+------------------------------------------------------+
-| sobelxy             | morpholigical opening (erode+dilate)                 |
-+---------------------+------------------------------------------------------+
++---------------------+-------------------------------------------------------------------------+
+| filter              | description                                                             |
++=====================+=========================================================================+
+| sobelx              | Sobel operator in x direction                                           |
++---------------------+-------------------------------------------------------------------------+
+| sobely              | Sobel operator in y direction                                           |
++---------------------+-------------------------------------------------------------------------+
+| sobelxy             | Sobel operator in x and y direction                                     |
++---------------------+-------------------------------------------------------------------------+
+| homog               | binary value indicating if pixel is identical to all pixels in kernel   |
++---------------------+-------------------------------------------------------------------------+
+| heterog             | binary value indicating if pixel is different than all pixels in kernel |
++---------------------+-------------------------------------------------------------------------+
+
+Example:
+
+Perform Sobel edge detection in both x and direction::
+
+  jim_filtered=jim.filter2d({'filter':'sobelxy'})
 
 **Morphological filters**
 
@@ -842,10 +976,11 @@ Supported keys in the dict:
 
 .. note:: You can use the optional key 'class' with a list value to take only these pixel values into account. For instance, use 'class':[255] to dilate clouds in the raster dataset that have been flagged with value 255. In addition, you can use a circular disc kernel (set the key 'circular' to True).
 
-Example
-Perform a simple smoothing filter by defining three identical tap values::
+Example:
 
-  jim_filtered=jim.filter2d({'filter':'dilate','dz':5,'circular':True})
+Perform a morphological dilation using a circular kernel with size (diameter) of 5 pixels::
+
+  jim_filtered=jim.filter2d({'filter':'dilate','dx':5,'dy':5,'circular':True})
 
 **Statistical filters**
 
@@ -864,17 +999,13 @@ Perform a simple smoothing filter by defining three identical tap values::
 +--------------+------------------------------------------------------+
 | max          | calculate maximum in window                          |
 +--------------+------------------------------------------------------+
-| ismin        |                                                      |
+| ismin        | binary value indicating if pixel is minimum in kernel|
 +--------------+------------------------------------------------------+
-| ismax        |                                                      |
+| ismax        | binary value indicating if pixel is maximum in kernel|
 +--------------+------------------------------------------------------+
 | sum          | calculate sum in window                              |
 +--------------+------------------------------------------------------+
 | mode         | calculate the mode (only for categorical values)     |
-+--------------+------------------------------------------------------+
-| density      |                                                      |
-+--------------+------------------------------------------------------+
-| countid      |                                                      |
 +--------------+------------------------------------------------------+
 | mean         | calculate mean in window                             |
 +--------------+------------------------------------------------------+
@@ -884,21 +1015,25 @@ Perform a simple smoothing filter by defining three identical tap values::
 +--------------+------------------------------------------------------+
 | proportion   | calculate proportion in window                       |
 +--------------+------------------------------------------------------+
-| order        |                                                      |
-+--------------+------------------------------------------------------+
-| scrample     |                                                      |
-+--------------+------------------------------------------------------+
-| shift        |                                                      |
-+--------------+------------------------------------------------------+
+..
+   | scrample     |                                                      |
+   +--------------+------------------------------------------------------+
+   | shift        |                                                      |
+   +--------------+------------------------------------------------------+
 
 .. note:: You can specify the no data value for the smoothnodata filter with the extra key 'nodata' and a list of no data values. The interpolation type can be set with the key 'interp' (check complete list of `values <http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html>`_, removing the leading "gsl_interp").
 
-Example
-Smooth the 0 valued pixel values using a linear interpolation in a spectral/temporal neighborhood of 5 bands::
+Example:
 
-  jim_filtered=jim.filter1d({'filter':'smoothnodata','nodata':0,'interp':'linear','dz':5})
+Perform a median filter with kernel size of 5x5 pixels::
+
+  jim_filtered=jim.filter2d({'filter':'median','dz':5})
 
 **Wavelet filters**
+
+Perform a wavelet transform (or inverse) in spatial domain.
+
+.. note:: The wavelet coefficients can be positive and negative. If the input raster dataset has an unsigned data type, make sure to set the output to a signed data type using the key 'otype'.
 
 You can use set the wavelet family with the key 'family' in the dictionary. The following wavelets are supported as values:
 
@@ -921,10 +1056,12 @@ You can use set the wavelet family with the key 'family' in the dictionary. The 
 
 .. note:: The filter 'dwt_cut' performs a forward and inverse transform, approximating the input signal. The approximation is performed by discarding a percentile of the wavelet coefficients that can be set with the key 'threshold'. A threshold of 0 (default) retains all and a threshold of 50 discards the lower half of the wavelet coefficients. 
 
-Example
-Approximate the multi-temporal raster dataset by discarding the lower 20 percent of the coefficients after a discrete wavelet transform::
+Example:
 
-  jim_approx=jim_multitemp.filter1d({'filter':'dwt_cut','threshold':20})
+Approximate the multi-temporal raster dataset by discarding the lower 20 percent of the coefficients after a discrete wavelet transform. The input dataset has a Byte data type. We wavelet transform is calculated using an Int16 data type. The approximated image is then converted to a Byte dataset, making sure all values below 0 and above 255 are set to 0::
+
+  jim_approx=jim_multitemp.filter2d({'filter':'dwt_cut','threshold':20, 'otype':Int16})
+  jim_approx=jim_approx.pushNoDataValue(0).setThreshold(0,255).convert({'otype':'Byte'})
 
 END
 
@@ -933,7 +1070,7 @@ Classification methods
 ----------------------
 
 METHOD classify(dict)
-Supervised classification of a raster dataset. The classifier must have been trained via the :py:method:`train` method.
+Supervised classification of a raster dataset. The classifier must have been trained via the :py:method:jiplib:VectorOgr:`train` method.
 The classifier can be selected with the key 'method' and possible values 'svm' and 'ann':
 
 Args:
@@ -957,12 +1094,9 @@ Supported keys in the dict (with more keys defined for the respective classicati
 Returns:
    The classified raster dataset.
 
-The support vector machine (SVM) supervised classifier is described `here <http://dx.doi.org/10.1007/BF00994018>`_.
+The support vector machine (SVM) supervised classifier is described `here <http://dx.doi.org/10.1007/BF00994018>`_. The implementation in JIPlib is based on the open source `libsvm <https://www.csie.ntu.edu.tw/~cjlin/libsvm/>`_.
 
-The implementation in JIPlib is based on the open source `libsvm <https://www.csie.ntu.edu.tw/~cjlin/libsvm/>`_.
-
-The artificial neural network (ANN) supervised classifier is based on the back propagation model as introduced by D. E. Rumelhart, G. E. Hinton, and R. J. Williams (Nature, vol. 323, pp. 533-536, 1986).
-The implementation is based on the open source C++ library fann (http://leenissen.dk/fann/wp/).
+The artificial neural network (ANN) supervised classifier is based on the back propagation model as introduced by D. E. Rumelhart, G. E. Hinton, and R. J. Williams (Nature, vol. 323, pp. 533-536, 1986). The implementation is based on the open source C++ library fann (http://leenissen.dk/fann/wp/).
 
 **Prior probabilities**
 
@@ -990,10 +1124,167 @@ To apply a raster mask, use the key 'mask' with the path of the raster dataset a
 
 END
 
-.. automethod:: jiplib.Jim.classify
-.. automethod:: jiplib.Jim.classifySML
-.. automethod:: jiplib.Jim.reclass
-.. automethod:: jiplib.Jim.validate
+METHOD classifySML(dict)
+Supervised classification of a raster dataset using the symbolic machine learning algorithm `sml <https://doi.org/10.3390/rs8050399>`_. For training, one or more reference raster datasets with categorical values is expected as a JimList. The reference raster dataset is typically at a lower spatial resolution than the input raster dataset to be classified. Unlike the :py:meth:`jiplib.jim.classify`, the training is performed not prior to the classification, but in the same process as the classification.
+
+Args:
+    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Supported keys in the dict (with more keys defined for the respective classication methods):
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| band             | List of band indices (starting from 0). Leave empty to use all bands            |
++------------------+---------------------------------------------------------------------------------+
+| class            | List of classes to extract from the reference. Leave empty to extract two       |
+|                  | classes only (1 against rest)                                                   |
++------------------+---------------------------------------------------------------------------------+
+| otype            | Data type for output image                                                      |
++------------------+---------------------------------------------------------------------------------+
+
+Returns:
+   A multiband raster dataset with one band for each class. The pixel values represent the respective frequencies of the classes (scaled to Byte). To create a hard classified output, obtain the maxindex of this output. The result will then contains the class indices (0-nclass-1). To obtain the same class numbers as defined in the reference dataset, use the :py:meth:jiplib:jim:`reclass` method (see example below).
+
+
+**Classifying parts of the input raster dataset**
+
+See :py:meth:`jipblib.jim.classify`.
+
+Example:
+
+Use the Corine land cover product as a reference to perform an SML classification of a Sentinel-2 image using the 10 m bands (B02, B03, B04 and B08).
+
+Import modules::
+  import os, sys
+  from osgeo import gdal
+  from osgeo import gdalconst
+  from osgeo import ogr
+  from osgeo import osr
+  import fnmatch
+  import time
+  import numpy as np
+  from scipy import misc
+  import operator
+  import jiplib as jl
+  from osgeo import gdal
+
+Preparation of input. Stack all input bands to single multiband input raster dataset. Scale input to Byte and adapt the dynamic range to chosen number of bits::
+ 
+  NBIT=7
+  jimlist=jl.createJimList()
+  for file in sorted(fnmatch.filter(os.listdir(infolder), '*_B0[2348].jp2')):
+      file=os.path.join(infolder,file)
+      jim=jl.createJim({'filename':file,'dx':100,'dy':100})
+      jim_convert=jim.convert({'autoscale':[2**(8-NBIT),2**8-1],'otype':'GDT_Byte'}).pointOpBitShift(8-NBIT)
+      jim.close()
+      jimlist.pushImage(jim_convert)
+  jim=jimlist.stack()
+  jimlist.close()
+
+Then prepare reference dataset. The reference Corine land cover is in the LAEA (EPSG:3035) coordinate reference system. We will only read the area corresponding to the input image Therefore, we need to calculate the transformed bounding box of the input image in LAEA::
+
+  corinefn='/eos/jeodpp/data/base/Landcover/EUROPE/CorineLandCover/CLC2012/VER18-5/Data/GeoTIFF/250m/g250_clc12_V18_5.tif'
+  jim_ref=jl.createJim({'filename':corinefn,'noread':True,'a_srs':'EPSG:3035'})
+  print("bounding box input image:",jim.getUlx(), jim.getUly(), jim.getLrx(), jim.getLry())
+  pointUL = ogr.Geometry(ogr.wkbPoint)
+  pointUL.AddPoint(jim.getUlx(), jim.getUly())
+  pointLR = ogr.Geometry(ogr.wkbPoint)
+  pointLR.AddPoint(jim.getLrx(), jim.getLry())
+  source = osr.SpatialReference()
+  source.ImportFromEPSG(32632)
+  target = osr.SpatialReference()
+  target.ImportFromEPSG(3035)
+  transform = osr.CoordinateTransformation(source, target)
+  pointUL.Transform(transform)
+  pointLR.Transform(transform)
+
+Now we can open the reference image for the region of interest. We will open it in a reduced spatial resolution of 500 m::
+
+   jim_ref=jl.createJim({'filename':corinefn,'dx':500,'dy':500.0,'ulx':pointUL.GetX(),'uly':pointUL.GetY(),'lrx':pointLR.GetX(),'lry':pointLR.GetY(),'a_srs':'EPSG:3035'})
+
+Create a dictionary with the class names and corresponding values used in the classified raster map::
+
+  classDict={}
+  classDict['urban']=2
+  classDict['agriculture']=12
+  classDict['forest']=25
+  classDict['water']=41
+  classDict['rest']=50
+  sorted(classDict.values())
+
+Reclass the reference to the selected classes::
+  classFrom=range(0,50)
+  classTo=[50]*50
+  for i in range(0,50):
+  if i>=1 and i<10:
+  classTo[i]=classDict['urban']
+  elif i>=11 and i<22:
+  classTo[i]=classDict['agriculture']
+  elif i>=23 and i<25:
+  classTo[i]=classDict['forest']
+  elif i>=40 and i<45:
+  classTo[i]=classDict['water']
+  else:
+  classTo[i]=classDict['rest']
+
+  jim_ref=jim_ref.reclass({'class':classFrom,'reclass':classTo})
+
+The SML algorithm uses a JimList of reference raster datasets. Here we will create a list of a single reference only::
+  reflist=jl.createJimList([jim_ref])
+
+For a multi-class problem, we must define the list of classes that should be taken into account by the SML algorithm::
+
+   sml=jim.classifySML(reflist,{'class':sorted(classDict.values())}).setNoData([0])
+
+Preparation of output. The output is a multiband raster dataset with one band for each class. The pixels represent the respective frequencies of the classes (scaled to Byte)
+
+We can create a hard classified output by obtaining the maxindex of this output. The result contains the class indices (0-nclass-1).
+To obtain the same class numbers as defined in the reference dataset, we can reclass accordingly::
+  sml_class=sml.statProfile({'function':'maxindex'}).reclass({'class':range(0,sml.nrOfBand()),'reclass':sorted(classDict.values())})
+
+END
+
+METHOD reclass(dict)
+Replace categorical pixel values in raster dataset
+
+Args:
+    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Supported keys in the dict (with more keys defined for the respective classication methods):
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| class            | List of input classes to reclass from                                           |
++------------------+---------------------------------------------------------------------------------+
+| reclass          | List of output classes to reclass to                                            |
++------------------+---------------------------------------------------------------------------------+
+| otype            | Data type for output image (default is type of input raster dataset)            |
++------------------+---------------------------------------------------------------------------------+
+
+.. note:: The list size of the class and reclass should be identical. The value class[index] will be replaced with the value reclass[index].
+
+Returns:
+   Raster dataset with class values replaced according to corresponding class and reclass list values.
+
+Example:
+
+Reclass all pixel values 0 to 255::
+
+  jim_reclass=jim.reclass({'class':[0],'reclass':[255]})
+
+END
+
+------------------------
+Mask / Threshold methods
+------------------------
+
+.. automethod:: jiplib.Jim.setThreshold
+.. automethod:: jiplib.Jim.setAbsThreshold
+.. automethod:: jiplib.Jim.getMask
+.. automethod:: jiplib.Jim.setMask
+
 ###########################################################################################################################################################################
 # JimList
 ###########################################################################################################################################################################
@@ -1002,7 +1293,7 @@ CLASS JimList
 JimList class represents a list of Jim images.
 
 Notes:
-A JimList can be created from a python list of Jim images or via the :py:method:`pushImage` method::
+A JimList can be created from a python list of Jim images or via the :py:meth:jiplib:jimlist:`pushImage` method::
 
   ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
   jim0=createJim()

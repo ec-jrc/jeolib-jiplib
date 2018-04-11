@@ -140,6 +140,11 @@ namespace jiplib{
     %pythonprepend getNoDataValues()  "\"\"\"HELP.METHOD.Jim.getNoDataValues()\"\"\""
 #endif
        std::vector<double> getNoDataValues() const { return ImgRaster::getNoDataValues();};
+    ///Set the single no data values of this dataset
+#ifdef SWIG
+    %pythonprepend setDataValue(double)  "\"\"\"HELP.METHOD.Jim.setNoDataValue(*args)\"\"\""
+#endif
+       CPLErr setNoDataValue(double nodata){return ImgRaster::setNoDataValue(nodata);};
     ///pushNoDataValue
 #ifdef SWIG
     %pythonprepend pushNoDataValue(double)  "\"\"\"HELP.METHOD.Jim.pushNoDataValue(*args)\"\"\""
@@ -294,6 +299,28 @@ namespace jiplib{
     %pythonprepend isEqual(std::shared_ptr<Jim> refImg)  "\"\"\"HELP.METHOD.Jim.isEqual(*args)\"\"\""
 #endif
     bool isEqual(std::shared_ptr<Jim> refImg);
+
+    /* --------------- */
+    /* Convert methods */
+    /* --------------- */
+    ///convert Jim image in memory returning Jim image (alias for crop)
+#ifdef SWIG
+    %pythonprepend convert(app::AppFactory &)  "\"\"\"HELP.METHOD.Jim.convert(dict)\"\"\""
+#endif
+       std::shared_ptr<Jim> convert(app::AppFactory& app);
+    /* ------------------------------------- */
+    /* Subset methods and geometry operators */
+    /* ------------------------------------- */
+    ///crop Jim image in memory returning Jim image
+#ifdef SWIG
+    %pythonprepend crop(app::AppFactory &)  "\"\"\"HELP.METHOD.Jim.crop(dict)\"\"\""
+#endif
+       std::shared_ptr<Jim> crop(app::AppFactory& app);
+    ///crop Jim image in memory returning Jim image
+#ifdef SWIG
+    %pythonprepend crop(VectorOgr&, app::AppFactory &)  "\"\"\"HELP.METHOD.Jim.crop(*args)\"\"\""
+#endif
+    std::shared_ptr<Jim> crop(VectorOgr& sampleReader, app::AppFactory& app);
     /* ----------------------------------------------- */
     /* Convolution filters and morphological operators */
     /* ----------------------------------------------- */
@@ -324,7 +351,7 @@ namespace jiplib{
 #endif
     std::shared_ptr<Jim> classifySML(JimList& referenceReader, app::AppFactory& app);
     std::shared_ptr<Jim> classifySML(app::AppFactory& app);
-    ///reclass raster dataset
+    ///replace categorical pixel values in raster dataset
 #ifdef SWIG
     %pythonprepend reclass(app::AppFactory&)  "\"\"\"HELP.METHOD.reclass(dict)\"\"\""
 #endif
@@ -374,12 +401,6 @@ namespace jiplib{
     /* ///read data from with reduced resolution */
     /* CPLErr GDALRead(std::string filename, int band, int nXOff, int nYOff, int nXSize, int nYSize, int nBufXSize=0, int nBufYSize=0); */
 
-    //in memory functions from ImgRaster using AppFactory
-
-    ///crop Jim image in memory returning Jim image
-    std::shared_ptr<Jim> crop(app::AppFactory& app);
-    ///crop Jim image in memory returning Jim image
-    std::shared_ptr<Jim> crop(VectorOgr& sampleReader, app::AppFactory& app);
     ///get statistics on image list
     std::multimap<std::string,std::string> getStats(app::AppFactory& theApp);
     ///get unique pixels
