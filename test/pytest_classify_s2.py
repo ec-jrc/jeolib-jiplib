@@ -13,13 +13,13 @@ parser=argparse.ArgumentParser()
 parser.add_argument("-input","--input",help="Path of the input raster dataset",dest="input",required=True,type=str)
 parser.add_argument("-reference","--reference",help="Path of the reference raster dataset",dest="reference",required=True,type=str)
 parser.add_argument("-model","--model",help="Path of the model output filename used for training",dest="model",required=False,type=str)
+parser.add_argument("-training","--training",help="Path of the training vector dataset with raster information",dest="training",required=False,type=str)
 parser.add_argument("-output","--output",help="Path of the classification output raster dataset",dest="output",required=True,type=str)
 parser.add_argument("-sampleSize","--sampleSize",help="Sample size used for training svm or ann",dest="sampleSize",required=False,type=int,default=100)
 parser.add_argument("-classifier","--classifier",help="classifier (sml, svm, ann)",dest="classifier",required=True,type=str,default="sml")
 args = parser.parse_args()
 
-# try:
-if True:
+try:
     jim=jl.createJim({'filename':args.input})
     #preparation of reference
     classDict={}
@@ -54,22 +54,28 @@ if True:
             sml_class.write({'filename':args.output})
         sml_class.close()
     else:
-        trainingfn='training.shp'
-        dict={'output':trainingfn}
-        dict.update({'oformat':'Memory'})
+        srcnodata=[0]
+        dict={'srcnodata':srcnodata}
+        if args.training:
+            trainingfn=args.training
+            dict.update({'oformat':'ESRI Shapefile'})
+        else:
+            dict.update({'oformat':'Memory'})
+            trainingfn='training.shp'
+        dict.update({'output':trainingfn})
         dict.update({'class':sorted(classDict.values())})
         sampleSize=-args.sampleSize #use negative values for absolute and positive values for percentage values
         dict.update({'threshold':sampleSize})
-        srcnodata=[0]
-        dict.update({'srcnodata':srcnodata})
         dict.update({'bandname':['B02','B03','B04','B08']})
         dict.update({'band':[0,1,2,3]})
+        # dict.update({'verbose':2})
         sample=jim.extractImg(jim_ref,dict)
         if args.classifier == "svm":
             #training
-            sample.train({'method':args.classifier,'label':'label','model':args.model})
             #explicitly define all band names to use for training
-            #sample.train({'method':args.classifier,'label':'label','bandname':['B02','B03','B04','B08'],'model':args.model})
+            sample.train({'method':args.classifier,'label':'label','bandname':['B02','B03','B04','B08'],'model':args.model})
+            #test
+            sample.write()
             #define selection of band names to use for training
             #sample.train({'method':'svm','label':'label','bandname':['B03','B08'],'model':args.model})
             sample.close()
@@ -104,8 +110,6 @@ if True:
             throw()
 
     jim.close()
-    print("Success: classify")
-try:
     print("Success: classify")
 except:
     print("Failed: classify")
