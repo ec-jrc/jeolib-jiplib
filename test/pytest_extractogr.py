@@ -14,6 +14,7 @@ parser.add_argument("-input","--input",help="Path of the raster dataset",dest="i
 parser.add_argument("-vector","--vector",help="Path of the vector dataset",dest="vector",required=False,type=str)
 parser.add_argument("-output","--output",help="Path of the output vector dataset",dest="output",required=False,type=str)
 parser.add_argument("-noread","--noread",help="Postpone reading raster dataset",dest="noread",required=False,type=bool,default=False)
+parser.add_argument("-random","--random",help="Number of random pixels to select",dest="random",required=False,type=int,default=100)
 args = parser.parse_args()
 
 # try:

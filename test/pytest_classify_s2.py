@@ -14,7 +14,7 @@ parser.add_argument("-input","--input",help="Path of the input raster dataset",d
 parser.add_argument("-reference","--reference",help="Path of the reference raster dataset",dest="reference",required=True,type=str)
 parser.add_argument("-model","--model",help="Path of the model output filename used for training",dest="model",required=False,type=str)
 parser.add_argument("-training","--training",help="Path of the training vector dataset with raster information",dest="training",required=False,type=str)
-parser.add_argument("-output","--output",help="Path of the classification output raster dataset",dest="output",required=True,type=str)
+parser.add_argument("-output","--output",help="Path of the classification output raster dataset",dest="output",required=False,type=str)
 parser.add_argument("-sampleSize","--sampleSize",help="Sample size used for training svm or ann",dest="sampleSize",required=False,type=int,default=100)
 parser.add_argument("-classifier","--classifier",help="classifier (sml, svm, ann)",dest="classifier",required=True,type=str,default="sml")
 args = parser.parse_args()
