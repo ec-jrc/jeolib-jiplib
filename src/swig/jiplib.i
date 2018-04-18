@@ -168,9 +168,66 @@
   %append_output(PyFloat_FromDouble(*$1));
 }
 
-/* %typemap(in) double* setGeoTransform(float temp[6]){ */
+%typemap(in,numinputs=0) double& gt0 (double temp) "$1 = &temp;"
+%typemap(in,numinputs=0) double& gt1 (double temp) "$1 = &temp;"
+%typemap(in,numinputs=0) double& gt2 (double temp) "$1 = &temp;"
+%typemap(in,numinputs=0) double& gt3 (double temp) "$1 = &temp;"
+%typemap(in,numinputs=0) double& gt4 (double temp) "$1 = &temp;"
+%typemap(in,numinputs=0) double& gt5 (double temp) "$1 = &temp;"
+
+%typemap(argout) double& gt0 {
+  %append_output(PyFloat_FromDouble(*$1));
+ }
+
+%typemap(argout) double& gt1 {
+  %append_output(PyFloat_FromDouble(*$1));
+ }
+
+%typemap(argout) double& gt2 {
+  %append_output(PyFloat_FromDouble(*$1));
+ }
+
+%typemap(argout) double& gt3 {
+  %append_output(PyFloat_FromDouble(*$1));
+ }
+
+%typemap(argout) double& gt4 {
+  %append_output(PyFloat_FromDouble(*$1));
+ }
+
+%typemap(argout) double& gt5 {
+  %append_output(PyFloat_FromDouble(*$1));
+ }
+
+%typemap(in,numinputs=0) double& centerX (double temp) "$1 = &temp;"
+%typemap(in,numinputs=0) double& centerY (double temp) "$1 = &temp;"
+
+%typemap(argout) double& centerX {
+  %append_output(PyFloat_FromDouble(*$1));
+ }
+
+%typemap(argout) double& centerY {
+  %append_output(PyFloat_FromDouble(*$1));
+ }
+
+/* Set the input argument to point to a temporary variable */
+/* %typemap(in, numinputs=0) double *gt (double temp) { */
+/*   $1 = &temp; */
+/*  } */
+
+ /*  %typemap(argout) double* { */
+ /*  // Append output value $1 to $result */
+ /*  int n=6; */
+ /*  PyObject *pyList; */
+ /*  pyList=PyList_New(n); */
+ /*  for(int i=0; i<n; ++i){ */
+ /*    PyList_SET_ITEM(pyList, i, PyFloat_FromDouble($1[i])); */
+ /*  } */
+ /*  $result = pyList; */
+ /* } */
+
 %typemap(in) double* gt(double temp[6]){
-  //std::cout << "we are in typemap(in) setGeoTransform" << std::endl;
+  std::cout << "we are in typemap(in) setGeoTransform" << std::endl;
   int i;
   if (!PySequence_Check($input)) {
     PyErr_SetString(PyExc_ValueError,"Expected a sequence");
@@ -191,21 +248,6 @@
   }
   $1 = temp;
  }
-
-/* /\* Set the input argument to point to a temporary variable *\/ */
-/* %typemap(in, numinputs=0) double *gt (double temp) { */
-/*   $1 = &temp; */
-/*  } */
-
-%typemap(argout) double* getGeoTransform{
-  // Append output value $1 to $result
-  int n=6;
-  PyList=PyList_New(n);
-  for(int i=0; i<n; ++i){
-    PyList_SET_ITEM(pyList, i, PyFloat_FromDouble($1[i]));
-  }
-  $result = pyList;
-}
 
 /* From: http://biomol.bme.utexas.edu/~mh43854/openmm/archive/openmm-master/wrappers/python/src/swig_doxygen/swig_lib/python/typemaps.i */
 /* The following two typemaps cause a non-const vector<string>& named fields to become a return list of values. */

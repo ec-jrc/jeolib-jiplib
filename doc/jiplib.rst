@@ -303,7 +303,7 @@ List of floats with geotransform data:
 
 END
 
-METHOD setGeoTransform(*args)
+METHOD setGeoTransform()
 Set the geotransform data for this dataset.
 
 Args:
@@ -351,7 +351,7 @@ Returns:
 
 END
 
-METHOD getBoundingBox(*args)
+METHOD getBoundingBox()
 Get the bounding box of this dataset in georeferenced coordinates.
 
 Returns:
@@ -359,7 +359,7 @@ Returns:
 
 END
 
-METHOD getCenterPos(*args)
+METHOD getCenterPos()
 Get the center position of this dataset in georeferenced coordinates
 
 Returns:
@@ -367,7 +367,7 @@ Returns:
 
 END
 
-METHOD getUlx(*args)
+METHOD getUlx()
 Get the upper left corner x (georeferenced) coordinate of this dataset
 
 Returns:
@@ -375,7 +375,7 @@ Returns:
 
 END
 
-METHOD getUly(*args)
+METHOD getUly()
 Get the upper left corner y (georeferenced) coordinate of this dataset
 
 Returns:
@@ -383,7 +383,7 @@ Returns:
 
 END
 
-METHOD getLrx(*args)
+METHOD getLrx()
 Get the lower left corner x (georeferenced) coordinate of this dataset
 
 Returns:
@@ -391,7 +391,7 @@ Returns:
 
 END
 
-METHOD getLry(*args)
+METHOD getLry()
 Get the lower left corner y (georeferenced) coordinate of this dataset
 
 Returns:
@@ -399,7 +399,7 @@ Returns:
 
 END
 
-METHOD getDeltaX(*args)
+METHOD getDeltaX()
 Get the pixel cell spacing in x.
 
 Returns:
@@ -407,7 +407,7 @@ Returns:
 
 END
 
-METHOD getDeltaY(*args)
+METHOD getDeltaY()
 Get the piyel cell spacing in y.
 
 Returns:
@@ -416,7 +416,7 @@ Returns:
 END
 
 
-METHOD getRefPix(*args)
+METHOD getRefPix()
 Calculate the reference pixel as the centre of gravity pixel (weighted average of all values not taking into account no data values) for a specific band (start counting from 0).
 
 Returns:
@@ -644,6 +644,9 @@ Supported keys in the dict:
 | a_srs            | Override the projection for the output file                                     |
 +------------------+---------------------------------------------------------------------------------+
 
+Returns:
+   This converted Jim object
+
 Example:
 
 Convert data type of input image to byte, using autoscale and clipping respectively::
@@ -660,6 +663,9 @@ Subset raster dataset according in spatial (subset region) or spectral/temporal 
 
 Args:
     * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Returns:
+   This subset of Jim object
 
 .. note:: Spatial subsetting only supports nearest neighbor interpolation. Use :py:method:jiplib:`createJim` for more flexible interpolation options
 
@@ -743,6 +749,10 @@ Filter Jim image in spectral/temporal domain performed on multi-band raster data
 
 Args:
     * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+
+Returns:
+   This filtered of Jim object (self)
 
 Supported keys in the dict:
 
@@ -917,6 +927,10 @@ Filter Jim image in spatial domain performed on single or multi-band raster data
 Args:
     * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
+
+Returns:
+   This filtered of Jim object (self)
+
 Supported keys in the dict:
 
 
@@ -1076,6 +1090,10 @@ The classifier can be selected with the key 'method' and possible values 'svm' a
 Args:
     * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
+
+Returns:
+   The classified raster dataset.
+
 Supported keys in the dict (with more keys defined for the respective classication methods):
 
 +------------------+------------------------------------------------------------------------------------------------------+
@@ -1088,9 +1106,6 @@ Supported keys in the dict (with more keys defined for the respective classicati
 | band             | Band index (starting from 0). The band order must correspond to the band names defined in the model. |
 |                  | Leave empty to use all bands                                                                         |
 +------------------+------------------------------------------------------------------------------------------------------+
-
-Returns:
-   The classified raster dataset.
 
 The support vector machine (SVM) supervised classifier is described `here <http://dx.doi.org/10.1007/BF00994018>`_. The implementation in JIPlib is based on the open source `libsvm <https://www.csie.ntu.edu.tw/~cjlin/libsvm/>`_.
 
@@ -1128,7 +1143,10 @@ Supervised classification of a raster dataset using the symbolic machine learnin
 Args:
     * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
-Supported keys in the dict (with more keys defined for the respective classication methods):
+Returns:
+   A multiband raster dataset with one band for each class. The pixel values represent the respective frequencies of the classes (scaled to Byte). To create a hard classified output, obtain the maxindex of this output. The result will then contains the class indices (0-nclass-1). To obtain the same class numbers as defined in the reference dataset, use the :py:meth:jiplib:jim:`reclass` method (see example below).
+
+Supported keys in the dict:
 
 +------------------+---------------------------------------------------------------------------------+
 | key              | value                                                                           |
@@ -1140,9 +1158,6 @@ Supported keys in the dict (with more keys defined for the respective classicati
 +------------------+---------------------------------------------------------------------------------+
 | otype            | Data type for output image                                                      |
 +------------------+---------------------------------------------------------------------------------+
-
-Returns:
-   A multiband raster dataset with one band for each class. The pixel values represent the respective frequencies of the classes (scaled to Byte). To create a hard classified output, obtain the maxindex of this output. The result will then contains the class indices (0-nclass-1). To obtain the same class numbers as defined in the reference dataset, use the :py:meth:jiplib:jim:`reclass` method (see example below).
 
 
 **Classifying parts of the input raster dataset**
@@ -1249,7 +1264,10 @@ Replace categorical pixel values in raster dataset
 Args:
     * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
-Supported keys in the dict (with more keys defined for the respective classication methods):
+Returns:
+   Raster dataset with class values replaced according to corresponding class and reclass list values.
+
+Supported keys in the dict:
 
 +------------------+---------------------------------------------------------------------------------+
 | key              | value                                                                           |
@@ -1263,9 +1281,6 @@ Supported keys in the dict (with more keys defined for the respective classicati
 
 .. note:: The list size of the class and reclass should be identical. The value class[index] will be replaced with the value reclass[index].
 
-Returns:
-   Raster dataset with class values replaced according to corresponding class and reclass list values.
-
 Example:
 
 Reclass all pixel values 0 to 255::
@@ -1278,10 +1293,727 @@ END
 Mask / Threshold methods
 ------------------------
 
-.. automethod:: jiplib.Jim.setThreshold
-.. automethod:: jiplib.Jim.setAbsThreshold
-.. automethod:: jiplib.Jim.getMask
-.. automethod:: jiplib.Jim.setMask
+METHOD setThreshold(dict)
+Apply minimum and maximum threshold to pixel values in raster dataset
+
+Args:
+    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Supported keys in the dict:
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| min              | Minimum threshold value (if pixel value < min set pixel value to no data)       |
++------------------+---------------------------------------------------------------------------------+
+| max              | Maximum threshold value (if pixel value < max set pixel value to no data)       |
++------------------+---------------------------------------------------------------------------------+
+| abs              | Set to True to perform threshold test to absolute pixel values                  |
++------------------+---------------------------------------------------------------------------------+
+| nodata           | Set pixel value to this no data if pixel value < min or > max                   |
++------------------+---------------------------------------------------------------------------------+
+
+Returns:
+   Raster dataset with pixel threshold applied.
+
+Example:
+
+Mask all values not within [0,250] and set to 255 (no data)::
+
+  jim_threshold=jim.setThreshold('min':0,'max':250,'nodata':255)
+
+END
+
+METHOD getMask(dict)
+Create mask image based on values in input raster dataset.
+
+Args:
+    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Supported keys in the dict (more keys defined depending on the mask type)
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| band             | List of bands (0 indexed) user for mask.                                        |
++------------------+---------------------------------------------------------------------------------+
+| min              | List of minimum threshold values.                                               |
++------------------+---------------------------------------------------------------------------------+
+| min              | List of maximum threshold values.                                               |
++------------------+---------------------------------------------------------------------------------+
+| operator         | Boolean operator ("AND" or "OR") used to combine tests applied to list of bands |
+|                  | or min/max thresholds. Default is OR.                                           |
++------------------+---------------------------------------------------------------------------------+
+| data             | List of pixel values to set if pixel value is within min and max.               |
+|                  | List of values correspond to the list of min/max values in min/max values       |
++------------------+---------------------------------------------------------------------------------+
+| data             | List of pixel values to set if pixel value is not within min and max.           |
+|                  | List of values correspond to the list of min/max values in min/max values       |
++------------------+---------------------------------------------------------------------------------+
+
+Returns:
+   Raster mask dataset.
+
+Example:
+
+Create a binary mask from a raster dataset. The mask will get a value 1 (defined by the key 'data') if pixels in the input image are between 1 and 20. Otherwise, the mask will have a 0 (defined by the key 'nodata') value::
+
+  jim_threshold=jim.setThreshold('min':0,'max':250,'nodata':255)
+
+END
+
+METHOD setMask(mask, dict)
+Apply mask image based on values in vector or raster dataset.
+
+Args:
+    * ``mask`` Either a list of raster datasets (:py:class:`JimList`) or a vector dataset (:py:class:`VectorOgr`)
+    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Returns:
+   Raster dataset with pixel mask applied.
+
+Supported keys in the dict (more keys defined depending on the mask type)
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| otype            | Data type for output image                                                      |
++------------------+---------------------------------------------------------------------------------+
+| nodata           | Set pixel value to this no data if pixel value not valid according to mask      |
++------------------+---------------------------------------------------------------------------------+
+
+Mask is a :py:class:`JimList`
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| msknodata        | List of mask values where raster dataset should be set to nodata.               |
+|                  | Use one value for each mask, or multiple values for a single mask.              |
++------------------+---------------------------------------------------------------------------------+
+| mskband          | List of mask bands to read (0 indexed). Provide band for each mask.             |
++------------------+---------------------------------------------------------------------------------+
+| operator         | List of operators used for testing pixel values against mask.                   |
+|                  | Provide one operator for each msknodata value.                                  |
++------------------+---------------------------------------------------------------------------------+
+
+..note:: The mask raster datasets in the :py:class:`JimList` can be of a different spatial resolution than the input raster dataset to be masked. A nearest neighbor resampling is used.
+
+Mask is a :py:class:`VectorOgr`
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| eo               | Special extent options controlling rasterization                                |
++------------------+---------------------------------------------------------------------------------+
+| ln               | List of layer names.                                                            |
++------------------+---------------------------------------------------------------------------------+
+
+..note:: Possible values for the key 'eo' are: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG. For instance you can use 'eo':'ATTRIBUTE=fieldname'
+
+Example:
+
+Apply vector mask to a raster dataset, masking all pixels that are touched by the vector to a value 255 (no data). You can reduce the memory footprint by not reading the vector dataset::
+
+  v0=jl.createVector()
+  v0.open({'filename':args.vm,'noread':True})
+  jim1=jim0.setMask(v0,{'nodata':255,'eo':'ALL_TOUCHED'})
+
+Apply list of raster masks that consists of a single raster dataset jim_mask (created from jim1 with :py:meth:jiplib:jim:`getMask`) to a raster dataset jim. Set a value 255 (no data) to all values where the mask has a value 0 (msknodata)::
+
+  jim_mask=jim1.getMask({'min':1,'max':20,'nodata':0,'data':1})
+  jlist=jl.JimList([jim_mask])
+  jim_masked=jim.setMask(jlist,{'nodata':255,'msknodata':0})
+
+END
+
+--------------------------------------
+Statistical methods and interpolations
+--------------------------------------
+
+METHOD statProfile(dict)
+Obtain a statistical profile per pixel based no a multi-band input raster dataset. Multiple functions can be set, resulting in a multi-band raster dataset (one output band for each function).
+
+Args:
+    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Returns:
+   The statistical profile of the input raster dataset
+
+Supported keys in the dict:
+
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| function         | Statistical function (see values for different functions in tables below)       |
++------------------+---------------------------------------------------------------------------------+
+| nodata           | Do not take these values into account when calculating statistics               |
++------------------+---------------------------------------------------------------------------------+
+| otype            | Data type for output image                                                      |
++------------------+---------------------------------------------------------------------------------+
+
+
+**Statistical profile functions**
+
++--------------+------------------------------------------------------+
+| function     | description                                          |
++=====================+===============================================+
+| nvalid       | report number of valid (not nodata) values in window |
++--------------+------------------------------------------------------+
+| median       | perform a median filter                              |
++--------------+------------------------------------------------------+
+| var          | calculate variance in window                         |
++--------------+------------------------------------------------------+
+| min          | calculate minimum in window                          |
++--------------+------------------------------------------------------+
+| max          | calculate maximum in window                          |
++--------------+------------------------------------------------------+
+| sum          | calculate sum in window                              |
++--------------+------------------------------------------------------+
+| mode         | calculate the mode (only for categorical values)     |
++--------------+------------------------------------------------------+
+| mean         | calculate mean in window                             |
++--------------+------------------------------------------------------+
+| stdev        | calculate standard deviation in window               |
++--------------+------------------------------------------------------+
+| percentile   | calculate percentile value in window                 |
++--------------+------------------------------------------------------+
+| proportion   | calculate proportion in window                       |
++--------------+------------------------------------------------------+
+
+.. note:: The 'percentile' function calculates the percentile value based on the pixel values in the multi-band input raster dataset. A number of percentiles can be calculated, e.g., 10th and 50th percentile, resulting in a multi-band output raster dataset (one band for each calculated percentile). The percentiles to be calculated can be set with the key 'perc' and a list of values.
+
+Example:
+
+Calculated the 10th and 50th percentiles for the multi-band input raster dataset jim::
+
+  jim_percentiles=jim.statProfile({'function':args.function,'perc':[10,50]})
+
+END
+
+METHOD getStats(dict)
+Calculate statistics of a raster dataset.
+
+Args:
+    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Returns:
+   A dictionary with the results of the statistics, using the same keys as for the functions.
+
+Supported keys in the dict:
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| function         | Statistical function (see values for different functions in tables below)       |
++------------------+---------------------------------------------------------------------------------+
+| cband            | List of bands on which to calculate the statistics                              |
++------------------+---------------------------------------------------------------------------------+
+| down             | Down sampling factor (in pixels x and y) to calculate the statistics on a subset|
++------------------+---------------------------------------------------------------------------------+
+| src_min          | Do not take smaller values into account when calculating statistics             |
++------------------+---------------------------------------------------------------------------------+
+| src_max          | Do not take higher values into account when calculating statistics              |
++------------------+---------------------------------------------------------------------------------+
+| nodata           | Do not take these values into account when calculating statistics               |
++------------------+---------------------------------------------------------------------------------+
+| otype            | Data type for output image                                                      |
++------------------+---------------------------------------------------------------------------------+
+
+.. note:: For statistical functions requiring two sets of inputs, use a list of two values for cband (e.g., regression and histogram2d)
+
+**Supported statistical functions**
+
++--------------+------------------------------------------------------+
+| function     | description                                          |
++=====================+===============================================+
+| invalid      | report number of invalid (nodata) values             |
++--------------+------------------------------------------------------+
+| nvalid       | report number of valid (not nodata) values           |
++--------------+------------------------------------------------------+
+| basic        | Shows basic statistics                               |
+|              | (min,max, mean and stdDev of the raster datasets)    |
++--------------+------------------------------------------------------+
+| gdal         | Use the GDAL calculation of basic statistics         |
++--------------+------------------------------------------------------+
+| mean         | calculate the mean valule                            |
++--------------+------------------------------------------------------+
+| median       | calculate the median value                           |
++--------------+------------------------------------------------------+
+| var          | calculate variance value                             |
++--------------+------------------------------------------------------+
+| stdev        | calculate standard deviation                         |
++--------------+------------------------------------------------------+
+| skewness     | calculate the skewness                               |
++--------------+------------------------------------------------------+
+| kurtosis     | calculate the kurtosis                               |
++--------------+------------------------------------------------------+
+| sum          | calculate sum of all values                          |
++--------------+------------------------------------------------------+
+| minmax       | calculate minimum and maximum value                  |
++--------------+------------------------------------------------------+
+| min          | calculate minimum value                              |
++--------------+------------------------------------------------------+
+| max          | calculate maximum value                              |
++--------------+------------------------------------------------------+
+| histogram    | calculate the histogram                              |
++--------------+------------------------------------------------------+
+| histogram2d  | calculate the two-dimensional histogram for two bands|
++--------------+------------------------------------------------------+
+| rmse         | calculate root mean square error for two bands       |
++--------------+------------------------------------------------------+
+| regresssion  | calculate the regression between two bands           |
++--------------+------------------------------------------------------+
+
+For the histogram function, the following key values can be set:
+
++--------------+------------------------------------------------------+
+| key          | description                                          |
++=====================+===============================================+
+| nbin         | Number of bins for the histogram                     |
++--------------+------------------------------------------------------+
+| relative     | Set to True to report percentage values              |
++--------------+------------------------------------------------------+
+| kde          | Set to True to use Kernel density estimation when    |
+|              | producing histogram. The standard deviation is       |
+|              | estimated based on Silverman's rule of thumb         |
++--------------+------------------------------------------------------+
+
+Example:
+
+Get the histogram of the input raster dataset using 10 bins::
+
+  jim.getStats({'function':['histogram','nbin':10})
+
+END
+
+METHOD stretch(dict)
+Stretch the input raster dataset.
+
+Args:
+    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Returns:
+   A dictionary with the results of the statistics, using the same keys as for the functions.
+
+Supported keys in the dict:
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| function         | Statistical function (see values for different functions in tables below)       |
++------------------+---------------------------------------------------------------------------------+
+| down             | Down sampling factor (in pixels x and y) to calculate the statistics on a subset|
++------------------+---------------------------------------------------------------------------------+
+| src_min          | Clip source below this minimum value                                            |
++------------------+---------------------------------------------------------------------------------+
+| src_max          | Clip source above this minimum value                                            |
++------------------+---------------------------------------------------------------------------------+
+| dst_min          | Mininum value in output image                                                   |
++------------------+---------------------------------------------------------------------------------+
+| dst_max          | Maximum value in output image                                                   |
++------------------+---------------------------------------------------------------------------------+
+| cc_min           | Cumulative count cut from                                                       |
++------------------+---------------------------------------------------------------------------------+
+| cc_max           | Cumulative count cut to                                                         |
++------------------+---------------------------------------------------------------------------------+
+| band             | List of bands to stretch                                                        |
++------------------+---------------------------------------------------------------------------------+
+| eq               | Set to True to perform histogram equalization                                   |
++------------------+---------------------------------------------------------------------------------+
+| nodata           | List of values not to take into account when stretching                         |
++------------------+---------------------------------------------------------------------------------+
+| otype            | Data type for output image                                                      |
++------------------+---------------------------------------------------------------------------------+
+
+Example:
+
+Stretch the input raster dataset using the cumulative counts of 5 and 95 percent. Then, the output is converted to Byte with a dynamic range that is calculated based on the number of user defined bits (NBIT=[1:8])::
+  CCMIN=5
+  CCMAX=95
+  NBIT=7
+  jim_stretched=jim.({'cc_min':CCMIN,'cc_max':CCMAX,'dst_min':2**(8-NBIT),'dst_max':2**8-1,'otype':'GDT_Float32'})
+  jim_byte=jim_stretched.convert({'otype':'GDT_Byte'}).pointOpBitShift(8-NBIT)
+
+END
+
+--------------------------------------------------
+Extracting pixel values from overlays and sampling
+--------------------------------------------------
+
+METHOD extractOgr(*args)
+Extract pixel values from raster image using a vector dataset sample.
+
+Args:
+    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Returns:
+   A :py:class:`VectorOgr` with the same geometry as the sample vector dataset and an extra field for each of the calculated raster value (zonal) statistics. The same layer name(s) of the sample will be used for the output vector dataset.
+
+Supported keys in the dict:
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| rule             | Rule how to calculate zonal statistics per feature                              |
++------------------+---------------------------------------------------------------------------------+
+| copy             | Copy these fields from the sample vector dataset (default is to copy all fields)|
++------------------+---------------------------------------------------------------------------------+
+| label            | Create extra field named 'label' with this value                                |
++------------------+---------------------------------------------------------------------------------+
+| fid              | Create extra field named 'fid' with this field identifier (sequence of features)|
++------------------+---------------------------------------------------------------------------------+
+| band             | List of bands to extract (0 indexed). Default is to use extract all bands       |
++------------------+---------------------------------------------------------------------------------+
+| bandname         | List of band name corresponding to list of bands to extract                     |
++------------------+---------------------------------------------------------------------------------+
+| startband        | Start band sequence number (0 indexed)                                          |
++------------------+---------------------------------------------------------------------------------+
+| endband          | End band sequence number (0 indexed)                                            |
++------------------+---------------------------------------------------------------------------------+
+| output           | Name of the output vector dataset in which the zonal statistics are saved       |
++------------------+---------------------------------------------------------------------------------+
+| oformat          | Output vector dataset format                                                    |
++------------------+---------------------------------------------------------------------------------+
+| co               | Creation option for output vector dataset                                       |
++------------------+---------------------------------------------------------------------------------+
+
+**Supported rules for extraction**
+
++------------------+---------------------------------------------------------------------------------------------------+
+| rule             | description                                                                                       |
++==================+===================================================================================================+
+| point            | extract a single pixel within the polygon or on each point feature                                |
++------------------+---------------------------------------------------------------------------------------------------+
+| allpoints        | Extract all pixel values covered by the polygon                                                   |
++------------------+---------------------------------------------------------------------------------------------------+
+| centroid         | Extract pixel value at the centroid of the polygon                                                |
++------------------+---------------------------------------------------------------------------------------------------+
+| mean             | Extract average of all pixel values within the polygon                                            |
++------------------+---------------------------------------------------------------------------------------------------+
+| stdev            | Extract standard deviation of all pixel values within the polygon                                 |
++------------------+---------------------------------------------------------------------------------------------------+
+| median           | Extract median of all pixel values within the polygon                                             |
++------------------+---------------------------------------------------------------------------------------------------+
+| min              | Extract minimum value of all pixels within the polygon                                            |
++------------------+---------------------------------------------------------------------------------------------------+
+| max              | Extract maximum value of all pixels within the polygon                                            |
++------------------+---------------------------------------------------------------------------------------------------+
+| sum              | Extract sum of the values of all pixels within the polygon                                        |
++------------------+---------------------------------------------------------------------------------------------------+
+| mode             | Extract the mode of classes within the polygon (classes must be set with the option class)        |
++------------------+---------------------------------------------------------------------------------------------------+
+| proportion       | Extract proportion of class(es) within the polygon (classes must be set with the option class)    |
++------------------+---------------------------------------------------------------------------------------------------+
+| count            | Extract count of class(es) within the polygon (classes must be set with the option class)         |
++------------------+---------------------------------------------------------------------------------------------------+
+| percentile       | Extract percentile as defined by option perc (e.g, 95th percentile of values covered by polygon)  |
++------------------+---------------------------------------------------------------------------------------------------+
+
+**Masking values from extract**
+
+To mask some pixels from the extraction process, there are some keys that can be used:
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| srcnodata        | List of nodata values not to extract                                            |
++------------------+---------------------------------------------------------------------------------+
+| bndnodata        | List of band in input image to check if pixel is valid (used for srcnodata)     |
++------------------+---------------------------------------------------------------------------------+
+| mask             | Use the the specified file as a validity mask                                   |
++------------------+---------------------------------------------------------------------------------+
+| mskband          | Use the the specified band of the mask file defined                             |
++------------------+---------------------------------------------------------------------------------+
+| msknodata        | List of mask values not to extract                                              |
++------------------+---------------------------------------------------------------------------------+
+| threshold        | Maximum number of features to extract (use positive values for percentage value |
+|                  | and negative value for absolute threshold)                                      |
++------------------+---------------------------------------------------------------------------------+
+
+Example:
+
+Open a raster sample dataset based on land cover map (e.g., Corine) and use it to extract a stratified sample of 100 points from an input raster dataset with four spectral bands ('B02', 'B03', 'B04', 'B08'). Only sample classes 2 (urban), 12 (agriculture), 25 (forest), 41 (water) and an aggregated (rest) class 50::
+
+  jim_ref=jl.createJim({'filename':'/path/to/landcovermap.tif'})
+
+  samplefn='path/to/sample.sqlite'
+  outputfn='path/to/output.sqlite'
+
+  classDict={}
+  classDict['urban']=2
+  classDict['agriculture']=12
+  classDict['forest']=25
+  classDict['water']=41
+  classDict['rest']=50
+  classFrom=range(0,50)
+  classTo=[50]*50
+  for i in range(0,50):
+     if i>=1 and i<10:
+        classTo[i]=classDict['urban']
+     elif i>=11 and i<22:
+        classTo[i]=classDict['agriculture']
+     elif i>=23 and i<25:
+        classTo[i]=classDict['forest']
+     elif i>=40 and i<45:
+        classTo[i]=classDict['water']
+     else:
+        classTo[i]=classDict['rest']
+
+
+  jim_ref=jl.createJim({'filename':args.reference,'dx':jim.getDeltaX(),'dy':jim.getDeltaY(),'ulx':jim.getUlx(),'uly':jim.getUly(),'lrx':jim.getLrx(),'lry':jim.getLry()})
+  jim_ref=jim_ref.reclass({'class':classFrom,'reclass':classTo})
+
+  srcnodata=[0]
+  dict={'srcnodata':srcnodata}
+  dict.update({'output':output})
+  dict.update({'class':sorted(classDict.values())})
+  sampleSize=-100 #use negative values for absolute and positive values for percentage values
+  dict.update({'threshold':sampleSize})
+  dict.update({'bandname':['B02','B03','B04','B08']})
+  dict.update({'band':[0,1,2,3]})
+
+  sample=jim.extractImg(jim_ref,dict)
+
+END
+
+METHOD extractSample(dict)
+Extract a random or grid sample from raster image.
+
+Args:
+    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Returns:
+   A :py:class:`VectorOgr` with fields for each of the calculated raster value (zonal) statistics.
+
+Supported keys in the dict:
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| rule             | Rule how to calculate zonal statistics per feature                              |
++------------------+---------------------------------------------------------------------------------+
+| buffer           | Buffer for calculating statistics for point features (in number of pixels)      |
++------------------+---------------------------------------------------------------------------------+
+| label            | Create extra field named 'label' with this value                                |
++------------------+---------------------------------------------------------------------------------+
+| fid              | Create extra field named 'fid' with this field identifier (sequence of features)|
++------------------+---------------------------------------------------------------------------------+
+| band             | List of bands to extract (0 indexed). Default is to use extract all bands       |
++------------------+---------------------------------------------------------------------------------+
+| bandname         | List of band name corresponding to list of bands to extract                     |
++------------------+---------------------------------------------------------------------------------+
+| startband        | Start band sequence number (0 indexed)                                          |
++------------------+---------------------------------------------------------------------------------+
+| endband          | End band sequence number (0 indexed)                                            |
++------------------+---------------------------------------------------------------------------------+
+| output           | Name of the output vector dataset in which the zonal statistics are saved       |
++------------------+---------------------------------------------------------------------------------+
+| ln               | Layer name of output vector dataset                                             |
++------------------+---------------------------------------------------------------------------------+
+| oformat          | Output vector dataset format                                                    |
++------------------+---------------------------------------------------------------------------------+
+| co               | Creation option for output vector dataset                                       |
++------------------+---------------------------------------------------------------------------------+
+
+**Supported rules for extraction**
+
++------------------+---------------------------------------------------------------------------------------------------+
+| rule             | description                                                                                       |
++==================+===================================================================================================+
+| point            | extract a single pixel within the polygon or on each point feature                                |
++------------------+---------------------------------------------------------------------------------------------------+
+| allpoints        | Extract all pixel values covered by the polygon                                                   |
++------------------+---------------------------------------------------------------------------------------------------+
+| centroid         | Extract pixel value at the centroid of the polygon                                                |
++------------------+---------------------------------------------------------------------------------------------------+
+| mean             | Extract average of all pixel values within the polygon                                            |
++------------------+---------------------------------------------------------------------------------------------------+
+| stdev            | Extract standard deviation of all pixel values within the polygon                                 |
++------------------+---------------------------------------------------------------------------------------------------+
+| median           | Extract median of all pixel values within the polygon                                             |
++------------------+---------------------------------------------------------------------------------------------------+
+| min              | Extract minimum value of all pixels within the polygon                                            |
++------------------+---------------------------------------------------------------------------------------------------+
+| max              | Extract maximum value of all pixels within the polygon                                            |
++------------------+---------------------------------------------------------------------------------------------------+
+| sum              | Extract sum of the values of all pixels within the polygon                                        |
++------------------+---------------------------------------------------------------------------------------------------+
+| mode             | Extract the mode of classes within the polygon (classes must be set with the option class)        |
++------------------+---------------------------------------------------------------------------------------------------+
+| proportion       | Extract proportion of class(es) within the polygon (classes must be set with the option class)    |
++------------------+---------------------------------------------------------------------------------------------------+
+| count            | Extract count of class(es) within the polygon (classes must be set with the option class)         |
++------------------+---------------------------------------------------------------------------------------------------+
+| percentile       | Extract percentile as defined by option perc (e.g, 95th percentile of values covered by polygon)  |
++------------------+---------------------------------------------------------------------------------------------------+
+
+.. note:: For the rules mode, proportion and count, set the extra key 'class' with the list of class values in the input raster image to use.
+
+**Masking values from extract**
+
+To mask some pixels from the extraction process, there are some keys that can be used:
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| srcnodata        | List of nodata values not to extract                                            |
++------------------+---------------------------------------------------------------------------------+
+| bndnodata        | List of band in input image to check if pixel is valid (used for srcnodata)     |
++------------------+---------------------------------------------------------------------------------+
+| mask             | Use the the specified file as a validity mask                                   |
++------------------+---------------------------------------------------------------------------------+
+| mskband          | Use the the specified band of the mask file defined                             |
++------------------+---------------------------------------------------------------------------------+
+| msknodata        | List of mask values not to extract                                              |
++------------------+---------------------------------------------------------------------------------+
+| threshold        | Maximum number of features to extract (use positive values for percentage value |
+|                  | and negative value for absolute threshold)                                      |
++------------------+---------------------------------------------------------------------------------+
+
+Example:
+
+Extract a random sample of 100 points, calculating the mean value based on a 3x3 window (buffer value of 1 pixel neighborhood) in a vector dataset in memory::
+
+  v01=jim0.extractSample({'random':100,'buffer':1,'rule':['mean'],'output':'mem01','oformat':'Memory'})
+  v01.close()
+
+Extract a sample of 100 points using a regular grid sampling scheme. For each grid point, calculate the median value based on a 3x3 window (buffer value of 1 pixel neighborhood). Write the result in a SQLite vector dataset on disk::
+
+  outputfn='/path/to/output.sqlite'
+  npoint=100
+  gridsize=int(jim.nrOfCol()*jim.getDeltaX()/math.sqrt(npoint))
+  v=jim.extractSample({'grid':gridsize,'buffer':1,'rule':['median'],'output':output,'oformat':'SQLite'})
+  v.write()
+  v.close()
+
+END
+
+METHOD extractImg(dict)
+Extract a pixel values from an input raster dataset based on a raster sample dataset.
+
+Args:
+    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Returns:
+   A :py:class:`VectorOgr` with fields for each of the calculated raster value (zonal) statistics.
+
+Supported keys in the dict:
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| rule             | Rule how to calculate zonal statistics per feature                              |
++------------------+---------------------------------------------------------------------------------+
+| class            | List of classes to extract from the raster sample dataset.                      |
+|                  | Leave empty to extract all valid data pixels from thee sample                   |
++------------------+---------------------------------------------------------------------------------+
+| cname            | Name of the class label in the output vector dataset (default is 'label')       |
++------------------+---------------------------------------------------------------------------------+
+| fid              | Create extra field named 'fid' with this field identifier (sequence of features)|
++------------------+---------------------------------------------------------------------------------+
+| band             | List of bands to extract (0 indexed). Default is to use extract all bands       |
++------------------+---------------------------------------------------------------------------------+
+| bandname         | List of band name corresponding to list of bands to extract                     |
++------------------+---------------------------------------------------------------------------------+
+| startband        | Start band sequence number (0 indexed)                                          |
++------------------+---------------------------------------------------------------------------------+
+| endband          | End band sequence number (0 indexed)                                            |
++------------------+---------------------------------------------------------------------------------+
+| down             | Down sampling factor to extract a subset of the sample based on a grid          |
++------------------+---------------------------------------------------------------------------------+
+| output           | Name of the output vector dataset in which the zonal statistics are saved       |
++------------------+---------------------------------------------------------------------------------+
+| ln               | Layer name of output vector dataset                                             |
++------------------+---------------------------------------------------------------------------------+
+| oformat          | Output vector dataset format                                                    |
++------------------+---------------------------------------------------------------------------------+
+| co               | Creation option for output vector dataset                                       |
++------------------+---------------------------------------------------------------------------------+
+
+**Supported rules for extraction**
+
++------------------+---------------------------------------------------------------------------------------------------+
+| rule             | description                                                                                       |
++==================+===================================================================================================+
+| point            | extract a single pixel within the polygon or on each point feature                                |
++------------------+---------------------------------------------------------------------------------------------------+
+| allpoints        | Extract all pixel values covered by the polygon                                                   |
++------------------+---------------------------------------------------------------------------------------------------+
+| centroid         | Extract pixel value at the centroid of the polygon                                                |
++------------------+---------------------------------------------------------------------------------------------------+
+| mean             | Extract average of all pixel values within the polygon                                            |
++------------------+---------------------------------------------------------------------------------------------------+
+| stdev            | Extract standard deviation of all pixel values within the polygon                                 |
++------------------+---------------------------------------------------------------------------------------------------+
+| median           | Extract median of all pixel values within the polygon                                             |
++------------------+---------------------------------------------------------------------------------------------------+
+| min              | Extract minimum value of all pixels within the polygon                                            |
++------------------+---------------------------------------------------------------------------------------------------+
+| max              | Extract maximum value of all pixels within the polygon                                            |
++------------------+---------------------------------------------------------------------------------------------------+
+| sum              | Extract sum of the values of all pixels within the polygon                                        |
++------------------+---------------------------------------------------------------------------------------------------+
+| mode             | Extract the mode of classes within the polygon (classes must be set with the option class)        |
++------------------+---------------------------------------------------------------------------------------------------+
+| proportion       | Extract proportion of class(es) within the polygon (classes must be set with the option class)    |
++------------------+---------------------------------------------------------------------------------------------------+
+| count            | Extract count of class(es) within the polygon (classes must be set with the option class)         |
++------------------+---------------------------------------------------------------------------------------------------+
+| percentile       | Extract percentile as defined by option perc (e.g, 95th percentile of values covered by polygon)  |
++------------------+---------------------------------------------------------------------------------------------------+
+
+.. note:: For the rules mode, proportion and count, set the extra key 'class' with the list of class values in the input raster image to use.
+
+**Masking values from extract**
+
+To mask some pixels from the extraction process, there are some keys that can be used:
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| srcnodata        | List of nodata values not to extract                                            |
++------------------+---------------------------------------------------------------------------------+
+| bndnodata        | List of band in input image to check if pixel is valid (used for srcnodata)     |
++------------------+---------------------------------------------------------------------------------+
+| mask             | Use the the specified file as a validity mask                                   |
++------------------+---------------------------------------------------------------------------------+
+| mskband          | Use the the specified band of the mask file defined                             |
++------------------+---------------------------------------------------------------------------------+
+| msknodata        | List of mask values not to extract                                              |
++------------------+---------------------------------------------------------------------------------+
+| threshold        | Maximum number of features to extract (use positive values for percentage value |
+|                  | and negative value for absolute threshold)                                      |
++------------------+---------------------------------------------------------------------------------+
+
+Example:
+
+Extract a random sample of 100 points, calculating the mean value based on a 3x3 window (buffer value of 1 pixel neighborhood) in a vector dataset in memory::
+
+  v01=jim0.extractSample({'random':100,'buffer':1,'rule':['mean'],'output':'mem01','oformat':'Memory'})
+  v01.close()
+
+Extract a sample of 100 points using a regular grid sampling scheme. For each grid point, calculate the median value based on a 3x3 window (buffer value of 1 pixel neighborhood). Write the result in a SQLite vector dataset on disk::
+
+  outputfn='/path/to/output.sqlite'
+  npoint=100
+  gridsize=int(jim.nrOfCol()*jim.getDeltaX()/math.sqrt(npoint))
+  v=jim.extractSample({'grid':gridsize,'buffer':1,'rule':['median'],'output':output,'oformat':'SQLite'})
+  v.write()
+  v.close()
+
+END
+.. automethod:: jiplib.Jim.extractOgr
+.. automethod:: jiplib.Jim.extractSample
+.. automethod:: jiplib.Jim.extractImg
+
+--------------------------------
+Digitial elevation model methods
+--------------------------------
+
+----------------------------------------
+Segmentation methods and label operators
+----------------------------------------
 
 ###########################################################################################################################################################################
 # JimList

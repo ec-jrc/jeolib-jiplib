@@ -179,14 +179,17 @@ namespace jiplib{
 #endif
        bool covers(double ulx, double  uly, double lrx, double lry, bool all=false, OGRCoordinateTransformation *poCT=NULL) const{return ImgRaster::covers(ulx,uly,lrx,lry,all,poCT);};
     ///Get the geotransform data for this dataset
-    using ImgRaster::getGeoTransform;
 #ifdef SWIG
-    %pythonprepend getGeoTransform(double*)  "\"\"\"HELP.METHOD.Jim.getGeoTransform(*args)\"\"\""
+    %pythonprepend getGeoTransform(double&, double&, double&, double&, double&, double&)  "\"\"\"HELP.METHOD.Jim.getGeoTransform()\"\"\""
+#endif
+       void getGeoTransform(double& gt0, double& gt1, double& gt2, double& gt3, double& gt4, double& gt5) const{return ImgRaster::getGeoTransform(gt0, gt1, gt2, gt3, gt4, gt5);};
+#ifdef SWIG
+    %pythonprepend getGeoTransform(double*)  "\"\"\"HELP.METHOD.Jim.getGeoTransform()\"\"\""
 #endif
        CPLErr getGeoTransform(double* gt) const{return ImgRaster::getGeoTransform(gt);};
     ///Set the geotransform data for this dataset
 #ifdef SWIG
-    %pythonprepend setGeoTransform(double*)  "\"\"\"HELP.METHOD.Jim.setGeoTransform(*args)\"\"\""
+    %pythonprepend setGeoTransform(double*)  "\"\"\"HELP.METHOD.Jim.setGeoTransform()\"\"\""
 #endif
        CPLErr setGeoTransform(double* gt){return ImgRaster::setGeoTransform(gt);};
     ///Copy geotransform information from another georeferenced image
@@ -206,44 +209,44 @@ namespace jiplib{
        CPLErr setProjection(const std::string& projection){return ImgRaster::setProjection(projection);};
     ///Get the bounding box of this dataset in georeferenced coordinates with coordinate transform
 #ifdef SWIG
-    %pythonprepend getBoundingBox(double&, double&, double&, double&, OGRCoordinateTransformation *)  "\"\"\"HELP.METHOD.Jim.getBoundingBox(*args)\"\"\""
+    %pythonprepend getBoundingBox(double&, double&, double&, double&, OGRCoordinateTransformation *)  "\"\"\"HELP.METHOD.Jim.getBoundingBox()\"\"\""
 #endif
        void getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT=NULL) const{return ImgRaster::getBoundingBox(ulx,uly,lrx,lry,poCT);};
     ///Get the bounding box of this dataset in georeferenced coordinates with coordinate transform
     void getBoundingBox(std::vector<double> &bbvector, OGRCoordinateTransformation *poCT=NULL) const{return ImgRaster::getBoundingBox(bbvector,poCT);};
     ///Get the center position of the image in georeferenced coordinates with coordinate transform
 #ifdef SWIG
-    %pythonprepend getCenterPos(double&, double&)  "\"\"\"HELP.METHOD.Jim.getCenterPos(*args)\"\"\""
+    %pythonprepend getCenterPos(double&, double&)  "\"\"\"HELP.METHOD.Jim.getCenterPos()\"\"\""
 #endif
        void getCenterPos(double& centerX, double& centerY){return ImgRaster::getCenterPos(centerX, centerY);};
 #ifdef SWIG
-    %pythonprepend getUlx()  "\"\"\"HELP.METHOD.Jim.getUlx(*args)\"\"\""
+    %pythonprepend getUlx()  "\"\"\"HELP.METHOD.Jim.getUlx()\"\"\""
 #endif
        double getUlx(){return ImgRaster::getUlx();};
 #ifdef SWIG
-    %pythonprepend getUly()  "\"\"\"HELP.METHOD.Jim.getUly(*args)\"\"\""
+    %pythonprepend getUly()  "\"\"\"HELP.METHOD.Jim.getUly()\"\"\""
 #endif
        double getUly(){return ImgRaster::getUly();};
 #ifdef SWIG
-    %pythonprepend getLrx()  "\"\"\"HELP.METHOD.Jim.getLrx(*args)\"\"\""
+    %pythonprepend getLrx()  "\"\"\"HELP.METHOD.Jim.getLrx()\"\"\""
 #endif
        double getLrx(){return ImgRaster::getLrx();};
 #ifdef SWIG
-    %pythonprepend getLry()  "\"\"\"HELP.METHOD.Jim.getLry(*args)\"\"\""
+    %pythonprepend getLry()  "\"\"\"HELP.METHOD.Jim.getLry()\"\"\""
 #endif
        double getLry(){return ImgRaster::getLry();};
 #ifdef SWIG
-    %pythonprepend getDeltaX()  "\"\"\"HELP.METHOD.Jim.getDeltaX(*args)\"\"\""
+    %pythonprepend getDeltaX()  "\"\"\"HELP.METHOD.Jim.getDeltaX()\"\"\""
 #endif
        double getDeltaX(){return ImgRaster::getDeltaX();};
 #ifdef SWIG
-    %pythonprepend getDeltaY()  "\"\"\"HELP.METHOD.Jim.getDeltaY(*args)\"\"\""
+    %pythonprepend getDeltaY()  "\"\"\"HELP.METHOD.Jim.getDeltaY()\"\"\""
 #endif
        double getDeltaY(){return ImgRaster::getDeltaY();};
 #ifdef SWIG
-    %pythonprepend getRefPix(double&, double &, int)  "\"\"\"HELP.METHOD.Jim.getRefPix(*args)\"\"\""
+    %pythonprepend getRefPix(double&, double &, int)  "\"\"\"HELP.METHOD.Jim.getRefPix(\"\"\""
 #endif
-       void getRefPix(double& refX, double &refY, int band=0){return ImgRaster::getRefPix(refX, refY, band);};
+       void getRefPix(double& centerX, double &centerY, int band=0){return ImgRaster::getRefPix(centerX, centerY, band);};
     /* -------------------- */
     /* Input/Output methods */
     /* -------------------- */
@@ -362,6 +365,66 @@ namespace jiplib{
 #endif
     CPLErr validate(app::AppFactory& app);
 
+    /* ------------------------ */
+    /* Mask / Threshold methods */
+    /* ------------------------ */
+    ///Apply thresholds: set to no data if not within thresholds t1 and t2
+#ifdef SWIG
+    %pythonprepend setThreshold(app::AppFactory&)  "\"\"\"HELP.METHOD.setThreshold(dict)\"\"\""
+#endif
+       std::shared_ptr<Jim> setThreshold(app::AppFactory& theApp);
+    ///get mask from a raster dataset
+#ifdef SWIG
+    %pythonprepend getMask(app::AppFactory&)  "\"\"\"HELP.METHOD.getMask(dict)\"\"\""
+#endif
+    std::shared_ptr<Jim> getMask(app::AppFactory& app);
+    ///set mask to raster dataset
+#ifdef SWIG
+    %pythonprepend setMask(VectorOgr&, app::AppFactory&)  "\"\"\"HELP.METHOD.setMask(*args)\"\"\""
+#endif
+    std::shared_ptr<Jim> setMask(VectorOgr& ogrReader, app::AppFactory& app);
+#ifdef SWIG
+    %pythonprepend setMask(JimList&,app::AppFactory&)  "\"\"\"HELP.METHOD.setMask(*args)\"\"\""
+#endif
+    std::shared_ptr<Jim> setMask(JimList& maskList, app::AppFactory& app);
+
+    /* -------------------------------------- */
+    /* Statistical methods and interpolations */
+    /* -------------------------------------- */
+    ///create statistical profile
+#ifdef SWIG
+    %pythonprepend statProfile(app::AppFactory&)  "\"\"\"HELP.METHOD.statProfile(dict)\"\"\""
+#endif
+    std::shared_ptr<Jim> statProfile(app::AppFactory& theApp);
+    ///stretch Jim image and return stretched image as shared pointer
+#ifdef SWIG
+    %pythonprepend stretch(app::AppFactory&)  "\"\"\"HELP.METHOD.stretch(dict)\"\"\""
+#endif
+    std::shared_ptr<Jim> stretch(app::AppFactory& app);
+    ///get statistics on image list
+#ifdef SWIG
+    %pythonprepend getStats(app::AppFactory&)  "\"\"\"HELP.METHOD.getStats(dict)\"\"\""
+#endif
+    std::multimap<std::string,std::string> getStats(app::AppFactory& theApp);
+
+    /* -------------------------------------------------- */
+    /* Extracting pixel values from overlays and sampling */
+    /* -------------------------------------------------- */
+    ///extract pixel values from raster image from a vector sample
+#ifdef SWIG
+    %pythonprepend extractOgr(VectorOgr&, app::AppFactory&)  "\"\"\"HELP.METHOD.extractOgr(*args)\"\"\""
+#endif
+    std::shared_ptr<VectorOgr> extractOgr(VectorOgr& sampleReader, app::AppFactory& app);
+    ///extract pixel values from raster image with random or grid sampling
+#ifdef SWIG
+    %pythonprepend extractSample(app::AppFactory&)  "\"\"\"HELP.METHOD.extractSample(dict)\"\"\""
+#endif
+    std::shared_ptr<VectorOgr> extractSample(app::AppFactory& app);
+    ///extract pixel values from raster image from a raster sample
+#ifdef SWIG
+    %pythonprepend extractImg(ImgRaster&, app::AppFactory&)  "\"\"\"HELP.METHOD.extractImg(*args)\"\"\""
+#endif
+    std::shared_ptr<VectorOgr> extractImg(ImgRaster& classReader, app::AppFactory& app);
     ///Initialize the memory for read/write image in cache
     CPLErr initMem(unsigned int memory);
     /// convert single plane multiband image to single band image with multiple planes
@@ -401,8 +464,6 @@ namespace jiplib{
     /* ///read data from with reduced resolution */
     /* CPLErr GDALRead(std::string filename, int band, int nXOff, int nYOff, int nXSize, int nYSize, int nBufXSize=0, int nBufYSize=0); */
 
-    ///get statistics on image list
-    std::multimap<std::string,std::string> getStats(app::AppFactory& theApp);
     ///get unique pixels
     /* unsigned int getUniquePixels(){ */
     /*   std::map<std::vector<char>,std::vector<std::pair<unsigned short,unsigned short> > > theMap; */
@@ -414,27 +475,10 @@ namespace jiplib{
     /*   theMap=ImgRaster::getUniquePixels<T>(); */
     /*   return(theMap); */
     /* }; */
-    ///create statistical profile
-    std::shared_ptr<Jim> statProfile(app::AppFactory& theApp);
     ///check the difference between two images
     std::shared_ptr<Jim> diff(app::AppFactory& app);
     ///Check for difference with reference image
     CPLErr diff(std::shared_ptr<Jim> refImage,app::AppFactory& app);
-    ///stretch Jim image and return stretched image as shared pointer
-    std::shared_ptr<Jim> stretch(app::AppFactory& app);
-    ///Apply thresholds: set to no data if not within thresholds t1 and t2
-    std::shared_ptr<Jim> setThreshold(double t1, double t2);
-    ///Apply absolute thresholds: set to no data if not within thresholds t1 and t2
-    std::shared_ptr<Jim> setAbsThreshold(double t1, double t2);
-    ///Apply thresholds: set to no data if not within thresholds t1 and t2, else set to value
-    std::shared_ptr<Jim> setThreshold(double t1, double t2, double value);
-    ///Apply absolute thresholds: set to no data if not within thresholds t1 and t2, else set to value
-    std::shared_ptr<Jim> setAbsThreshold(double t1, double t2, double value);
-    ///get mask from a raster dataset
-    std::shared_ptr<Jim> getMask(app::AppFactory& app);
-    ///set mask to raster dataset
-    std::shared_ptr<Jim> setMask(VectorOgr& ogrReader, app::AppFactory& app);
-    std::shared_ptr<Jim> setMask(JimList& maskList, app::AppFactory& app);
 
     std::shared_ptr<Jim> getShared(){
       return(std::dynamic_pointer_cast<Jim>(shared_from_this()));

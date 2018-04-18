@@ -1447,32 +1447,12 @@ std::shared_ptr<Jim> Jim::stretch(app::AppFactory& app){
 }
 
 ///Apply thresholds: set to no data if not within thresholds t1 and t2
-std::shared_ptr<Jim> Jim::setThreshold(double t1, double t2){
+std::shared_ptr<Jim> Jim::setThreshold(app::AppFactory& app){
   std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
-  ImgRaster::setThreshold(*imgWriter,t1,t2);
+  ImgRaster::setThreshold(*imgWriter,app);
   return(imgWriter);
 }
 
-///Apply absolute thresholds: set to no data if not within thresholds t1 and t2
-std::shared_ptr<Jim> Jim::setAbsThreshold(double t1, double t2){
-  std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
-  ImgRaster::setAbsThreshold(*imgWriter,t1,t2);
-  return(imgWriter);
-}
-
-///Apply thresholds: set to no data if not within thresholds t1 and t2, else set to value
-std::shared_ptr<Jim> Jim::setThreshold(double t1, double t2, double value){
-  std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
-  ImgRaster::setThreshold(*imgWriter,t1,t2,value);
-  return(imgWriter);
-}
-
-///Apply absolute thresholds: set to no data if not within thresholds t1 and t2, else set to value
-std::shared_ptr<Jim> Jim::setAbsThreshold(double t1, double t2, double value){
-  std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
-  ImgRaster::setAbsThreshold(*imgWriter,t1,t2,value);
-  return(imgWriter);
-}
 ///get mask from a raster dataset
 /**
  * @param min (type: double) Values smaller than min threshold(s) are masked as invalid. Use one threshold for each band
