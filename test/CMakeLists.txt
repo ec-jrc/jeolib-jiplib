@@ -20,6 +20,7 @@ set(TESTAPPS
   testMemoryLeak
   testCreateImg
   test2
+  pktestexternal
   )
 
 set(JIPLIBS

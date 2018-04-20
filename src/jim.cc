@@ -1124,7 +1124,7 @@ bool Jim::isEqual(std::shared_ptr<Jim> refImg){
 ///convert Jim image in memory returning Jim image (alias for crop)
 std::shared_ptr<Jim> Jim::convert(app::AppFactory& app){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
-  ImgRaster::crop(*imgWriter, app);
+  ImgRaster::convert(*imgWriter, app);
   return(imgWriter);
 }
 

@@ -414,17 +414,17 @@ namespace jiplib{
 #ifdef SWIG
     %pythonprepend extractOgr(VectorOgr&, app::AppFactory&)  "\"\"\"HELP.METHOD.extractOgr(*args)\"\"\""
 #endif
-    std::shared_ptr<VectorOgr> extractOgr(VectorOgr& sampleReader, app::AppFactory& app);
+    std::shared_ptr<VectorOgr> extractOgr(VectorOgr& sampleReader, app::AppFactory& app){return ImgRaster::extractOgr(sampleReader,app);};
     ///extract pixel values from raster image with random or grid sampling
 #ifdef SWIG
     %pythonprepend extractSample(app::AppFactory&)  "\"\"\"HELP.METHOD.extractSample(dict)\"\"\""
 #endif
-    std::shared_ptr<VectorOgr> extractSample(app::AppFactory& app);
+       std::shared_ptr<VectorOgr> extractSample(app::AppFactory& app){return ImgRaster::extractSample(app);};
     ///extract pixel values from raster image from a raster sample
 #ifdef SWIG
-    %pythonprepend extractImg(ImgRaster&, app::AppFactory&)  "\"\"\"HELP.METHOD.extractImg(*args)\"\"\""
+    %pythonprepend extractImg(Jim&, app::AppFactory&)  "\"\"\"HELP.METHOD.extractImg(*args)\"\"\""
 #endif
-    std::shared_ptr<VectorOgr> extractImg(ImgRaster& classReader, app::AppFactory& app);
+       std::shared_ptr<VectorOgr> extractImg(Jim& classReader, app::AppFactory& app){return ImgRaster::extractImg(classReader,app);};
     ///Initialize the memory for read/write image in cache
     CPLErr initMem(unsigned int memory);
     /// convert single plane multiband image to single band image with multiple planes
