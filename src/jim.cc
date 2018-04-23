@@ -200,7 +200,8 @@ CPLErr Jim::open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane
   if(dataPointers.size()){
     for(int iband=0;iband<m_nband;++iband){
       if(dataPointers[iband]){
-        m_data[iband]=(uint8_t*)dataPointers[iband]+iband*ncol*nrow*getDataTypeSizeBytes();
+        m_data[iband]=(uint8_t*)dataPointers[iband];
+        // m_data[iband]=(uint8_t*)dataPointers[iband]+iband*nplane*ncol*nrow*getDataTypeSizeBytes();
         m_begin[iband]=0;
         m_end[iband]=m_begin[iband]+m_blockSize;
       }
