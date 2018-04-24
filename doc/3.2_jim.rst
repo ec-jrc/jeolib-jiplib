@@ -90,20 +90,43 @@ Input/Output methods
    #     - writeGeoTiff
    #     - writeMultibandGeoTiff
 
+-------------------------------------
+Subset methods and geometry operators
+-------------------------------------
+
+.. automethod:: jiplib.Jim.crop
+
+Geometry operators (from MIA module gemetry)
+
+- imageFrameSet
+- imageFrameAdd
+- imageFrameSubstract
+- imageInsert
+- imageInsertCompose
+- imageCut
+- getBoundingBoxNonZeroDomain
+- imageMagnify
+- imageRotateCoor
+- predicateSizeAndTypeEqual
+- predicateSizeEqual
+- plotLine
+- overlapMatrix
+
 ---------------
 Convert methods
 ---------------
 
 .. automethod:: jiplib.Jim.convert
-   ..
+.. automethod:: jiplib.Jim.jim2np
+.. automethod:: jiplib.Jim.np2jim
+
+..
       # - band2plane
       # - plane2band
       # - jim2json
       # - json2jim
       # - jim2mia (private)
       # - mia2jim (private)
-.. automethod:: jiplib.Jim.jim2np (implemented in Python)
-.. automethod:: jiplib.Jim.np2jim (implemented in Python)
 ..
    from MIA module format
        - convertTo1bitPerPixel
@@ -127,137 +150,113 @@ Convert methods
    #     - imageToArray
    #     - imageFromArray
 
--------------------------------------
-Subset methods and geometry operators
--------------------------------------
-
-.. automethod:: jiplib.Jim.crop
-..
-   Geometry operators (from MIA module gemetry)
-       - imageFrameSet
-       - imageFrameAdd
-       - imageFrameSubstract
-       - imageInsert
-       - imageInsertCompose
-       - imageCut
-       - getBoundingBoxNonZeroDomain
-       - imageMagnify
-       - imageRotateCoor
-       - predicateSizeAndTypeEqual
-       - predicateSizeEqual
-       - plotLine
-       - overlapMatrix
-
 -----------------------------------------------
 Convolution filters and morphological operators
 -----------------------------------------------
 
-.. _filter1d:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 spectral/temporal domain (1D)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automethod:: jiplib.Jim.filter1d
 
-.. _filter2d:
 ^^^^^^^^^^^^^^^^^^^
 spatial domain (2D)
 ^^^^^^^^^^^^^^^^^^^
 
 .. automethod:: jiplib.Jim.filter2d
 
-.. _mia_morpho2d:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Advanced spatial morphological operators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _mia_convolve2d:
-   convolutional filters (from MIA module convolve)
-        - convolve
-        - convolveDownSample
-        - runSum2d
-        - runSum3d
-        - runSumInSquareNgb
-        - meanFilterInSquareNgb
-        - meanFilterIn2dNgb
-        - varianceFilterIn2dNgb
-        - sumInSquareNgb
-        - gradientAzimuth
-        - orientationMap
-        - phaseCorrelation
+convolutional filters (from MIA module convolve)
 
-.. _mia_erodil2d:
+- convolve
+- convolveDownSample
+- runSum2d
+- runSum3d
+- runSumInSquareNgb
+- meanFilterInSquareNgb
+- meanFilterIn2dNgb
+- varianceFilterIn2dNgb
+- sumInSquareNgb
+- gradientAzimuth
+- orientationMap
+- phaseCorrelation
+      
 Morphological operators (from MIA module erodil)
-        - morphoErodeLine
-        - morphoDilateLine
-        - morphoDilateLinePeriodic
-        - morphoErodeLinePeriodic
-        - morphoErodeNgb4
-        - morphoDilateNgb4
-        - morphoErode
-        - morphoDilate
-        - morphoRankFilter
-        - morphoRankFilterSquare
-        - morphoRankFilterLine
-        - morphoRankFilterLineTI
-        - morphoGradientMultibandSquareNgb
-        - morphoGradientMultiband2dNgb
 
-.. _mia_opclo2d:
-   Morphological operators (from MIA module opclo)
-        - morphoOpeningAttribute
-        - morphoOpeningArea
-        - morphoClosingArea
-        - morphoOpeningAreaROI
-        - morphoClosingAreaROI
-        - convexHull
-        - morphoClosingHalfPlane
-        - morphoClosingHalfPlaneTI
+- morphoErodeLine
+- morphoDilateLine
+- morphoDilateLinePeriodic
+- morphoErodeLinePeriodic
+- morphoErodeNgb4
+- morphoDilateNgb4
+- morphoErode
+- morphoDilate
+- morphoRankFilter
+- morphoRankFilterSquare
+- morphoRankFilterLine
+- morphoRankFilterLineTI
+- morphoGradientMultibandSquareNgb
+- morphoGradientMultiband2dNgb
 
-.. _mia_hmt2d:
-   Morphological operators (from MIA module hmt)
-        - skeleton
-        - pruneBinary
-        - extractPixelConfigurationBinary
-        - extractPixelConfigurationGrey
-        - switchOperator
-        - skeletonOrderIndependent
-        - skeletonAnchored
-        - orderDependentThin
-        - orderDependentThinFifo
-        - orderIndependentThin
-        - orderIndependentThinFifo
+Morphological operators (from MIA module opclo)
+
+- morphoOpeningAttribute
+- morphoOpeningArea
+- morphoClosingArea
+- morphoOpeningAreaROI
+- morphoClosingAreaROI
+- convexHull
+- morphoClosingHalfPlane
+- morphoClosingHalfPlaneTI
+
+Morphological operators (from MIA module hmt)
+
+- skeleton
+- pruneBinary
+- extractPixelConfigurationBinary
+- extractPixelConfigurationGrey
+- switchOperator
+- skeletonOrderIndependent
+- skeletonAnchored
+- orderDependentThin
+- orderDependentThinFifo
+- orderIndependentThin
+- orderIndependentThinFifo
        
-.. _mia_geodesy2d:
-   Geodesy operators (from MIA module geodesy)
-        - geodesicReconstructionByDilation
-        - geodesicReconstructionByErosion
-        - geodesicReconstruction
-        - geodesicComplete
-        - getRegionalMinima
-        - geodesicTimeFlat
-        - geodesicTime
-        - geodesicTimeSymmetric
+Geodesy operators (from MIA module geodesy)
 
-.. _mia_dist2d:
-   Distance functions (from MIA dist module)
-        - distance2d4
-        - distance2dChamfer57
-        - distance2dChamfer
-        - distance2dEuclideanFifo
-        - distance2dEuclideanSquared
-        - distanceInfluenceZones2dEuclidean
-        - distanceInfluenceZones2dOrderedIndependent
-        - distanceGeodesic
-        - distance2dEuclideanConstrained
+- geodesicReconstructionByDilation
+- geodesicReconstructionByErosion
+- geodesicReconstruction
+- geodesicComplete
+- getRegionalMinima
+- geodesicTimeFlat
+- geodesicTime
+- geodesicTimeSymmetric
+
+Distance functions (from MIA dist module)
+
+- distance2d4
+- distance2dChamfer57
+- distance2dChamfer
+- distance2dEuclideanFifo
+- distance2dEuclideanSquared
+- distanceInfluenceZones2dEuclidean
+- distanceInfluenceZones2dOrderedIndependent
+- distanceGeodesic
+- distance2dEuclideanConstrained
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 spatial and spectral domain (3D)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _mia_erodil3d:
-   Morphological operators (from MIA module erodil)
-        - morphoErodeVolumic
+Morphological operators (from MIA module erodil)
+
+- morphoErodeVolumic
 
 ----------------------
 Classification methods
@@ -285,7 +284,6 @@ Mask / Threshold methods
 ------------------------
 
 .. automethod:: jiplib.Jim.setThreshold
-.. automethod:: jiplib.Jim.setAbsThreshold
 .. automethod:: jiplib.Jim.getMask
 .. automethod:: jiplib.Jim.setMask
 ..

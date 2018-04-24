@@ -25,7 +25,7 @@ try:
         jim=jim.crop({'band':args.band})
     if 'dwt' in args.filter:
         if args.cut > 0:
-            jim_filtered=jim.filter2d({'filter':'dwt_cut','otype':'Int16','threshold':args.cut}).pushNoDataValue(0).setThreshold(0,255).crop({'otype':'Byte'})
+            jim_filtered=jim.filter2d({'filter':'dwt_cut','otype':'Int16','threshold':args.cut}).pushNoDataValue(0).setThreshold({'min':0,'max':255}).convert({'otype':'Byte'})
         else:
             jim_filtered=jim.filter2d({'filter':'dwt','otype':'Int16'})
             jim_filtered=jim_filtered.filter2d({'filter':'dwti'}).pushNoDataValue(0).setThreshold(0,255).crop({'otype':'Byte'})

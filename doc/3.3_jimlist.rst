@@ -11,18 +11,21 @@ JimList class
 JimList methods
 ===============
 
+-------------------------------------------------------
 Accessing JimList attributes and geospatial information
 -------------------------------------------------------
 
+^^^^^^^^^^^^^^^^^^^^^^^^^
 Access JimList attributes
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: jiplib.JimList.getImage
 .. automethod:: jiplib.JimList.pushImage
-.. automethod:: jiplib.JimList.
+.. automethod:: jiplib.JimList.popImage
+.. automethod:: jiplib.JimList.getImage
 .. automethod:: jiplib.JimList.pushNoDataValue
 .. automethod:: jiplib.JimList.clearNoData
 
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 Get geospatial information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -34,17 +37,20 @@ Get geospatial information
 .. automethod:: jiplib.JimList.getLrx
 .. automethod:: jiplib.JimList.getLry
 
+----------------------
 Classification methods
 ----------------------
 
 .. automethod:: jiplib.JimList.validate
 
+--------------
 Reduce methods
 --------------
 
 .. automethod:: jiplib.JimList.composite
 .. automethod:: jiplib.JimList.stack
 
+-------------------
 Statistical methods
 -------------------
 

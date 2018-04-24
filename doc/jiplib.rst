@@ -24,7 +24,7 @@ FUNC createJim(dict)
 Creates a Jim object as an instance of the basis image class of the Joint image processing library, using a Python Dictionary argument
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Supported keys in the dict:
 
@@ -123,9 +123,8 @@ FUNC createJim(*args)
 Creates an empty Jim object as an instance of the basis image class of the Joint image processing library.
 
 Args:
-
-    * ``Jim``: A reference Jim object
-    * ``copyData`` (bool): Set to False if reference image is used as a template only, without copying actual pixel dat
+* ``Jim``: A reference Jim object
+* ``copyData`` (bool): Set to False if reference image is used as a template only, without copying actual pixel dat
 
 Returns:
    This instance of Jim object (self)
@@ -142,11 +141,11 @@ END
 
 FUNC createVector()
 Creates an empty VectorOgr object as an instance of the basis vector class of the Joint image processing library.
-END
 
 Returns:
    This instance of VectorOgr object (self)
 
+END
 
 *********
 Jim class
@@ -157,7 +156,6 @@ Jim class is the basis image class of the Joint image processing library.
 
 Notes:
 The calls to Jim methods can be chained together using the dot (.) syntax returning a new Jim instance::
-
     ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
     jim0=createJim()
     ULX=600000.0
@@ -271,17 +269,17 @@ Check if a geolocation is covered by this dataset. Only the coordinates of the p
 
 Args (variant 1):
 
-    * ``x`` (float): x coordinate in spatial reference system of the raster dataset
-    * ``y`` (float): y coordinate in spatial reference system of the raster dataset
+* ``x`` (float): x coordinate in spatial reference system of the raster dataset
+* ``y`` (float): y coordinate in spatial reference system of the raster dataset
 
 
 Args (variant 2):
 
-    * ``ulx`` (float): upper left x coordinate in spatial reference system of the raster dataset
-    * ``uly`` (float): upper left y coordinate in spatial reference system of the raster dataset
-    * ``lrx`` (float): lower right x coordinate in spatial reference system of the raster dataset
-    * ``lry`` (float): lower right x coordinate in spatial reference system of the raster dataset
-    * ``all`` (bool): set to True if the entire bounding box must be covered by the raster dataset
+* ``ulx`` (float): upper left x coordinate in spatial reference system of the raster dataset
+* ``uly`` (float): upper left y coordinate in spatial reference system of the raster dataset
+* ``lrx`` (float): lower right x coordinate in spatial reference system of the raster dataset
+* ``lry`` (float): lower right x coordinate in spatial reference system of the raster dataset
+* ``all`` (bool): set to True if the entire bounding box must be covered by the raster dataset
 
 
 Returns:
@@ -294,12 +292,12 @@ Get the geotransform data for this dataset as a list of floats.
 
 Returns:
 List of floats with geotransform data:
- * [0] top left x
- * [1] w-e pixel resolution
- * [2] rotation, 0 if image is "north up"
- * [3] top left y
- * [4] rotation, 0 if image is "north up"
- * [5] n-s pixel resolution
+* [0] top left x
+* [1] w-e pixel resolution
+* [2] rotation, 0 if image is "north up"
+* [3] top left y
+* [4] rotation, 0 if image is "north up"
+* [5] n-s pixel resolution
 
 END
 
@@ -308,12 +306,12 @@ Set the geotransform data for this dataset.
 
 Args:
 List of floats with geotransform data:
- * [0] top left x
- * [1] w-e pixel resolution
- * [2] rotation, 0 if image is "north up"
- * [3] top left y
- * [4] rotation, 0 if image is "north up"
- * [5] n-s pixel resolution
+* [0] top left x
+* [1] w-e pixel resolution
+* [2] rotation, 0 if image is "north up"
+* [3] top left y
+* [4] rotation, 0 if image is "north up"
+* [5] n-s pixel resolution
 
 Returns:
    This instance of Jim object (self)
@@ -324,7 +322,7 @@ METHOD copyGeoTransform(*args)
 Copy geotransform information from another georeferenced image.
 
 Args:
- * A referenced Jim image
+* A referenced Jim image
 
 Returns:
    This instance of Jim object (self)
@@ -344,7 +342,7 @@ METHOD setProjection(*args)
 Set the projection for this dataset in well known text (wkt) format.
 
 Args:
- * The projection string in well known text format (typically an EPSG code, e.g., 'epsg:3035')
+* The projection string in well known text format (typically an EPSG code, e.g., 'epsg:3035')
 
 Returns:
    This instance of Jim object (self)
@@ -433,7 +431,7 @@ Open a raster dataset
 
 Args:
 
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Supported keys in the dict:
 
@@ -493,7 +491,7 @@ METHOD write(dict)
 Write the raster dataset to file in a GDAL supporte format
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Supported keys in the dict:
 
@@ -509,7 +507,7 @@ Returns:
 
 Note:
     Supported GDAL output formats are restricted to those that support creation (see http://www.gdal.org/formats_list.html#footnote1)
-    The image data is kept in memory (unlike using method :py:func:`close``)
+    The image data is kept in memory (unlike using method :py:func:`Jim.close`)
 
 Example:
 
@@ -526,7 +524,7 @@ METHOD dumpImg(dict)
 Dump the raster dataset to output (screen or ASCII file).
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Supported keys in the dict:
 
@@ -609,7 +607,7 @@ METHOD isEqual(*args)
 Test raster dataset for equality.
 
 Args:
-    * ``Jim``: A reference Jim object
+* ``Jim``: A reference Jim object
 
 Returns:
    True if raster dataset is equal to reference raster dataset, else False.
@@ -624,7 +622,7 @@ METHOD convert(dict)
 Convert Jim image with respect to data type, creation options (compression, interleave, etc.).
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Supported keys in the dict:
 
@@ -652,6 +650,7 @@ Convert data type of input image to byte, using autoscale and clipping respectiv
   jim_scaled=jim.convert({'otype':'Byte','autoscale':[0,255]})
   jim_clipped=jim.setNoDataValue(0).setThreshold(0,255).convert({'otype':'Byte'})
 
+END
 -------------------------------------
 Subset methods and geometry operators
 -------------------------------------
@@ -660,16 +659,16 @@ METHOD crop(dict)
 Subset raster dataset according in spatial (subset region) or spectral/temporal domain (subset bands)
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Returns:
    This subset of Jim object
 
-.. note:: Spatial subsetting only supports nearest neighbor interpolation. Use :py:method:jiplib:`createJim` for more flexible interpolation options
+.. note:: Spatial subsetting only supports nearest neighbor interpolation. Use :py:func:`createJim` for more flexible interpolation options
 
 Supported keys in the dict:
 
-.. note:: In addition to the keys defined here, you can use all the keys defined in :py:method:jiplib:Jim:`covert`
+.. note:: In addition to the keys defined here, you can use all the keys defined in :py:func:`Jim:convert`
 
 **Subset spatial region in coordinates of the image geospatial reference system**
 
@@ -734,6 +733,7 @@ Convert data type of input image to byte, using autoscale and clipping respectiv
   jim_scaled=jim.convert({'otype':'Byte','autoscale':[0,255]})
   jim_clipped=jim.setNoDataValue(0).setThreshold(0,255).convert({'otype':'Byte'})
 
+END
 -----------------------------------------------
 Convolution filters and morphological operators
 -----------------------------------------------
@@ -746,7 +746,7 @@ METHOD filter1d(dict)
 Filter Jim image in spectral/temporal domain performed on multi-band raster dataset.
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 
 Returns:
@@ -923,7 +923,7 @@ METHOD filter2d(dict)
 Filter Jim image in spatial domain performed on single or multi-band raster dataset.
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 
 Returns:
@@ -1027,11 +1027,6 @@ Perform a morphological dilation using a circular kernel with size (diameter) of
 +--------------+------------------------------------------------------+
 | proportion   | calculate proportion in window                       |
 +--------------+------------------------------------------------------+
-..
-   | scrample     |                                                      |
-   +--------------+------------------------------------------------------+
-   | shift        |                                                      |
-   +--------------+------------------------------------------------------+
 
 .. note:: You can specify the no data value for the smoothnodata filter with the extra key 'nodata' and a list of no data values. The interpolation type can be set with the key 'interp' (check complete list of `values <http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html>`_, removing the leading "gsl_interp").
 
@@ -1082,11 +1077,11 @@ Classification methods
 ----------------------
 
 METHOD classify(dict)
-Supervised classification of a raster dataset. The classifier must have been trained via the :py:method:jiplib:VectorOgr:`train` method.
+Supervised classification of a raster dataset. The classifier must have been trained via the :py:func:`VectorOgr:train` method.
 The classifier can be selected with the key 'method' and possible values 'svm' and 'ann':
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 
 Returns:
@@ -1136,13 +1131,13 @@ To apply a raster mask, use the key 'mask' with the path of the raster dataset a
 END
 
 METHOD classifySML(dict)
-Supervised classification of a raster dataset using the symbolic machine learning algorithm `sml <https://doi.org/10.3390/rs8050399>`_. For training, one or more reference raster datasets with categorical values is expected as a JimList. The reference raster dataset is typically at a lower spatial resolution than the input raster dataset to be classified. Unlike the :py:meth:`jiplib.jim.classify`, the training is performed not prior to the classification, but in the same process as the classification.
+Supervised classification of a raster dataset using the symbolic machine learning algorithm `sml <https://doi.org/10.3390/rs8050399>`_. For training, one or more reference raster datasets with categorical values is expected as a JimList. The reference raster dataset is typically at a lower spatial resolution than the input raster dataset to be classified. Unlike the :py:func:`Jim:classify`, the training is performed not prior to the classification, but in the same process as the classification.
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Returns:
-   A multiband raster dataset with one band for each class. The pixel values represent the respective frequencies of the classes (scaled to Byte). To create a hard classified output, obtain the maxindex of this output. The result will then contains the class indices (0-nclass-1). To obtain the same class numbers as defined in the reference dataset, use the :py:meth:jiplib:jim:`reclass` method (see example below).
+   A multiband raster dataset with one band for each class. The pixel values represent the respective frequencies of the classes (scaled to Byte). To create a hard classified output, obtain the maxindex of this output. The result will then contains the class indices (0-nclass-1). To obtain the same class numbers as defined in the reference dataset, use the :py:func::`Jim:reclass` method (see example below).
 
 Supported keys in the dict:
 
@@ -1160,7 +1155,7 @@ Supported keys in the dict:
 
 **Classifying parts of the input raster dataset**
 
-See :py:meth:`jipblib.jim.classify`.
+See :py:func:`Jim:classify`.
 
 Example:
 
@@ -1260,7 +1255,7 @@ METHOD reclass(dict)
 Replace categorical pixel values in raster dataset
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Returns:
    Raster dataset with class values replaced according to corresponding class and reclass list values.
@@ -1295,7 +1290,7 @@ METHOD setThreshold(dict)
 Apply minimum and maximum threshold to pixel values in raster dataset
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Supported keys in the dict:
 
@@ -1326,7 +1321,7 @@ METHOD getMask(dict)
 Create mask image based on values in input raster dataset.
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Supported keys in the dict (more keys defined depending on the mask type)
 
@@ -1364,8 +1359,8 @@ METHOD setMask(mask, dict)
 Apply mask image based on values in vector or raster dataset.
 
 Args:
-    * ``mask`` Either a list of raster datasets (:py:class:`JimList`) or a vector dataset (:py:class:`VectorOgr`)
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``mask`` Either a list of raster datasets (:py:class:`JimList`) or a vector dataset (:py:class:`VectorOgr`)
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Returns:
    Raster dataset with pixel mask applied.
@@ -1416,7 +1411,7 @@ Apply vector mask to a raster dataset, masking all pixels that are touched by th
   v0.open({'filename':args.vm,'noread':True})
   jim1=jim0.setMask(v0,{'nodata':255,'eo':'ALL_TOUCHED'})
 
-Apply list of raster masks that consists of a single raster dataset jim_mask (created from jim1 with :py:meth:jiplib:jim:`getMask`) to a raster dataset jim. Set a value 255 (no data) to all values where the mask has a value 0 (msknodata)::
+Apply list of raster masks that consists of a single raster dataset jim_mask (created from jim1 with :py:func:`Jim:getMask`) to a raster dataset jim. Set a value 255 (no data) to all values where the mask has a value 0 (msknodata)::
 
   jim_mask=jim1.getMask({'min':1,'max':20,'nodata':0,'data':1})
   jlist=jl.JimList([jim_mask])
@@ -1432,7 +1427,7 @@ METHOD statProfile(dict)
 Obtain a statistical profile per pixel based no a multi-band input raster dataset. Multiple functions can be set, resulting in a multi-band raster dataset (one output band for each function).
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Returns:
    The statistical profile of the input raster dataset
@@ -1493,7 +1488,7 @@ METHOD getStats(dict)
 Calculate statistics of a raster dataset.
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Returns:
    A dictionary with the results of the statistics, using the same keys as for the functions.
@@ -1589,7 +1584,7 @@ METHOD stretch(dict)
 Stretch the input raster dataset.
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Returns:
    A dictionary with the results of the statistics, using the same keys as for the functions.
@@ -1643,7 +1638,7 @@ METHOD extractOgr(*args)
 Extract pixel values from raster image using a vector dataset sample.
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Returns:
    A :py:class:`VectorOgr` with the same geometry as the sample vector dataset and an extra field for each of the calculated raster value (zonal) statistics. The same layer name(s) of the sample will be used for the output vector dataset.
@@ -1779,7 +1774,7 @@ METHOD extractSample(dict)
 Extract a random or grid sample from raster image.
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Returns:
    A :py:class:`VectorOgr` with fields for each of the calculated raster value (zonal) statistics.
@@ -1891,7 +1886,7 @@ METHOD extractImg(dict)
 Extract a pixel values from an input raster dataset based on a raster sample dataset.
 
 Args:
-    * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Returns:
    A :py:class:`VectorOgr` with fields for each of the calculated raster value (zonal) statistics.
@@ -2001,9 +1996,6 @@ Extract a sample of 100 points using a regular grid sampling scheme. For each gr
   v.close()
 
 END
-.. automethod:: jiplib.Jim.extractOgr
-.. automethod:: jiplib.Jim.extractSample
-.. automethod:: jiplib.Jim.extractImg
 
 --------------------------------
 Digitial elevation model methods
@@ -2021,7 +2013,26 @@ CLASS JimList
 JimList class represents a list of Jim images.
 
 Notes:
-A JimList can be created from a python list of Jim images or via the :py:meth:jiplib:jimlist:`pushImage` method::
+A JimList can be created from a python list of Jim images::
+
+  ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
+  jim0=createJim()
+  jlist=jl.createJim([jim0])
+  #do stuff with jim ...
+  jlist.close()
+
+END
+
+METHOD pushImage(Jim)
+Push a Jim image to this JimList object
+
+Args:
+* A :py:class:`Jim` object.
+
+Returns:
+   The :py:class:`JimList` (self) with the extra image pushed to the end
+
+Push a :py:class:`Jim` image object to an empty :py:class:`JimList`::
 
   ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
   jim0=createJim()
@@ -2032,9 +2043,59 @@ A JimList can be created from a python list of Jim images or via the :py:meth:ji
 
 END
 
-METHOD pushImage(Jim)
-Push a Jim image to this JimList object
+METHOD popImage(Jim)
+Pop a Jim image from this JimList
+
+Returns:
+   The :py:class:`JimList` (self) without the last image (that has been removed) 
+
+Pop a :py:class`Jim` image object to an empty :py:class:`JimList`::
+
+  ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
+  jim0=createJim()
+  jlist=jl.createJim()
+  jlist.pushImage(jim0)
+  jlist.popImage()
+  jlist.close()
+
+END
+
+METHOD getImage(integer)
+Get an image at the specified index (0 based)
 
 Args:
+* ``Integer`` the index of the index to get (0 based).
 
-    * ``Jim`` :py:class:`Jim` object.
+Returns:
+   The :py:class:`Jim` object at the specified index
+
+Push an image to an empty list and get it back::
+
+  ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
+  jim0=createJim()
+  jlist=jl.createJim()
+  jlist.pushImage(jim0)
+  jim1=jlist.getImage(0)
+  #jim1 is a reference to jim0
+
+END
+
+METHOD pushNoDataValue(float)
+Push a no data value to this :py:class:`JimList` object.
+
+Args:
+* ``Float`` the no data value
+
+Returns:
+   The :py:class:`JimList` (self)
+
+END
+
+
+METHOD clearNoData(float)
+Clear all no data values from this :py:class:`JimList` object.
+
+Returns:
+   The :py:class:`JimList` (self)
+
+END

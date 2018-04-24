@@ -281,12 +281,12 @@ namespace jiplib{
      * @param nodata Nodata value to put in image.
      **/
 #ifdef SWIG
-    %pythonprepend write(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.Jim.write(dict)\"\"\""
+    %pythonprepend write(app::AppFactory&)  "\"\"\"HELP.METHOD.Jim.write(dict)\"\"\""
 #endif
     CPLErr write(app::AppFactory &theApp);
     ///dump raster dataset
 #ifdef SWIG
-    %pythonprepend dumpImg(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.Jim.dumpImg(dict)\"\"\""
+    %pythonprepend dumpImg(app::AppFactory&)  "\"\"\"HELP.METHOD.Jim.dumpImg(dict)\"\"\""
 #endif
        CPLErr dumpImg(app::AppFactory& app){return ImgRaster::dumpImg(app);};
     ///assignment operator
@@ -299,16 +299,16 @@ namespace jiplib{
     /* bool isEqual(Jim& refImg){return(*this==(refImg));}; */
     ///Test raster dataset for equality.
 #ifdef SWIG
-    %pythonprepend isEqual(std::shared_ptr<Jim> refImg)  "\"\"\"HELP.METHOD.Jim.isEqual(*args)\"\"\""
+    %pythonprepend isEqual(std::shared_ptr<Jim>)  "\"\"\"HELP.METHOD.Jim.isEqual(*args)\"\"\""
 #endif
     bool isEqual(std::shared_ptr<Jim> refImg);
 
     /* --------------- */
     /* Convert methods */
     /* --------------- */
-    ///convert Jim image in memory returning Jim image (alias for crop)
+    ///convert Jim image in memory returning Jim image
 #ifdef SWIG
-    %pythonprepend convert(app::AppFactory &)  "\"\"\"HELP.METHOD.Jim.convert(dict)\"\"\""
+    %pythonprepend convert(app::AppFactory&)  "\"\"\"HELP.METHOD.Jim.convert(dict)\"\"\""
 #endif
        std::shared_ptr<Jim> convert(app::AppFactory& app);
     /* ------------------------------------- */
@@ -316,14 +316,14 @@ namespace jiplib{
     /* ------------------------------------- */
     ///crop Jim image in memory returning Jim image
 #ifdef SWIG
-    %pythonprepend crop(app::AppFactory &)  "\"\"\"HELP.METHOD.Jim.crop(dict)\"\"\""
+    %pythonprepend crop(app::AppFactory&)  "\"\"\"HELP.METHOD.Jim.crop(dict)\"\"\""
 #endif
        std::shared_ptr<Jim> crop(app::AppFactory& app);
-    ///crop Jim image in memory returning Jim image
+    ///crop Jim image in memory based on VectorOgr returning Jim image
 #ifdef SWIG
-    %pythonprepend crop(VectorOgr&, app::AppFactory &)  "\"\"\"HELP.METHOD.Jim.crop(*args)\"\"\""
+    %pythonprepend cropOgr(VectorOgr&, app::AppFactory&)  "\"\"\"HELP.METHOD.Jim.crop(*args)\"\"\""
 #endif
-    std::shared_ptr<Jim> crop(VectorOgr& sampleReader, app::AppFactory& app);
+    std::shared_ptr<Jim> cropOgr(VectorOgr& sampleReader, app::AppFactory& app);
     /* ----------------------------------------------- */
     /* Convolution filters and morphological operators */
     /* ----------------------------------------------- */
@@ -332,7 +332,7 @@ namespace jiplib{
     /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
     ///filter Jim image in spectral/temporal domain
 #ifdef SWIG
-    %pythonprepend filter1d(app::AppFactory& theApp)  "\"\"\"HELP.METHOD.filter1d(dict)\"\"\""
+    %pythonprepend filter1d(app::AppFactory&)  "\"\"\"HELP.METHOD.filter1d(dict)\"\"\""
 #endif
        std::shared_ptr<Jim> filter1d(app::AppFactory& theApp);
     /* ^^^^^^^^^^^^^^^^^^^ */
@@ -384,7 +384,7 @@ namespace jiplib{
 #endif
     std::shared_ptr<Jim> setMask(VectorOgr& ogrReader, app::AppFactory& app);
 #ifdef SWIG
-    %pythonprepend setMask(JimList&,app::AppFactory&)  "\"\"\"HELP.METHOD.setMask(*args)\"\"\""
+    %pythonprepend setMask(JimList&, app::AppFactory&)  "\"\"\"HELP.METHOD.setMask(*args)\"\"\""
 #endif
     std::shared_ptr<Jim> setMask(JimList& maskList, app::AppFactory& app);
 
@@ -533,11 +533,11 @@ namespace jiplib{
 #endif
   static std::shared_ptr<Jim> createJim(){return Jim::createImg();};
 #ifdef SWIG
-  %pythonprepend createJim(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.createJim(dict)\"\"\""
+  %pythonprepend createJim(app::AppFactory&)  "\"\"\"HELP.METHOD.createJim(dict)\"\"\""
 #endif
      static std::shared_ptr<Jim> createJim(app::AppFactory &theApp){return(Jim::createImg(theApp));};
 #ifdef SWIG
-  %pythonprepend createJim(const std::shared_ptr<Jim>,bool)  "\"\"\"HELP.METHOD.createJim(*args)\"\"\""
+  %pythonprepend createJim(const std::shared_ptr<Jim>, bool)  "\"\"\"HELP.METHOD.createJim(*args)\"\"\""
 #endif
      static std::shared_ptr<Jim> createJim(const std::shared_ptr<Jim> pSrc, bool copyData=true){return(Jim::createImg(pSrc, copyData));};
   static std::shared_ptr<Jim> createJim(const std::string& filename, bool readData=true){return(Jim::createImg(filename,readData));};

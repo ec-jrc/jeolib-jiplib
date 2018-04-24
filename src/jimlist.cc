@@ -93,7 +93,7 @@ JimList& JimList::open(app::AppFactory& theApp){
  * @param index index of the image
  * @return shared pointer to image object
  **/
-const std::shared_ptr<jiplib::Jim> JimList::getImage(int index){
+std::shared_ptr<jiplib::Jim> JimList::getImage(int index) const{
   return(std::dynamic_pointer_cast<jiplib::Jim>(ImgList::getImage(index)));
 }
 

@@ -19,7 +19,7 @@ if(args.min==0 and args.max==1):
     try:
         jim0=jim0.pushNoDataValue(1)
         # Create binary mask where all values not within [0,1[ are set to 1 (i.e., all pixel values > 0 are set to 1)
-        jim0=jim0.setThreshold(args.min,args.max)
+        jim0=jim0.setThreshold({'min':args.min,'max':args.max})
         if jim0.getNvalid()!=87957:
             print("Failed: nvalid")
             throw()
@@ -32,7 +32,7 @@ if(args.min==0 and args.max==1):
 elif(args.min==10 and args.max==50):
     try:
         jim0=jim0.pushNoDataValue(0)
-        jim1=jim0.setThreshold(10,50)
+        jim1=jim0.setThreshold({'min':10,'max':50})
         theStats=jim1.getStats({'function':['min','max'],'nodata':0})
         print(theStats)
         if theStats['min']!=10:
@@ -41,7 +41,7 @@ elif(args.min==10 and args.max==50):
         if theStats['max']!=50:
             print("Failed: max",theStats['max'])
             throw()
-        jim1=jim0.setThreshold(10,50,100).clearNoData()
+        jim1=jim0.setThreshold({'min':10,'max':50,'value':100}).clearNoData()
         theStats=jim1.getStats({'function':['min','max']})
         if theStats['min']!=0:
             print("Failed: min",theStats['min'])
@@ -55,7 +55,7 @@ elif(args.min==10 and args.max==50):
 else:
     try:
         jim0=jim0.pushNoDataValue(0)
-        jim1=jim0.setThreshold(args.min,args.max)
+        jim1=jim0.setThreshold({'min':args.min,'max':args.max})
         theStats=jim1.getStats({'function':['min','max'],'nodata':0})
         print(theStats)
         print("Success: masking")

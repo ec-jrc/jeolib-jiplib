@@ -1137,7 +1137,7 @@ std::shared_ptr<Jim> Jim::crop(app::AppFactory& app){
 }
 
 ///crop Jim image in memory returning Jim image
-std::shared_ptr<Jim> Jim::crop(VectorOgr& sampleReader, app::AppFactory& app){
+std::shared_ptr<Jim> Jim::cropOgr(VectorOgr& sampleReader, app::AppFactory& app){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
   ImgRaster::crop(sampleReader, *imgWriter, app);
   return(imgWriter);
