@@ -192,6 +192,7 @@ namespace jiplib{
     %pythonprepend setGeoTransform(double*)  "\"\"\"HELP.METHOD.Jim.setGeoTransform()\"\"\""
 #endif
        CPLErr setGeoTransform(double* gt){return ImgRaster::setGeoTransform(gt);};
+    CPLErr setGeoTransform(std::vector<double> gt){return ImgRaster::setGeoTransform(gt);};
     ///Copy geotransform information from another georeferenced image
 #ifdef SWIG
     %pythonprepend copyGeoTransform(const ImgRaster&)  "\"\"\"HELP.METHOD.Jim.copyGeoTransform(*args)\"\"\""
