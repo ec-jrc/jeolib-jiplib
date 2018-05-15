@@ -69,6 +69,11 @@ namespace jiplib{
 #endif
     std::shared_ptr<jiplib::Jim> getImage(int index) const;
 
+    ///get size of list
+#ifdef SWIG
+    %pythonprepend getSize()  "\"\"\"HELP.METHOD.getSize()\"\"\""
+#endif
+       size_t getSize() const{return ImgList::getSize();};
     ///Get the no data values of this dataset as a standard template library (stl) vector
     JimList& getNoDataValues(std::vector<double>& noDataValues){ImgList::getNoDataValues(noDataValues);return(*this);};
     ///push a no data value
@@ -89,33 +94,54 @@ namespace jiplib{
     /* ^^^^^^^^^^^^^^^^^^^^^^^^^^ */
     ///functions from ImgList in pktools
     ///Check if a geolocation is covered by this dataset. Only the bounding box is checked, irrespective of no data values.
+#ifdef SWIG
+    %pythonprepend covers()  "\"\"\"HELP.METHOD.covers(*args)\"\"\""
+#endif
     bool covers(double x, double  y, OGRCoordinateTransformation *poCT=0) const{return ImgList::covers(x,y,poCT);};
     ///Check if a region of interest is (partially) covered by this dataset. Only the bounding box is checked, irrespective of no data values.
     bool covers(double ulx, double  uly, double lrx, double lry, bool all=false, OGRCoordinateTransformation *poCT=0) const{return ImgList::covers(ulx,uly,lrx,lry,all,poCT);};
     ///Check if an image raster dataset is (partially) covered by this dataset. Only the bounding box is checked, irrespective of no data values.
     /* bool covers(const std::shared_ptr<jiplib::Jim> imgRaster, bool all=false) const {return ImgList::covers(*imgRaster,all);}; */
     ///select a geographical region based on bounding box
+#ifdef SWIG
+    %pythonprepend selectGeo()  "\"\"\"HELP.METHOD.selectGeo(*args)\"\"\""
+#endif
     JimList& selectGeo(double ulx, double uly, double lrx, double lry){ImgList::selectGeo(ulx,uly,lrx,lry);return(*this);};
     ///select a geographical region based on a position
     JimList& selectGeo(double x, double y){ImgList::selectGeo(x,y);return(*this);};
     ///return an empty collection
-    JimList& clean(){ImgList::clean();return(*this);};
+    JimList& clear(){ImgList::clear();return(*this);};
     ///close all images in collection
 #ifdef SWIG
-    %pythonprepend close(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.JimList.close(dict)\"\"\""
+    %pythonprepend close()  "\"\"\"HELP.METHOD.JimList.close()\"\"\""
 #endif
     JimList& close(){ImgList::close();return(*this);};
     ///composite image only for in memory
+#ifdef SWIG
+    %pythonprepend composite(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.JimList.composite(dict)\"\"\""
+#endif
     std::shared_ptr<jiplib::Jim> composite(app::AppFactory& app);
     ///crop image only for in memory
+#ifdef SWIG
+    %pythonprepend crop(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.JimList.crop(dict)\"\"\""
+#endif
     std::shared_ptr<jiplib::Jim> crop(app::AppFactory& app);
     ///stack all images in collection to multiband image (alias for crop)
+#ifdef SWIG
+    %pythonprepend stack(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.JimList.stack(dict)\"\"\""
+#endif
     std::shared_ptr<jiplib::Jim> stack(app::AppFactory& app);
     ///stack all images in collection to multiband image (alias for crop)
     std::shared_ptr<jiplib::Jim> stack();
     ///create statistical profile from a collection
+#ifdef SWIG
+    %pythonprepend statProfile(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.JimList.statProfile(dict)\"\"\""
+#endif
     std::shared_ptr<jiplib::Jim> statProfile(app::AppFactory& app);
     ///get statistics on image list
+#ifdef SWIG
+    %pythonprepend getStats(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.JimList.getStats(dict)\"\"\""
+#endif
     std::multimap<std::string,std::string> getStats(app::AppFactory& app);
     ///validate image based on reference vector dataset (-ref)
     JimList& validate(app::AppFactory& app);

@@ -1,5 +1,5 @@
 VectorOgr class
-*************
+***************
 
 .. toctree::
    :maxdepth: 3
@@ -9,10 +9,13 @@ VectorOgr class
 .. autoclass:: VectorOgr
 
 VectorOgr methods
-===============
+=================
 
 Accessing VectorOgr attributes and geospatial information
 ---------------------------------------------------------
+
+Accessing VectorOgr attributes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automethod:: jiplib.VectorOgr.getLayerCount
 .. automethod:: jiplib.VectorOgr.getFeatureCount
@@ -21,7 +24,6 @@ Get geospatial information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automethod:: jiplib.VectorOgr.getBoundingBox
-.. automethod:: jiplib.VectorOgr.
 .. automethod:: jiplib.VectorOgr.getUly
 .. automethod:: jiplib.VectorOgr.getLrx
 .. automethod:: jiplib.VectorOgr.getLry

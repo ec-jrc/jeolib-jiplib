@@ -147,15 +147,17 @@ Returns:
 
 END
 
-*********
-Jim class
-*********
+##########
+#Jim class
+##########
 
 CLASS Jim
 Jim class is the basis image class of the Joint image processing library.
 
 Notes:
+
 The calls to Jim methods can be chained together using the dot (.) syntax returning a new Jim instance::
+
     ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
     jim0=createJim()
     ULX=600000.0
@@ -169,15 +171,12 @@ The calls to Jim methods can be chained together using the dot (.) syntax return
 
 END
 
----------------------
-Access Jim attributes
----------------------
-
 METHOD nrOfCol()
 Get number of columns in this raster dataset
 
 Returns:
    The number of columns in this raster dataset
+
 END
 
 METHOD nrOfRow()
@@ -185,6 +184,7 @@ Get number of rows in this raster dataset
 
 Returns:
    The number of rows in this raster dataset
+
 END
 
 METHOD nrOfBand()
@@ -192,6 +192,7 @@ Get number of bands in this raster dataset
 
 Returns:
    The number of bands in this raster dataset
+
 END
 
 METHOD nrOfPlane()
@@ -199,6 +200,7 @@ Get number of planes in this raster dataset
 
 Returns:
    The number of planes in this raster dataset
+
 END
 
 METHOD printNoDataValues()
@@ -206,6 +208,7 @@ Print the list of no data values of this raster dataset
 
 Returns:
    This instance of Jim object (self)
+
 END
 
 METHOD pushNoDataValue()
@@ -213,6 +216,7 @@ Push a no data value for this raster dataset
 
 Returns:
    This instance of Jim object (self)
+
 END
 
 METHOD setNoDataValue()
@@ -220,6 +224,7 @@ Set a single no data value for this raster dataset
 
 Returns:
    This instance of Jim object (self)
+
 END
 
 METHOD setNoData(list)
@@ -227,6 +232,7 @@ Set a list of no data values for this raster dataset
 
 Returns:
    This instance of Jim object (self)
+
 END
 
 METHOD clearNoData()
@@ -234,6 +240,7 @@ Clear the list of no data values for this raster dataset
 
 Returns:
    This instance of Jim object (self)
+
 END
 
 METHOD getDataType()
@@ -258,11 +265,8 @@ Returns:
    CFloat32  10
    CFloat64  11
    ========= ==
-END
 
---------------------------
-Get geospatial information
---------------------------
+END
 
 METHOD covers(*args)
 Check if a geolocation is covered by this dataset. Only the coordinates of the point (variant 1) or region of interest (variant 2) are checked, irrespective of no data values. Set the additional flag to True if the region of interest must be entirely covered.
@@ -422,10 +426,6 @@ Returns:
 
 END
 
---------------------
-Input/Output methods
---------------------
-
 METHOD open(dict)
 Open a raster dataset
 
@@ -488,7 +488,7 @@ END
 
 
 METHOD write(dict)
-Write the raster dataset to file in a GDAL supporte format
+Write the raster dataset to file in a GDAL supported format
 
 Args:
 * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
@@ -507,7 +507,7 @@ Returns:
 
 Note:
     Supported GDAL output formats are restricted to those that support creation (see http://www.gdal.org/formats_list.html#footnote1)
-    The image data is kept in memory (unlike using method :py:func:`Jim.close`)
+    The image data is kept in memory (unlike using method :py:func:`Jim:close`)
 
 Example:
 
@@ -601,6 +601,7 @@ Open resampled raster dataset in reduced spatial resolution of 20 km by 20 km an
     5 5 2823
 
     jim.close()
+
 END
 
 METHOD isEqual(*args)
@@ -613,10 +614,6 @@ Returns:
    True if raster dataset is equal to reference raster dataset, else False.
 
 END
-
----------------
-Convert methods
----------------
 
 METHOD convert(dict)
 Convert Jim image with respect to data type, creation options (compression, interleave, etc.).
@@ -651,9 +648,6 @@ Convert data type of input image to byte, using autoscale and clipping respectiv
   jim_clipped=jim.setNoDataValue(0).setThreshold(0,255).convert({'otype':'Byte'})
 
 END
--------------------------------------
-Subset methods and geometry operators
--------------------------------------
 
 METHOD crop(dict)
 Subset raster dataset according in spatial (subset region) or spectral/temporal domain (subset bands)
@@ -664,11 +658,13 @@ Args:
 Returns:
    This subset of Jim object
 
-.. note:: Spatial subsetting only supports nearest neighbor interpolation. Use :py:func:`createJim` for more flexible interpolation options
+.. note::
+   Spatial subsetting only supports nearest neighbor interpolation. Use :py:func:`createJim` for more flexible interpolation options
 
 Supported keys in the dict:
 
-.. note:: In addition to the keys defined here, you can use all the keys defined in :py:func:`Jim:convert`
+.. note::
+   In addition to the keys defined here, you can use all the keys defined in :py:func:`Jim:convert`
 
 **Subset spatial region in coordinates of the image geospatial reference system**
 
@@ -681,10 +677,10 @@ Supported keys in the dict:
 +------------------+---------------------------------------------------------------------------------+
 | ln               | Layer name of extent to crop                                                    |
 +------------------+---------------------------------------------------------------------------------+
-| cut_to_cutline   | True will crop the extent of the target dataset to the extent of the cutline    |
+| crop_to_cutline  | True will crop the extent of the target dataset to the extent of the cutline    |
 |                  | The outside area will be set to no data (the value defined by the key 'nodata') |
 +------------------+---------------------------------------------------------------------------------+
-| cut_in_cutline   | True: inverse operation to cut_to_cutline                                       |
+| crop_in_cutline  | True: inverse operation to crop_to_cutline                                      |
 |                  | The inside area will be set to no data (the value defined by the key 'nodata')  |
 +------------------+---------------------------------------------------------------------------------+
 | ulx              | Upper left x value of bounding box to crop                                      |
@@ -704,7 +700,8 @@ Supported keys in the dict:
 | align            | Align output bounding box to input image                                        |
 +------------------+---------------------------------------------------------------------------------+
 
-..note:: Possible values for the key 'eo' are: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG. For instance you can use 'eo':'ATTRIBUTE=fieldname'
+.. note::
+   Possible values for the key 'eo' are: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG. For instance you can use 'eo':'ATTRIBUTE=fieldname'
 
 **Subset bands**
 
@@ -734,13 +731,6 @@ Convert data type of input image to byte, using autoscale and clipping respectiv
   jim_clipped=jim.setNoDataValue(0).setThreshold(0,255).convert({'otype':'Byte'})
 
 END
------------------------------------------------
-Convolution filters and morphological operators
------------------------------------------------
-
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-spectral/temporal domain (1D)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 METHOD filter1d(dict)
 Filter Jim image in spectral/temporal domain performed on multi-band raster dataset.
@@ -783,7 +773,8 @@ Supported keys in the dict:
 | open                | morpholigical opening (erode+dilate)                 |
 +---------------------+------------------------------------------------------+
 
-.. note:: The morphological filter uses a linear structural element with a size defined by the key 'dz'
+.. note::
+   The morphological filter uses a linear structural element with a size defined by the key 'dz'
 
 Example:
 
@@ -820,7 +811,8 @@ Perform a morphological dilation with a linear structural element of size 5::
 | proportion   | calculate proportion in window                       |
 +--------------+------------------------------------------------------+
 
-.. note:: You can specify the no data value for the smoothnodata filter with the extra key 'nodata' and a list of no data values. The interpolation type can be set with the key 'interp' (check complete list of `values <http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html>`_, removing the leading "gsl_interp").
+.. note::
+   You can specify the no data value for the smoothnodata filter with the extra key 'nodata' and a list of no data values. The interpolation type can be set with the key 'interp' (check complete list of `values <http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html>`_, removing the leading "gsl_interp").
 
 Example:
 
@@ -832,7 +824,8 @@ Smooth the 0 valued pixel values using a linear interpolation in a spectral/temp
 
 Perform a wavelet transform (or inverse) in spectral/temporal domain.
 
-.. note:: The wavelet coefficients can be positive and negative. If the input raster dataset has an unsigned data type, make sure to set the output to a signed data type using the key 'otype'.
+.. note::
+   The wavelet coefficients can be positive and negative. If the input raster dataset has an unsigned data type, make sure to set the output to a signed data type using the key 'otype'.
 
 You can use set the wavelet family with the key 'family' in the dictionary. The following wavelets are supported as values:
 
@@ -853,7 +846,8 @@ You can use set the wavelet family with the key 'family' in the dictionary. The 
 | dwt_cut  | DWT approximation in spectral domain |
 +----------+--------------------------------------+
 
-.. note:: The filter 'dwt_cut' performs a forward and inverse transform, approximating the input signal. The approximation is performed by discarding a percentile of the wavelet coefficients that can be set with the key 'threshold'. A threshold of 0 (default) retains all and a threshold of 50 discards the lower half of the wavelet coefficients. 
+.. note::
+   The filter 'dwt_cut' performs a forward and inverse transform, approximating the input signal. The approximation is performed by discarding a percentile of the wavelet coefficients that can be set with the key 'threshold'. A threshold of 0 (default) retains all and a threshold of 50 discards the lower half of the wavelet coefficients. 
 
 Example:
 
@@ -880,7 +874,7 @@ Covert the hyperspectral input raster dataset, with the wavelengths defined in t
   else:
      print("Error: number of input wavelengths must be equal to number of bands in input raster dataset")
 
-Note:
+.. note::
     The input wavelenghts are automatically interpolated. You can specify the interpolation using the key 'interp' and values as listed interpolation http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html
 
 The spectral response filter (SRF) 
@@ -899,7 +893,7 @@ Covert the hyperspectral input raster dataset, to a multispectral raster dataset
   else:
      print("Error: number of input wavelengths must be equal to number of bands in input raster dataset")
 
-Note:
+.. note::
     The input wavelenghts are automatically interpolated. You can specify the interpolation using the key 'interp' and values as listed interpolation http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html
 
 
@@ -914,10 +908,6 @@ Perform a simple smoothing filter by defining three identical tap values::
   jim_filtered=jim.filter1d({'tapz':[1,1,1]})
 
 END
-
-^^^^^^^^^^^^^^^^^^^
-spatial domain (2D)
-^^^^^^^^^^^^^^^^^^^
 
 METHOD filter2d(dict)
 Filter Jim image in spatial domain performed on single or multi-band raster dataset.
@@ -972,7 +962,8 @@ Perform Sobel edge detection in both x and direction::
 
 **Morphological filters**
 
-.. note::  For a more comprehensive list morphological operators, please refer to :ref:`advanced spatial morphological operators <mia_morpho2d>`. 
+.. note::
+   For a more comprehensive list morphological operators, please refer to :ref:`advanced spatial morphological operators <mia_morpho2d>`. 
 
 +---------------------+------------------------------------------------------+
 | filter              | description                                          |
@@ -986,7 +977,8 @@ Perform Sobel edge detection in both x and direction::
 | open                | morpholigical opening (erode+dilate)                 |
 +---------------------+------------------------------------------------------+
 
-.. note:: You can use the optional key 'class' with a list value to take only these pixel values into account. For instance, use 'class':[255] to dilate clouds in the raster dataset that have been flagged with value 255. In addition, you can use a circular disc kernel (set the key 'circular' to True).
+.. note::
+   You can use the optional key 'class' with a list value to take only these pixel values into account. For instance, use 'class':[255] to dilate clouds in the raster dataset that have been flagged with value 255. In addition, you can use a circular disc kernel (set the key 'circular' to True).
 
 Example:
 
@@ -1028,7 +1020,8 @@ Perform a morphological dilation using a circular kernel with size (diameter) of
 | proportion   | calculate proportion in window                       |
 +--------------+------------------------------------------------------+
 
-.. note:: You can specify the no data value for the smoothnodata filter with the extra key 'nodata' and a list of no data values. The interpolation type can be set with the key 'interp' (check complete list of `values <http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html>`_, removing the leading "gsl_interp").
+.. note::
+   You can specify the no data value for the smoothnodata filter with the extra key 'nodata' and a list of no data values. The interpolation type can be set with the key 'interp' (check complete list of `values <http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html>`_, removing the leading "gsl_interp").
 
 Example:
 
@@ -1040,7 +1033,8 @@ Perform a median filter with kernel size of 5x5 pixels::
 
 Perform a wavelet transform (or inverse) in spatial domain.
 
-.. note:: The wavelet coefficients can be positive and negative. If the input raster dataset has an unsigned data type, make sure to set the output to a signed data type using the key 'otype'.
+.. note::
+   The wavelet coefficients can be positive and negative. If the input raster dataset has an unsigned data type, make sure to set the output to a signed data type using the key 'otype'.
 
 You can use set the wavelet family with the key 'family' in the dictionary. The following wavelets are supported as values:
 
@@ -1061,7 +1055,8 @@ You can use set the wavelet family with the key 'family' in the dictionary. The 
 | dwt_cut  | DWT approximation in spectral domain |
 +----------+--------------------------------------+
 
-.. note:: The filter 'dwt_cut' performs a forward and inverse transform, approximating the input signal. The approximation is performed by discarding a percentile of the wavelet coefficients that can be set with the key 'threshold'. A threshold of 0 (default) retains all and a threshold of 50 discards the lower half of the wavelet coefficients. 
+.. note::
+   The filter 'dwt_cut' performs a forward and inverse transform, approximating the input signal. The approximation is performed by discarding a percentile of the wavelet coefficients that can be set with the key 'threshold'. A threshold of 0 (default) retains all and a threshold of 50 discards the lower half of the wavelet coefficients. 
 
 Example:
 
@@ -1071,10 +1066,6 @@ Approximate the multi-temporal raster dataset by discarding the lower 20 percent
   jim_approx=jim_approx.pushNoDataValue(0).setThreshold(0,255).convert({'otype':'Byte'})
 
 END
-
-----------------------
-Classification methods
-----------------------
 
 METHOD classify(dict)
 Supervised classification of a raster dataset. The classifier must have been trained via the :py:func:`VectorOgr:train` method.
@@ -1137,7 +1128,7 @@ Args:
 * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
 Returns:
-   A multiband raster dataset with one band for each class. The pixel values represent the respective frequencies of the classes (scaled to Byte). To create a hard classified output, obtain the maxindex of this output. The result will then contains the class indices (0-nclass-1). To obtain the same class numbers as defined in the reference dataset, use the :py:func::`Jim:reclass` method (see example below).
+   A multiband raster dataset with one band for each class. The pixel values represent the respective frequencies of the classes (scaled to Byte). To create a hard classified output, obtain the maxindex of this output. The result will then contains the class indices (0-nclass-1). To obtain the same class numbers as defined in the reference dataset, use the :py:func:`Jim:reclass` method (see example below).
 
 Supported keys in the dict:
 
@@ -1162,6 +1153,7 @@ Example:
 Use the Corine land cover product as a reference to perform an SML classification of a Sentinel-2 image using the 10 m bands (B02, B03, B04 and B08).
 
 Import modules::
+
   import os, sys
   from osgeo import gdal
   from osgeo import gdalconst
@@ -1220,6 +1212,7 @@ Create a dictionary with the class names and corresponding values used in the cl
   sorted(classDict.values())
 
 Reclass the reference to the selected classes::
+
   classFrom=range(0,50)
   classTo=[50]*50
   for i in range(0,50):
@@ -1237,16 +1230,18 @@ Reclass the reference to the selected classes::
   jim_ref=jim_ref.reclass({'class':classFrom,'reclass':classTo})
 
 The SML algorithm uses a JimList of reference raster datasets. Here we will create a list of a single reference only::
+
   reflist=jl.createJimList([jim_ref])
 
 For a multi-class problem, we must define the list of classes that should be taken into account by the SML algorithm::
 
-   sml=jim.classifySML(reflist,{'class':sorted(classDict.values())}).setNoData([0])
+  sml=jim.classifySML(reflist,{'class':sorted(classDict.values())}).setNoData([0])
 
 Preparation of output. The output is a multiband raster dataset with one band for each class. The pixels represent the respective frequencies of the classes (scaled to Byte)
 
 We can create a hard classified output by obtaining the maxindex of this output. The result contains the class indices (0-nclass-1).
 To obtain the same class numbers as defined in the reference dataset, we can reclass accordingly::
+
   sml_class=sml.statProfile({'function':'maxindex'}).reclass({'class':range(0,sml.nrOfBand()),'reclass':sorted(classDict.values())})
 
 END
@@ -1272,7 +1267,8 @@ Supported keys in the dict:
 | otype            | Data type for output image (default is type of input raster dataset)            |
 +------------------+---------------------------------------------------------------------------------+
 
-.. note:: The list size of the class and reclass should be identical. The value class[index] will be replaced with the value reclass[index].
+.. note::
+   The list size of the class and reclass should be identical. The value class[index] will be replaced with the value reclass[index].
 
 Example:
 
@@ -1281,10 +1277,6 @@ Reclass all pixel values 0 to 255::
   jim_reclass=jim.reclass({'class':[0],'reclass':[255]})
 
 END
-
-------------------------
-Mask / Threshold methods
-------------------------
 
 METHOD setThreshold(dict)
 Apply minimum and maximum threshold to pixel values in raster dataset
@@ -1389,7 +1381,8 @@ Mask is a :py:class:`JimList`
 |                  | Provide one operator for each msknodata value.                                  |
 +------------------+---------------------------------------------------------------------------------+
 
-..note:: The mask raster datasets in the :py:class:`JimList` can be of a different spatial resolution than the input raster dataset to be masked. A nearest neighbor resampling is used.
+.. note::
+   The mask raster datasets in the :py:class:`JimList` can be of a different spatial resolution than the input raster dataset to be masked. A nearest neighbor resampling is used.
 
 Mask is a :py:class:`VectorOgr`
 
@@ -1401,7 +1394,8 @@ Mask is a :py:class:`VectorOgr`
 | ln               | List of layer names.                                                            |
 +------------------+---------------------------------------------------------------------------------+
 
-..note:: Possible values for the key 'eo' are: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG. For instance you can use 'eo':'ATTRIBUTE=fieldname'
+.. note::
+   Possible values for the key 'eo' are: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG. For instance you can use 'eo':'ATTRIBUTE=fieldname'
 
 Example:
 
@@ -1416,71 +1410,6 @@ Apply list of raster masks that consists of a single raster dataset jim_mask (cr
   jim_mask=jim1.getMask({'min':1,'max':20,'nodata':0,'data':1})
   jlist=jl.JimList([jim_mask])
   jim_masked=jim.setMask(jlist,{'nodata':255,'msknodata':0})
-
-END
-
---------------------------------------
-Statistical methods and interpolations
---------------------------------------
-
-METHOD statProfile(dict)
-Obtain a statistical profile per pixel based no a multi-band input raster dataset. Multiple functions can be set, resulting in a multi-band raster dataset (one output band for each function).
-
-Args:
-* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
-
-Returns:
-   The statistical profile of the input raster dataset
-
-Supported keys in the dict:
-
-
-+------------------+---------------------------------------------------------------------------------+
-| key              | value                                                                           |
-+==================+=================================================================================+
-| function         | Statistical function (see values for different functions in tables below)       |
-+------------------+---------------------------------------------------------------------------------+
-| nodata           | Do not take these values into account when calculating statistics               |
-+------------------+---------------------------------------------------------------------------------+
-| otype            | Data type for output image                                                      |
-+------------------+---------------------------------------------------------------------------------+
-
-
-**Statistical profile functions**
-
-+--------------+------------------------------------------------------+
-| function     | description                                          |
-+=====================+===============================================+
-| nvalid       | report number of valid (not nodata) values in window |
-+--------------+------------------------------------------------------+
-| median       | perform a median filter                              |
-+--------------+------------------------------------------------------+
-| var          | calculate variance in window                         |
-+--------------+------------------------------------------------------+
-| min          | calculate minimum in window                          |
-+--------------+------------------------------------------------------+
-| max          | calculate maximum in window                          |
-+--------------+------------------------------------------------------+
-| sum          | calculate sum in window                              |
-+--------------+------------------------------------------------------+
-| mode         | calculate the mode (only for categorical values)     |
-+--------------+------------------------------------------------------+
-| mean         | calculate mean in window                             |
-+--------------+------------------------------------------------------+
-| stdev        | calculate standard deviation in window               |
-+--------------+------------------------------------------------------+
-| percentile   | calculate percentile value in window                 |
-+--------------+------------------------------------------------------+
-| proportion   | calculate proportion in window                       |
-+--------------+------------------------------------------------------+
-
-.. note:: The 'percentile' function calculates the percentile value based on the pixel values in the multi-band input raster dataset. A number of percentiles can be calculated, e.g., 10th and 50th percentile, resulting in a multi-band output raster dataset (one band for each calculated percentile). The percentiles to be calculated can be set with the key 'perc' and a list of values.
-
-Example:
-
-Calculated the 10th and 50th percentiles for the multi-band input raster dataset jim::
-
-  jim_percentiles=jim.statProfile({'function':args.function,'perc':[10,50]})
 
 END
 
@@ -1513,7 +1442,8 @@ Supported keys in the dict:
 | otype            | Data type for output image                                                      |
 +------------------+---------------------------------------------------------------------------------+
 
-.. note:: For statistical functions requiring two sets of inputs, use a list of two values for cband (e.g., regression and histogram2d)
+.. note::
+   For statistical functions requiring two sets of inputs, use a list of two values for cband (e.g., regression and histogram2d)
 
 **Supported statistical functions**
 
@@ -1580,6 +1510,68 @@ Get the histogram of the input raster dataset using 10 bins::
 
 END
 
+METHOD statProfile(dict)
+Obtain a statistical profile per pixel based on a multi-band input raster dataset. Multiple functions can be set, resulting in a multi-band raster dataset (one output band for each function).
+
+Args:
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Returns:
+   The statistical profile of the input raster dataset
+
+Supported keys in the dict:
+
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| function         | Statistical function (see values for different functions in tables below)       |
++------------------+---------------------------------------------------------------------------------+
+| nodata           | Do not take these values into account when calculating statistics               |
++------------------+---------------------------------------------------------------------------------+
+| otype            | Data type for output image                                                      |
++------------------+---------------------------------------------------------------------------------+
+
+
+**Statistical profile functions**
+
++--------------+------------------------------------------------------+
+| function     | description                                          |
++=====================+===============================================+
+| nvalid       | report number of valid (not nodata) values in window |
++--------------+------------------------------------------------------+
+| median       | perform a median filter                              |
++--------------+------------------------------------------------------+
+| var          | calculate variance in window                         |
++--------------+------------------------------------------------------+
+| min          | calculate minimum in window                          |
++--------------+------------------------------------------------------+
+| max          | calculate maximum in window                          |
++--------------+------------------------------------------------------+
+| sum          | calculate sum in window                              |
++--------------+------------------------------------------------------+
+| mode         | calculate the mode (only for categorical values)     |
++--------------+------------------------------------------------------+
+| mean         | calculate mean in window                             |
++--------------+------------------------------------------------------+
+| stdev        | calculate standard deviation in window               |
++--------------+------------------------------------------------------+
+| percentile   | calculate percentile value in window                 |
++--------------+------------------------------------------------------+
+| proportion   | calculate proportion in window                       |
++--------------+------------------------------------------------------+
+
+.. note::
+   The 'percentile' function calculates the percentile value based on the pixel values in the multi-band input raster dataset. A number of percentiles can be calculated, e.g., 10th and 50th percentile, resulting in a multi-band output raster dataset (one band for each calculated percentile). The percentiles to be calculated can be set with the key 'perc' and a list of values.
+
+Example:
+
+Calculated the 10th and 50th percentiles for the multi-band input raster dataset jim::
+
+  jim_percentiles=jim.statProfile({'function':args.function,'perc':[10,50]})
+
+END
+
 METHOD stretch(dict)
 Stretch the input raster dataset.
 
@@ -1622,6 +1614,7 @@ Supported keys in the dict:
 Example:
 
 Stretch the input raster dataset using the cumulative counts of 5 and 95 percent. Then, the output is converted to Byte with a dynamic range that is calculated based on the number of user defined bits (NBIT=[1:8])::
+
   CCMIN=5
   CCMAX=95
   NBIT=7
@@ -1629,10 +1622,6 @@ Stretch the input raster dataset using the cumulative counts of 5 and 95 percent
   jim_byte=jim_stretched.convert({'otype':'GDT_Byte'}).pointOpBitShift(8-NBIT)
 
 END
-
---------------------------------------------------
-Extracting pixel values from overlays and sampling
---------------------------------------------------
 
 METHOD extractOgr(*args)
 Extract pixel values from raster image using a vector dataset sample.
@@ -1841,7 +1830,8 @@ Supported keys in the dict:
 | percentile       | Extract percentile as defined by option perc (e.g, 95th percentile of values covered by polygon)  |
 +------------------+---------------------------------------------------------------------------------------------------+
 
-.. note:: For the rules mode, proportion and count, set the extra key 'class' with the list of class values in the input raster image to use.
+.. note::
+   For the rules mode, proportion and count, set the extra key 'class' with the list of class values in the input raster image to use.
 
 **Masking values from extract**
 
@@ -1956,7 +1946,8 @@ Supported keys in the dict:
 | percentile       | Extract percentile as defined by option perc (e.g, 95th percentile of values covered by polygon)  |
 +------------------+---------------------------------------------------------------------------------------------------+
 
-.. note:: For the rules mode, proportion and count, set the extra key 'class' with the list of class values in the input raster image to use.
+.. note::
+   For the rules mode, proportion and count, set the extra key 'class' with the list of class values in the input raster image to use.
 
 **Masking values from extract**
 
@@ -1997,17 +1988,9 @@ Extract a sample of 100 points using a regular grid sampling scheme. For each gr
 
 END
 
---------------------------------
-Digitial elevation model methods
---------------------------------
-
-----------------------------------------
-Segmentation methods and label operators
-----------------------------------------
-
-###########################################################################################################################################################################
+#########
 # JimList
-###########################################################################################################################################################################
+#########
 
 CLASS JimList
 JimList class represents a list of Jim images.
@@ -2017,7 +2000,7 @@ A JimList can be created from a python list of Jim images::
 
   ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
   jim0=createJim()
-  jlist=jl.createJim([jim0])
+  jlist=jl.createJimList([jim0])
   #do stuff with jim ...
   jlist.close()
 
@@ -2036,7 +2019,7 @@ Push a :py:class:`Jim` image object to an empty :py:class:`JimList`::
 
   ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
   jim0=createJim()
-  jlist=jl.createJim()
+  jlist=jl.createJimList()
   jlist.pushImage(jim0)
   #do stuff with jim ...
   jlist.close()
@@ -2053,7 +2036,7 @@ Pop a :py:class`Jim` image object to an empty :py:class:`JimList`::
 
   ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
   jim0=createJim()
-  jlist=jl.createJim()
+  jlist=jl.createJimList()
   jlist.pushImage(jim0)
   jlist.popImage()
   jlist.close()
@@ -2073,10 +2056,27 @@ Push an image to an empty list and get it back::
 
   ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
   jim0=createJim()
-  jlist=jl.createJim()
+  jlist=jl.createJimList()
   jlist.pushImage(jim0)
   jim1=jlist.getImage(0)
   #jim1 is a reference to jim0
+
+END
+
+METHOD getSize()
+Get number of images in list
+
+Returns:
+   The number of images in the list
+
+Push an image to an empty list and get it back::
+
+  ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
+  jim0=createJim()
+  jlist=jl.createJimList()
+  jlist.pushImage(jim0)
+  if jlist.getSize() != 1:
+     print("Error: size of list should be 1")
 
 END
 
@@ -2097,5 +2097,582 @@ Clear all no data values from this :py:class:`JimList` object.
 
 Returns:
    The :py:class:`JimList` (self)
+
+END
+
+METHOD covers(*args)
+Check if a geolocation is covered by this :py:class:`JimList` object. Only the coordinates of the point (variant 1) or region of interest (variant 2) are checked, irrespective of no data values. Set the additional flag to True if the region of interest must be entirely covered.
+
+Args (variant 1):
+
+* ``x`` (float): x coordinate in spatial reference system of the raster dataset
+* ``y`` (float): y coordinate in spatial reference system of the raster dataset
+
+
+Args (variant 2):
+
+* ``ulx`` (float): upper left x coordinate in spatial reference system of the raster dataset
+* ``uly`` (float): upper left y coordinate in spatial reference system of the raster dataset
+* ``lrx`` (float): lower right x coordinate in spatial reference system of the raster dataset
+* ``lry`` (float): lower right x coordinate in spatial reference system of the raster dataset
+* ``all`` (bool): set to True if the entire bounding box must be covered by the raster dataset
+
+Returns:
+   True if the raster dataset covers the point or region of interest.
+
+END
+
+METHOD selectGeo(*args)
+Removes all images in this :py:class:`JimList` object if not covered by the coordinates of the point (variant 1) or region of interest (variant 2).
+
+Args (variant 1):
+
+* ``x`` (float): x coordinate in spatial reference system of the this :py:class:`JimList` object
+* ``y`` (float): y coordinate in spatial reference system of the this :py:class:`JimList` object
+
+
+Args (variant 2):
+
+* ``ulx`` (float): upper left x coordinate in spatial reference system of the this :py:class:`JimList` object
+* ``uly`` (float): upper left y coordinate in spatial reference system of the this :py:class:`JimList` object
+* ``lrx`` (float): lower right x coordinate in spatial reference system of the this :py:class:`JimList` object
+* ``lry`` (float): lower right x coordinate in spatial reference system of the this :py:class:`JimList` object
+
+
+Returns:
+   A subset of the :py:class:`JimList` object that covers the point or region of interest.
+
+END
+
+METHOD getBoundingBox()
+Get the bounding box of this :py:class:`JimList` object in georeferenced coordinates.
+
+Returns:
+   A list with the bounding box of this :py:class:`JimList` object in georeferenced coordinates.
+
+END
+
+METHOD getUlx()
+Get the upper left corner x (georeferenced) coordinate of this :py:class:`JimList` object
+
+Returns:
+   The upper left corner x (georeferenced) coordinate of this :py:class:`JimList` object
+
+END
+
+METHOD getUly()
+Get the upper left corner y (georeferenced) coordinate of this :py:class:`JimList` object
+
+Returns:
+   The upper left corner y (georeferenced) coordinate of this :py:class:`JimList` object
+
+END
+
+METHOD getLrx()
+Get the lower left corner x (georeferenced) coordinate of this :py:class:`JimList` object
+
+Returns:
+   The lower left corner x (georeferenced) coordinate of this :py:class:`JimList` object
+
+END
+
+METHOD getLry()
+Get the lower left corner y (georeferenced) coordinate of this :py:class:`JimList` object
+
+Returns:
+   The lower left corner y (georeferenced) coordinate of this :py:class:`JimList` object
+
+END
+
+METHOD composite(dict)
+Composite overlapping :py:class:`Jim` raster datasets according to a composite rule.
+This method can be used to mosaic and composite multiple (georeferenced) :py:class:`Jim` raster datasets. A mosaic can merge images with different geographical extents into a single larger image. Compositing resolves the overlapping pixels according to some rule (e.g, the median of all overlapping pixels). Input datasets can have a different bounding boxes and spatial resolution.
+
+Args:
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Supported keys in the dict:
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| crule            | Composite rule                                                                  |
++------------------+---------------------------------------------------------------------------------+
+| band             | band index(es) to crop (leave empty if all bands must be retained)              | 
++------------------+---------------------------------------------------------------------------------+
+| resample         | Resampling method (near or bilinear)                                            |
++------------------+---------------------------------------------------------------------------------+
+| otype            | Data type for output image. Default is to inherit type from input image         |
++------------------+---------------------------------------------------------------------------------+
+| a_srs            | Override the projection for the output file                                     |
++------------------+---------------------------------------------------------------------------------+
+| file             | Create extra band in output representing number of observations (1) and/or      |
+|                  | sequence number of selected raster dataset in the list (2) for each pixel       |
++------------------+---------------------------------------------------------------------------------+
+
+Returns:
+   The composite :py:class:`Jim` raster dataset object
+
+**Managing no data values in input and output**
+
++------------------+---------------------------------------------------------------------------------------------+
+| key              | value                                                                                       |
++==================+=============================================================================================+
+| bndnodata        | Band(s) in input image to check if pixel is valid (used for srcnodata, min and max options) |
++------------------+---------------------------------------------------------------------------------------------+
+| srcnodata        | invalid value(s) for input raster dataset                                                   |
++------------------+---------------------------------------------------------------------------------------------+
+| bndnodata        | Band(s) in input image to check if pixel is valid (used for srcnodata, min and max options) |
++------------------+---------------------------------------------------------------------------------------------+
+| min              | flag values smaller or equal to this value as invalid                                       |
++------------------+---------------------------------------------------------------------------------------------+
+| max              | flag values larger or equal to this value as invalid                                        |
++------------------+---------------------------------------------------------------------------------------------+
+| dstnodata        | nodata value to put in output raster dataset if not valid or out of bounds                  |
++------------------+---------------------------------------------------------------------------------------------+
+
+**Subset spatial region in coordinates of the image geospatial reference system**
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| extent           | Get boundary from extent from polygons in vector file                           |
++------------------+---------------------------------------------------------------------------------+
+| eo               | Special extent options controlling rasterization                                |
++------------------+---------------------------------------------------------------------------------+
+| ln               | Layer name of extent to crop                                                    |
++------------------+---------------------------------------------------------------------------------+
+| crop_to_cutline  | True will crop the extent of the target dataset to the extent of the cutline    |
+|                  | The outside area will be set to no data (the value defined by the key 'nodata') |
++------------------+---------------------------------------------------------------------------------+
+| ulx              | Upper left x value of bounding box to crop                                      |
++------------------+---------------------------------------------------------------------------------+
+| uly              | Upper left y value of bounding box to crop                                      |
++------------------+---------------------------------------------------------------------------------+
+| lrx              | Lower right x value of bounding box to crop                                     |
++------------------+---------------------------------------------------------------------------------+
+| lry              | Lower right y value of bounding box to crop                                     |
++------------------+---------------------------------------------------------------------------------+
+| dx               | Output resolution in x (default: keep original resolution)                      |
++------------------+---------------------------------------------------------------------------------+
+| dy               | Output resolution in y (default: keep original resolution)                      |
++------------------+---------------------------------------------------------------------------------+
+| align            | Align output bounding box to first input raster dataset in list                 |
++------------------+---------------------------------------------------------------------------------+
+
+.. note::
+   Possible values for the key 'eo' are: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG. For instance you can use 'eo':'ATTRIBUTE=fieldname'
+
+**Supported composite rules**
+
++-----------------+---------------------------------------------------------------------------------+
+| composite rule  | composite output                                                                | 
++=================+=================================================================================+
+| overwrite       | Overwrite overlapping pixels                                                    |
++-----------------+---------------------------------------------------------------------------------+
+| maxndvi         | Create a maximum NDVI (normalized difference vegetation index) composite        |
++-----------------+---------------------------------------------------------------------------------+
+| maxband         | Select the pixel with a maximum value in the band specified by option cband     |
++-----------------+---------------------------------------------------------------------------------+
+| minband         | Select the pixel with a minimum value in the band specified by option cband     |
++-----------------+---------------------------------------------------------------------------------+
+| mean            | Calculate the mean (average) of overlapping pixels                              |
++-----------------+---------------------------------------------------------------------------------+
+| stdev           | Calculate the standard deviation of overlapping pixels                          |
++-----------------+---------------------------------------------------------------------------------+
+| median          | Calculate the median of overlapping pixels                                      |
++-----------------+---------------------------------------------------------------------------------+
+| mode            | Select the mode of overlapping pixels (maximum voting): use for Byte images only|
++-----------------+---------------------------------------------------------------------------------+
+| sum             | Calculate the arithmetic sum of overlapping pixels                              |
++-----------------+---------------------------------------------------------------------------------+
+| maxallbands     | For each individual band, assign the maximum value found in all overlapping     |
+|                 | pixels. Unlike maxband, output band values cannot be attributed to a single     |
+|                 | (date) pixel in the input time series                                           |
++-----------------+---------------------------------------------------------------------------------+
+| minallbands     | For each individual band, assign the minimum value found in all overlapping     |
+|                 | pixels. Unlike minband, output band values cannot be attributed to a single     |
+|                 | (date) pixel in the input time series                                           |
++-----------------+---------------------------------------------------------------------------------+
+
+.. note::
+   Some rules require multiple input bands. For instance, the maxndvi rule calculates the NDVI per pixel based on two input bands. Use the extra key 'cband' to indicate the list of bands representing the red and near infrared band respectively.
+
+END
+
+METHOD stack(dict)
+Stack all raster datasets in the list to a single multi-band raster dataset.
+
+Args:
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Supported keys in the dict:
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| band             | band index(es) to crop (leave empty if all bands must be retained)              | 
++------------------+---------------------------------------------------------------------------------+
+| otype            | Data type for output image. Default is to inherit type from input image         |
++------------------+---------------------------------------------------------------------------------+
+| a_srs            | Override the projection for the output file                                     |
++------------------+---------------------------------------------------------------------------------+
+
+Returns:
+   Multi-band :py:class:`Jim` raster dataset object.
+
+END
+
+METHOD getStats(dict)
+Calculate statistics of a raster dataset.
+
+Args:
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Returns:
+   A dictionary with the results of the statistics, using the same keys as for the functions.
+
+Supported keys in the dict:
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| function         | Statistical function (see values for different functions in tables below)       |
++------------------+---------------------------------------------------------------------------------+
+| cband            | List of bands on which to calculate the statistics                              |
++------------------+---------------------------------------------------------------------------------+
+| down             | Down sampling factor (in pixels x and y) to calculate the statistics on a subset|
++------------------+---------------------------------------------------------------------------------+
+| src_min          | Do not take smaller values into account when calculating statistics             |
++------------------+---------------------------------------------------------------------------------+
+| src_max          | Do not take higher values into account when calculating statistics              |
++------------------+---------------------------------------------------------------------------------+
+| nodata           | Do not take these values into account when calculating statistics               |
++------------------+---------------------------------------------------------------------------------+
+| otype            | Data type for output image                                                      |
++------------------+---------------------------------------------------------------------------------+
+
+.. note::
+   For statistical functions requiring two sets of inputs, use a list of two values for cband (e.g., regression and histogram2d)
+
+**Supported statistical functions**
+
++--------------+------------------------------------------------------+
+| function     | description                                          |
++==============+======================================================+
+| invalid      | report number of invalid (nodata) values             |
++--------------+------------------------------------------------------+
+| nvalid       | report number of valid (not nodata) values           |
++--------------+------------------------------------------------------+
+| basic        | Shows basic statistics                               |
+|              | (min,max, mean and stdDev of the raster datasets)    |
++--------------+------------------------------------------------------+
+| gdal         | Use the GDAL calculation of basic statistics         |
++--------------+------------------------------------------------------+
+| mean         | calculate the mean value                             |
++--------------+------------------------------------------------------+
+| median       | calculate the median value                           |
++--------------+------------------------------------------------------+
+| var          | calculate variance value                             |
++--------------+------------------------------------------------------+
+| stdev        | calculate standard deviation                         |
++--------------+------------------------------------------------------+
+| skewness     | calculate the skewness                               |
++--------------+------------------------------------------------------+
+| kurtosis     | calculate the kurtosis                               |
++--------------+------------------------------------------------------+
+| sum          | calculate sum of all values                          |
++--------------+------------------------------------------------------+
+| minmax       | calculate minimum and maximum value                  |
++--------------+------------------------------------------------------+
+| min          | calculate minimum value                              |
++--------------+------------------------------------------------------+
+| max          | calculate maximum value                              |
++--------------+------------------------------------------------------+
+| histogram    | calculate the histogram                              |
++--------------+------------------------------------------------------+
+| histogram2d  | calculate the two-dimensional histogram for two bands|
++--------------+------------------------------------------------------+
+| rmse         | calculate root mean square error for two bands       |
++--------------+------------------------------------------------------+
+| regresssion  | calculate the regression between two bands           |
++--------------+------------------------------------------------------+
+
+For the histogram function, the following key values can be set:
+
++--------------+------------------------------------------------------+
+| key          | description                                          |
++==============+======================================================+
+| nbin         | Number of bins for the histogram                     |
++--------------+------------------------------------------------------+
+| relative     | Set to True to report percentage values              |
++--------------+------------------------------------------------------+
+| kde          | Set to True to use Kernel density estimation when    |
+|              | producing histogram. The standard deviation is       |
+|              | estimated based on Silverman's rule of thumb         |
++--------------+------------------------------------------------------+
+
+Example:
+
+Get the histogram of the input raster dataset using 10 bins::
+
+  jlist.getStats({'function':['histogram','nbin':10})
+
+END
+
+METHOD statProfile(dict)
+Obtain a statistical profile per pixel based on the data available in a :py:class:`JimList` object. Multiple functions can be set, resulting in a multi-band raster dataset (one output band for each function).
+
+Args:
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Returns:
+   The statistical profile of the input raster dataset
+
+Supported keys in the dict:
+
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| function         | Statistical function (see values for different functions in tables below)       |
++------------------+---------------------------------------------------------------------------------+
+| nodata           | Do not take these values into account when calculating statistics               |
++------------------+---------------------------------------------------------------------------------+
+| otype            | Data type for output image                                                      |
++------------------+---------------------------------------------------------------------------------+
+
+
+**Statistical profile functions**
+
++--------------+------------------------------------------------------+
+| function     | description                                          |
++==============+======================================================+
+| nvalid       | report number of valid (not nodata) values in window |
++--------------+------------------------------------------------------+
+| median       | perform a median filter                              |
++--------------+------------------------------------------------------+
+| var          | calculate variance in window                         |
++--------------+------------------------------------------------------+
+| min          | calculate minimum in window                          |
++--------------+------------------------------------------------------+
+| max          | calculate maximum in window                          |
++--------------+------------------------------------------------------+
+| sum          | calculate sum in window                              |
++--------------+------------------------------------------------------+
+| mode         | calculate the mode (only for categorical values)     |
++--------------+------------------------------------------------------+
+| mean         | calculate mean in window                             |
++--------------+------------------------------------------------------+
+| stdev        | calculate standard deviation in window               |
++--------------+------------------------------------------------------+
+| percentile   | calculate percentile value in window                 |
++--------------+------------------------------------------------------+
+| proportion   | calculate proportion in window                       |
++--------------+------------------------------------------------------+
+
+.. note::
+   The 'percentile' function calculates the percentile value based on the pixel values in the multi-band input raster dataset. A number of percentiles can be calculated, e.g., 10th and 50th percentile, resulting in a multi-band output raster dataset (one band for each calculated percentile). The percentiles to be calculated can be set with the key 'perc' and a list of values.
+
+Example:
+
+Calculated the 10th and 50th percentiles for the multi-band input raster dataset jim::
+
+  jim_percentiles=jlist.statProfile({'function':args.function,'perc':[10,50]})
+
+END
+
+###########
+# VectorOgr
+###########
+
+CLASS VectorOgr
+VectorOgr class is the basis vector dataset class of the Joint image processing library.
+
+
+END
+
+METHOD getLayerCount()
+Get number of layers in this vector dataset
+
+Returns:
+   The number of layers in this vector dataset
+END
+
+METHOD getFeatureCount()
+Get number of features in this vector dataset
+
+Returns:
+   The number of features in this vector dataset
+END
+
+METHOD getBoundingBox()
+Get the bounding box of this dataset in georeferenced coordinates.
+
+Returns:
+   A list with the bounding box of this dataset in georeferenced coordinates.
+
+END
+
+METHOD getUlx()
+Get the upper left corner x (georeferenced) coordinate of this dataset
+
+Returns:
+   The upper left corner x (georeferenced) coordinate of this dataset
+
+END
+
+METHOD getUly()
+Get the upper left corner y (georeferenced) coordinate of this dataset
+
+Returns:
+   The upper left corner y (georeferenced) coordinate of this dataset
+
+END
+
+METHOD getLrx()
+Get the lower left corner x (georeferenced) coordinate of this dataset
+
+Returns:
+   The lower left corner x (georeferenced) coordinate of this dataset
+
+END
+
+METHOD getLry()
+Get the lower left corner y (georeferenced) coordinate of this dataset
+
+Returns:
+   The lower left corner y (georeferenced) coordinate of this dataset
+
+END
+
+METHOD open(dict)
+Open a vector dataset
+
+Args:
+
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Supported keys in the dict:
+
+======== ===================================================
+filename Filename of the vector dataset
+ln       Layer name
+======== ===================================================
+
+Returns:
+   This instance of VectorOgr object (self)
+
+**keys specific for reading vector datasets**
+
+=============== ===================================================
+attributeFilter Set an attribute filter 
+noread          Set this flag to True to not read data when opening
+=============== ===================================================
+
+**keys specific for writing vector datasets**
+
+======== ===================================================================
+a_srs    Assign this projection (e.g., epsg:3035)
+gtype    Geometry type (default is wkbUnknown)
+co       Format dependent options controlling creation of the output file
+oformat  Output sample dataset format supported by OGR (default is "SQLite")
+======== ===================================================================
+
+Example:
+
+Create a vector and open a dataset::
+
+  v0=jl.createVector()
+  v0.open({'filename':'/path/to/vector.sqlite'})
+
+END
+
+METHOD close()
+Close a vector dataset, releasing resources such as memory and OGR dataset handle.
+
+END
+
+METHOD write()
+Write the vector dataset to file
+
+Returns:
+   This instance of Jim object (self)
+
+.. note::
+   Unlike writing a raster dataset :py:class:`Jim` where the output filename and type can be defined at the time of writing, these parameters have already been set when opening the :py:class:`VectorOgr`.
+
+END
+
+METHOD train(dict)
+Train a supervised classifier based on extracted data including label information (typically obtained via :py:func:`Jim:extractOgr`).
+
+Args:
+
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Supported keys in the dict:
+
+======== =====================================================================================================================
+method   Classification method: 'svm' (support vector machine), 'ann' (artificial neural network)
+model    Model filename to save trained classifier
+label    Attribute name for class label in training vector file (default: 'label')
+bandname List of band names to use that correspond to the fields in the vector dataset. Leave empty to use all bands
+class    List of alpha numeric class names as defined in the label attribute (use only if labels contain not numerical values)
+reclass  List of numeric class values corresponding to the list defined by the class key
+======== =====================================================================================================================
+
+Returns:
+
+   This instance of VectorOgr object (self)
+
+**Balancing the training sample**
+
+Keys used to balance the training sample:
+
+======== ================================================================================================
+balance  Balance the input data to this number of samples for each class
+random   Randomize training data for balancing
+min      Set to a value to not take classes into account with a sample size that is lower than this value
+======== ================================================================================================
+
+**Support vector machine**
+
+The support vector machine (SVM) supervised classifier is described `here <http://dx.doi.org/10.1007/BF00994018>`_. The implementation in JIPlib is based on the open source `libsvm <https://www.csie.ntu.edu.tw/~cjlin/libsvm/>`_.
+
+Keys specific to the SVM:
+
+========== ======================================================================
+svmtype    Type of SVM (C_SVC, nu_SVC,one_class, epsilon_SVR, nu_SVR)","C_SVC")
+kerneltype Type of kernel function (linear,polynomial,radial,sigmoid) ","radial")
+kd         Degree in kernel function",3)
+gamma      Gamma in kernel function",1.0)
+coef0      Coef0 in kernel function",0)
+ccost      The parameter C of C_SVC, epsilon_SVR, and nu_SVR",1000)
+nu         The parameter nu of nu_SVC, one_class SVM, and nu_SVR",0.5)
+eloss      The epsilon in loss function of epsilon_SVR",0.1)
+cache      Cache memory size in MB",100)
+etol       The tolerance of termination criterion",0.001)
+shrink     Whether to use the shrinking heuristics",false)
+probest    Whether to train a SVC or SVR model for probability estimates",true,2)
+========== ======================================================================
+
+**Artificial neural network**
+
+The artificial neural network (ANN) supervised classifier is based on the back propagation model as introduced by D. E. Rumelhart, G. E. Hinton, and R. J. Williams (Nature, vol. 323, pp. 533-536, 1986). The implementation is based on the open source C++ library fann (http://leenissen.dk/fann/wp/).
+
+
+Keys specific to the ANN:
+
+========== ==========================================================================
+nneuron    List defining the number of neurons in each hidden layer in the neural network 
+connection Connection rate (default: 1.0 for a fully connected network
+learning   Learning rate (default: 0.7)
+weights    Weights for neural network. Apply to fully connected network only, starting from first input neuron to last output neuron, including the bias neurons (last neuron in each but last layer)
+maxit      Maximum epochs used for training the neural network (default: 500)
+========== ==========================================================================
+
+.. note::
+   To define two hidden layers with 3 and 5 neurons respectively, define a list of two values for the key 'nneuron': [3, 5].
 
 END

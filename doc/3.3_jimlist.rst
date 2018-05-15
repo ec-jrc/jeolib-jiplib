@@ -22,6 +22,7 @@ Access JimList attributes
 .. automethod:: jiplib.JimList.pushImage
 .. automethod:: jiplib.JimList.popImage
 .. automethod:: jiplib.JimList.getImage
+.. automethod:: jiplib.JimList.getSize
 .. automethod:: jiplib.JimList.pushNoDataValue
 .. automethod:: jiplib.JimList.clearNoData
 
@@ -36,12 +37,6 @@ Get geospatial information
 .. automethod:: jiplib.JimList.getUly
 .. automethod:: jiplib.JimList.getLrx
 .. automethod:: jiplib.JimList.getLry
-
-----------------------
-Classification methods
-----------------------
-
-.. automethod:: jiplib.JimList.validate
 
 --------------
 Reduce methods

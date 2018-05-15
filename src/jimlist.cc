@@ -20,12 +20,6 @@ JimList::JimList(const std::list<std::shared_ptr<jiplib::Jim> > &jimlist) : ImgL
 }
 
 ///constructor using a json string coming from a custom colllection
-///example:
-///str = '{"size": 1, "0": {"epsg": 4326, "path":"/eos/jeodpp/data/base/Soil/GLOBAL/HWSD/VER1-2/Data/GeoTIFF/hwsd.tif"} }'
-/**
- * @param strjson string coming from a custom collection
- * @return JimList object
- **/
 JimList& JimList::open(const std::string& strjson){
   Json::Value custom;
   Json::Reader reader;
@@ -46,10 +40,6 @@ JimList& JimList::open(const std::string& strjson){
   return(*this);
 }
 
-/**
- * @param json string coming from a custom collection
- * @return JimList object
- **/
 JimList& JimList::open(app::AppFactory& theApp){
   Optionpk<std::string> json_opt("json", "json", "The json object");
   bool doProcess;//stop process when program was invoked with help option (-h --help)
@@ -89,18 +79,11 @@ JimList& JimList::open(app::AppFactory& theApp){
 }
 
 ///get image from collection
-/**
- * @param index index of the image
- * @return shared pointer to image object
- **/
 std::shared_ptr<jiplib::Jim> JimList::getImage(int index) const{
   return(std::dynamic_pointer_cast<jiplib::Jim>(ImgList::getImage(index)));
 }
 
 ///convert a JimList to a json string
-/**
- * @return shared pointer to image object
- **/
 std::string JimList::jl2json(){
   Json::Value custom;
   custom["size"]=static_cast<int>(size());
@@ -125,90 +108,18 @@ std::string JimList::jl2json(){
 }
 
 ///push image to collection
-/**
- * @param shared pointer to image object
- * @return JimList object
- **/
 JimList& JimList::pushImage(const std::shared_ptr<jiplib::Jim> imgRaster){
   this->emplace_back(imgRaster);
   return(*this);
 }
 
 ///composite image only for in memory
-/**
- * @param band (type: unsigned int) band index(es) to crop (leave empty if all bands must be retained)
- * @param dx (type: double) Output resolution in x (in meter) (empty: keep original resolution)
- * @param dy (type: double) Output resolution in y (in meter) (empty: keep original resolution)
- * @param extent (type: std::string) get boundary from extent from polygons in vector file
- * @param crop_to_cutline (type: bool) (default: 0) Crop the extent of the target dataset to the extent of the cutline.
- * @param mask (type: std::string) Use the specified file as a validity mask.
- * @param msknodata (type: float) (default: 0) Mask value not to consider for composite.
- * @param mskband (type: unsigned int) (default: 0) Mask band to read (0 indexed)
- * @param ulx (type: double) (default: 0) Upper left x value bounding box
- * @param uly (type: double) (default: 0) Upper left y value bounding box
- * @param lrx (type: double) (default: 0) Lower right x value bounding box
- * @param lry (type: double) (default: 0) Lower right y value bounding box
- * @param crule (type: std::string) (default: overwrite) Composite rule (overwrite, maxndvi, maxband, minband, mean, mode (only for byte images), median, sum, maxallbands, minallbands, stdev
- * @param cband (type: unsigned int) (default: 0) band index used for the composite rule (e.g., for ndvi, use --cband=0 --cband=1 with 0 and 1 indices for red and nir band respectively
- * @param srcnodata (type: double) invalid value(s) for input raster dataset
- * @param bndnodata (type: unsigned int) (default: 0) Band(s) in input image to check if pixel is valid (used for srcnodata, min and max options)
- * @param min (type: double) flag values smaller or equal to this value as invalid.
- * @param max (type: double) flag values larger or equal to this value as invalid.
- * @param dstnodata (type: double) (default: 0) nodata value to put in output raster dataset if not valid or out of bounds.
- * @param resampling-method (type: std::string) (default: near) Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).
- * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
- * @param a_srs (type: std::string) Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
- * @param file (type: short) (default: 0) write number of observations (1) or sequence nr of selected file (2) for each pixels as additional layer in composite
- * @param weight (type: short) (default: 1) Weights (type: short) for the composite, use one weight for each input file in same order as input files are provided). Use value 1 for equal weights.
- * @param class (type: short) (default: 0) classes for multi-band output image: each band represents the number of observations for one specific class. Use value 0 for no multi-band output image.
- * @param ct (type: std::string) color table file with 5 columns: id R G B ALFA (0: transparent, 255: solid)
- * @param description (type: std::string) Set image description
- * @param align (type: bool) (default: 0) Align output bounding box to input image
- * @return shared pointer to composite image object
- **/
 std::shared_ptr<jiplib::Jim> JimList::composite(app::AppFactory& app){
   std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>();
   ImgList::composite(*imgWriter, app);
   return(imgWriter);
 }
 
-/**
- * @param a_srs (type: std::string) Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
- * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
- * @param a_srs (type: std::string) Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
- * @param ulx (type: double) (default: 0) Upper left x value bounding box
- * @param uly (type: double) (default: 0) Upper left y value bounding box
- * @param lrx (type: double) (default: 0) Lower right x value bounding box
- * @param lry (type: double) (default: 0) Lower right y value bounding box
- * @param band (type: unsigned int) band index to crop (leave empty to retain all bands)
- * @param startband (type: unsigned int) Start band sequence number
- * @param endband (type: unsigned int) End band sequence number
- * @param autoscale (type: double) scale output to min and max, e.g., --autoscale 0 --autoscale 255
- * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
- * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
- * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)
- * @param dx (type: double) Output resolution in x (in meter) (empty: keep original resolution)
- * @param dy (type: double) Output resolution in y (in meter) (empty: keep original resolution)
- * @param resampling-method (type: std::string) (default: near) Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).
- * @param extent (type: std::string) get boundary from extent from polygons in vector file
- * @param crop_to_cutline (type: bool) (default: 0) Crop the extent of the target dataset to the extent of the cutline.
- * @param eo (type: std::string) special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname
- * @param mask (type: std::string) Use the the specified file as a validity mask (0 is nodata).
- * @param msknodata (type: double) (default: 0) Mask value not to consider for crop.
- * @param mskband (type: unsigned int) (default: 0) Mask band to read (0 indexed)
- * @param x (type: double) x-coordinate of image center to crop (in meter)
- * @param y (type: double) y-coordinate of image center to crop (in meter)
- * @param nx (type: double) image size in x to crop (in meter)
- * @param ny (type: double) image size in y to crop (in meter)
- * @param ns (type: unsigned int) number of samples  to crop (in pixels)
- * @param nl (type: unsigned int) number of lines to crop (in pixels)
- * @param scale (type: double) output=scale*input+offset
- * @param offset (type: double) output=scale*input+offset
- * @param nodata (type: double) Nodata value to put in image if out of bounds.
- * @param description (type: std::string) Set image description
- * @param align (type: bool) (default: 0) Align output bounding box to input image
- * @return shared pointer to cropped image object
- **/
 std::shared_ptr<jiplib::Jim> JimList::crop(app::AppFactory& app){
   /* std::shared_ptr<jiplib::Jim> imgWriter=Jim::createImg(); */
   std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>();
@@ -217,91 +128,12 @@ std::shared_ptr<jiplib::Jim> JimList::crop(app::AppFactory& app){
 }
 
 ///stack all images in collection to multiband image (alias for crop)
-/**
- * @param a_srs (type: std::string) Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
- * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
- * @param a_srs (type: std::string) Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
- * @param ulx (type: double) (default: 0) Upper left x value bounding box
- * @param uly (type: double) (default: 0) Upper left y value bounding box
- * @param lrx (type: double) (default: 0) Lower right x value bounding box
- * @param lry (type: double) (default: 0) Lower right y value bounding box
- * @param band (type: unsigned int) band index to stack (leave empty to retain all bands)
- * @param startband (type: unsigned int) Start band sequence number
- * @param endband (type: unsigned int) End band sequence number
- * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
- * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
- * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)
- * @param dx (type: double) Output resolution in x (in meter) (empty: keep original resolution)
- * @param dy (type: double) Output resolution in y (in meter) (empty: keep original resolution)
- * @param resampling-method (type: std::string) (default: near) Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).
- * @param extent (type: std::string) get boundary from extent from polygons in vector file
- * @param crop_to_cutline (type: bool) (default: 0) Crop the extent of the target dataset to the extent of the cutline.
- * @param eo (type: std::string) special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname
- * @param mask (type: std::string) Use the the specified file as a validity mask (0 is nodata).
- * @param msknodata (type: double) (default: 0) Mask value not to consider for crop.
- * @param mskband (type: unsigned int) (default: 0) Mask band to read (0 indexed)
- * @param x (type: double) x-coordinate of image center to crop (in meter)
- * @param y (type: double) y-coordinate of image center to crop (in meter)
- * @param nx (type: double) image size in x to crop (in meter)
- * @param ny (type: double) image size in y to crop (in meter)
- * @param ns (type: unsigned int) number of samples  to crop (in pixels)
- * @param nl (type: unsigned int) number of lines to crop (in pixels)
- * @param scale (type: double) output=scale*input+offset
- * @param offset (type: double) output=scale*input+offset
- * @param nodata (type: double) Nodata value to put in image if out of bounds.
- * @param description (type: std::string) Set image description
- * @param align (type: bool) (default: 0) Align output bounding box to input image
- * @return output image
- **/
 std::shared_ptr<jiplib::Jim> JimList::stack(app::AppFactory& app){return(crop(app));};
 
 ////stack all images in collection to multiband image (alias for crop)
-/**
- * @param a_srs (type: std::string) Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
- * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
- * @param a_srs (type: std::string) Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid
- * @param ulx (type: double) (default: 0) Upper left x value bounding box
- * @param uly (type: double) (default: 0) Upper left y value bounding box
- * @param lrx (type: double) (default: 0) Lower right x value bounding box
- * @param lry (type: double) (default: 0) Lower right y value bounding box
- * @param band (type: unsigned int) band index to stack (leave empty to retain all bands)
- * @param startband (type: unsigned int) Start band sequence number
- * @param endband (type: unsigned int) End band sequence number
- * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
- * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
- * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)
- * @param dx (type: double) Output resolution in x (in meter) (empty: keep original resolution)
- * @param dy (type: double) Output resolution in y (in meter) (empty: keep original resolution)
- * @param resampling-method (type: std::string) (default: near) Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).
- * @param extent (type: std::string) get boundary from extent from polygons in vector file
- * @param crop_to_cutline (type: bool) (default: 0) Crop the extent of the target dataset to the extent of the cutline.
- * @param eo (type: std::string) special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname
- * @param mask (type: std::string) Use the the specified file as a validity mask (0 is nodata).
- * @param msknodata (type: double) (default: 0) Mask value not to consider for crop.
- * @param mskband (type: unsigned int) (default: 0) Mask band to read (0 indexed)
- * @param x (type: double) x-coordinate of image center to crop (in meter)
- * @param y (type: double) y-coordinate of image center to crop (in meter)
- * @param nx (type: double) image size in x to crop (in meter)
- * @param ny (type: double) image size in y to crop (in meter)
- * @param ns (type: unsigned int) number of samples  to crop (in pixels)
- * @param nl (type: unsigned int) number of lines to crop (in pixels)
- * @param scale (type: double) output=scale*input+offset
- * @param offset (type: double) output=scale*input+offset
- * @param nodata (type: double) Nodata value to put in image if out of bounds.
- * @param description (type: std::string) Set image description
- * @param align (type: bool) (default: 0) Align output bounding box to input image
- * @return output image
- **///stack all images in collection to multiband image (alias for crop)
 std::shared_ptr<jiplib::Jim> JimList::stack(){app::AppFactory app;return(stack(app));};
 
 ///create statistical profile from a collection
-/**
- * @param function (type: std::string) Statistics function (mean, median, var, stdev, min, max, sum, mode (provide classes), ismin, ismax, proportion (provide classes), percentile, nvalid
- * @param perc (type: double) Percentile value(s) used for rule percentile
- * @param nodata (type: double) nodata value(s)
- * @param otype (type: std::string) (default: GDT_Unknown) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
- * @return output image
- **/
 std::shared_ptr<jiplib::Jim> JimList::statProfile(app::AppFactory& app){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
   ImgList::statProfile(*imgWriter, app);
@@ -309,54 +141,10 @@ std::shared_ptr<jiplib::Jim> JimList::statProfile(app::AppFactory& app){
 }
 
 ///get statistics on image list
-/**
- * @param scale (type: double) output=scale*input+offset
- * @param offset (type: double) output=scale*input+offset
- * @param mem (type: unsigned long) (default: 0) Buffer size (in MB) to read image data blocks in memory
- * @param function (type: std::string) (default: basic) Statistics function (invalid, valid, filename, basic, gdal, mean, median, var, skewness, kurtosis,stdev, sum, minmax, min, max, histogram, histogram2d, rmse, regression, regressionError, regressionPerpendicular
- * @param band (type: unsigned short) (default: 0) band(s) on which to calculate statistics
- * @param nodata (type: double) Set nodata value(s)
- * @param nbin (type: short) number of bins to calculate histogram
- * @param relative (type: bool) (default: 0) use percentiles for histogram to calculate histogram
- * @param ulx (type: double) Upper left x value bounding box
- * @param uly (type: double) Upper left y value bounding box
- * @param lrx (type: double) Lower right x value bounding box
- * @param lry (type: double) Lower right y value bounding box
- * @param down (type: short) (default: 1) Down sampling factor (for raster sample datasets only). Can be used to create grid points
- * @param rnd (type: unsigned int) (default: 0) generate random numbers
- * @param scale (type: double) Scale(s) for reading input image(s)
- * @param offset (type: double) Offset(s) for reading input image(s)
- * @param src_min (type: double) start reading source from this minimum value
- * @param src_max (type: double) stop reading source from this maximum value
- * @param kde (type: bool) (default: 0) Use Kernel density estimation when producing histogram. The standard deviation is estimated based on Silverman's rule of thumb
- * @return this object
- **/
 std::multimap<std::string,std::string> JimList::getStats(app::AppFactory& app){
   return(ImgList::getStats(app));
 }
 
-/**
- * @param reference (type: std::string) Reference vector dataset
- * @param ln (type: std::string) Layer name(s) in sample. Leave empty to select all (for vector reference datasets only)
- * @param band (type: unsigned int) (default: 0) Input (reference) raster band. Optionally, you can define different bands for input and reference bands respectively: -b 1 -b 0.
- * @param confusion (type: bool) (default: 1) Create confusion matrix (to std out)
- * @param lref (type: std::string) (default: label) Attribute name of the reference label (for vector reference datasets only)
- * @param class (type: std::string) List of class names.
- * @param reclass (type: short) List of class values (use same order as in classname option).
- * @param nodata (type: double) No data value(s) in input or reference dataset are ignored
- * @param mask (type: std::string) Use the first band of the specified file as a validity mask. Nodata values can be set with the option msknodata.
- * @param msknodata (type: double) (default: 0) Mask value(s) where image is invalid. Use negative value for valid data (example: use -t -1: if only -1 is valid value)
- * @param output (type: std::string) Output dataset (optional)
- * @param f (type: std::string) (default: SQLite) OGR format for output vector
- * @param lclass (type: std::string) (default: class) Attribute name of the classified label
- * @param cmf (type: std::string) (default: ascii) Format for confusion matrix (ascii or latex)
- * @param cmo (type: std::string) Output file for confusion matrix
- * @param se95 (type: bool) (default: 0) Report standard error for 95 confidence interval
- * @param boundary (type: short) (default: 1) Boundary for selecting the sample
- * @param homogeneous (type: bool) (default: 0) Only take regions with homogeneous boundary into account (for reference datasets only)
- * @param circular (type: bool) (default: 0) Use circular boundary
- * @return reference to JimList object
- **/
 JimList& JimList::validate(app::AppFactory& app){
   ImgList::validate(app);
   return(*this);
