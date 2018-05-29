@@ -645,7 +645,7 @@ Example:
 Convert data type of input image to byte, using autoscale and clipping respectively::
 
   jim_scaled=jim.convert({'otype':'Byte','autoscale':[0,255]})
-  jim_clipped=jim.setNoDataValue(0).setThreshold(0,255).convert({'otype':'Byte'})
+  jim_clipped=jim.setThreshold({'min':0,'max':255,'nodata':0}).convert({'otype':'Byte'})
 
 END
 
@@ -728,7 +728,7 @@ Example:
 Convert data type of input image to byte, using autoscale and clipping respectively::
 
   jim_scaled=jim.convert({'otype':'Byte','autoscale':[0,255]})
-  jim_clipped=jim.setNoDataValue(0).setThreshold(0,255).convert({'otype':'Byte'})
+  jim_clipped=jim.setThreshold({'min':0,'max':255,'nodata':0}).convert({'otype':'Byte'})
 
 END
 
@@ -854,7 +854,7 @@ Example:
 Approximate the multi-temporal raster dataset by discarding the lower 20 percent of the coefficients after a discrete wavelet transform. The input dataset has a Byte data type. We wavelet transform is calculated using an Int16 data type. The approximated image is then converted to a Byte dataset, making sure all values below 0 and above 255 are set to 0::
 
   jim_approx=jim_multitemp.filter1d({'filter':'dwt_cut','threshold':20, 'otype':Int16})
-  jim_approx=jim_approx.pushNoDataValue(0).setThreshold(0,255).convert({'otype':'Byte'})
+  jim_approx=jim_approx({'min':0,'max':255,'nodata':0}).convert({'otype':'Byte'})
 
 **Hyperspectral filters**
 
@@ -1063,7 +1063,7 @@ Example:
 Approximate the multi-temporal raster dataset by discarding the lower 20 percent of the coefficients after a discrete wavelet transform. The input dataset has a Byte data type. We wavelet transform is calculated using an Int16 data type. The approximated image is then converted to a Byte dataset, making sure all values below 0 and above 255 are set to 0::
 
   jim_approx=jim_multitemp.filter2d({'filter':'dwt_cut','threshold':20, 'otype':Int16})
-  jim_approx=jim_approx.pushNoDataValue(0).setThreshold(0,255).convert({'otype':'Byte'})
+  jim_approx=jim_approx({'min':0,'max':255,'nodata':0}).convert({'otype':'Byte'})
 
 END
 
@@ -1293,6 +1293,9 @@ Supported keys in the dict:
 +------------------+---------------------------------------------------------------------------------+
 | max              | Maximum threshold value (if pixel value < max set pixel value to no data)       |
 +------------------+---------------------------------------------------------------------------------+
+| value            | value to be set if within min and max                                           |
+|                  | (if not set, valid pixels will remain their input value)                        |
++------------------+---------------------------------------------------------------------------------+
 | abs              | Set to True to perform threshold test to absolute pixel values                  |
 +------------------+---------------------------------------------------------------------------------+
 | nodata           | Set pixel value to this no data if pixel value < min or > max                   |
@@ -1305,7 +1308,7 @@ Example:
 
 Mask all values not within [0,250] and set to 255 (no data)::
 
-  jim_threshold=jim.setThreshold('min':0,'max':250,'nodata':255)
+  jim_threshold=jim.setThreshold({'min':0,'max':250,'nodata':255})
 
 END
 
@@ -1343,7 +1346,7 @@ Example:
 
 Create a binary mask from a raster dataset. The mask will get a value 1 (defined by the key 'data') if pixels in the input image are between 1 and 20. Otherwise, the mask will have a 0 (defined by the key 'nodata') value::
 
-  jim_threshold=jim.setThreshold('min':0,'max':250,'nodata':255)
+  jim_threshold=jim.setThreshold({'min':0,'max':250,'nodata':255})
 
 END
 

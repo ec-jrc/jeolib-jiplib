@@ -325,6 +325,13 @@ namespace jiplib{
     %pythonprepend cropOgr(VectorOgr&, app::AppFactory&)  "\"\"\"HELP.METHOD.Jim.crop(*args)\"\"\""
 #endif
     std::shared_ptr<Jim> cropOgr(VectorOgr& sampleReader, app::AppFactory& app);
+    ///warp Jim image in memory
+#ifdef SWIG
+    %pythonprepend warp(app::AppFactory&)  "\"\"\"HELP.METHOD.Jim.warp(dict)\"\"\""
+#endif
+       std::shared_ptr<Jim> warp(app::AppFactory& theApp);
+    ///warp image
+    CPLErr warp(Jim& imgWriter, app::AppFactory &theApp);
     /* ----------------------------------------------- */
     /* Convolution filters and morphological operators */
     /* ----------------------------------------------- */

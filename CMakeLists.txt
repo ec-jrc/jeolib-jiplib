@@ -78,6 +78,14 @@ else(PKTOOLS_FOUND)
   # set(PKTOOLS_LIB_PATH /usr/local/lib CACHE PATH "Library PATH for PKTOOLS")
 endif()
 
+# Make sure Boost libraries are found
+set(Boost_DEBUG 0)
+find_package(Boost COMPONENTS filesystem system serialization)
+if(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
+  # add_definitions("-DBOOST_ALL")
+  add_definitions("-DBOOST_ALL_NO_LIB")
+endif()
 
 # Make sure Python libraries are found
 FIND_PACKAGE(PythonLibs REQUIRED)
@@ -186,6 +194,11 @@ SET_TARGET_PROPERTIES(${JIPLIB_LIB_NAME}
 if(BUILD_WITH_MIALIB)
   target_link_libraries(
     ${JIPLIB_LIB_NAME}
+    ${BOOST_LIBRARIES}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_SERIALIZATION_LIBRARY}
+    ${BOOST_ARCHIVE_LIBRARY}
     ${MIA_LIB_NAME}
     ${PYTHON_LIBRARIES}
     gomp
@@ -196,6 +209,11 @@ if(BUILD_WITH_MIALIB)
 else(BUILD_WITH_MIALIB)
   target_link_libraries(
     ${JIPLIB_LIB_NAME}
+    ${BOOST_LIBRARIES}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_SERIALIZATION_LIBRARY}
+    ${BOOST_ARCHIVE_LIBRARY}
     ${PYTHON_LIBRARIES}
     gomp
     ${GDAL_LIBRARIES}
@@ -318,7 +336,7 @@ SET_PROPERTY(SOURCE ${PYTHON_SRC_DIR}/jiplib.i PROPERTY CPLUSPLUS ON)
 SWIG_ADD_MODULE(jiplib python ${PYTHON_SRC_DIR}/jiplib.i)
 # SET_SOURCE_FILES_PROPERTIES(${PYTHON_SRC_DIR}/jiplib.i PROPERTIES SWIG_FLAGS "-Wall")
 SET_SOURCE_FILES_PROPERTIES(${PYTHON_SRC_DIR}/jiplib.i PROPERTIES SWIG_FLAGS "-W2")
-SWIG_LINK_LIBRARIES(jiplib ${PKTOOLS_LIBRARIES} ${PYTHON_LIBRARIES} ${JIPLIB_LIB_NAME})
+SWIG_LINK_LIBRARIES(jiplib ${PKTOOLS_LIBRARIES} ${PYTHON_LIBRARIES} ${JIPLIB_LIB_NAME} ${BOOST_LIBRARIES})
 
 ########## INSTALL ##########
 INSTALL (TARGETS ${JIPLIB_LIB_NAME} LIBRARY DESTINATION lib)

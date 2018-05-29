@@ -8,7 +8,6 @@ Change log
 #include "base/Optionpk.h"
 #include "algorithms/Filter2d.h"
 #include "apps/AppFactory.h"
-#include "imageclasses/ImgCollection.h"
 #include "jim.h"
 
 using namespace std;

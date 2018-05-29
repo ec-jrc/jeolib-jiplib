@@ -13,10 +13,10 @@ parser.add_argument("-input","--input",help="Path of the input file",dest="input
 parser.add_argument("-extent","--extent",help="Path of the extent file",dest="extent",required=True,type=str)
 args = parser.parse_args()
 
-
 jim0=jl.createJim({'filename':args.input,'extent':args.extent})
 v0=jl.createVector()
-v0.open({'filename':args.extent,'access':0})
+v0.open({'filename':args.extent})
+print("v0.getBoundingBox():",v0.getBoundingBox())
 if jim0.getUlx()<v0.getUlx()-jim0.getDeltaX() or jim0.getUlx()>v0.getUlx()+jim0.getDeltaX():
     print("1Failed: get spatial extent ulx")
 elif jim0.getUly()>v0.getUly()+jim0.getDeltaY() or jim0.getUly()<v0.getUly()-jim0.getDeltaY():
