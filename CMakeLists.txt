@@ -90,6 +90,13 @@ endif()
 # Make sure Python libraries are found
 set(python_version "2" CACHE STRING "Specify which Python version to use")
 FIND_PACKAGE(PythonLibs ${PYTHON_VERSION} REQUIRED)
+if(PYTHONLIBS_FOUND)
+  message(STATUS "Python version found: ${PYTHONLIBS_VERSION_STRING}")
+  message(STATUS "Found Python library: ${PYTHON_LIBRARY}")
+  message(STATUS "Found Python include dir: ${PYTHON_INCLUDE_DIR}")
+else(PYTHONLIBS_FOUND)
+  message(STATUS "Error: PYTHON not found")
+endif(PYTHONLIBS_FOUND)
 
 #should replace following line
 # EXECUTE_PROCESS(COMMAND pkg-config --cflags pktools OUTPUT_VARIABLE PKTOOLS_INCLUDE_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
