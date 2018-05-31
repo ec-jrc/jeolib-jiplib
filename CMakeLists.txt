@@ -88,14 +88,19 @@ if(Boost_FOUND)
 endif()
 
 # Make sure Python libraries are found
-set(python_version "2" CACHE STRING "Specify which Python version to use")
-FIND_PACKAGE(PythonLibs ${PYTHON_VERSION} REQUIRED)
+set(python_version "2.7" CACHE STRING "Specify which Python version to use")
+#from https://github.com/InsightSoftwareConsortium/ITK/blob/master/Wrapping/Generators/Python/CMakeLists.txt#L1-18
+# if(PYTHON_VERSION_STRING VERSION_EQUAL PYTHONLIBS_VERSION_STRING)
+# if(PYTHON_VERSION_STRING VERSION_LESS 2.6)
+# if(PYTHON_VERSION_STRING VERSION_GREATER 3.0)
+FIND_PACKAGE(PythonLibs ${PYTHON_VERSION} EXACT)
 if(PYTHONLIBS_FOUND)
   message(STATUS "Python version found: ${PYTHONLIBS_VERSION_STRING}")
   message(STATUS "Found Python library: ${PYTHON_LIBRARY}")
   message(STATUS "Found Python include dir: ${PYTHON_INCLUDE_DIR}")
 else(PYTHONLIBS_FOUND)
-  message(STATUS "Error: PYTHON not found")
+  message(STATUS "Error: PYTHON exact version ${PYTHON_VERSION} not found, trying default")
+  FIND_PACKAGE(PythonLibs REQUIRED)
 endif(PYTHONLIBS_FOUND)
 
 #should replace following line
