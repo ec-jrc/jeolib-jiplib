@@ -88,7 +88,8 @@ if(Boost_FOUND)
 endif()
 
 # Make sure Python libraries are found
-FIND_PACKAGE(PythonLibs REQUIRED)
+set(python_version "2" CACHE STRING "Specify which Python version to use")
+FIND_PACKAGE(PythonLibs ${PYTHON_VERSION} REQUIRED)
 
 #should replace following line
 # EXECUTE_PROCESS(COMMAND pkg-config --cflags pktools OUTPUT_VARIABLE PKTOOLS_INCLUDE_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)

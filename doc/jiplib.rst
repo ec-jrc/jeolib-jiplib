@@ -43,6 +43,8 @@ extent   get boundary from extent from polygons in vector dataset
 noread   Set this flag to True to not read data when opening
 ======== ===================================================
 
+.. note::
+   You can specify a different spatial reference system to define the region of interest to read set with keys ulx, uly, lrx, and lry with the extra key 't_srs'. Notice this will not re-project the resulting image. You can use the function :py:func:Jim:`warp` for this.
 ..
    resample: (default: GRIORA_NearestNeighbour) Resample algorithm used for reading pixel data in case of interpolation GRIORA_NearestNeighbour | GRIORA_Bilinear | GRIORA_Cubic | GRIORA_CubicSpline | GRIORA_Lanczos | GRIORA_Average | GRIORA_Average | GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)
 
@@ -505,7 +507,7 @@ nodata   Nodata value to put in image
 Returns:
    This instance of Jim object (self)
 
-Note:
+.. note::
     Supported GDAL output formats are restricted to those that support creation (see http://www.gdal.org/formats_list.html#footnote1)
     The image data is kept in memory (unlike using method :py:func:`Jim:close`)
 
@@ -729,6 +731,46 @@ Convert data type of input image to byte, using autoscale and clipping respectiv
 
   jim_scaled=jim.convert({'otype':'Byte','autoscale':[0,255]})
   jim_clipped=jim.setThreshold({'min':0,'max':255,'nodata':0}).convert({'otype':'Byte'})
+
+END
+
+METHOD warp(dict)
+Warp a raster dataset to a target spatial reference system
+
+Args:
+* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+
+Returns:
+   This warped Jim object in the target spatial reference system
+
+Supported keys in the dict:
+
++------------------+---------------------------------------------------------------------------------+
+| key              | value                                                                           |
++==================+=================================================================================+
+| s_srs            | Source spatial reference system (default is to read from input)                 |
++------------------+---------------------------------------------------------------------------------+
+| t_srs            | Target spatial reference system (default is to read from input)                 |
++------------------+---------------------------------------------------------------------------------+
+| resample         | Resample algorithm used for reading pixel data in case of interpolation         |
+|                  | (default: GRIORA_NearestNeighbour).                                             |
+|                  | Check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a         |
+|                  | or available options.                                                           |
++------------------+---------------------------------------------------------------------------------+
+| nodata           | Nodata value to put in image if out of bounds                                   |
++------------------+---------------------------------------------------------------------------------+
+| otype            | Data type for output image                                                      |
++------------------+---------------------------------------------------------------------------------+
+
+.. note::
+   Possible values for the key 'otype' are: Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64
+
+Example:
+
+Read a raster dataset from disk by selecting a bounding box in some target spatial reference system. Then warp the read raster dataset to the target spatial reference system::
+
+  jim=jl.createJim({'filename':'/path/to/file.tif','t_srs':'epsg:3035','ulx':1000000,'uly':4000000','lrx':1500000,'lry':3500000})
+  jim_warped=jim.warp({'t_srs':'epsg:3035})
 
 END
 

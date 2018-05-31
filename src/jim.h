@@ -256,7 +256,7 @@ namespace jiplib{
     ///Open a multiband image for writing using a external data pointers
     CPLErr open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType);
     ///Open an image for writing in memory, defining image attributes.
-    /* void open(int ncol, int nrow, int nband, int dataType); */
+    void open(int ncol, int nrow, int nband, const GDALDataType& dataType){ImgRaster::open(ncol,nrow,nband,dataType);};
     ///Open an image for writing, based on an existing image object
     CPLErr open(Jim& imgSrc, bool copyData=true);
     ///Open dataset

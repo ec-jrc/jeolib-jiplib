@@ -272,345 +272,6 @@ CPLErr Jim::open(Jim& imgSrc, bool copyData){
 }
 
 //Open raster dataset for reading or writing
-// CPLErr Jim::open(app::AppFactory &app) {
-//   //input
-//   Optionpk<std::string> input_opt("fn", "filename", "filename");
-//   Optionpk<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
-//   // Optionpk<std::string> extra_opt("extra", "extra", "RGDALRasterIOExtraArg (check http://www.gdal.org/structGDALRasterIOExtraArg.html)");
-//   // Optionpk<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference system in EPSG format (e.g., epsg:3035)");//todo
-//   //output
-//   Optionpk<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.");
-//   Optionpk<int> nsample_opt("ns", "ncol", "Number of columns");
-//   Optionpk<int> nline_opt("nl", "nrow", "Number of rows");
-//   Optionpk<int> nband_opt("nb", "nband", "Number of bands",1);
-//   Optionpk<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64})","Byte");
-//   Optionpk<unsigned long int> seed_opt("seed", "seed", "seed value for random generator",0);
-//   Optionpk<double> mean_opt("mean", "mean", "Mean value for random generator",0);
-//   Optionpk<double> stdev_opt("stdev", "stdev", "Standard deviation for Gaussian random generator",0);
-//   Optionpk<double> uniform_opt("uniform", "uniform", "start and end values for random value with uniform distribution",0);
-//   Optionpk<std::string> assignSRS_opt("a_srs", "a_srs", "Assign the spatial reference for the output file, e.g., psg:3035 to use European projection and force to European grid");
-//   // Optionpk<std::string> description_opt("d", "description", "Set image description");
-//   //input and output
-//   Optionpk<int> band_opt("b", "band", "Bands to open, index starts from 0");
-//   Optionpk<std::string> extent_opt("e", "extent", "get boundary from extent from polygons in vector file");
-//   Optionpk<double> ulx_opt("ulx", "ulx", "Upper left x value bounding box");
-//   Optionpk<double> uly_opt("uly", "uly", "Upper left y value bounding box");
-//   Optionpk<double> lrx_opt("lrx", "lrx", "Lower right x value bounding box");
-//   Optionpk<double> lry_opt("lry", "lry", "Lower right y value bounding box");
-//   Optionpk<double> dx_opt("dx", "dx", "Resolution in x");
-//   Optionpk<double> dy_opt("dy", "dy", "Resolution in y");
-//   Optionpk<std::string> access_opt("access", "access", "access (READ_ONLY, UPDATE)","READ_ONLY",2);
-//   Optionpk<bool> noread_opt("noread", "noread", "do not read data when opening",false);
-//   Optionpk<bool> band2plane_opt("band2plane", "band2plane", "read bands as planes",false);
-//   Optionpk<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
-
-//   bool doProcess;//stop process when program was invoked with help option (-h --help)
-//   try{
-//     doProcess=input_opt.retrieveOption(app);
-//     nodata_opt.retrieveOption(app);
-//     band_opt.retrieveOption(app);
-//     ulx_opt.retrieveOption(app);
-//     uly_opt.retrieveOption(app);
-//     lrx_opt.retrieveOption(app);
-//     lry_opt.retrieveOption(app);
-//     dx_opt.retrieveOption(app);
-//     dy_opt.retrieveOption(app);
-//     resample_opt.retrieveOption(app);
-//     extent_opt.retrieveOption(app);
-//     // extra_opt.retrieveOption(app);
-//     // targetSRS_opt.retrieveOption(app);
-//     nsample_opt.retrieveOption(app);
-//     nline_opt.retrieveOption(app);
-//     nband_opt.retrieveOption(app);
-//     otype_opt.retrieveOption(app);
-//     seed_opt.retrieveOption(app);
-//     mean_opt.retrieveOption(app);
-//     stdev_opt.retrieveOption(app);
-//     uniform_opt.retrieveOption(app);
-//     assignSRS_opt.retrieveOption(app);
-//     access_opt.retrieveOption(app);
-//     noread_opt.retrieveOption(app);
-//     band2plane_opt.retrieveOption(app);
-//     memory_opt.retrieveOption(app);
-//   }
-//   catch(std::string predefinedString){
-//     std::cout << predefinedString << std::endl;
-//   }
-//   if(!doProcess){
-//     std::cout << std::endl;
-//     std::ostringstream helpStream;
-//     helpStream << "exception thrown due to help info";
-//     throw(helpStream.str());//help was invoked, stop processing
-//   }
-
-//   std::vector<std::string> badKeys;
-//   app.badKeys(badKeys);
-//   if(badKeys.size()){
-//     std::ostringstream errorStream;
-//     if(badKeys.size()>1)
-//       errorStream << "Error: unknown keys: ";
-//     else
-//       errorStream << "Error: unknown key: ";
-//     for(int ikey=0;ikey<badKeys.size();++ikey){
-//       errorStream << badKeys[ikey] << " ";
-//     }
-//     errorStream << std::endl;
-//     throw(errorStream.str());
-//   }
-//   statfactory::StatFactory stat;
-
-//   //get bounding box from extentReader if defined
-//   VectorOgr extentReader;
-//   if(extent_opt.size()){
-//     double e_ulx;
-//     double e_uly;
-//     double e_lrx;
-//     double e_lry;
-//     for(int iextent=0;iextent<extent_opt.size();++iextent){
-//       extentReader.open(extent_opt[iextent]);
-//       extentReader.getExtent(e_ulx,e_uly,e_lrx,e_lry);
-//       ulx_opt.push_back(e_ulx);
-//       uly_opt.push_back(e_uly);
-//       lrx_opt.push_back(e_lrx);
-//       lry_opt.push_back(e_lry);
-//       extentReader.close();
-//     }
-//     e_ulx=stat.mymin(ulx_opt);
-//     e_uly=stat.mymax(uly_opt);
-//     e_lrx=stat.mymax(lrx_opt);
-//     e_lry=stat.mymin(lry_opt);
-//     ulx_opt.clear();
-//     uly_opt.clear();
-//     lrx_opt.clear();
-//     lrx_opt.clear();
-//     ulx_opt.push_back(e_ulx);
-//     uly_opt.push_back(e_uly);
-//     lrx_opt.push_back(e_lrx);
-//     lry_opt.push_back(e_lry);
-//   }
-
-//   if(input_opt.empty()){
-//     if(dx_opt.size()||dy_opt.size()){
-//       if(dx_opt.empty()){
-//         std::ostringstream errorStream;
-//         errorStream << "Warning: cell size in x not defined (use option --dx)." << std::endl;
-//         // ImgRaster();
-//         throw(errorStream.str());
-//       }
-//       if(dy_opt.empty()){
-//         std::ostringstream errorStream;
-//         errorStream << "Warning: cell size in y not defined (use option --dy)." << std::endl;
-//         // ImgRaster();
-//         throw(errorStream.str());
-//       }
-//       if(ulx_opt.empty()||uly_opt.empty()||lrx_opt.empty()||lry_opt.empty()){
-//         std::ostringstream errorStream;
-//         errorStream << "Warning: bounding box not defined (use options --ulx --uly --lrx --lry)." << std::endl;
-//         // ImgRaster();
-//         throw(errorStream.str());
-//       }
-//       nsample_opt.clear();
-//       nsample_opt.push_back((lrx_opt[0]-ulx_opt[0])/dx_opt[0]);
-//       nline_opt.clear();
-//       nline_opt.push_back((uly_opt[0]-lry_opt[0])/dy_opt[0]);
-//     }
-//     else if(nsample_opt.size()||nline_opt.size()){
-//       if(nsample_opt.empty()){
-//         std::ostringstream errorStream;
-//         errorStream << "Warning: no number of columns (use option --ncol)." << std::endl;
-//         // ImgRaster();
-//         throw(errorStream.str());
-//       }
-//       if(nline_opt.empty()){
-//         std::ostringstream errorStream;
-//         errorStream << "Warning: no number of rows (use option --nrow)." << std::endl;
-//         // ImgRaster();
-//         throw(errorStream.str());
-//       }
-//     }
-//     GDALDataType theType=string2GDAL(otype_opt[0]);
-//     // open(nsample_opt[0],nline_opt[0],nband_opt[0],theType);
-//     m_ncol = nsample_opt[0];
-//     m_nrow = nline_opt[0];
-//     m_nband = nband_opt[0];
-//     m_dataType = theType;
-//     initMem(0);
-//     for(int iband=0;iband<m_nband;++iband){
-//       m_begin[iband]=0;
-//       m_end[iband]=m_begin[iband]+m_blockSize;
-//     }
-//     if(m_filename!=""){
-//       // m_writeMode=true;
-//       m_access=WRITE;
-//       registerDriver();
-//     }
-//     if(ulx_opt.size()&&uly_opt.size()&&lrx_opt.size()&&lry_opt.size()){
-//       double gt[6];
-//       if(ulx_opt[0]<lrx_opt[0])
-//         gt[0]=ulx_opt[0];
-//       else
-//         gt[0]=0;
-//       if(dx_opt.size())
-//         gt[1]=dx_opt[0];
-//       else if(lrx_opt[0]-ulx_opt[0]>0){
-//         gt[1]=lrx_opt[0]-ulx_opt[0];
-//         gt[1]/=nrOfCol();
-//       }
-//       else
-//         gt[1]=1;
-//       gt[2]=0;
-//       if(uly_opt[0]>lry_opt[0])
-//         gt[3]=uly_opt[0];
-//       else
-//         gt[3]=0;
-//       gt[4]=0;
-//       if(dy_opt.size())
-//         gt[5]=-dy_opt[0];
-//       else if(uly_opt[0]-lry_opt[0]>0){
-//         gt[5]=lry_opt[0]-uly_opt[0];
-//         gt[5]/=nrOfRow();
-//       }
-//       else
-//         gt[5]=-1;
-//       setGeoTransform(gt);
-//       if(assignSRS_opt.size())
-//         setProjectionProj4(assignSRS_opt[0]);
-//     }
-//     gsl_rng* rndgen=stat.getRandomGenerator(seed_opt[0]);
-//     double value=mean_opt[0];
-//     std::vector<double> lineBuffer(nrOfCol(),value);
-//     double a=0;
-//     double b=1;
-//     std::string distribution="none";
-//     if(uniform_opt.size()>1){
-//       distribution="uniform";
-//       a=uniform_opt[0];
-//       b=uniform_opt[1];
-//     }
-//     else if(stdev_opt[0]>0){
-//       distribution="gaussian";
-//       a=mean_opt[0];
-//       b=stdev_opt[0];
-//     }
-//     else
-//       distribution="none";
-//     for(unsigned int iband=0;iband<nrOfBand();++iband){
-//       for(unsigned int irow=0;irow<nrOfRow();++irow){
-//         for(unsigned int icol=0;icol<nrOfCol();++icol){
-//           if(stat.getDistributionType(distribution)==statfactory::StatFactory::none)
-//             break;
-//           else
-//             value=stat.getRandomValue(rndgen,distribution,a,b);
-//           lineBuffer[icol]=value;
-//         }
-//         writeData(lineBuffer,irow,iband);
-//       }
-//     }
-//     stat.freeRandomGenerator(rndgen);
-//   }
-//   else if(input_opt.size()){
-//     setAccess(access_opt[0]);
-//     m_filename=input_opt[0];
-//     //set class member variables based on GDAL dataset
-//     registerDriver();
-//     //reset all class member variables according to options provided in app
-//     if(band_opt.empty()){
-//       while(band_opt.size()<nrOfBand())
-//         band_opt.push_back(band_opt.size());
-//     }
-//     m_nband=band_opt.size();
-//     if(ulx_opt.empty())
-//       ulx_opt.push_back(getUlx());
-//     if(uly_opt.empty())
-//       uly_opt.push_back(getUly());
-//     if(lrx_opt.empty())
-//       lrx_opt.push_back(getLrx());
-//     if(lry_opt.empty())
-//       lry_opt.push_back(getLry());
-//     if(dx_opt.empty())
-//       dx_opt.push_back(getDeltaX());
-//     if(dy_opt.empty())
-//       dy_opt.push_back(getDeltaY());
-
-//     //force bounding box to be within dataset
-//     if(ulx_opt[0]<getUlx())
-//       ulx_opt[0]=getUlx();
-//     if(uly_opt[0]>getUly())
-//       uly_opt[0]=getUly();
-//     if(lrx_opt[0]>getLrx())
-//       lrx_opt[0]=getLrx();
-//     if(lry_opt[0]<getLry())
-//       lry_opt[0]=getLry();
-
-//     //todo: reproject on the fly using
-//     // OGRSpatialReference::SetFromUserInput
-
-//     double gt[6];
-//     gt[0]=ulx_opt[0];
-//     gt[3]=uly_opt[0];
-//     gt[1]=dx_opt[0];//todo: adfGeotransform[1]: $cos(\alpha)\cdot\textrm{Xres}$
-//     gt[2]=0;//todo: $-sin(\alpha)\cdot\textrm{Xres}$
-//     gt[4]=0;//todo: $-sin(\alpha)\cdot\textrm{Yres}$
-//     gt[5]=-dy_opt[0];//todo: a$-cos(\alpha)\cdot\textrm{Yres}
-//     setGeoTransform(gt);
-
-//     if(assignSRS_opt.size())
-//       setProjectionProj4(assignSRS_opt[0]);
-//     m_resample=getGDALResample(resample_opt[0]);
-//     int nBufXSize=abs(static_cast<unsigned int>(ceil((lrx_opt[0]-ulx_opt[0])/dx_opt[0]-FLT_EPSILON)));
-//     int nBufYSize=abs(static_cast<unsigned int>(ceil((uly_opt[0]-lry_opt[0])/dy_opt[0]-FLT_EPSILON)));
-//     m_ncol=nBufXSize;
-//     m_nrow=nBufYSize;
-
-//     if(band2plane_opt[0]){
-//       m_nplane=m_nband;
-//       m_nband=1;
-//       initMem(memory_opt[0]);
-//       m_begin[0]=0;
-//       m_end[0]=m_begin[0]+m_blockSize;
-//       if(!noread_opt[0]){
-//         readDataPlanes(band_opt);
-//       }
-//     }
-//     else{
-//       if(!noread_opt[0]){
-//         //we initialize memory using class member variables instead of those read from GDAL dataset
-//         initMem(memory_opt[0]);
-//         for(int iband=0;iband<nrOfBand();++iband){
-//           m_begin[iband]=0;
-//           m_end[iband]=m_begin[iband]+m_blockSize;
-//           if(!noread_opt[0]){
-//             //we can not use readData(iband) because sequence of band_opt might not correspond bands in GDAL dataset
-//             readDataDS(iband,band_opt[iband]);
-//           }
-//         }
-//       }
-//       else{
-//         if(memory_opt[0]<=0)
-//           m_blockSize=nrOfRow();
-//         else{
-//           m_blockSize=static_cast<unsigned int>(memory_opt[0]*1000000/nrOfBand()/nrOfCol()/getDataTypeSizeBytes());
-//           if(getBlockSizeY(0))
-//             m_blockSize-=m_blockSize%getBlockSizeY(0);
-//           if(m_blockSize<1)
-//             m_blockSize=1;
-//           if(m_blockSize>nrOfRow())
-//             m_blockSize=nrOfRow();
-//         }
-//       }
-//     }
-//   }
-//   else{
-//     std::ostringstream errorStream;
-//     errorStream << "Warning: no number of rows or columns provided, nor input filename." << std::endl;
-//     // ImgRaster();
-//     throw(errorStream.str());
-//   }
-//   setNoData(nodata_opt);
-//   return(CE_None);
-// }
-
-//Open raster dataset for reading or writing
 CPLErr Jim::open(app::AppFactory &app){
   //input
   Optionpk<std::string> input_opt("fn", "filename", "filename");
@@ -1765,6 +1426,8 @@ CPLErr Jim::warp(Jim& imgWriter, app::AppFactory &theApp){
   sourceSpatialRef.SetFromUserInput(getProjectionRef().c_str());
   targetSpatialRef.SetFromUserInput(targetSRS_opt[0].c_str());
   if(sourceSpatialRef.IsSame(&targetSpatialRef)){
+    if(verbose_opt[0])
+      std::cout << "source SRS is same as target SRS, no warp is needed (just converting):  " << GDALGetDataTypeName(theType) << std::endl;
     app::AppFactory convertApp(theApp);
     convertApp.clearOption("t_srs");
     convertApp.clearOption("resample");
@@ -1777,7 +1440,10 @@ CPLErr Jim::warp(Jim& imgWriter, app::AppFactory &theApp){
   std::vector<double> sourceGT(6);
   std::vector<double> targetGT(6);
   ImgRaster::getGeoTransform(sourceGT);
+  //todo: warp first band to open imgWriter and consecutive bands in parallel
   for(int iband=0;iband<nrOfBand();++iband){
+    if(verbose_opt[0])
+      std::cout << "warping band " << iband << std::endl;
     const char *pszFormat = "MEM";
     GDALDriver *poDriverMem = GetGDALDriverManager()->GetDriverByName(pszFormat);
     GDALDataset *poDatasetMem = NULL;
@@ -1822,13 +1488,14 @@ CPLErr Jim::warp(Jim& imgWriter, app::AppFactory &theApp){
                   GDALRasterBand *poBandOut = poDatasetOut->GetRasterBand(1);
                   if( poBandOut ){
                     if(!iband){
-                      app::AppFactory writerApp;
-                      writerApp.setLongOption("ncol",poBandOut->GetXSize());
-                      writerApp.setLongOption("nrow",poBandOut->GetYSize());
-                      writerApp.setLongOption("nband",nrOfBand());
-                      writerApp.setLongOption("otype",otype_opt[0]);
-                      // imgWriter.open(poBandOut->GetXSize(),poBandOut->GetYSize(),nrOfBand(),theType);
-                      imgWriter.open(writerApp);
+                      // app::AppFactory writerApp;
+                      // writerApp.setLongOption("ncol",poBandOut->GetXSize());
+                      // writerApp.setLongOption("nrow",poBandOut->GetYSize());
+                      // writerApp.setLongOption("nband",nrOfBand());
+                      // if(otype_opt.size())
+                      //   writerApp.setLongOption("otype",otype_opt[0]);
+                      // imgWriter.open(writerApp);
+                      imgWriter.open(poBandOut->GetXSize(),poBandOut->GetYSize(),nrOfBand(),theType);
                       imgWriter.setGeoTransform(targetGT);
                       imgWriter.setProjection(targetWKT);
                       imgWriter.setNoData(nodata_opt);
