@@ -303,6 +303,7 @@ CPLErr Jim::open(app::AppFactory &app){
   Optionpk<double> lry_opt("lry", "lry", "Lower right y value bounding box");
   Optionpk<double> dx_opt("dx", "dx", "Resolution in x");
   Optionpk<double> dy_opt("dy", "dy", "Resolution in y");
+  Optionpk<bool> align_opt("align", "align", "Align output bounding box to input image",false);
   Optionpk<std::string> access_opt("access", "access", "access (READ_ONLY, UPDATE)","READ_ONLY",2);
   Optionpk<bool> noread_opt("noread", "noread", "do not read data when opening",false);
   Optionpk<bool> band2plane_opt("band2plane", "band2plane", "read bands as planes",false);
@@ -320,6 +321,7 @@ CPLErr Jim::open(app::AppFactory &app){
     lry_opt.retrieveOption(app);
     dx_opt.retrieveOption(app);
     dy_opt.retrieveOption(app);
+    align_opt.retrieveOption(app);
     resample_opt.retrieveOption(app);
     extent_opt.retrieveOption(app);
     // extra_opt.retrieveOption(app);
@@ -609,7 +611,7 @@ CPLErr Jim::open(app::AppFactory &app){
 
         char *wktString;
         targetSpatialRef.exportToWkt(&wktString);
-        m_projection=wktString;
+        // m_projection=wktString;
         gds2target = OGRCreateCoordinateTransformation(&gdsSpatialRef, &targetSpatialRef);
         target2gds = OGRCreateCoordinateTransformation(&targetSpatialRef, &gdsSpatialRef);
         if(targetSpatialRef.IsSame(&gdsSpatialRef)){
@@ -628,24 +630,26 @@ CPLErr Jim::open(app::AppFactory &app){
             throw(errorStream.str());
           }
         }
-        if(dx_opt.size()){//convert to number of samples
-          if(ulx_opt.size()&&lrx_opt.size()){
-            nsample_opt.clear();
-            nsample_opt.push_back((lrx_opt[0]-ulx_opt[0])/dx_opt[0]);
-          }
-          else{
-            dx_opt.clear();
-          }
-        }
-        if(dy_opt.size()){//convert to number of samples
-          if(uly_opt.size()&&lry_opt.size()){
-            nline_opt.clear();
-            nline_opt.push_back((uly_opt[0]-lry_opt[0])/dy_opt[0]);
-          }
-          else{
-            dy_opt.clear();
-          }
-        }
+        // if(dx_opt.size()){//convert to number of samples
+        //   if(ulx_opt.size()&&lrx_opt.size()){
+        //     nsample_opt.clear();
+        //     nsample_opt.push_back((lrx_opt[0]-ulx_opt[0])/dx_opt[0]);
+        //     dx_opt.clear();
+        //   }
+        //   else{
+        //     dx_opt.clear();
+        //   }
+        // }
+        // if(dy_opt.size()){//convert to number of lines
+        //   if(uly_opt.size()&&lry_opt.size()){
+        //     nline_opt.clear();
+        //     nline_opt.push_back((uly_opt[0]-lry_opt[0])/dy_opt[0]);
+        //     dy_opt.clear();
+        //   }
+        //   else{
+        //     dy_opt.clear();
+        //   }
+        // }
         //both ulx and uly need to be set
         if(ulx_opt.size() && uly_opt.size()){
           if(target2gds){
@@ -687,14 +691,39 @@ CPLErr Jim::open(app::AppFactory &app){
     double gds_lry=gds_gt[3]+gds_ncol*gds_gt[4]+gds_nrow*gds_gt[5];
     double gds_dx=gds_gt[1];
     double gds_dy=-gds_gt[5];
+
     if(ulx_opt.empty())
       ulx_opt.push_back(gds_ulx);
+    else if(align_opt[0]){
+      if(ulx_opt[0]>this->getUlx())
+        ulx_opt[0]-=fmod(ulx_opt[0]-this->getUlx(),getDeltaX());
+      else if(ulx_opt[0]<this->getUlx())
+        ulx_opt[0]+=fmod(this->getUlx()-ulx_opt[0],getDeltaX())-getDeltaX();
+    }
     if(uly_opt.empty())
       uly_opt.push_back(gds_uly);
+    else if(align_opt[0]){
+      if(uly_opt[0]<this->getUly())
+        uly_opt[0]+=fmod(this->getUly()-uly_opt[0],getDeltaY());
+      else if(uly_opt[0]>this->getUly())
+        uly_opt[0]-=fmod(uly_opt[0]-this->getUly(),getDeltaY())+getDeltaY();
+    }
     if(lrx_opt.empty())
       lrx_opt.push_back(gds_lrx);
+    else if(align_opt[0]){
+      if(lrx_opt[0]<this->getLrx())
+        lrx_opt[0]+=fmod(this->getLrx()-lrx_opt[0],getDeltaX());
+      else if(lrx_opt[0]>this->getLrx())
+        lrx_opt[0]-=fmod(lrx_opt[0]-this->getLrx(),getDeltaX())+getDeltaX();
+    }
     if(lry_opt.empty())
       lry_opt.push_back(gds_lry);
+    else if(align_opt[0]){
+      if(lry_opt[0]>this->getLry())
+        lry_opt[0]-=fmod(lry_opt[0]-this->getLry(),getDeltaY());
+      else if(lry_opt[0]<this->getLry())
+        lry_opt[0]+=fmod(this->getLry()-lry_opt[0],getDeltaY())-getDeltaY();
+    }
     //now ulx_opt, uly_opt, lrx_opt and lry_opt are in GDS SRS coordinates
     if(band_opt.empty()){
       while(band_opt.size()<nrOfBand())
@@ -708,21 +737,29 @@ CPLErr Jim::open(app::AppFactory &app){
     std::vector<double> gds_bb;
     getBoundingBox(gds_bb);
     if(dx_opt.empty()){
-      if(nsample_opt.size())
-        dx_opt.push_back((gds_lrx-gds_ulx)/nsample_opt[0]);
+      if(nsample_opt.size()){
+        if(verbose_opt[0])
+          std::cout << "nsample_opt[0]: " << nsample_opt[0] << std::endl;
+        dx_opt.push_back((lrx_opt[0]-ulx_opt[0])/nsample_opt[0]);
+        // dx_opt.push_back((gds_lrx-gds_ulx)/nsample_opt[0]);
+      }
       else
         dx_opt.push_back(gds_dx);
     }
-    if(verbose_opt[0])
-      std::cout << "dx_opt[0]: " << dx_opt[0] << std::endl;
     if(dy_opt.empty()){
-      if(nline_opt.size())
-        dy_opt.push_back((gds_bb[1]-gds_bb[3])/nline_opt[0]);
+      if(nline_opt.size()){
+        if(verbose_opt[0])
+          std::cout << "nline_opt[0]: " << nline_opt[0] << std::endl;
+        dy_opt.push_back((uly_opt[0]-lry_opt[0])/nline_opt[0]);
+        // dy_opt.push_back((gds_bb[1]-gds_bb[3])/nline_opt[0]);
+      }
       else
         dy_opt.push_back(getDeltaY());
     }
-    if(verbose_opt[0])
+    if(verbose_opt[0]){
+      std::cout << "dx_opt[0]: " << dx_opt[0] << std::endl;
       std::cout << "dy_opt[0]: " << dy_opt[0] << std::endl;
+    }
     //force bounding box to be within dataset
     if(ulx_opt[0]<gds_ulx)
       ulx_opt[0]=gds_ulx;
@@ -732,7 +769,6 @@ CPLErr Jim::open(app::AppFactory &app){
       lrx_opt[0]=gds_lrx;
     if(lry_opt[0]<gds_lry)
       lry_opt[0]=gds_lry;
-
     std::vector<double> gt(6);
     gt[0]=ulx_opt[0];
     gt[3]=uly_opt[0];
@@ -759,29 +795,7 @@ CPLErr Jim::open(app::AppFactory &app){
       }
     }
     else{
-      // app.showOptions();
-      if(targetSRS_opt.size()){
-        app::AppFactory openApp(app);
-        openApp.clearOption("t_srs");
-        openApp.clearOption("ulx");
-        openApp.setLongOption("ulx",gds_ulx);
-        openApp.clearOption("uly");
-        openApp.setLongOption("uly",gds_uly);
-        openApp.clearOption("lrx");
-        openApp.setLongOption("lrx",gds_lrx);
-        openApp.clearOption("lry");
-        openApp.setLongOption("lry",gds_lry);
-        openApp.clearOption("dx");//dx has been converted in ncol
-        if(dx_opt.size())
-          openApp.setLongOption("dx",dx_opt[0]);
-        openApp.clearOption("dy");//dy has been converted in nrow
-        if(dx_opt.size())
-          openApp.setLongOption("dy",dy_opt[0]);
-        openApp.clearOption("ncol");
-        openApp.clearOption("nrow");
-        open(openApp);
-      }
-      else if(!noread_opt[0]){
+      if(!noread_opt[0]){
         if(!covers(ulx_opt[0],uly_opt[0],lrx_opt[0],lry_opt[0])){
           std::ostringstream errorStream;
           errorStream << "Warning: raster dataset does not cover required bounding box" << std::endl;
@@ -1700,38 +1714,18 @@ CPLErr Jim::validate(app::AppFactory& app){
 }
 
 
+///supervised training (only for SML)
+
+CPLErr Jim::train(JimList& referenceReader, app::AppFactory& app){
+  std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
+  ImgList referenceList;
+  for(int ijim=0;ijim<referenceReader.size();++ijim){
+    referenceList.pushImage(referenceReader.getImage(ijim));
+  }
+  return(ImgRaster::train(referenceList, app));
+}
+
 ///supervised classification (train with extractImg/extractOgr)
-/**
- * @param training (type: std::string) Training vector file. A single vector file contains all training features (must be set as: b0, b1, b2,...) for all classes (class numbers identified by label option). Use multiple training files for bootstrap aggregation (alternative to the bag and bsize options, where a random subset is taken from a single training file)
- * @param cv (type: unsigned short) (default: 0) N-fold cross validation mode
- * @param cmf (type: std::string) (default: ascii) Format for confusion matrix (ascii or latex)
- * @param tln (type: std::string) Training layer name(s)
- * @param class (type: std::string) List of class names.
- * @param reclass (type: short) List of class values (use same order as in class opt).
- * @param f (type: std::string) (default: SQLite) Output ogr format for active training sample
- * @param ct (type: std::string) Color table in ASCII format having 5 columns: id R G B ALFA (0: transparent, 255: solid)
- * @param label (type: std::string) (default: label) Attribute name for class label in training vector file.
- * @param prior (type: double) (default: 0) Prior probabilities for each class (e.g., -p 0.3 -p 0.3 -p 0.2 ). Used for input only (ignored for cross validation)
- * @param extent (type: std::string) Only classify within extent from polygons in vector file
- * @param mask (type: std::string) Only classify within specified mask. For raster mask, set nodata values with the option msknodata.
- * @param msknodata (type: short) (default: 0) Mask value(s) not to consider for classification. Values will be taken over in classification image.
- * @param nodata (type: unsigned short) (default: 0) Nodata value to put where image is masked as nodata
- * @param band (type: unsigned int) Band index (starting from 0, either use band option or use start to end)
- * @param startband (type: unsigned int) Start band sequence number
- * @param endband (type: unsigned int) End band sequence number
- * @param balance (type: unsigned int) (default: 0) Balance the input data to this number of samples for each class
- * @param min (type: unsigned int) (default: 0) If number of training pixels is less then min, do not take this class into account (0: consider all classes)
- * @param bag (type: unsigned short) (default: 1) Number of bootstrap aggregations
- * @param bagsize (type: int) (default: 100) Percentage of features used from available training features for each bootstrap aggregation (one size for all classes, or a different size for each class respectively
- * @param comb (type: unsigned short) (default: 0) How to combine bootstrap aggregation classifiers (0: sum rule, 1: product rule, 2: max rule). Also used to aggregate classes with rc option.
- * @param classbag (type: std::string) Output for each individual bootstrap aggregation
- * @param prob (type: std::string) Probability image.
- * @param priorimg (type: std::string) (default: ) Prior probability image (multi-band img with band for each class
- * @param offset (type: double) (default: 0) Offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]
- * @param scale (type: double) (default: 0) Scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)
- * @param random (type: bool) (default: 1) Randomize training data for balancing and bagging
- * @return shared pointer to classified image object
- **/
 std::shared_ptr<Jim> Jim::classify(app::AppFactory& app){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
   ImgRaster::classify(*imgWriter, app);
@@ -1753,18 +1747,18 @@ std::shared_ptr<Jim> Jim::classify(app::AppFactory& app){
 //   return(imgWriter);
 // }
 
-///todo: extend for other types than char
-std::shared_ptr<Jim> Jim::classifySML(app::AppFactory& app){
-  std::shared_ptr<Jim> imgWriter=Jim::createImg();
-  ImgRaster::classifySML<unsigned char>(*imgWriter, app);
-  return(imgWriter);
-}
+// ///todo: extend for other types than char
+// std::shared_ptr<Jim> Jim::classifySML(app::AppFactory& app){
+//   std::shared_ptr<Jim> imgWriter=Jim::createImg();
+//   ImgRaster::classifySML<unsigned char>(*imgWriter, app);
+//   return(imgWriter);
+// }
 
-std::shared_ptr<Jim> Jim::classifySML(JimList& referenceReader, app::AppFactory& app){
-  std::shared_ptr<Jim> imgWriter=Jim::createImg();
-  ImgRaster::classifySML<unsigned char>(referenceReader, *imgWriter, app);
-  return(imgWriter);
-}
+// std::shared_ptr<Jim> Jim::classifySML(JimList& referenceReader, app::AppFactory& app){
+//   std::shared_ptr<Jim> imgWriter=Jim::createImg();
+//   ImgRaster::classifySML<unsigned char>(referenceReader, *imgWriter, app);
+//   return(imgWriter);
+// }
 
 ///supervised classification using support vector machine (train with extractImg/extractOgr)
 /**

@@ -351,17 +351,22 @@ namespace jiplib{
     /* ---------------------- */
     /* Classification methods */
     /* ---------------------- */
+    ///Supervised training (only for SML)
+#ifdef SWIG
+    %pythonprepend train(JimList& referenceReader, app::AppFactory&)  "\"\"\"HELP.METHOD.classify(dict)\"\"\""
+#endif
+       CPLErr train(JimList& referenceReader, app::AppFactory& app);
     ///Supervised classification (train with extractImg/extractOgr)
 #ifdef SWIG
     %pythonprepend classify(app::AppFactory&)  "\"\"\"HELP.METHOD.classify(dict)\"\"\""
 #endif
     std::shared_ptr<Jim> classify(app::AppFactory& app);
     ///Supervised classification using Symbolic Machine Learning
-#ifdef SWIG
-    %pythonprepend classifySML(JimList&, app::AppFactory&)  "\"\"\"HELP.METHOD.classifySML(dict)\"\"\""
-#endif
-    std::shared_ptr<Jim> classifySML(JimList& referenceReader, app::AppFactory& app);
-    std::shared_ptr<Jim> classifySML(app::AppFactory& app);
+/* #ifdef SWIG */
+/*     %pythonprepend classifySML(JimList&, app::AppFactory&)  "\"\"\"HELP.METHOD.classifySML(dict)\"\"\"" */
+/* #endif */
+/*     std::shared_ptr<Jim> classifySML(JimList& referenceReader, app::AppFactory& app); */
+/*     std::shared_ptr<Jim> classifySML(app::AppFactory& app); */
     ///replace categorical pixel values in raster dataset
 #ifdef SWIG
     %pythonprepend reclass(app::AppFactory&)  "\"\"\"HELP.METHOD.reclass(dict)\"\"\""
