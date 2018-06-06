@@ -42,12 +42,13 @@ try:
         else:
             classTo[i]=classDict['rest']
 
-    jim_ref=jl.createJim({'filename':args.reference,'dx':jim.getDeltaX(),'dy':jim.getDeltaY(),'ulx':jim.getUlx(),'uly':jim.getUly(),'lrx':jim.getLrx(),'lry':jim.getLry()})
+    jim_ref=jl.createJim({'filename':args.reference,'dx':jim.getDeltaX(),'dy':jim.getDeltaY(),'ulx':jim.getUlx(),'uly':jim.getUly(),'lrx':jim.getLrx(),'lry':jim.getLry(),'t_srs':jim.getProjection()})
     jim_ref=jim_ref.reclass({'class':classFrom,'reclass':classTo})
 
     if args.classifier == "sml":
         reflist=jl.JimList([jim_ref])
-        sml=jim.classifySML(reflist,{'class':sorted(classDict.values())})
+        jim.train(reflist,{'method':'sml','model':args.model,'class':sorted(classDict.values())})
+        sml=jim.classify({'method':'sml','model':args.model})
         #preparation of output
         sml_class=sml.statProfile({'function':'maxindex'}).reclass({'class':range(0,sml.nrOfBand()),'reclass':sorted(classDict.values())})
         if args.output:
