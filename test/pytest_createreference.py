@@ -24,7 +24,7 @@ dict.update({'uniform':[args.min,args.max+1]})
 dict.update({'otype':'GDT_UInt16'})
 dict.update({'seed':10915})
 try:
-    jim0=jl.createJim(dict)
+    jim0=jl.createJim(**dict)
     #create a reference
     jim1=jim0
     print("debug0")

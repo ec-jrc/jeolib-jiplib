@@ -20,7 +20,7 @@ parser.add_argument("-output","--output",help="Path of the classification output
 args = parser.parse_args()
 
 try:
-    jim=jl.createJim({'filename':args.input})
+    jim=jl.createJim(args.input)
     if args.band:
         jim=jim.crop({'band':args.band})
     if 'dwt' in args.filter:

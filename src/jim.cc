@@ -47,7 +47,7 @@ Jim::Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALD
 Jim::Jim(int ncol, int nrow, int nband, const GDALDataType& dataType) : m_nplane(1), ImgRaster(ncol, nrow, nband, dataType){};
 //test
 // Jim::Jim(app::AppFactory &theApp): m_nplane(1), ImgRaster(theApp){};
-Jim::Jim(app::AppFactory &theApp){reset();open(theApp);};
+Jim::Jim(const app::AppFactory &theApp){reset();open(theApp);};
 
 ///destructor
 Jim::~Jim(void){
@@ -86,7 +86,7 @@ Jim::~Jim(void){
  * @param a_srs (type: std::string) Assign the spatial reference for the output file, e.g., psg:3035 to use European projection and force to European grid
  * @return shared pointer to new Jim object
  **/
-std::shared_ptr<Jim> Jim::createImg(app::AppFactory &theApp){
+std::shared_ptr<Jim> Jim::createImg(const app::AppFactory &theApp){
   std::shared_ptr<Jim> pJim=std::make_shared<Jim>(theApp);
   return(pJim);
 }
@@ -272,7 +272,7 @@ CPLErr Jim::open(Jim& imgSrc, bool copyData){
 }
 
 //Open raster dataset for reading or writing
-CPLErr Jim::open(app::AppFactory &app){
+CPLErr Jim::open(const app::AppFactory &app){
   //input
   Optionpk<std::string> input_opt("fn", "filename", "filename");
   Optionpk<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
@@ -355,20 +355,20 @@ CPLErr Jim::open(app::AppFactory &app){
     throw(helpStream.str());//help was invoked, stop processing
   }
 
-  std::vector<std::string> badKeys;
-  app.badKeys(badKeys);
-  if(badKeys.size()){
-    std::ostringstream errorStream;
-    if(badKeys.size()>1)
-      errorStream << "Error: unknown keys: ";
-    else
-      errorStream << "Error: unknown key: ";
-    for(int ikey=0;ikey<badKeys.size();++ikey){
-      errorStream << badKeys[ikey] << " ";
-    }
-    errorStream << std::endl;
-    throw(errorStream.str());
-  }
+  // std::vector<std::string> badKeys;
+  // app.badKeys(badKeys);
+  // if(badKeys.size()){
+  //   std::ostringstream errorStream;
+  //   if(badKeys.size()>1)
+  //     errorStream << "Error: unknown keys: ";
+  //   else
+  //     errorStream << "Error: unknown key: ";
+  //   for(int ikey=0;ikey<badKeys.size();++ikey){
+  //     errorStream << badKeys[ikey] << " ";
+  //   }
+  //   errorStream << std::endl;
+  //   throw(errorStream.str());
+  // }
   statfactory::StatFactory stat;
 
   OGRCoordinateTransformation *target2gds=0;

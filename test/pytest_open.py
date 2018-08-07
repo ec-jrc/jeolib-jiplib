@@ -15,7 +15,7 @@ parser=argparse.ArgumentParser()
 parser.add_argument("-input","--input",help="Path of the input file",dest="input",required=True,type=str)
 args = parser.parse_args()
 
-jim0=jl.createJim({'filename':args.input})
+jim0=jl.createJim(args.input)
 # Get basic statistics of the raster datasets
 theStats=jim0.getStats({'function':['min','max','mean']})
 if theStats['min']!=0:

@@ -22,7 +22,7 @@ dict.update({'otype':'GDT_Float32'})
 nrow=1098
 ncol=1098
 dict.update({'nrow':args.nrow,'ncol':args.ncol})
-jim0=jl.createJim(dict)
+jim0=jl.createJim(**dict)
 jim0=jim0.pointOpBlank(args.value)
 theStats=jim0.getStats({'function':['min','max']})
 if theStats['max']!=args.value:

@@ -14,7 +14,7 @@ parser.add_argument("-output","--output",help="Path of the output file",dest="ou
 args = parser.parse_args()
 
 try:
-    jim0=jl.createJim({'filename':args.input})
+    jim0=jl.createJim(args.input)
     jim0.write({'filename':args.output, 'oformat': 'GTiff', 'co':['COMPRESS=LZW','TILED=YES']}).close()
     if os.path.isfile(args.output):
         print("Success: write to file")

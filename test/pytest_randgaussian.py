@@ -22,7 +22,7 @@ dict={'ulx':ULX,'uly':ULY,'lrx':LRX,'lry':LRY,'a_srs':projection}
 dict.update({'otype':'GDT_Float32'})
 dict.update({'nrow':args.nrow,'ncol':args.ncol})
 dict.update({'mean':args.mean,'stdev':args.stdev})
-jim0=jl.createJim(dict)
+jim0=jl.createJim(**dict)
 theStats=jim0.getStats({'function':['mean','stdev']})
 print(theStats)
 if theStats['mean']<args.mean-1 or theStats['mean']>args.mean+1:

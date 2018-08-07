@@ -44,7 +44,7 @@ try:
         openDict.update({'s_srs':'epsg:3035'})
 
     openDict.update({'filename':refpath})
-    jim_ref=jl.createJim(openDict)
+    jim_ref=jl.createJim(**openDict)
     # jim_ref=jim_ref.warp({'t_srs':'epsg:'+args.t_srs})
 
     classDict={}

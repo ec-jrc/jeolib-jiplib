@@ -14,7 +14,7 @@ parser.add_argument("-min","--min",help="min value for threshold",dest="min",req
 parser.add_argument("-max","--max",help="max value for threshold",dest="max",required=True,type=int)
 args = parser.parse_args()
 
-jim0=jl.createJim({'filename':args.input})
+jim0=jl.createJim(args.input)
 if(args.min==0 and args.max==1):
     try:
         jim0=jim0.pushNoDataValue(1)

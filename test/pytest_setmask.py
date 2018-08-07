@@ -13,7 +13,7 @@ parser.add_argument("-input","--input",help="Path of the raster dataset",dest="i
 parser.add_argument("-vectormask","--vectormask",help="Path of the vector mask dataset",dest="vm",required=False,type=str)
 args = parser.parse_args()
 
-jim0=jl.createJim({'filename':args.input})
+jim0=jl.createJim(args.input)
 if args.vm:
     try:
         print("create vector")

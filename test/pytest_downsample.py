@@ -12,7 +12,7 @@ parser=argparse.ArgumentParser()
 parser.add_argument("-input","--input",help="Path of the input file",dest="input",required=True,type=str)
 args = parser.parse_args()
 
-jim0=jl.createJim({'filename':args.input,'dx':1000,'dy':1000})
+jim0=jl.createJim(filename=args.input,dx=1000,dy=1000)
 if jim0.nrOfCol() == 256:
         print("Success: createJim with downsample")
 else:

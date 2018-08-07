@@ -13,7 +13,7 @@ parser.add_argument("-input","--input",help="Path of the input file",dest="input
 args = parser.parse_args()
 
 try:
-    jim0=jl.createJim({'filename':args.input})
+    jim0=jl.createJim(args.input)
     theStats=jim0.getStats({'function':'max'})
     # The method getMask sets values within [min,max] to value defined by 'data', else to 'nodata'
     # The min and max values can be defined as a list

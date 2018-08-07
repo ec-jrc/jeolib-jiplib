@@ -24,7 +24,7 @@ dict.update({'uniform':[args.min,args.max+1]})
 dict.update({'otype':'GDT_UInt16'})
 dict.update({'seed':10915})
 try:
-    jim0=jl.createJim(dict)
+    jim0=jl.createJim(**dict)
     #create a copy
     jim1=jl.createJim(jim0)
     if not jim1.isEqual(jim0):

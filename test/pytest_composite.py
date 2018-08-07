@@ -13,7 +13,7 @@ parser.add_argument("-input","--input",help="Path of the raster dataset",dest="i
 args = parser.parse_args()
 
 try:
-    jim0=jl.createJim({'filename':args.input})
+    jim0=jl.createJim(args.input)
     stats0=jim0.getStats({'function':['min','max'], 'band':0})
     stats5=jim0.getStats({'function':['min','max'], 'band':5})
     stats10=jim0.getStats({'function':['min','max'], 'band':10})

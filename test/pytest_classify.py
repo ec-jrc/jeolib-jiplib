@@ -19,7 +19,7 @@ args = parser.parse_args()
 
 try:
     print("createJim")
-    jim=jl.createJim({'filename':args.input})
+    jim=jl.createJim(args.input)
     print("createVector")
     sample=jl.createVector();
     print("open vector",args.vector)

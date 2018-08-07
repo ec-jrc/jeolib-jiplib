@@ -77,11 +77,11 @@ namespace jiplib{
     ///constructor from app
     /* Jim(app::AppFactory &theApp): m_nplane(1), ImgRaster(theApp){}; */
     //test
-  Jim(app::AppFactory &theApp);
+  Jim(const app::AppFactory &theApp);
     ///destructor
     ~Jim(void);
     ///Create new shared pointer to Jim object using app
-    static std::shared_ptr<Jim> createImg(app::AppFactory &theApp);
+    static std::shared_ptr<Jim> createImg(const app::AppFactory &theApp);
     ///Create new shared pointer to Jim object
     static std::shared_ptr<Jim> createImg();
     ///Create new shared pointer to Jim object using existing image object
@@ -265,7 +265,7 @@ namespace jiplib{
 #ifdef SWIG
     %pythonprepend open(app::AppFactory &theApp)  "\"\"\"HELP.METHOD.Jim.open(dict)\"\"\""
 #endif
-    CPLErr open(app::AppFactory &app);
+    CPLErr open(const app::AppFactory &app);
     ///Close dataset (specialization of the close member function of ImgRaster, avoiding writing the data)
 #ifdef SWIG
     %pythonprepend close()  "\"\"\"HELP.METHOD.Jim.close()\"\"\""
@@ -541,19 +541,19 @@ namespace jiplib{
    * @param a_srs (type: std::string) Assign the spatial reference for the output file, e.g., psg:3035 to use European projection and force to European grid
    * @return shared pointer to new Jim object
    **/
-#ifdef SWIG
-  %pythonprepend createJim()  "\"\"\"HELP.METHOD.createJim()\"\"\""
-#endif
-  static std::shared_ptr<Jim> createJim(){return Jim::createImg();};
-#ifdef SWIG
-  %pythonprepend createJim(app::AppFactory&)  "\"\"\"HELP.METHOD.createJim(dict)\"\"\""
-#endif
-     static std::shared_ptr<Jim> createJim(app::AppFactory &theApp){return(Jim::createImg(theApp));};
-#ifdef SWIG
-  %pythonprepend createJim(const std::shared_ptr<Jim>, bool)  "\"\"\"HELP.METHOD.createJim(*args)\"\"\""
-#endif
-     static std::shared_ptr<Jim> createJim(const std::shared_ptr<Jim> pSrc, bool copyData=true){return(Jim::createImg(pSrc, copyData));};
-  static std::shared_ptr<Jim> createJim(const std::string& filename, bool readData=true){return(Jim::createImg(filename,readData));};
+/* #ifdef SWIG */
+  /* %pythonprepend createJim()  "\"\"\"HELP.METHOD.createJim()\"\"\"" */
+/* #endif */
+  /* static std::shared_ptr<Jim> createJim(){return Jim::createImg();}; */
+/* #ifdef SWIG */
+  /* %pythonprepend createJim(app::AppFactory&)  "\"\"\"HELP.METHOD.createJim(dict)\"\"\"" */
+/* #endif */
+     /* static std::shared_ptr<Jim> createJim(const app::AppFactory &theApp=app::AppFactory()){return(Jim::createImg(theApp));}; */
+/* #ifdef SWIG */
+  /* %pythonprepend createJim(const std::shared_ptr<Jim>, bool)  "\"\"\"HELP.METHOD.createJim(*args)\"\"\"" */
+/* #endif */
+     /* static std::shared_ptr<Jim> createJim(const std::shared_ptr<Jim> pSrc, bool copyData=true){return(Jim::createImg(pSrc, copyData));}; */
+  /* static std::shared_ptr<Jim> createJim(const std::string& filename, bool readData=true){return(Jim::createImg(filename,readData));}; */
   /* static std::shared_ptr<Jim> createImg(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType); */
   /* static std::shared_ptr<Jim> createImg(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType); */
 

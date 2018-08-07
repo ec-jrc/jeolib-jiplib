@@ -22,7 +22,7 @@ args = parser.parse_args()
 
 try:
     print("create jim")
-    jim=jl.createJim({'filename':args.input})
+    jim=jl.createJim(args.input)
     print("created jim")
     print("nbands:",jim.nrOfBand())
     if args.tapz:

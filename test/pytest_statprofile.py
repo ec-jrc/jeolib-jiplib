@@ -18,7 +18,7 @@ args = parser.parse_args()
 
 try:
     print('calculating functions:',args.function)
-    jim0=jl.createJim({'filename':args.input})
+    jim0=jl.createJim(args.input)
     if args.percentile:
         jim1=jim0.statProfile({'function':args.function,'perc':args.percentile})
     else:

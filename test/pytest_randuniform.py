@@ -23,7 +23,7 @@ dict.update({'nrow':args.nrow,'ncol':args.ncol})
 dict.update({'uniform':[args.min,args.max+1]})
 dict.update({'otype':'GDT_UInt16'})
 dict.update({'seed':10915})
-jim0=jl.createJim(dict)
+jim0=jl.createJim(**dict)
 theStats=jim0.getStats({'function':['min','max']})
 if theStats['min']!=args.min:
     print("Failed: min")

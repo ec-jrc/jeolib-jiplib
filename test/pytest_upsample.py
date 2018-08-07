@@ -12,13 +12,13 @@ parser=argparse.ArgumentParser()
 parser.add_argument("-input","--input",help="Path of the input file",dest="input",required=True,type=str)
 args = parser.parse_args()
 
-jim0=jl.createJim({'filename':args.input,'noread':True})
+jim0=jl.createJim(filename=args.input,noread=True)
 ULX=jim0.getUlx()
 ULY=jim0.getUly()
 LRX=ULX+1000
 LRY=ULY-1000
 jim0.close()
-jim0=jl.createJim({'filename':args.input,'ulx':ULX,'uly':ULY,'lrx':LRX,'lry':LRY,'dx':5,'dy':5})
+jim0=jl.createJim(filename=args.input,ulx=ULX,uly=ULY,lrx=LRX,lry=LRY,dx=5,dy=5)
 if jim0.nrOfCol() != 200:
     print("Failed: createJim with upsample")
 elif jim0.nrOfRow() != 200:

@@ -19,7 +19,7 @@ args = parser.parse_args()
 
 # try:
 if True:
-    jim0=jl.createJim({'filename':args.input})
+    jim0=jl.createJim(args.input)
     rules=['centroid','min','max','mean','stdev']
     if not args.vector:
         v01=jim0.extractSample({'random':20,'buffer':3,'rule':rules,'output':'mem01','oformat':'Memory'})
@@ -52,7 +52,7 @@ if True:
                 jim_lodi.write({'filename':lodifn})
                 print("close Lodi")
                 jim_lodi.close()
-                jimlist=jl.JimList([jl.createJim({'filename':milanofn,'noread':True}),jl.createJim({'filename':lodifn,'noread':True})])
+                jimlist=jl.JimList([jl.createJim(filename=milanofn,noread=True),jl.createJim(filename=lodifn,noread=True)])
                 print("extractOgr")
                 v2=jimlist.extractOgr(sample,{'rule':rules[3],'output':args.output,'oformat':'SQLite','co':'OVERWRITE=YES','all_covered':True})
                 print("write v2")

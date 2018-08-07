@@ -19,7 +19,7 @@ projection='epsg:32612'
 dict={'ulx':ULX,'uly':ULY,'lrx':LRX,'lry':LRY,'a_srs':projection}
 dict.update({'otype':'GDT_UInt16'})
 dict.update({'nrow':args.nrow,'ncol':args.ncol})
-jim0=jl.createJim(dict)
+jim0=jl.createJim(**dict)
 if jim0.getDeltaX()!=100:
     print("Failed: deltaX",jim0.getDeltaX())
 if jim0.getDeltaY()!=100:

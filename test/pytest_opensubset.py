@@ -13,7 +13,7 @@ parser.add_argument("-input","--input",help="Path of the input file",dest="input
 parser.add_argument("-extent","--extent",help="Path of the extent file",dest="extent",required=True,type=str)
 args = parser.parse_args()
 
-jim0=jl.createJim({'filename':args.input,'extent':args.extent})
+jim0=jl.createJim(filename=args.input,extent=args.extent)
 v0=jl.createVector()
 v0.open({'filename':args.extent})
 print("v0.getBoundingBox():",v0.getBoundingBox())

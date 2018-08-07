@@ -20,7 +20,7 @@ parser.add_argument("-classifier","--classifier",help="classifier (sml, svm, ann
 args = parser.parse_args()
 
 try:
-    jim=jl.createJim({'filename':args.input})
+    jim=jl.createJim(args.input)
     #preparation of reference
     classDict={}
     classDict['urban']=2
@@ -42,7 +42,7 @@ try:
         else:
             classTo[i]=classDict['rest']
 
-    jim_ref=jl.createJim({'filename':args.reference,'dx':jim.getDeltaX(),'dy':jim.getDeltaY(),'ulx':jim.getUlx(),'uly':jim.getUly(),'lrx':jim.getLrx(),'lry':jim.getLry(),'t_srs':jim.getProjection()})
+    jim_ref=jl.createJim(filename=args.reference,dx=jim.getDeltaX(),dy=jim.getDeltaY(),ulx=jim.getUlx(),uly=jim.getUly(),lrx=jim.getLrx(),lry=jim.getLry(),t_srs=jim.getProjection())
     jim_ref=jim_ref.reclass({'class':classFrom,'reclass':classTo})
 
     if args.classifier == "sml":

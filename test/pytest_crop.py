@@ -19,7 +19,7 @@ parser.add_argument("-cut_in_cutline","--cut_in_cutline",help="Crop the extent o
 args = parser.parse_args()
 
 try:
-    jim0=jl.createJim({'filename':args.input})
+    jim0=jl.createJim(args.input)
     rules=['centroid','min','max','mean','stdev']
     jlv=jl.createVector(args.extent);
     if os.path.basename(args.extent)=='nuts_italy.sqlite':

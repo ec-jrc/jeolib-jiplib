@@ -20,7 +20,7 @@ projection='epsg:32612'
 dict={'ulx':ULX,'uly':ULY,'lrx':LRX,'lry':LRY,'a_srs':projection}
 dict.update({'otype':'GDT_UInt16'})
 dict.update({'dy':args.dy,'dx':args.dx})
-jim0=jl.createJim(dict)
+jim0=jl.createJim(**dict)
 if jim0.nrOfCol()!=1098:
     print("Failed: number of cols")
 if jim0.nrOfRow()!=1098:

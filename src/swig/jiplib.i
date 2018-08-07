@@ -86,7 +86,7 @@
  }
 
 %typemap(in) app::AppFactory& (app::AppFactory tempFactory){
-  //std::cout << "we are in typemap AppFactory" << std::endl;
+  std::cout << "we are now in typemap AppFactory" << std::endl;
   if(PyDict_Check($input)){
     PyObject *pKey, *pValue;
     Py_ssize_t ppos=0;
@@ -126,10 +126,60 @@
     }
     $1->showOptions();
   } else {
-    SWIG_exception(SWIG_TypeError, "Python dictionary expected");
+    PyObject* kwargs;
+    static char *kwlist[] = {
+      "theString",
+      "theOptInt",
+      NULL
+    };
+    PyArg_ParseTupleAndKeywords($input,kwargs,"S|i",kwlist);
+    std::cout << "we are in typemap(in) with kwargs" << std::endl;
+    /* SWIG_exception(SWIG_TypeError, "Python dictionary expected"); */
   }
  }
 
+/* %ignore createJim(); */
+/* %ignore createJim(const std::shared_ptr<Jim>, bool); */
+/* %ignore createJim(const std::string&, bool); */
+%pythoncode %{
+  import os.path
+  def createJim(arg1=None,arg2=True,**kwargs):
+    try:
+      if arg1:
+        if isinstance(arg1,Jim):
+          if isinstance(arg2,bool):
+            return Jim_createImg(arg1,arg2)
+          else:
+            raise(TypeError)
+        elif isinstance(arg1,str):
+          if os.path.isfile(arg1):
+            if isinstance(arg2,bool):
+              return Jim_createImg(arg1,arg2)
+            else:
+              raise(TypeError)
+          else:
+            raise(IOError)
+        else:
+          raise(TypeError)
+      else:
+        if kwargs is None:
+          # SWIG generates wrappers that try to work around calling static member functions, replaceing :: with _ (underscore)
+          return Jim_createImg()
+        appDict={}
+        for key, value in kwargs.items():
+          appDict.update({key:value})
+        if appDict:
+          # SWIG generates wrappers that try to work around calling static member functions, replaceing :: with _ (underscore)
+          return Jim_createImg(appDict)
+        else:
+          return Jim_createImg()
+    except IOError:
+      print("Error: {} is not a regular file".format(arg1))
+    except TypeError:
+      print("Error: bad argument type for createJim, arguments without names should be a path or of Jim type")
+    except:
+      print("Error: could not create Jim image")
+    %}
 /* !!! from: http://svn.salilab.org/imp/branches/1.0/kernel/pyext/IMP_streams.i */
 /* to allow overloading and select the appropriate typemap when a Python object is provided */
 %typemap(typecheck) (app::AppFactory&) = PyObject *;
@@ -139,7 +189,7 @@
 /* if Python function argument $input is a PyDict, then use the C++ function with the AppFactory */
 /* Note:  %typecheck(X) is a macro for %typemap(typecheck,precedence=X) so we might want to include a second argument precedence=X after app?*/
 %typemap(typecheck) (const app::AppFactory& app) {
-  $1 = PyDict_Check($input) ? 1 : 0;
+ $1 = PyDict_Check($input) ? 1 : 0;
  }
 
 %typemap(typecheck) (app::AppFactory& app) {

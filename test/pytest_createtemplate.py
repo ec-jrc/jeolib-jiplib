@@ -24,7 +24,7 @@ dict.update({'uniform':[args.min,args.max+1]})
 dict.update({'otype':'GDT_UInt16'})
 dict.update({'seed':10915})
 try:
-    jim0=jl.createJim(dict)
+    jim0=jl.createJim(**dict)
     jim0.d_pointOpBlank(500)
     #create a copy without copying pixel values
     jim1=jl.createJim(jim0,False)
