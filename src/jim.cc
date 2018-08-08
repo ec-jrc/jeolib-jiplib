@@ -778,8 +778,8 @@ CPLErr Jim::open(const app::AppFactory &app){
     gt[5]=-dy_opt[0];//todo: a$-cos(\alpha)\cdot\textrm{Yres}
     setGeoTransform(gt);
     m_resample=getGDALResample(resample_opt[0]);
-    int nBufXSize=abs(static_cast<unsigned int>(ceil((lrx_opt[0]-ulx_opt[0])/dx_opt[0]-FLT_EPSILON)));
-    int nBufYSize=abs(static_cast<unsigned int>(ceil((uly_opt[0]-lry_opt[0])/dy_opt[0]-FLT_EPSILON)));
+    int nBufXSize=static_cast<unsigned int>(ceil((lrx_opt[0]-ulx_opt[0])/dx_opt[0]-FLT_EPSILON));
+    int nBufYSize=static_cast<unsigned int>(ceil((uly_opt[0]-lry_opt[0])/dy_opt[0]-FLT_EPSILON));
     m_ncol=nBufXSize;
     m_nrow=nBufYSize;
 
@@ -870,7 +870,7 @@ CPLErr Jim::readDataPlanes(std::vector<int> bands)
   // double dfYSize=(getUly()-getLry())/gds_dy;//y-size in piyels of region to read in original image
   // double dfYOff=diffYm/gds_dy;
   // int nYOff=static_cast<int>(dfYOff);
-  int nXSize=abs(static_cast<unsigned int>(ceil((getLrx()-getUlx())/gds_dx)));//x-size in pixels of region to read in original image
+  int nXSize=static_cast<unsigned int>(ceil((getLrx()-getUlx())/gds_dx));//x-size in pixels of region to read in original image
   int nXOff=static_cast<int>(dfXOff);
   if(nXSize>gds_ncol)
     nXSize=gds_ncol;
@@ -884,7 +884,7 @@ CPLErr Jim::readDataPlanes(std::vector<int> bands)
   INIT_RASTERIO_EXTRA_ARG(sExtraArg);
   sExtraArg.eResampleAlg = m_resample;
   dfYSize=(m_end[0]-m_begin[0])*getDeltaY()/gds_dy;//y-size in pixels of region to read in original image
-  nYSize=abs(static_cast<unsigned int>(ceil((m_end[0]-m_begin[0])*getDeltaY()/gds_dy)));//y-size in pixels of region to read in original image
+  nYSize=static_cast<unsigned int>(ceil((m_end[0]-m_begin[0])*getDeltaY()/gds_dy));//y-size in pixels of region to read in original image
   if(nYSize>gds_nrow)
     nYSize=gds_nrow;
   dfYOff=(gds_uly-getUly())/gds_dy+m_begin[0]*getDeltaY()/gds_dy;
