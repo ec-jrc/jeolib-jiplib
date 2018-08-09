@@ -59,7 +59,7 @@
 
   ERROR_TYPE _ConvertNumPyArrayToJim( PyArrayObject *psArray, std::shared_ptr< jiplib::Jim > ajim){
     IMAGE *im=ajim->getMIA();
-    im->p_im=memcpy( (void *)GetImPtr(im), (void *)(psArray->data), GetImNx(im)*GetImNy(im)*(GetImBitPerPixel(im)/8));
+    im->p_im=memcpy( (void *)GetImPtr(im), (void *)(psArray->data), GetImNx(im)*GetImNy(im)*GetImNz(im)*(GetImBitPerPixel(im)/8));
     ajim->setMIA();
     return NO_ERROR;
   }
@@ -67,8 +67,8 @@
   /* ERROR_TYPE RasterIOJim( std::shared_ptr< jiplib::Jim > ajim, PyArrayObject *psArray) { */
   /* int RasterIOJim( std::shared_ptr< jiplib::Jim > ajim, PyArrayObject *psArray) { */
   /* int RasterIOJim( std::shared_ptr< jiplib::Jim > ajim ) { */
-  void RasterIOJim( PyArrayObject *psArray) {
-    /* psArray->data = (char *)memcpy((void *)(psArray->data), ajim->getDataPointer(), ajim->nrOfCol()*ajim->nrOfRow()*GDALGetDataTypeSize(ajim->getDataType())>>3 ); */
+  void RasterIOJim( std::shared_ptr< jiplib::Jim > ajim, int typeSizeByte, PyArrayObject *psArray) {
+    psArray->data = (char *)memcpy((void *)(psArray->data), ajim->getDataPointer(), ajim->nrOfCol()*ajim->nrOfRow()*ajim->nrOfPlane()*typeSizeByte );
   }
 %}
 
@@ -167,38 +167,77 @@ def JimToNumPyTypeCode(JimDataType):
         return numpy.float32
     elif JimDataType == GDT_Float64:
         return numpy.float64
-    else:
-        return None
 
+	  
+def NumPyToJimDataTypeCode(numeric_type):
+    """Converts a given numpy array data type code into the correspondent
+    JIPlib image data type code."""
+    if not isinstance(numeric_type, (numpy.dtype,type)):
+        raise TypeError("Input must be a valid numpy Array data type")
+    if numeric_type == numpy.uint8:
+        return 'GDT_Byte'
+    elif numeric_type == numpy.uint16:
+        return 'GDT_UInt16'
+    elif numeric_type == numpy.int16:
+        return 'GDT_Int16' 
+    elif numeric_type == numpy.uint32:
+        return 'GDT_UInt32' 
+    elif numeric_type == numpy.int32:
+        return 'GDT_Int32'
+    elif numeric_type == numpy.uint64:
+        return 'JDT_UInt64'
+    elif numeric_type == numpy.int64:
+        return 'JDT_Int64'
+    elif numeric_type == numpy.float32:
+        return 'GDT_Float32'
+    elif numeric_type == numpy.float64:
+        return 'GDT_Float64'
+    else:
+        raise TypeError("provided numeric_type not compatible with available Jim data types")
+
+def JimGetTypeSizeByte(JimDataType):
+    if JimDataType == GDT_Byte:
+        return 1
+    elif JimDataType == GDT_UInt16:
+        return 2
+    elif JimDataType == GDT_Int16:
+        return 2
+    elif JimDataType == GDT_UInt32:
+        return 4
+    elif JimDataType == GDT_Int32:
+        return 4
+    elif JimDataType == JDT_UInt64:
+        return 8
+    elif JimDataType == JDT_Int64:
+        return 8
+    elif JimDataType == GDT_Float32:
+        return 4
+    elif JimDataType == GDT_Float64:
+        return 8
+	  
 
 def ConvertToNumPyArray( im ):
     buf_obj = numpy.empty([im.ny,im.nx], dtype = ImDataToNumPyTypeCode(im.DataType))
     if RasterIOMIALib(im, buf_obj) != NO_ERROR:
         return None
-
     return buf_obj
 
 def ConvertNumPyArrayToMIALibImage( psArray ):
     im=_mialib.create_image(NumPyToImDataTypeCode(psArray.dtype),psArray.shape[0],psArray.shape[1],1)
-
     if _ConvertNumPyArrayToMIALibIMAGE(psArray, im) != NO_ERROR:
         return None
-
     return im
 
-def np2jim( psArray):
-    jim=Jim.createImg({'nrow': psArray.shape[0], 'ncol': psArray.shape[1], 'otype': 'GDT_Float64','mean':10})
+def np2jim(psArray):
+    otype = NumPyToJimDataTypeCode(psArray.dtype)
+    jim=Jim.createImg({'nrow': psArray.shape[0], 'ncol': psArray.shape[1], 'otype': otype})
+    _ConvertNumPyArrayToJim(psArray, jim)
     return jim
 
-def jim2np( jim ):
-    buf_obj = numpy.zeros([jim.nrOfRow(),jim.nrOfCol()], dtype = JimToNumPyTypeCode(jim.getDataType()))
-    buf_obj
-    RasterIOJim(buf_obj)
-    return buf_obj
-
-def jim2np():
-    buf_obj = numpy.zeros([10,10], dtype = numpy.uint32)
-    RasterIOJim(buf_obj)
+def jim2np(jim):
+    buf_obj = numpy.zeros([jim.nrOfRow(),jim.nrOfCol(),jim.nrOfPlane()], dtype = JimToNumPyTypeCode(jim.getDataType()))
+    typeSizeByte=JimGetTypeSizeByte(jim.getDataType())
+    RasterIOJim(jim, typeSizeByte, buf_obj)
     return buf_obj
 
 %}
