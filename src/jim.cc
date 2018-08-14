@@ -43,6 +43,10 @@ Jim::Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory, co
 Jim::Jim(Jim& imgSrc, bool copyData) : m_nplane(1), ImgRaster(imgSrc, copyData){};
 ///constructor output image
 Jim::Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory, const std::vector<std::string>& options) : m_nplane(1), ImgRaster(filename, ncol, nrow, nband, dataType, imageType, memory, options){};
+///constructor output image with nplane
+Jim::Jim(int ncol, int nrow, int nband, int nplane, const GDALDataType& dataType){
+  open(ncol,nrow,nband,nplane,dataType);
+}
 ///constructor output image
 Jim::Jim(int ncol, int nrow, int nband, const GDALDataType& dataType) : m_nplane(1), ImgRaster(ncol, nrow, nband, dataType){};
 //test
@@ -60,6 +64,13 @@ Jim::~Jim(void){
   // ImgRaster::reset();
   close();
 }
+
+///Copy data
+CPLErr Jim::copyData(void* data, int band){
+  memcpy(data,m_data[band],getDataTypeSizeBytes()*nrOfCol()*m_blockSize*nrOfPlane());
+  // memcpy(data,m_data[band],(GDALGetDataTypeSize(getDataType())>>3)*nrOfCol()*m_blockSize);
+  return(CE_None);
+};
 
 ///Create new shared pointer to Jim object
 /**
@@ -214,6 +225,30 @@ CPLErr Jim::open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane
   }
   else
     return(CE_Failure);
+}
+
+///Open an image for writing, based on an existing image object
+CPLErr Jim::open(int ncol, int nrow, int nband, int nplane, const GDALDataType& dataType){
+  m_ncol=ncol;
+  m_nrow=nrow;
+  m_nplane=nplane;
+  m_nband=nband;
+  m_dataType=dataType;
+  m_data.resize(m_nband);
+  m_begin.resize(m_nband);
+  m_end.resize(m_nband);
+  m_blockSize=nrow;//memory contains entire image and has been read already
+  initMem(0);
+  for(int iband=0;iband<m_nband;++iband){
+    m_begin[iband]=0;
+    m_end[iband]=m_begin[iband]+m_blockSize;
+  }
+  if(m_filename!=""){
+    // m_writeMode=true;
+    m_access=WRITE;
+    registerDriver();
+  }
+  return(CE_None);
 }
 
 /**

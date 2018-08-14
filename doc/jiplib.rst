@@ -20,13 +20,14 @@ Returns:
 
 END
 
-FUNC createJim(dict)
-Creates a Jim object as an instance of the basis image class of the Joint image processing library, using a Python Dictionary argument
+FUNC createJim(**kwargs)
+Creates a Jim object as an instance of the basis image class of the Joint image processing library, using keyword arguments
 
-Args:
-* ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
+..
+   Args:
+   * ``dict`` (Python Dictionary) with key value pairs. Each key (a 'quoted' string) is separated from its value by a colon (:). The items are separated by commas and the dictionary is enclosed in curly braces. An empty dictionary without any items is written with just two curly braces, like this: {}. A value can be a list that is also separated by commas and enclosed in square brackets [].
 
-Supported keys in the dict:
+Supported keys as arguments:
 
 ======== ===================================================
 filename input filename to read from (GDAL supported format)
@@ -73,19 +74,26 @@ Example:
 Create Jim image object by opening an existing file (file content will automatically be read in memory)::
 
     ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
-    jim=jl.createJim({'filename':ifn})
+    jim=jl.createJim('filename'=ifn)
+    #do stuff with jim ...
+    jim.close()
+
+The key 'filename' is optional::
+
+    ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
+    jim=jl.createJim(ifn)
     #do stuff with jim ...
     jim.close()
 
 Create Jim image object by opening an existing file for specific region of interest and spatial resolution using cubic convolution resampling::
 
     ifn='/eos/jeodpp/data/SRS/Copernicus/S2/scenes/source/L1C/2017/08/05/065/S2A_MSIL1C_20170805T102031_N0205_R065_T32TNR_20170805T102535.SAFE/GRANULE/L1C_T32TNR_A011073_20170805T102535/IMG_DATA/T32TNR_20170805T102031_B08.jp2'
-    jim0=jl.createJim({'filename':ifn,'noread':True})
+    jim0=jl.createJim(filename=ifn,'noread'=True)
     ULX=jim0.getUlx()
     ULY=jim0.getUly()
     LRX=jim0.getUlx()+100*jim0.getDeltaX()
     LRY=jim0.getUly()-100*jim0.getDeltaY()
-    jim=jl.Jim.createImg({'filename':ifn,'ulx':ULX,'uly':ULY,'lrx':LRX,'lry':LRY,'dx':5,'dy':5,'resample':'GRIORA_Cubic'})
+    jim=jl.Jim.createImg(filename=ifn,ulx:ULX,'uly':ULY,'lrx':LRX,'lry':LRY,'dx':5,'dy':5,'resample':'GRIORA_Cubic'})
     #do stuff with jim ...
     jim.close()
 

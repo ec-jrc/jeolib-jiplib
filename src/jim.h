@@ -72,6 +72,8 @@ namespace jiplib{
   Jim(Jim& imgSrc, bool copyData=true);
     ///constructor output image
   Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>());
+  ///constructor output image with nplane
+  Jim(int ncol, int nrow, int nband, int nplane, const GDALDataType& dataType);
     ///constructor output image
   Jim(int ncol, int nrow, int nband, const GDALDataType& dataType);
     ///constructor from app
@@ -80,6 +82,8 @@ namespace jiplib{
   Jim(const app::AppFactory &theApp);
     ///destructor
     ~Jim(void);
+    ///initMem with nplane
+    CPLErr initMem(unsigned int memory);
     ///Create new shared pointer to Jim object using app
     static std::shared_ptr<Jim> createImg(const app::AppFactory &theApp);
     ///Create new shared pointer to Jim object
@@ -108,6 +112,8 @@ namespace jiplib{
      * @return shared pointer to new ImgRaster object alllowing polymorphism
      */
     std::shared_ptr<Jim> clone(bool copyData=true);
+    ///Copy data
+    CPLErr copyData(void* data, int band=0);
     ///get size in Bytes of the current data type
     size_t getDataTypeSizeBytes(int band=0) const;
     /* --------------------- */
@@ -255,8 +261,10 @@ namespace jiplib{
     CPLErr open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType);
     ///Open a multiband image for writing using a external data pointers
     CPLErr open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType);
+    ///Open an image for writing in memory with nplane, defining image attributes.
+    CPLErr open(int ncol, int nrow, int nband, int nplane, const GDALDataType& dataType);
     ///Open an image for writing in memory, defining image attributes.
-    void open(int ncol, int nrow, int nband, const GDALDataType& dataType){ImgRaster::open(ncol,nrow,nband,dataType);};
+    CPLErr open(int ncol, int nrow, int nband, const GDALDataType& dataType){ImgRaster::open(ncol,nrow,nband,dataType);};
     ///Open an image for writing, based on an existing image object
     CPLErr open(Jim& imgSrc, bool copyData=true);
     ///Open dataset
@@ -438,8 +446,6 @@ namespace jiplib{
     %pythonprepend extractImg(Jim&, app::AppFactory&)  "\"\"\"HELP.METHOD.extractImg(*args)\"\"\""
 #endif
        std::shared_ptr<VectorOgr> extractImg(Jim& classReader, app::AppFactory& app){return ImgRaster::extractImg(classReader,app);};
-    ///Initialize the memory for read/write image in cache
-    CPLErr initMem(unsigned int memory);
     /// convert single plane multiband image to single band image with multiple planes
     CPLErr band2plane();
     ///read data bands into planes

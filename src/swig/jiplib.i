@@ -145,40 +145,36 @@
   import os.path
   def createJim(arg1=None,arg2=True,**kwargs):
     try:
-      if arg1:
-        if isinstance(arg1,Jim):
-          if isinstance(arg2,bool):
-            return Jim_createImg(arg1,arg2)
-          else:
-            raise(TypeError)
-        elif isinstance(arg1,str):
-          if os.path.isfile(arg1):
-            if isinstance(arg2,bool):
-              return Jim_createImg(arg1,arg2)
-            else:
-              raise(TypeError)
-          else:
-            raise(IOError)
-        else:
-          raise(TypeError)
-      else:
-        if kwargs is None:
-          # SWIG generates wrappers that try to work around calling static member functions, replaceing :: with _ (underscore)
-          return Jim_createImg()
         appDict={}
+        if arg1:
+            if isinstance(arg1,Jim):
+                if isinstance(arg2,bool):
+                    return Jim_createImg(arg1,arg2)
+                else:
+                    raise(TypeError)
+            elif isinstance(arg1,str):
+                if os.path.isfile(arg1):
+                    appDict.update({'filename':arg1})
+                else:
+                    raise(IOError)
+                if isinstance(arg2,bool):
+                    appDict.update({'readData':arg1})
+                else:
+                    raise(TypeError)
+
         for key, value in kwargs.items():
-          appDict.update({key:value})
+            appDict.update({key:value})
         if appDict:
-          # SWIG generates wrappers that try to work around calling static member functions, replaceing :: with _ (underscore)
-          return Jim_createImg(appDict)
+            # SWIG generates wrappers that try to work around calling static member functions, replaceing :: with _ (underscore)
+            return Jim_createImg(appDict)
         else:
-          return Jim_createImg()
+            return Jim_createImg()
     except IOError:
-      print("Error: {} is not a regular file".format(arg1))
+        print("Error: {} is not a regular file".format(arg1))
     except TypeError:
-      print("Error: bad argument type for createJim, arguments without names should be a path or of Jim type")
+        print("Error: bad argument type for createJim, arguments without names should be a path or of Jim type")
     except:
-      print("Error: could not create Jim image")
+        print("Error: could not create Jim image")
     %}
 /* !!! from: http://svn.salilab.org/imp/branches/1.0/kernel/pyext/IMP_streams.i */
 /* to allow overloading and select the appropriate typemap when a Python object is provided */
@@ -382,7 +378,7 @@ namespace jiplib{
   //    NPY_INT8, NPY_INT16, NPY_INT32, NPY_INT64, NPY_UINT8, NPY_UINT16, NPY_UINT32, NPY_UINT64, NPY_FLOAT32, NPY_FLOAT64, NPY_COMPLEX64, NPY_COMPLEX128.
 
   %extend Jim {
-    static std::shared_ptr<jiplib::Jim> np2jim(PyObject* npArray) {
+    static std::shared_ptr<jiplib::Jim> np2jim(PyObject* npArray, bool copyData=true) {
       if(PyArray_Check(npArray)){
         PyArrayObject *obj=(PyArrayObject *)npArray;
         GDALDataType jDataType;
@@ -425,8 +421,14 @@ namespace jiplib{
         int nrow=PyArray_DIM((PyArrayObject*)npArray,0);
         int ncol=PyArray_DIM((PyArrayObject*)npArray,1);
         int nband=1;//only single band supported for now
-        std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>((void*)(((PyArrayObject*)npArray)->data),ncol,nrow,nplane,jDataType);
-        return(imgWriter);
+        if(copyData){
+          std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>((void*)(((PyArrayObject*)npArray)->data),ncol,nrow,nplane,jDataType);
+          return(imgWriter);
+        }
+        else{
+          std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>((void*)(((PyArrayObject*)npArray)->data),ncol,nrow,nplane,jDataType);
+          return(imgWriter);
+        }
       }
       else{
         std::cerr << "Error: expected a numpy array as input" << std::endl;
@@ -434,7 +436,7 @@ namespace jiplib{
       }
     }
 
-    PyObject* jim2np(int band=0) {
+    PyObject* jim2np(int band=0, bool copyData=true) {
       if(band>=$self->nrOfBand()){
         std::string errorString="Error: band out of range";
         throw(errorString);
@@ -473,13 +475,22 @@ namespace jiplib{
         std::string errorString="Error: Unknown data type";
         throw(errorString);
       }
+      void *npdata=0;
+      if(copyData){
+        //alllocate memory for npdata
+        npdata=(void *) calloc(static_cast<size_t>($self->nrOfPlane()*$self->nrOfCol()*$self->nrOfRow()),$self->getDataTypeSizeBytes());
+        //copy data from jim to npdata
+        $self->copyData(npdata,band);
+      }
+      else
+        npdata=(void*)($self->getDataPointer(band));
       int dim=($self->nrOfPlane()>1)? 3 : 2;
       if($self->nrOfPlane()>1){
         npy_intp dims[3];
         dims[0]=$self->nrOfRow();
         dims[1]=$self->nrOfCol();
         dims[2]=$self->nrOfPlane();
-        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,(void*)$self->getDataPointer(band));
+        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,npdata);
         if(npArray)
           return(PyArray_Return(npArray));
         else
@@ -489,7 +500,8 @@ namespace jiplib{
         npy_intp dims[2];
         dims[0]=$self->nrOfRow();
         dims[1]=$self->nrOfCol();
-        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,(void*)$self->getDataPointer(band));
+        /* PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,(void*)$self->getDataPointer(band)); */
+        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,npdata);
         if(npArray)
           return(PyArray_Return(npArray));
         else
