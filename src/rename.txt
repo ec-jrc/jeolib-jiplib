@@ -244,6 +244,7 @@ mialib_segment.h:extern ERROR_TYPE IsPartitionFiner(IMAGE *im1, IMAGE *im2, int 
 mialib_segment.h:extern IMAGE **imgc(IMAGE *imlbl); imgc
 mialib_segment.h:extern ERROR_TYPE dendro(IMAGE **imap, int nc, char *fn); dendrogram
 mialib_segment.h:extern IMAGE **PartitionSimilarity(IMAGE *part1, IMAGE *part2, int graph); partitionSimilarity
+mialib_segment.h:extern IMAGE *segmentBinaryPatterns(IMAGE *imin, float size, int graphfg, int transition, int internal); segmentBinaryPatterns
 
 mialib_stats.h:extern IMAGE *histo1d(IMAGE *im); histo1d
 mialib_stats.h:extern IMAGE *histo2d(IMAGE *im1, IMAGE *im2); histo2d
