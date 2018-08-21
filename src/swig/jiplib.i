@@ -53,7 +53,7 @@
  /* %apply double &INOUT{ double &max }; */
  /* %apply Float64Vector &INOUT{ std::vector<double>& }; */
 
- /* to resolve naming conflicts with mialib library*/
+ /* to resolve naming conflicts with mialib library: rename(to) from*/
 %rename(filter2d_erode) filter2d::erode;
 %rename(filter2d_dilate) filter2d::dilate;
 %rename(filter2d_shift) filter2d::shift;
@@ -137,6 +137,7 @@
     /* SWIG_exception(SWIG_TypeError, "Python dictionary expected"); */
   }
  }
+
 
 /* %ignore createJim(); */
 /* %ignore createJim(const std::shared_ptr<Jim>, bool); */
@@ -360,6 +361,8 @@
 #include <memory>
   %}
 
+ /* %rename jiplib::Jim::crop jiplib::Jim::geospatial::crop; */
+
 %{
 #include <memory>
 #include "imageclasses/ImgRaster.h"
@@ -378,7 +381,8 @@ namespace jiplib{
   //    NPY_INT8, NPY_INT16, NPY_INT32, NPY_INT64, NPY_UINT8, NPY_UINT16, NPY_UINT32, NPY_UINT64, NPY_FLOAT32, NPY_FLOAT64, NPY_COMPLEX64, NPY_COMPLEX128.
 
   %extend Jim {
-    static std::shared_ptr<jiplib::Jim> np2jim(PyObject* npArray, bool copyData=true) {
+    /* std::shared_ptr<jiplib::Jim> np2jim(PyObject* npArray) { */
+    std::shared_ptr<jiplib::Jim> np2jim(PyObject* npArray) {
       if(PyArray_Check(npArray)){
         PyArrayObject *obj=(PyArrayObject *)npArray;
         GDALDataType jDataType;
@@ -421,18 +425,29 @@ namespace jiplib{
         int nrow=PyArray_DIM((PyArrayObject*)npArray,0);
         int ncol=PyArray_DIM((PyArrayObject*)npArray,1);
         int nband=1;//only single band supported for now
-        if(copyData){
-          std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>((void*)(((PyArrayObject*)npArray)->data),ncol,nrow,nplane,jDataType);
-          return(imgWriter);
-        }
-        else{
-          std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>((void*)(((PyArrayObject*)npArray)->data),ncol,nrow,nplane,jDataType);
-          return(imgWriter);
-        }
+        /* std::vector<double> gt(6); */
+        /* std::string theProjection=$self->getProjection(); */
+        /* $self->getGeoTransform(gt); */
+        /* /\* $self->close(); *\/ */
+        /* std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>(ncol,nrow,nplane,jDataType); */
+        /* memcpy(imgWriter->getDataPointer(),(void*)(((PyArrayObject*)npArray)->data),imgWriter->getDataTypeSizeBytes()*imgWriter->nrOfCol()*imgWriter->nrOfRow()*imgWriter->nrOfPlane()); */
+        /* imgWriter->setGeoTransform(gt); */
+        /* imgWriter->setProjection(theProjection); */
+        /* return(imgWriter); */
+        std::vector<double> gt(6);
+        std::string theProjection=$self->getProjection();
+        $self->getGeoTransform(gt);
+        $self->close();
+        $self->open(ncol,nrow,nplane,jDataType);
+        memcpy($self->getDataPointer(),(void*)(((PyArrayObject*)npArray)->data),$self->getDataTypeSizeBytes()*$self->nrOfCol()*$self->nrOfRow()*$self->nrOfPlane());
+        $self->setGeoTransform(gt);
+        $self->setProjection(theProjection);
+        return($self->getShared());
       }
       else{
-        std::cerr << "Error: expected a numpy array as input" << std::endl;
-        return(0);
+        std::cerr << "Error: expected a numpy array as input, returning empty Jim image" << std::endl;
+        /* return create; */
+        return $self->getShared();
       }
     }
 

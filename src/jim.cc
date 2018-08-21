@@ -171,8 +171,8 @@ std::shared_ptr<Jim> Jim::createImg(const std::string filename, bool readData, u
   return(pJim);
 }
 
-///Open an image for writing, based on an existing image object
-CPLErr Jim::open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType){
+///Open an image for writing, copying data from dataPointer
+CPLErr Jim::open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType, bool copyData){
   m_ncol=ncol;
   m_nrow=nrow;
   m_nplane=nplane;
@@ -183,9 +183,15 @@ CPLErr Jim::open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDa
   m_end.resize(m_nband);
   m_blockSize=nrow;//memory contains entire image and has been read already
   if(dataPointer){
-    m_data[0]=(uint8_t*)dataPointer;
-    m_begin[0]=0;
-    m_end[0]=m_begin[0]+m_blockSize;
+    if(copyData){
+      initMem(0);
+      memcpy(m_data[0],dataPointer,getDataTypeSizeBytes()*nrOfCol()*m_blockSize*nrOfPlane());
+    }
+    else{
+      m_data[0]=(uint8_t*)dataPointer;
+      m_begin[0]=0;
+      m_end[0]=m_begin[0]+m_blockSize;
+    }
     /*
     for(int iband=0;iband<m_nband;++iband){
       m_data[iband]=(char *)dataPointer+iband*ncol*nrow*nplane*getDataTypeSizeBytes();
@@ -201,7 +207,7 @@ CPLErr Jim::open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDa
 }
 
 ///Open a multiband image for writing, based on an existing image object
-CPLErr Jim::open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType){
+CPLErr Jim::open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType, bool copyData){
   m_ncol=ncol;
   m_nrow=nrow;
   m_nplane=nplane;
@@ -212,12 +218,23 @@ CPLErr Jim::open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane
   m_end.resize(m_nband);
   m_blockSize=nrow;//memory contains entire image and has been read already
   if(dataPointers.size()){
-    for(int iband=0;iband<m_nband;++iband){
-      if(dataPointers[iband]){
-        m_data[iband]=(uint8_t*)dataPointers[iband];
-        // m_data[iband]=(uint8_t*)dataPointers[iband]+iband*nplane*ncol*nrow*getDataTypeSizeBytes();
-        m_begin[iband]=0;
-        m_end[iband]=m_begin[iband]+m_blockSize;
+    if(copyData){
+      initMem(0);
+      for(int iband=0;iband<m_nband;++iband){
+        if(dataPointers[iband]){
+          memcpy(m_data[iband],dataPointers[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize*nrOfPlane());
+          m_begin[iband]=0;
+          m_end[iband]=m_begin[iband]+m_blockSize;
+        }
+      }
+    }
+    else{
+      for(int iband=0;iband<m_nband;++iband){
+        if(dataPointers[iband]){
+          m_data[iband]=(uint8_t*)dataPointers[iband];
+          m_begin[iband]=0;
+          m_end[iband]=m_begin[iband]+m_blockSize;
+        }
       }
     }
     // m_externalData=true;

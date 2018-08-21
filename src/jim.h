@@ -114,6 +114,8 @@ namespace jiplib{
     std::shared_ptr<Jim> clone(bool copyData=true);
     ///Copy data
     CPLErr copyData(void* data, int band=0);
+    ///Get the datapointer
+    void* getDataPointer(int band=0){return(m_data[band]);};
     ///get size in Bytes of the current data type
     size_t getDataTypeSizeBytes(int band=0) const;
     /* --------------------- */
@@ -188,11 +190,12 @@ namespace jiplib{
 #ifdef SWIG
     %pythonprepend getGeoTransform(double&, double&, double&, double&, double&, double&)  "\"\"\"HELP.METHOD.Jim.getGeoTransform()\"\"\""
 #endif
-       void getGeoTransform(double& gt0, double& gt1, double& gt2, double& gt3, double& gt4, double& gt5) const{return ImgRaster::getGeoTransform(gt0, gt1, gt2, gt3, gt4, gt5);};
+       CPLErr getGeoTransform(double& gt0, double& gt1, double& gt2, double& gt3, double& gt4, double& gt5) const{return ImgRaster::getGeoTransform(gt0, gt1, gt2, gt3, gt4, gt5);};
 #ifdef SWIG
     %pythonprepend getGeoTransform(double*)  "\"\"\"HELP.METHOD.Jim.getGeoTransform()\"\"\""
 #endif
        CPLErr getGeoTransform(double* gt) const{return ImgRaster::getGeoTransform(gt);};
+    CPLErr getGeoTransform(std::vector<double>& gt) const {return ImgRaster::getGeoTransform(gt);};
     ///Set the geotransform data for this dataset
 #ifdef SWIG
     %pythonprepend setGeoTransform(double*)  "\"\"\"HELP.METHOD.Jim.setGeoTransform()\"\"\""
@@ -258,9 +261,9 @@ namespace jiplib{
     /* Input/Output methods */
     /* -------------------- */
     ///Open an image for writing using an external data pointer
-    CPLErr open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType);
+    CPLErr open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType, bool  copyData=true);
     ///Open a multiband image for writing using a external data pointers
-    CPLErr open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType);
+    CPLErr open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType, bool  copyData=true);
     ///Open an image for writing in memory with nplane, defining image attributes.
     CPLErr open(int ncol, int nrow, int nband, int nplane, const GDALDataType& dataType);
     ///Open an image for writing in memory, defining image attributes.
