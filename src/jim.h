@@ -190,12 +190,12 @@ namespace jiplib{
 #ifdef SWIG
     %pythonprepend getGeoTransform(double&, double&, double&, double&, double&, double&)  "\"\"\"HELP.METHOD.Jim.getGeoTransform()\"\"\""
 #endif
-       CPLErr getGeoTransform(double& gt0, double& gt1, double& gt2, double& gt3, double& gt4, double& gt5) const{return ImgRaster::getGeoTransform(gt0, gt1, gt2, gt3, gt4, gt5);};
+       void getGeoTransform(double& gt0, double& gt1, double& gt2, double& gt3, double& gt4, double& gt5) const{ImgRaster::getGeoTransform(gt0, gt1, gt2, gt3, gt4, gt5);};
 #ifdef SWIG
     %pythonprepend getGeoTransform(double*)  "\"\"\"HELP.METHOD.Jim.getGeoTransform()\"\"\""
 #endif
-       CPLErr getGeoTransform(double* gt) const{return ImgRaster::getGeoTransform(gt);};
-    CPLErr getGeoTransform(std::vector<double>& gt) const {return ImgRaster::getGeoTransform(gt);};
+       void getGeoTransform(double* gt) const{ImgRaster::getGeoTransform(gt);};
+    void getGeoTransform(std::vector<double>& gt) const {ImgRaster::getGeoTransform(gt);};
     ///Set the geotransform data for this dataset
 #ifdef SWIG
     %pythonprepend setGeoTransform(double*)  "\"\"\"HELP.METHOD.Jim.setGeoTransform()\"\"\""
