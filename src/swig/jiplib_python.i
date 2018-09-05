@@ -74,6 +74,8 @@
 
 %pythoncode %{
 
+import jiplib
+
 
 import numpy
 
@@ -230,7 +232,7 @@ def ConvertNumPyArrayToMIALibImage( psArray ):
 
 def np2jim(psArray):
     otype = NumPyToJimDataTypeCode(psArray.dtype)
-    jim=jl.createJim(nrow=psArray.shape[0],ncol=psArray.shape[1],otype=otype)
+    jim=jiplib.createJim(nrow=psArray.shape[0],ncol=psArray.shape[1],otype=otype)
     _ConvertNumPyArrayToJim(psArray, jim)
     return jim
 
