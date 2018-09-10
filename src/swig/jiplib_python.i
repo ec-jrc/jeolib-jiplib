@@ -7,6 +7,7 @@
   // #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "Python.h"
 #include "numpy/arrayobject.h"
+#include "config_jiplib.h"
 %}
 
 %typemap(in,numinputs=1) (PyArrayObject *psArray)
@@ -46,28 +47,39 @@
 /* } */
 
 %inline %{
-
   ERROR_TYPE RasterIOMIALib( IMAGE *im, PyArrayObject *psArray) {
+#if MIALIB == 1
     psArray->data = (char *)memcpy((void *)(psArray->data), (void *)GetImPtr(im), GetImNx(im)*GetImNy(im)*(GetImBitPerPixel(im)/8) );
     return NO_ERROR;
+#else
+    return 1;
+#endif
   }
 
   ERROR_TYPE _ConvertNumPyArrayToMIALibIMAGE( PyArrayObject *psArray, IMAGE *im ) {
+#if MIALIB == 1
     im->p_im=memcpy( (void *)GetImPtr(im), (void *)(psArray->data), GetImNx(im)*GetImNy(im)*(GetImBitPerPixel(im)/8));
     return NO_ERROR;
+#else
+    return 1;
+#endif
   }
 
-  ERROR_TYPE _ConvertNumPyArrayToJim( PyArrayObject *psArray, std::shared_ptr< jiplib::Jim > ajim){
+  ERROR_TYPE _ConvertNumPyArrayToJim( PyArrayObject *psArray, std::shared_ptr< ImgRaster > ajim){
+#if MIALIB == 1
     IMAGE *im=ajim->getMIA();
     im->p_im=memcpy( (void *)GetImPtr(im), (void *)(psArray->data), GetImNx(im)*GetImNy(im)*GetImNz(im)*(GetImBitPerPixel(im)/8));
     ajim->setMIA();
     return NO_ERROR;
+#else
+    return 1;
+#endif
   }
 
   /* ERROR_TYPE RasterIOJim( std::shared_ptr< jiplib::Jim > ajim, PyArrayObject *psArray) { */
   /* int RasterIOJim( std::shared_ptr< jiplib::Jim > ajim, PyArrayObject *psArray) { */
   /* int RasterIOJim( std::shared_ptr< jiplib::Jim > ajim ) { */
-  void RasterIOJim( std::shared_ptr< jiplib::Jim > ajim, int typeSizeByte, PyArrayObject *psArray) {
+  void RasterIOJim( std::shared_ptr< ImgRaster > ajim, int typeSizeByte, PyArrayObject *psArray) {
     psArray->data = (char *)memcpy((void *)(psArray->data), ajim->getDataPointer(), ajim->nrOfCol()*ajim->nrOfRow()*ajim->nrOfPlane()*typeSizeByte );
   }
 %}

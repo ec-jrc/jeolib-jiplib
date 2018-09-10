@@ -8,10 +8,9 @@ Change log
 #include "base/Optionpk.h"
 #include "algorithms/Filter2d.h"
 #include "apps/AppFactory.h"
-#include "jim.h"
+#include "imageclasses/ImgRaster.h"
 
 using namespace std;
-using namespace jiplib;
 
 int main(int argc, char *argv[])
 {
@@ -36,7 +35,7 @@ int main(int argc, char *argv[])
         exit(1);
       }
     }
-    shared_ptr<Jim> outputImg=Jim::createImg(app);
+    shared_ptr<ImgRaster> outputImg=ImgRaster::createImg(app);
     outputImg->setFile(output_opt[0],oformat_opt[0]);
     outputImg->close();
     std::cout << "test2: done" << std::endl;

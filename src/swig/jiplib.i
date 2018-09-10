@@ -6,7 +6,7 @@
 %include <std_iostream.i>
 %include <std_shared_ptr.i>
 %shared_ptr(ImgRaster)
-%shared_ptr(jiplib::Jim)
+/* %shared_ptr(jiplib::Jim) */
 %shared_ptr(VectorOgr)
 
 /* http://www.swig.org/Doc1.3/Arguments.html */
@@ -148,9 +148,9 @@
     try:
         appDict={}
         if arg1:
-            if isinstance(arg1,Jim):
+            if isinstance(arg1,ImgRaster):
                 if isinstance(arg2,bool):
-                    return Jim_createImg(arg1,arg2)
+                    return ImgRaster_createImg(arg1,arg2)
                 else:
                     raise(TypeError)
             elif isinstance(arg1,str):
@@ -167,15 +167,15 @@
             appDict.update({key:value})
         if appDict:
             # SWIG generates wrappers that try to work around calling static member functions, replaceing :: with _ (underscore)
-            return Jim_createImg(appDict)
+            return ImgRaster_createImg(appDict)
         else:
-            return Jim_createImg()
+            return ImgRaster_createImg()
     except IOError:
         print("Error: {} is not a regular file".format(arg1))
     except TypeError:
-        print("Error: bad argument type for createJim, arguments without names should be a path or of Jim type")
+        print("Error: bad argument type for createJim, arguments without names should be a path or of ImgRaster type")
     except:
-        print("Error: could not create Jim image")
+        print("Error: could not create ImgRaster image")
     %}
 /* !!! from: http://svn.salilab.org/imp/branches/1.0/kernel/pyext/IMP_streams.i */
 /* to allow overloading and select the appropriate typemap when a Python object is provided */
@@ -371,18 +371,20 @@
 #include "imageclasses/VectorOgr.h"
 #include "apps/AppFactory.h"
 #include "algorithms/Filter2d.h"
-#include "jim.h"
-#include "jimlist.h"
+/* #include "jim.h" */
+/* #include "jimlist.h" */
+#if MIALIB == 1
 #include "mialib_swig.h"
+#endif
 #include <cpl_error.h>
   %}
 
-namespace jiplib{
+/* namespace jiplib{ */
   //    NPY_INT8, NPY_INT16, NPY_INT32, NPY_INT64, NPY_UINT8, NPY_UINT16, NPY_UINT32, NPY_UINT64, NPY_FLOAT32, NPY_FLOAT64, NPY_COMPLEX64, NPY_COMPLEX128.
 
-  %extend Jim {
+  %extend ImgRaster {
     /* std::shared_ptr<jiplib::Jim> np2jim(PyObject* npArray) { */
-    std::shared_ptr<jiplib::Jim> np2jim(PyObject* npArray) {
+    std::shared_ptr<ImgRaster> np2jim(PyObject* npArray) {
       if(PyArray_Check(npArray)){
         PyArrayObject *obj=(PyArrayObject *)npArray;
         GDALDataType jDataType;
@@ -532,17 +534,17 @@ namespace jiplib{
       std::cout << "Warning: CE_Failure" << std::endl;
     void *argp2;
     int res2=0;
-    res2 = SWIG_ConvertPtr($self, &argp2, SWIGTYPE_p_std__shared_ptrT_jiplib__Jim_t,  0  | 0);
+    res2 = SWIG_ConvertPtr($self, &argp2, SWIGTYPE_p_std__shared_ptrT_ImgRaster_t,  0  | 0);
     if (!SWIG_IsOK(res2)) {
       SWIG_exception_fail(SWIG_ArgError(res2), "in method " "$symname");
     }
     if (!argp2) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference , argument " "2"" of type '" "shared_ptr<const jiplib::Jim&>""'");
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference , argument " "2"" of type '" "shared_ptr<const ImgRaster&>""'");
     }
-    std::shared_ptr<jiplib::Jim> result=(*(reinterpret_cast< std::shared_ptr< jiplib::Jim > * >(argp2)))->getShared();
+    std::shared_ptr<ImgRaster> result=(*(reinterpret_cast< std::shared_ptr< ImgRaster > * >(argp2)))->getShared();
     PyObject* o=0;
-    std::shared_ptr<  jiplib::Jim > *smartresult = result ? new std::shared_ptr<  jiplib::Jim >(result) : 0;
-    o = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_jiplib__Jim_t, SWIG_POINTER_OWN | 0);
+    std::shared_ptr<  ImgRaster > *smartresult = result ? new std::shared_ptr<  ImgRaster >(result) : 0;
+    o = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_ImgRaster_t, SWIG_POINTER_OWN | 0);
     if(o)
       $result=o;
     else
@@ -657,7 +659,7 @@ namespace jiplib{
     }
     $result=d;
   }
-}
+/* } */
 
 /* %typemap(out) std::string getUniquePixels { */
 /*   $result=PyString_FromString($1.c_str()); */
@@ -698,13 +700,16 @@ namespace jiplib{
 
 
 
-%template(ImgVectorJim) std::vector< std::shared_ptr< jiplib::Jim > >;
-%template(ImgListJim) std::list< std::shared_ptr< jiplib::Jim > >;
+%template(ImgVectorJim) std::vector< std::shared_ptr< ImgRaster > >;
+%template(ImgListJim) std::list< std::shared_ptr< ImgRaster > >;
 %template(VectorDouble) std::vector<double>;
+/* %template(ImgVectorJim) std::vector< std::shared_ptr< jiplib::Jim > >; */
+/* %template(ImgListJim) std::list< std::shared_ptr< jiplib::Jim > >; */
+/* %template(VectorDouble) std::vector<double>; */
 
 //Parse the header file
 //%include "swig/pktools.i"
-%include "swig/mialib_tmp.i"
+/* %include "swig/mialib_tmp.i" */
 %include "swig/jiplib_python.i"
 %include "imageclasses/ImgList.h"
 %include "imageclasses/ImgRaster.h"
