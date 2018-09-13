@@ -21,9 +21,8 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <map>
 #include <algorithm>
-#include "imageclasses/ImgRaster.h"
-#include "imageclasses/ImgReaderOgr.h"
-#include "imageclasses/ImgWriterOgr.h"
+#include "imageclasses/Jim.h"
+#include "imageclasses/VectorOgr.h"
 #include "base/Optionpk.h"
 #include "base/PosValue.h"
 #include "algorithms/ConfusionMatrix.h"

@@ -22,9 +22,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <memory>
 #include <algorithm>
-#include "ImgRaster.h"
-// #include "ImgReaderOgr.h"
-// #include "ImgWriterOgr.h"
+#include "Jim.h"
 #include "VectorOgr.h"
 #include "base/Optionpk.h"
 #include "base/PosValue.h"
@@ -399,9 +397,9 @@ std::string VectorOgr::trainSVM(app::AppFactory& app){
  * @param app application specific option arguments
  * @return output classified raster dataset
  **/
-shared_ptr<ImgRaster> ImgRaster::classifySVM(app::AppFactory& app){
+shared_ptr<Jim> Jim::classifySVM(app::AppFactory& app){
   try{
-    shared_ptr<ImgRaster> imgWriter=createImg();
+    shared_ptr<Jim> imgWriter=createImg();
     classifySVM(*imgWriter, app);
     return(imgWriter);
   }
@@ -415,9 +413,9 @@ shared_ptr<ImgRaster> ImgRaster::classifySVM(app::AppFactory& app){
  * @param app application specific option arguments
  * @return output classified raster dataset
  **/
-// shared_ptr<ImgRaster> ImgRaster::svm(app::AppFactory& app){
+// shared_ptr<Jim> Jim::svm(app::AppFactory& app){
 //   try{
-//     shared_ptr<ImgRaster> imgWriter=createImg();
+//     shared_ptr<Jim> imgWriter=createImg();
 //     svm(*imgWriter, app);
 //     return(imgWriter);
 //   }
@@ -433,7 +431,7 @@ shared_ptr<ImgRaster> ImgRaster::classifySVM(app::AppFactory& app){
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr ImgRaster::classifySVM(ImgRaster& imgWriter, app::AppFactory& app){
+CPLErr Jim::classifySVM(Jim& imgWriter, app::AppFactory& app){
   vector<double> priors;
 
   //--------------------------- command line options ------------------------------------
@@ -516,7 +514,7 @@ CPLErr ImgRaster::classifySVM(ImgRaster& imgWriter, app::AppFactory& app){
     }
 
     VectorOgr extentReader;
-    ImgRaster maskReader;
+    Jim maskReader;
 
     double ulx=0;
     double uly=0;
@@ -651,7 +649,7 @@ CPLErr ImgRaster::classifySVM(ImgRaster& imgWriter, app::AppFactory& app){
       imgWriter.setProjection(this->getProjection());
       if(colorTable_opt.size())
         imgWriter.setColorTable(colorTable_opt[0],0);
-      ImgRaster priorReader;
+      Jim priorReader;
       if(priorimg_opt.size()){
         if(verbose_opt[0]>=1)
           std::cout << "opening prior image " << priorimg_opt[0] << std::endl;
@@ -662,8 +660,8 @@ CPLErr ImgRaster::classifySVM(ImgRaster& imgWriter, app::AppFactory& app){
 
       vector<char> classOut(ncol);//classified line for writing to image file
 
-      ImgRaster probImage;
-      ImgRaster entropyImage;
+      Jim probImage;
+      Jim entropyImage;
       std::string imageType="GTiff";
 
       if(prob_opt.size()){
@@ -901,7 +899,7 @@ CPLErr ImgRaster::classifySVM(ImgRaster& imgWriter, app::AppFactory& app){
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-// CPLErr ImgRaster::svm(ImgRaster& imgWriter, app::AppFactory& app){
+// CPLErr Jim::svm(Jim& imgWriter, app::AppFactory& app){
 //   vector<double> priors;
 
 //   //--------------------------- command line options ------------------------------------
@@ -1081,7 +1079,7 @@ CPLErr ImgRaster::classifySVM(ImgRaster& imgWriter, app::AppFactory& app){
     //   std::cout << "number of bootstrap aggregations: " << nbag << std::endl;
 
     // ImgReaderOgr extentReader;
-    // ImgRaster maskReader;
+    // Jim maskReader;
     // // OGRLayer  *readLayer;
 
     // double ulx=0;
@@ -1506,7 +1504,7 @@ CPLErr ImgRaster::classifySVM(ImgRaster& imgWriter, app::AppFactory& app){
     //   imgWriter.setProjection(this->getProjection());
     //   if(colorTable_opt.size())
     //     imgWriter.setColorTable(colorTable_opt[0],0);
-    //   ImgRaster priorReader;
+    //   Jim priorReader;
     //   if(priorimg_opt.size()){
     //     if(verbose_opt[0]>=1)
     //       std::cout << "opening prior image " << priorimg_opt[0] << std::endl;
@@ -1518,10 +1516,10 @@ CPLErr ImgRaster::classifySVM(ImgRaster& imgWriter, app::AppFactory& app){
     //   vector<char> classOut(ncol);//classified line for writing to image file
 
     //   //   assert(nband==imgWriter.nrOfBand());
-    //   ImgRaster classImageBag;
-    //   // ImgRaster imgWriter.
-    //   ImgRaster probImage;
-    //   ImgRaster entropyImage;
+    //   Jim classImageBag;
+    //   // Jim imgWriter.
+    //   Jim probImage;
+    //   Jim entropyImage;
 
     //   string imageType=imgWriter.getImageType();
     //   if(classBag_opt.size()){

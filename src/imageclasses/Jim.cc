@@ -1,5 +1,5 @@
 /**********************************************************************
-ImgRaster.cc: class to read raster files using GDAL API library
+Jim.cc: class to read raster files using GDAL API library
 Copyright (C) 2008-2018 Pieter Kempeneers
 
 This file is part of pktools
@@ -28,18 +28,18 @@ extern "C" {
 #include "gdalwarper.h"
 }
 #include <config_jiplib.h>
-#include "ImgRaster.h"
+#include "Jim.h"
 #include "VectorOgr.h"
 #include "base/Optionpk.h"
 #include "algorithms/StatFactory.h"
 
 using namespace std;
 
-ImgRaster::ImgRaster() : m_nplane(1){
+Jim::Jim() : m_nplane(1){
   // reset();//todo: check if needed (was not reset in Jim)
 }
 
-size_t ImgRaster::getDataTypeSizeBytes(int band) const {
+size_t Jim::getDataTypeSizeBytes(int band) const {
 #if MIALIB == 1
   switch (getDataType()){
   case JDT_UInt64:
@@ -65,7 +65,7 @@ size_t ImgRaster::getDataTypeSizeBytes(int band) const {
 }
 
 /// convert single plane multiband image to single band image with multiple planes
-CPLErr ImgRaster::band2plane(){
+CPLErr Jim::band2plane(){
   //temporary buffer
   m_data.resize(nrOfBand()+1);
   m_data[nrOfBand()]=(void *) calloc(static_cast<size_t>(nrOfCol()*m_blockSize),getDataTypeSizeBytes());
@@ -90,7 +90,7 @@ CPLErr ImgRaster::band2plane(){
 }
 
 #if MIALIB == 1
-IMAGE* ImgRaster::getMIA(int band){
+IMAGE* Jim::getMIA(int band){
   if(getBlockSize()!=nrOfRow()){
     std::ostringstream s;
     s << "Error: increase memory to support MIA library functions (now at " << 100.0*getBlockSize()/nrOfRow() << "%)";
@@ -122,7 +122,7 @@ IMAGE* ImgRaster::getMIA(int band){
  *
  * @return CE_None if successful
  */
-CPLErr ImgRaster::setMIA(int band){
+CPLErr Jim::setMIA(int band){
   try{
     // if(m_mia->nz>1){
     //   std::string errorString="Error: MIA image with nz>1 not supported";
@@ -130,7 +130,7 @@ CPLErr ImgRaster::setMIA(int band){
     // }
     if(m_mia.size()<band+1){
       std::ostringstream s;
-      s << "Error: illegal band number when setting MIA in ImgRaster";
+      s << "Error: illegal band number when setting MIA in Jim";
       throw(s.str());
     }
     if(m_ncol!=m_mia[band]->nx){
@@ -169,14 +169,14 @@ CPLErr ImgRaster::setMIA(int band){
 }
 
 /**
- * set ImgRaster attributes from external MIA image
+ * set Jim attributes from external MIA image
  *
  * @param mia the MIA image pointer to be set
  * @param band the band for which the MIA image pointer needs to be set
  *
  * @return C_None if successful
  */
-CPLErr ImgRaster::setMIA(IMAGE* mia, int band){
+CPLErr Jim::setMIA(IMAGE* mia, int band){
   try{
     if(nrOfBand()){
       if(m_ncol!=mia->nx){
@@ -225,7 +225,7 @@ CPLErr ImgRaster::setMIA(IMAGE* mia, int band){
   return(CE_None);
 }
 
- int ImgRaster::getMIADataType(){
+ int Jim::getMIADataType(){
    switch (getDataType()){
    case GDT_Byte:
      return t_UCHAR;
@@ -252,7 +252,7 @@ CPLErr ImgRaster::setMIA(IMAGE* mia, int band){
    }
  }
 
- int ImgRaster::JIPLIB2MIADataType(int aJIPLIBDataType){
+ int Jim::JIPLIB2MIADataType(int aJIPLIBDataType){
    //function exists, but introduced for naming consistency
    if(aJIPLIBDataType==JDT_UInt64)
      return(t_UINT64);
@@ -263,13 +263,13 @@ CPLErr ImgRaster::setMIA(IMAGE* mia, int band){
  }
 
  ///convert a GDAL to MIA data type
- int ImgRaster::GDAL2MIADataType(GDALDataType aGDALDataType){
+ int Jim::GDAL2MIADataType(GDALDataType aGDALDataType){
    //function exists, but introduced for naming consistency
    return(GDAL2MIALDataType(aGDALDataType));
  }
 
  ///convert a MIA data type to GDAL data type
- int ImgRaster::MIA2JIPLIBDataType(int aMIADataType){
+ int Jim::MIA2JIPLIBDataType(int aMIADataType){
    switch (aMIADataType){
    case t_UCHAR:
      return GDT_Byte;
@@ -297,7 +297,7 @@ CPLErr ImgRaster::setMIA(IMAGE* mia, int band){
  }
 #endif
 
-void ImgRaster::reset()
+void Jim::reset()
 {
   m_gds=0;
   m_ncol=0;
@@ -339,7 +339,7 @@ void ImgRaster::reset()
  * @param nrow The number of rows in the image
  * @param dataType The data type of the image (one of the GDAL supported datatypes: GDT_Byte, GDT_[U]Int[16|32], GDT_Float[32|64])
  **/
-ImgRaster::ImgRaster(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType){
+Jim::Jim(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType){
   open(dataPointer,ncol,nrow,dataType);
 }
 
@@ -349,60 +349,60 @@ ImgRaster::ImgRaster(void* dataPointer, int ncol, int nrow, const GDALDataType& 
  * @param nrow The number of rows in the image
  * @param dataType The data type of the image (one of the GDAL supported datatypes: GDT_Byte, GDT_[U]Int[16|32], GDT_Float[32|64])
  **/
-ImgRaster::ImgRaster(std::vector<void*> dataPointers, int ncol, int nrow, const GDALDataType& dataType){
+Jim::Jim(std::vector<void*> dataPointers, int ncol, int nrow, const GDALDataType& dataType){
   open(dataPointers,ncol,nrow,dataType);
 }
 
 ///constructor opening an image in memory using an external data pointer
-ImgRaster::ImgRaster(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType){
+Jim::Jim(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType){
   open(dataPointer,ncol,nrow,nplane,dataType);
 }
 ///constructor opening a multiband image in memory using an external data pointer
-ImgRaster::ImgRaster(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType){
+Jim::Jim(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType){
   open(dataPointers,ncol,nrow,nplane,dataType);
 }
 
-ImgRaster::ImgRaster(const std::string& filename, const ImgRaster& imgSrc, unsigned int memory, const std::vector<std::string>& options){
+Jim::Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory, const std::vector<std::string>& options){
   open(filename,imgSrc,memory,options);
 }
 
 #if MIALIB == 1
 ///constructor input image
-ImgRaster::ImgRaster(IMAGE *mia) : m_nplane(1){
+Jim::Jim(IMAGE *mia) : m_nplane(1){
   setMIA(mia,0);
 }
 #endif
 
 ///constructor output image
-ImgRaster::ImgRaster(const std::string& filename, bool readData, unsigned int memory){
+Jim::Jim(const std::string& filename, bool readData, unsigned int memory){
   open(filename,readData,memory);
 }
 
 ///constructor output image
-ImgRaster::ImgRaster(ImgRaster& imgSrc, bool copyData){
+Jim::Jim(Jim& imgSrc, bool copyData){
   open(imgSrc,copyData);
 }
 ///constructor output image
-ImgRaster::ImgRaster(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory, const std::vector<std::string>& options){
+Jim::Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory, const std::vector<std::string>& options){
   open(filename, ncol, nrow, nband, dataType, imageType, memory, options);
 }
 ///constructor output image with nplane
-ImgRaster::ImgRaster(int ncol, int nrow, int nband, int nplane, const GDALDataType& dataType){
+Jim::Jim(int ncol, int nrow, int nband, int nplane, const GDALDataType& dataType){
   open(ncol,nrow,nband,nplane,dataType);
 }
 ///constructor output image
-ImgRaster::ImgRaster(int ncol, int nrow, int nband, const GDALDataType& dataType){
+Jim::Jim(int ncol, int nrow, int nband, const GDALDataType& dataType){
   open(ncol, nrow, nband, dataType);
 }
 //test
-// ImgRaster::ImgRaster(app::AppFactory &theApp): m_nplane(1), ImgRaster(theApp){};
-ImgRaster::ImgRaster(app::AppFactory &theApp){
+// Jim::Jim(app::AppFactory &theApp): m_nplane(1), Jim(theApp){};
+Jim::Jim(app::AppFactory &theApp){
   reset();open(theApp);
 }
 
 
 ///destructor
-ImgRaster::~ImgRaster(void){
+Jim::~Jim(void){
 #if MIALIB == 1
   if(m_mia.size()){
     for(int iband=0;iband<m_mia.size();++iband)
@@ -411,13 +411,13 @@ ImgRaster::~ImgRaster(void){
     m_mia.clear();
   }
 #endif
-  // ImgRaster::reset();
+  // Jim::reset();
   close();
 }
 /**
  * @param memory Available memory to cache image raster data (in MB)
  **/
-CPLErr ImgRaster::initMem(unsigned int memory)
+CPLErr Jim::initMem(unsigned int memory)
 {
   if(memory<=0)
     m_blockSize=nrOfRow();
@@ -447,7 +447,7 @@ CPLErr ImgRaster::initMem(unsigned int memory)
 /**
  * @param memory Available memory to cache image raster data (in MB)
  **/
-void ImgRaster::freeMem()
+void Jim::freeMem()
 {
 //  if(m_data.size()&&m_filename.size()){
   for(int iband=0;iband<m_data.size();++iband){
@@ -463,14 +463,14 @@ void ImgRaster::freeMem()
   m_data.clear();
 }
 
-// ImgRaster& ImgRaster::operator=(ImgRaster& imgSrc)
+// Jim& Jim::operator=(Jim& imgSrc)
 // {
 //   bool copyData=true;
 //   //check for assignment to self (of the form v=v)
 //   if(this==&imgSrc)
 //     return *this;
 //   else{
-//     ImgRaster::open(imgSrc,copyData);
+//     Jim::open(imgSrc,copyData);
 //     return *this;
 //   }
 // }
@@ -481,7 +481,7 @@ void ImgRaster::freeMem()
  * @return true if image is equal to reference image
  **/
 // #if MIALIB == 1
-// bool ImgRaster::isEqual(std::shared_ptr<ImgRaster> refImg){
+// bool Jim::isEqual(std::shared_ptr<Jim> refImg){
 //   bool isEqual=true;
 //   if(nrOfBand()!=refImg->nrOfBand())
 //     return(false);
@@ -508,7 +508,7 @@ void ImgRaster::freeMem()
 /**
  * @param imgSrc Use this source image as a template to copy image attributes
  **/
-// ImgRaster& ImgRaster::operator=(ImgRaster& imgSrc)
+// Jim& Jim::operator=(Jim& imgSrc)
 // {
 //   bool copyData=true;
 //   //check for assignment to self (of the form v=v)
@@ -521,8 +521,8 @@ void ImgRaster::freeMem()
 // }
 
 // ///assignment operator for in memory image
-// std::shared_ptr<ImgRaster> ImgRaster::operator=(std::shared_ptr<ImgRaster> imgSrc){
-//   std::shared_ptr<ImgRaster> imgWriter=std::make_shared<ImgRaster>();
+// std::shared_ptr<Jim> Jim::operator=(std::shared_ptr<Jim> imgSrc){
+//   std::shared_ptr<Jim> imgWriter=std::make_shared<Jim>();
 //   *imgWriter=*imgSrc;
 //   return(imgWriter);
 // }
@@ -533,7 +533,7 @@ void ImgRaster::freeMem()
  * @param nrow The number of rows in the image
  * @param dataType The data type of the image (one of the GDAL supported datatypes: GDT_Byte, GDT_[U]Int[16|32], GDT_Float[32|64])
  **/
-CPLErr ImgRaster::open(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType){
+CPLErr Jim::open(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType){
   m_ncol=ncol;
   m_nrow=nrow;
   m_nband=1;
@@ -562,7 +562,7 @@ CPLErr ImgRaster::open(void* dataPointer, int ncol, int nrow, const GDALDataType
  * @param nrow The number of rows in the image
  * @param dataType The data type of the image (one of the GDAL supported datatypes: GDT_Byte, GDT_[U]Int[16|32], GDT_Float[32|64])
  **/
-CPLErr ImgRaster::open(std::vector<void*> dataPointers, int ncol, int nrow, const GDALDataType& dataType){
+CPLErr Jim::open(std::vector<void*> dataPointers, int ncol, int nrow, const GDALDataType& dataType){
   m_ncol=ncol;
   m_nrow=nrow;
   m_nband=dataPointers.size();
@@ -589,7 +589,7 @@ CPLErr ImgRaster::open(std::vector<void*> dataPointers, int ncol, int nrow, cons
 }
 
 ///Open an image for writing, copying data from dataPointer
-CPLErr ImgRaster::open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType, bool copyData){
+CPLErr Jim::open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType, bool copyData){
   m_ncol=ncol;
   m_nrow=nrow;
   m_nplane=nplane;
@@ -624,7 +624,7 @@ CPLErr ImgRaster::open(void* dataPointer, int ncol, int nrow, int nplane, const 
 }
 
 ///Open a multiband image for writing, based on an existing image object
-CPLErr ImgRaster::open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType, bool copyData){
+CPLErr Jim::open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType, bool copyData){
   m_ncol=ncol;
   m_nrow=nrow;
   m_nplane=nplane;
@@ -660,7 +660,7 @@ CPLErr ImgRaster::open(std::vector<void*> dataPointers, int ncol, int nrow, int 
   else
     return(CE_Failure);
 }
-CPLErr ImgRaster::close()
+CPLErr Jim::close()
 {
   if(m_gds)
     GDALClose(m_gds);
@@ -670,7 +670,7 @@ CPLErr ImgRaster::close()
 /**
  * @return the projection of this data set in string format
  **/
-std::string ImgRaster::getProjection() const
+std::string Jim::getProjection() const
 {
   // if(m_gds)
   //   return(m_gds->GetProjectionRef());
@@ -681,7 +681,7 @@ std::string ImgRaster::getProjection() const
 /**
  * @return the projection of this data set in string format
  **/
-std::string ImgRaster::getProjectionRef() const
+std::string Jim::getProjectionRef() const
 {
   // if(m_gds)
   //   return(m_gds->GetProjectionRef());
@@ -693,7 +693,7 @@ std::string ImgRaster::getProjectionRef() const
  * @param projection projection string to be used for this dataset
  * @return the projection of this data set in string format
  **/
-CPLErr ImgRaster::setProjectionProj4(const std::string& projection)
+CPLErr Jim::setProjectionProj4(const std::string& projection)
 {
   if(projection.size()){
     OGRSpatialReference theRef;
@@ -715,7 +715,7 @@ CPLErr ImgRaster::setProjectionProj4(const std::string& projection)
  * @param projection projection string to be used for this dataset
  **/
 //deprecated?
-// CPLErr ImgRaster::setProjection(const std::string& projection)
+// CPLErr Jim::setProjection(const std::string& projection)
 // {
 //   m_projection=projection;
 //   if(m_gds){
@@ -730,7 +730,7 @@ CPLErr ImgRaster::setProjectionProj4(const std::string& projection)
  * @param band get data type for this band (start counting from 0)
  * @return the GDAL data type of this data set for the selected band
  **/
-GDALDataType ImgRaster::getDataTypeDS(int band) const
+GDALDataType Jim::getDataTypeDS(int band) const
 {
   if(nrOfBand()<=band){
     std::string errorString="Error: band number exceeds available bands in getDataType";
@@ -746,8 +746,8 @@ GDALDataType ImgRaster::getDataTypeDS(int band) const
  * @param band get data type for this band (start counting from 0)
  * @return the data type of this data set for the selected band
  **/
-int ImgRaster::getDataType(int band) const
-//GDALDataType ImgRaster::getDataType(int band) const
+int Jim::getDataType(int band) const
+//GDALDataType Jim::getDataType(int band) const
 {
   if(nrOfBand()<=band){
     std::string errorString="Error: band number exceeds available bands in getDataType";
@@ -763,7 +763,7 @@ int ImgRaster::getDataType(int band) const
  * @param band get data type for this band (start counting from 0)
  * @return the GDAL data type of this data set for the selected band
  **/
-GDALDataType ImgRaster::getGDALDataType(int band) const
+GDALDataType Jim::getGDALDataType(int band) const
 {
   if(nrOfBand()<=band){
     std::string errorString="Error: band number exceeds available bands in getDataType";
@@ -796,7 +796,7 @@ GDALDataType ImgRaster::getGDALDataType(int band) const
  * @param band get GDAL raster band for this band (start counting from 0)
  * @return the GDAL raster band of this data set for the selected band
  **/
-GDALRasterBand* ImgRaster::getRasterBand(int band) const
+GDALRasterBand* Jim::getRasterBand(int band) const
 {
   if(nrOfBand()<=band){
     std::string errorString="Error: band number exceeds available bands in getRasterBand";
@@ -812,7 +812,7 @@ GDALRasterBand* ImgRaster::getRasterBand(int band) const
  * @param band get GDAL color table for this band (start counting from 0)
  * @return the GDAL color table of this data set for the selected band
  **/
-GDALColorTable* ImgRaster::getColorTable(int band) const
+GDALColorTable* Jim::getColorTable(int band) const
 {
   if(nrOfBand()<=band){
     std::string errorString="Error: band number exceeds available bands in getColorTable";
@@ -828,7 +828,7 @@ GDALColorTable* ImgRaster::getColorTable(int band) const
 /**
  * @return the driver description of this data set in string format
  **/
-std::string ImgRaster::getDriverDescription() const
+std::string Jim::getDriverDescription() const
 {
   std::string driverDescription;
   if(m_gds)
@@ -846,7 +846,7 @@ std::string ImgRaster::getDriverDescription() const
  * @param GeoTransform[5] n-s pixel resolution
  * return CE_None if geotransform could be set for GDAL dataset
  **/
-CPLErr ImgRaster::setGeoTransform(double* gt){
+CPLErr Jim::setGeoTransform(double* gt){
   m_gt.resize(6);
   // m_isGeoRef=true;
   m_gt[0]=gt[0];
@@ -862,7 +862,7 @@ CPLErr ImgRaster::setGeoTransform(double* gt){
     return(CE_Warning);
 }
 
-CPLErr ImgRaster::setGeoTransform(const std::vector<double>& gt){
+CPLErr Jim::setGeoTransform(const std::vector<double>& gt){
   if(gt.size()==6){
     m_gt.resize(6);
     // m_isGeoRef=true;
@@ -884,7 +884,7 @@ CPLErr ImgRaster::setGeoTransform(const std::vector<double>& gt){
  * @param imgSrc Use this source image as a template to copy geotranform information
  * return CE_None if geotransform could be copied for GDAL dataset
  **/
-CPLErr ImgRaster::copyGeoTransform(const ImgRaster& imgSrc)
+CPLErr Jim::copyGeoTransform(const Jim& imgSrc)
 {
   vector<double> gt;
   imgSrc.getGeoTransform(gt);
@@ -894,7 +894,7 @@ CPLErr ImgRaster::copyGeoTransform(const ImgRaster& imgSrc)
 /**
  * @param imgSrc Use this pointer to source image as a template to copy geotranform information
  **/
-// void ImgRaster::copyGeoTransform(const std::shared_ptr<ImgRaster>& imgSrc)
+// void Jim::copyGeoTransform(const std::shared_ptr<Jim>& imgSrc)
 // {
 //   double gt[6];
 //   imgSrc->getGeoTransform(gt);
@@ -910,7 +910,7 @@ CPLErr ImgRaster::copyGeoTransform(const ImgRaster& imgSrc)
  * @param GeoTransform[4] rotation, 0 if image is "north up"
  * @param GeoTransform[5] n-s pixel resolution
  **/
-CPLErr ImgRaster::getGeoTransform(double* gt) const{
+CPLErr Jim::getGeoTransform(double* gt) const{
   if(m_gt.size()==6){
     gt[0]=m_gt[0];
     gt[1]=m_gt[1];
@@ -924,7 +924,7 @@ CPLErr ImgRaster::getGeoTransform(double* gt) const{
     return(CE_Failure);
 }
 
-CPLErr ImgRaster::getGeoTransform(vector<double>& gt) const{
+CPLErr Jim::getGeoTransform(vector<double>& gt) const{
   gt=m_gt;
   if(gt.size()==6){
     return(CE_None);
@@ -944,7 +944,7 @@ CPLErr ImgRaster::getGeoTransform(vector<double>& gt) const{
 /**
  * @return the geotransform of this data set in string format
  **/
-// std::string ImgRaster::getGeoTransform() const
+// std::string Jim::getGeoTransform() const
 // {
 //   std::string gtString;
 //   double gt[6];// { 444720, 30, 0, 3751320, 0, -30 };
@@ -958,7 +958,7 @@ CPLErr ImgRaster::getGeoTransform(vector<double>& gt) const{
 /**
  * @return the metadata of this data set in C style string format (const version)
  **/
-char** ImgRaster::getMetadata() const
+char** Jim::getMetadata() const
 {
   if(m_gds){
     if(m_gds->GetMetadata()!=NULL)
@@ -974,7 +974,7 @@ char** ImgRaster::getMetadata() const
 /**
  * @return the metadata of this data set in standard template library (stl) string format
  **/
-CPLErr ImgRaster::getMetadata(std::list<std::string>& metadata) const
+CPLErr Jim::getMetadata(std::list<std::string>& metadata) const
 {
   if(m_gds){
     char** cmetadata=m_gds->GetMetadata();
@@ -991,7 +991,7 @@ CPLErr ImgRaster::getMetadata(std::list<std::string>& metadata) const
 /**
  * @return the description of this data set in string format
  **/
-std::string ImgRaster::getDescription() const
+std::string Jim::getDescription() const
 {
   if(m_gds){
     if(m_gds->GetDriver()->GetDescription()!=NULL)
@@ -1006,7 +1006,7 @@ std::string ImgRaster::getDescription() const
 /**
  * @return the meta data item of this data set in string format
  **/
-std::string ImgRaster::getMetadataItem() const
+std::string Jim::getMetadataItem() const
 {
   if(m_gds){
     if(m_gds->GetDriver()->GetMetadataItem( GDAL_DMD_LONGNAME )!=NULL)
@@ -1020,7 +1020,7 @@ std::string ImgRaster::getMetadataItem() const
 /**
  * @return the image description (TIFFTAG) of this data set in string format
  **/
-std::string ImgRaster::getImageDescription() const
+std::string Jim::getImageDescription() const
 {
   if(m_gds){
     if(m_gds->GetDriver()->GetMetadataItem("TIFFTAG_IMAGEDESCRIPTION")!=NULL)
@@ -1034,7 +1034,7 @@ std::string ImgRaster::getImageDescription() const
 /**
  * @return the band coding interleave of this data set in string format
  **/
-std::string ImgRaster::getInterleave() const
+std::string Jim::getInterleave() const
 {
   if(m_gds){
     if(m_gds->GetMetadataItem( "INTERLEAVE", "IMAGE_STRUCTURE"))
@@ -1049,7 +1049,7 @@ std::string ImgRaster::getInterleave() const
 /**
  * @return the compression meta data of this data set in string format
  **/
-std::string ImgRaster::getCompression() const
+std::string Jim::getCompression() const
 {
   if(m_gds){
     if(m_gds->GetMetadataItem( "COMPRESSION", "IMAGE_STRUCTURE"))
@@ -1075,7 +1075,7 @@ std::string ImgRaster::getCompression() const
  * @param lry lower left coordinate in y
  * @return true if successful and if image is georeferenced
  **/
-void ImgRaster::getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT) const
+void Jim::getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT) const
 {
   try{
     vector<double> gt(6);
@@ -1098,7 +1098,7 @@ void ImgRaster::getBoundingBox(double& ulx, double& uly, double& lrx, double& lr
       yvector[3]=lry;
       if(!poCT->Transform(xvector.size(),&xvector[0],&yvector[0])){
         std::ostringstream errorStream;
-        errorStream << "Error: cannot apply OGRCoordinateTransformation in ImgRaster::getBoundingBox" << std::endl;
+        errorStream << "Error: cannot apply OGRCoordinateTransformation in Jim::getBoundingBox" << std::endl;
         throw(errorStream.str());
       }
       ulx=std::min(xvector[0],xvector[2]);
@@ -1127,7 +1127,7 @@ void ImgRaster::getBoundingBox(double& ulx, double& uly, double& lrx, double& lr
  * @param bbvector[3] lower left coordinate in y
  * @return true if successful and if image is georeferenced
  **/
-void ImgRaster::getBoundingBox(std::vector<double> &bbvector, OGRCoordinateTransformation *poCT) const
+void Jim::getBoundingBox(std::vector<double> &bbvector, OGRCoordinateTransformation *poCT) const
 {
   bbvector.resize(4);
   getBoundingBox(bbvector[0],bbvector[1],bbvector[2],bbvector[3],poCT);
@@ -1135,7 +1135,7 @@ void ImgRaster::getBoundingBox(std::vector<double> &bbvector, OGRCoordinateTrans
 
 
 // ///get bounding box with coordinate transform based on EPSG code
-// bool ImgRaster::getBoundingBox(std::vector<double> &bbvector, int targetEPSG) const
+// bool Jim::getBoundingBox(std::vector<double> &bbvector, int targetEPSG) const
 // {
 //   bbvector.resize(4);
 //   OGRSpatialReference targetSRS;
@@ -1158,7 +1158,7 @@ void ImgRaster::getBoundingBox(std::vector<double> &bbvector, OGRCoordinateTrans
  * @param x, y centre coordinates in x and y
  * @return true if image is georeferenced
  **/
-void ImgRaster::getCenterPos(double& centerX, double& centerY) const
+void Jim::getCenterPos(double& centerX, double& centerY) const
 {
   vector<double> gt(6);
   getGeoTransform(gt);
@@ -1183,7 +1183,7 @@ void ImgRaster::getCenterPos(double& centerX, double& centerY) const
  * @param i,j image coordinates (can be fraction of pixels)
  * @return true if image is georeferenced
  **/
-bool ImgRaster::geo2image(double x, double y, double& i, double& j, OGRCoordinateTransformation *poCT) const
+bool Jim::geo2image(double x, double y, double& i, double& j, OGRCoordinateTransformation *poCT) const
 {
   vector<double> gt(6);
   getGeoTransform(gt);
@@ -1194,7 +1194,7 @@ bool ImgRaster::geo2image(double x, double y, double& i, double& j, OGRCoordinat
     if(poCT){
       if(!poCT->Transform(1,&thisX,&thisY)){
         std::ostringstream errorStream;
-        errorStream << "Error: cannot apply OGRCoordinateTransformation in ImgRaster::geo2image" << std::endl;
+        errorStream << "Error: cannot apply OGRCoordinateTransformation in Jim::geo2image" << std::endl;
         throw(errorStream.str());
       }
     }
@@ -1227,7 +1227,7 @@ bool ImgRaster::geo2image(double x, double y, double& i, double& j, OGRCoordinat
  * @param x,y georeferenced coordinates in x and y (can be fraction of pixels)
  * @return true if image is georeferenced
  **/
-bool ImgRaster::image2geo(double i, double j, double& x, double& y, OGRCoordinateTransformation *poCT) const
+bool Jim::image2geo(double i, double j, double& x, double& y, OGRCoordinateTransformation *poCT) const
 {
   try{
     vector<double> gt(6);
@@ -1238,7 +1238,7 @@ bool ImgRaster::image2geo(double i, double j, double& x, double& y, OGRCoordinat
     if(poCT){
       if(!poCT->Transform(1,&x,&y)){
         std::ostringstream errorStream;
-        errorStream << "Error: cannot apply OGRCoordinateTransformation in ImgRaster::image2geo" << std::endl;
+        errorStream << "Error: cannot apply OGRCoordinateTransformation in Jim::image2geo" << std::endl;
         throw(errorStream.str());
       }
     }
@@ -1265,7 +1265,7 @@ bool ImgRaster::image2geo(double i, double j, double& x, double& y, OGRCoordinat
  * @param x,y georeferenced coordinates in x and y
  * @return true if image covers the georeferenced location
  **/
-bool ImgRaster::covers(double x, double  y, OGRCoordinateTransformation *poCT) const
+bool Jim::covers(double x, double  y, OGRCoordinateTransformation *poCT) const
 {
   double theULX, theULY, theLRX, theLRY;
   getBoundingBox(theULX,theULY,theLRX,theLRY);
@@ -1274,7 +1274,7 @@ bool ImgRaster::covers(double x, double  y, OGRCoordinateTransformation *poCT) c
   if(poCT){
     if(!poCT->Transform(1,&ximg,&yimg)){
       std::ostringstream errorStream;
-      errorStream << "Error: cannot apply OGRCoordinateTransformation in ImgRaster::covers (1)" << std::endl;
+      errorStream << "Error: cannot apply OGRCoordinateTransformation in Jim::covers (1)" << std::endl;
       throw(errorStream.str());
     }
   }
@@ -1298,7 +1298,7 @@ bool ImgRaster::covers(double x, double  y, OGRCoordinateTransformation *poCT) c
  * @param lry lower left coordinate in y
  * @return true if image (partially or all if all is set) covers the bounding box
  **/
-bool ImgRaster::covers(double ulx, double  uly, double lrx, double lry, bool all, OGRCoordinateTransformation *poCT) const
+bool Jim::covers(double ulx, double  uly, double lrx, double lry, bool all, OGRCoordinateTransformation *poCT) const
 {
   double theULX, theULY, theLRX, theLRY;
   getBoundingBox(theULX,theULY,theLRX,theLRY);
@@ -1319,7 +1319,7 @@ bool ImgRaster::covers(double ulx, double  uly, double lrx, double lry, bool all
     yvector[3]=lryimg;
     if(!poCT->Transform(xvector.size(),&xvector[0],&yvector[0])){
       std::ostringstream errorStream;
-      errorStream << "Error: cannot apply OGRCoordinateTransformation in ImgRaster::covers (2)" << std::endl;
+      errorStream << "Error: cannot apply OGRCoordinateTransformation in Jim::covers (2)" << std::endl;
       throw(errorStream.str());
     }
     ulximg=std::min(xvector[0],xvector[2]);
@@ -1337,7 +1337,7 @@ bool ImgRaster::covers(double ulx, double  uly, double lrx, double lry, bool all
  * @param noDataValues standard template library (stl) vector containing no data values
  * @return number of no data values in this dataset
  **/
-CPLErr ImgRaster::getNoDataValues(std::vector<double>& noDataValues) const
+CPLErr Jim::getNoDataValues(std::vector<double>& noDataValues) const
 {
   if(m_noDataValues.size()){
     noDataValues=m_noDataValues;
@@ -1351,7 +1351,7 @@ CPLErr ImgRaster::getNoDataValues(std::vector<double>& noDataValues) const
  * @param noDataValue no data value to be pushed for this dataset
  * @return CE_None if successful
  **/
-CPLErr ImgRaster::pushNoDataValue(double noDataValue)
+CPLErr Jim::pushNoDataValue(double noDataValue)
 {
   if(find(m_noDataValues.begin(),m_noDataValues.end(),noDataValue)==m_noDataValues.end())
     m_noDataValues.push_back(noDataValue);
@@ -1361,7 +1361,7 @@ CPLErr ImgRaster::pushNoDataValue(double noDataValue)
     return(CE_Warning);
 }
 
-CPLErr ImgRaster::open(const std::string& filename, bool readData, unsigned int memory){
+CPLErr Jim::open(const std::string& filename, bool readData, unsigned int memory){
   reset();
   m_nplane=1;
   m_access=READ_ONLY;
@@ -1379,7 +1379,7 @@ CPLErr ImgRaster::open(const std::string& filename, bool readData, unsigned int 
   return(CE_None);
 }
 
-CPLErr ImgRaster::registerDriver()
+CPLErr Jim::registerDriver()
 {
   GDALAllRegister();
   if(writeMode()){
@@ -1488,7 +1488,7 @@ CPLErr ImgRaster::registerDriver()
 }
 
 //Open raster dataset for reading or writing
-CPLErr ImgRaster::open(app::AppFactory &app){
+CPLErr Jim::open(app::AppFactory &app){
   //input
   Optionpk<std::string> input_opt("fn", "filename", "filename");
   Optionpk<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
@@ -1647,19 +1647,19 @@ CPLErr ImgRaster::open(app::AppFactory &app){
       if(dx_opt.empty()){
         std::ostringstream errorStream;
         errorStream << "Warning: cell size in x not defined (use option --dx)." << std::endl;
-        // ImgRaster();
+        // Jim();
         throw(errorStream.str());
       }
       if(dy_opt.empty()){
         std::ostringstream errorStream;
         errorStream << "Warning: cell size in y not defined (use option --dy)." << std::endl;
-        // ImgRaster();
+        // Jim();
         throw(errorStream.str());
       }
       if(ulx_opt.empty()||uly_opt.empty()||lrx_opt.empty()||lry_opt.empty()){
         std::ostringstream errorStream;
         errorStream << "Warning: bounding box not defined (use options --ulx --uly --lrx --lry)." << std::endl;
-        // ImgRaster();
+        // Jim();
         throw(errorStream.str());
       }
       nsample_opt.clear();
@@ -1671,13 +1671,13 @@ CPLErr ImgRaster::open(app::AppFactory &app){
       if(nsample_opt.empty()){
         std::ostringstream errorStream;
         errorStream << "Warning: no number of columns (use option --ncol)." << std::endl;
-        // ImgRaster();
+        // Jim();
         throw(errorStream.str());
       }
       if(nline_opt.empty()){
         std::ostringstream errorStream;
         errorStream << "Warning: no number of rows (use option --nrow)." << std::endl;
-        // ImgRaster();
+        // Jim();
         throw(errorStream.str());
       }
     }
@@ -2053,7 +2053,7 @@ CPLErr ImgRaster::open(app::AppFactory &app){
   else{
     std::ostringstream errorStream;
     errorStream << "Warning: no number of rows or columns provided, nor input filename." << std::endl;
-    // ImgRaster();
+    // Jim();
     throw(errorStream.str());
   }
   setNoData(nodata_opt);
@@ -2064,7 +2064,7 @@ CPLErr ImgRaster::open(app::AppFactory &app){
  * @param band Band that must be read to cache
  * @return true if block was read
  **/
-CPLErr ImgRaster::readDataDS(int band, int ds_band)
+CPLErr Jim::readDataDS(int band, int ds_band)
 {
   CPLErr returnValue=CE_None;
   if(m_blockSize<nrOfRow()){
@@ -2082,7 +2082,7 @@ CPLErr ImgRaster::readDataDS(int band, int ds_band)
   return(readNewBlockDS(0,band,ds_band));
 }
 
-// CPLErr ImgRaster::readData(int band)
+// CPLErr Jim::readData(int band)
 // {
 //   CPLErr returnValue=CE_None;
 //   if(m_blockSize<nrOfRow()){
@@ -2109,7 +2109,7 @@ CPLErr ImgRaster::readDataDS(int band, int ds_band)
 /**
  * @return true if block was read
  **/
-CPLErr ImgRaster::readData()
+CPLErr Jim::readData()
 {
   CPLErr returnValue=CE_None;
   for(int iband=0;iband<nrOfBand();++iband){
@@ -2124,7 +2124,7 @@ CPLErr ImgRaster::readData()
  * @param band Band that must be read to cache
  * @return true if block was read
  **/
-CPLErr ImgRaster::readNewBlockDS(int row, int iband, int ds_band){
+CPLErr Jim::readNewBlockDS(int row, int iband, int ds_band){
   CPLErr returnValue=CE_None;
   if(m_gds == NULL){
     std::string errorString="Error in readNewBlock";
@@ -2266,7 +2266,7 @@ CPLErr ImgRaster::readNewBlockDS(int row, int iband, int ds_band){
   return(returnValue);//new block was read
 }
 
-// CPLErr ImgRaster::readNewBlock(int row, int band)
+// CPLErr Jim::readNewBlock(int row, int band)
 // {
 //   CPLErr returnValue=CE_None;
 //   if(m_gds == NULL){
@@ -2293,7 +2293,7 @@ CPLErr ImgRaster::readNewBlockDS(int row, int iband, int ds_band){
 // }
 
 #if MIALIB == 1
-CPLErr ImgRaster::readDataPlanes(std::vector<int> bands){
+CPLErr Jim::readDataPlanes(std::vector<int> bands){
   CPLErr returnValue=CE_None;
   if(m_gds == NULL){
     std::string errorString="Error in readNewBlock";
@@ -2387,7 +2387,7 @@ CPLErr ImgRaster::readDataPlanes(std::vector<int> bands){
  * @param band Search mininum value in image for this band
  * @return minimum value in image for the selected band
  **/
-double ImgRaster::getMin(int& x, int& y, int band){
+double Jim::getMin(int& x, int& y, int band){
   double minValue=0;
   std::vector<double> lineBuffer(nrOfCol());
   bool isValid=false;
@@ -2423,7 +2423,7 @@ double ImgRaster::getMin(int& x, int& y, int band){
  * @param band Search mininum value in image for this band
  * @return maximum value in image for the selected band
  **/
-double ImgRaster::getMax(int& x, int& y, int band){
+double Jim::getMax(int& x, int& y, int band){
   double maxValue=0;
   std::vector<double> lineBuffer(nrOfCol());
   bool isValid=false;
@@ -2459,7 +2459,7 @@ double ImgRaster::getMax(int& x, int& y, int band){
  * @param minValue Reported minimum value within searched region
  * @param maxValue Reported maximum value within searched region
  **/
-CPLErr ImgRaster::getMinMax(int startCol, int endCol, int startRow, int endRow, int band, double& minValue, double& maxValue)
+CPLErr Jim::getMinMax(int startCol, int endCol, int startRow, int endRow, int band, double& minValue, double& maxValue)
 {
   bool isConstraint=(maxValue>minValue);
   double minConstraint=minValue;
@@ -2508,7 +2508,7 @@ CPLErr ImgRaster::getMinMax(int startCol, int endCol, int startRow, int endRow, 
  * @param maxValue Reported maximum value in image
  * @param band Search extreme value in image for this band
  **/
-CPLErr ImgRaster::getMinMax(double& minValue, double& maxValue, int band)
+CPLErr Jim::getMinMax(double& minValue, double& maxValue, int band)
 {
   bool isConstraint=(maxValue>minValue);
   double minConstraint=minValue;
@@ -2559,7 +2559,7 @@ CPLErr ImgRaster::getMinMax(double& minValue, double& maxValue, int band)
  * @param kde Apply kernel density function for a Gaussian basis function
  * @return number of valid pixels in this dataset for the the selected band
  **/
-double ImgRaster::getHistogram(std::vector<double>& histvector, double& min, double& max, int& nbin, int theBand, bool kde){
+double Jim::getHistogram(std::vector<double>& histvector, double& min, double& max, int& nbin, int theBand, bool kde){
   double minValue=0;
   double maxValue=0;
 
@@ -2658,7 +2658,7 @@ double ImgRaster::getHistogram(std::vector<double>& histvector, double& min, dou
  * @param range Sorted vector containing the range of image values
  * @param band The band for which to calculate the range
  **/
-CPLErr ImgRaster::getRange(std::vector<short>& range, int band)
+CPLErr Jim::getRange(std::vector<short>& range, int band)
 {
   std::vector<short> lineBuffer(nrOfCol());
   range.clear();
@@ -2677,7 +2677,7 @@ CPLErr ImgRaster::getRange(std::vector<short>& range, int band)
  * @param band The band for which to calculate the number of valid pixels
  * @return number of valid pixels in this dataset for the the selected band
  **/
-unsigned long int ImgRaster::getNvalid(int band)
+unsigned long int Jim::getNvalid(int band)
 {
   unsigned long int nvalid=0;
   if(m_noDataValues.size()){
@@ -2701,7 +2701,7 @@ unsigned long int ImgRaster::getNvalid(int band)
  * @param band The band for which to calculate the number of valid pixels
  * @return number of invalid pixels in this dataset for the the selected band
  **/
-unsigned long int ImgRaster::getNinvalid(int band)
+unsigned long int Jim::getNinvalid(int band)
 {
   unsigned long int nvalid=0;
   if(m_noDataValues.size()){
@@ -2726,7 +2726,7 @@ unsigned long int ImgRaster::getNinvalid(int band)
  * @param band The band for which to calculate the number of valid pixels
  **/
 
-void ImgRaster::getRefPix(double& refX, double &refY, int band)
+void Jim::getRefPix(double& refX, double &refY, int band)
 {
   std::vector<double> lineBuffer(nrOfCol());
   double validCol=0;
@@ -2773,7 +2773,7 @@ void ImgRaster::getRefPix(double& refX, double &refY, int band)
  * @param band Band that must be written in cache
  * @return true if write was successful
  **/
-CPLErr ImgRaster::writeNewBlock(int row, int band)
+CPLErr Jim::writeNewBlock(int row, int band)
 {
   CPLErr returnValue=CE_None;
   if(m_gds == NULL){
@@ -2802,7 +2802,7 @@ CPLErr ImgRaster::writeNewBlock(int row, int band)
 }
 
 
-CPLErr ImgRaster::write(){
+CPLErr Jim::write(){
   //write, but do not reset
   if(m_data.size()&&m_filename.size()){
     for(int iband=0;iband<nrOfBand();++iband)
@@ -2827,13 +2827,13 @@ CPLErr ImgRaster::write(){
  * @param nodata Nodata value to put in image.
  * @return CE_None if successful, else CE_Failure
  **/
-CPLErr ImgRaster::write(app::AppFactory &app){
+CPLErr Jim::write(app::AppFactory &app){
   setFile(app);
   write();
 }
 
-///Create a JSON string from a ImgRaster image
-std::string ImgRaster::jim2json(){
+///Create a JSON string from a Jim image
+std::string Jim::jim2json(){
   Json::Value custom;
   custom["size"]=static_cast<int>(1);
   int iimg=0;
@@ -2854,13 +2854,13 @@ std::string ImgRaster::jim2json(){
   return(fastWriter.write(custom));
 }
 
-std::shared_ptr<ImgRaster> ImgRaster::clone(bool copyData) {
-  std::shared_ptr<ImgRaster> pImgRaster=std::dynamic_pointer_cast<ImgRaster>(cloneImpl(copyData));
-  if(pImgRaster)
-    return(pImgRaster);
+std::shared_ptr<Jim> Jim::clone(bool copyData) {
+  std::shared_ptr<Jim> pJim=std::dynamic_pointer_cast<Jim>(cloneImpl(copyData));
+  if(pJim)
+    return(pJim);
   else{
     std::cerr << "Warning: static pointer cast may slice object" << std::endl;
-    return(std::static_pointer_cast<ImgRaster>(cloneImpl(copyData)));
+    return(std::static_pointer_cast<Jim>(cloneImpl(copyData)));
   }
 }
 
@@ -2869,7 +2869,7 @@ std::shared_ptr<ImgRaster> ImgRaster::clone(bool copyData) {
 //  * @param imgSrc Use this source image as a template to copy image attributes
 //  * @param options Creation options
 //  **/
-// void ImgRaster::open(const std::string& filename, const ImgReaderGdal& imgSrc, const std::vector<std::string>& options)
+// void Jim::open(const std::string& filename, const ImgReaderGdal& imgSrc, const std::vector<std::string>& options)
 // {
 //   m_ncol=imgSrc.nrOfCol();
 //   m_nrow=imgSrc.nrOfRow();
@@ -2886,7 +2886,7 @@ std::shared_ptr<ImgRaster> ImgRaster::clone(bool copyData) {
  * @param imgSrc Use this source image as a template to copy image attributes
  * @param options Creation options
  **/
-CPLErr ImgRaster::open(const std::string& filename, const ImgRaster& imgSrc, const std::vector<std::string>& options)
+CPLErr Jim::open(const std::string& filename, const Jim& imgSrc, const std::vector<std::string>& options)
 {
   return(open(filename,imgSrc,0,options));
 }
@@ -2897,7 +2897,7 @@ CPLErr ImgRaster::open(const std::string& filename, const ImgRaster& imgSrc, con
  * @param memory Available memory to cache image raster data (in MB)
  * @param options Creation options
  **/
-CPLErr ImgRaster::open(const std::string& filename, const ImgRaster& imgSrc, unsigned int memory, const std::vector<std::string>& options)
+CPLErr Jim::open(const std::string& filename, const Jim& imgSrc, unsigned int memory, const std::vector<std::string>& options)
 {
   m_ncol=imgSrc.nrOfCol();
   m_nrow=imgSrc.nrOfRow();
@@ -2918,7 +2918,7 @@ CPLErr ImgRaster::open(const std::string& filename, const ImgRaster& imgSrc, uns
  * @param imgSrc Use this source image as a template to copy image attributes
  * @param copyData Copy data from source image when true
  **/
-CPLErr ImgRaster::open(ImgRaster& imgSrc, bool copyData)
+CPLErr Jim::open(Jim& imgSrc, bool copyData)
 {
   m_ncol=imgSrc.nrOfCol();
   m_nrow=imgSrc.nrOfRow();
@@ -2949,7 +2949,7 @@ CPLErr ImgRaster::open(ImgRaster& imgSrc, bool copyData)
  * @param imgSrc Use this source image as a template to copy image attributes
  * @param copyData Copy data from source image when true
  **/
-// CPLErr ImgRaster::open(std::shared_ptr<ImgRaster> imgSrc, bool copyData)
+// CPLErr Jim::open(std::shared_ptr<Jim> imgSrc, bool copyData)
 // {
 //   m_ncol=imgSrc->nrOfCol();
 //   m_nrow=imgSrc->nrOfRow();
@@ -2998,7 +2998,7 @@ CPLErr ImgRaster::open(ImgRaster& imgSrc, bool copyData)
 //  * @param imageType Image type. Currently only those formats where the drivers support the Create method can be written
 //  * @param options Creation options
 //  **/
-// void ImgRaster::open(const std::string& filename, int ncol, int nrow, unsigned int nband, const GDALDataType& dataType, const std::string& imageType, const std::vector<std::string>& options)
+// void Jim::open(const std::string& filename, int ncol, int nrow, unsigned int nband, const GDALDataType& dataType, const std::string& imageType, const std::vector<std::string>& options)
 // {
 //   m_ncol = ncol;
 //   m_nrow = nrow;
@@ -3020,7 +3020,7 @@ CPLErr ImgRaster::open(ImgRaster& imgSrc, bool copyData)
  * @param memory Available memory to cache image raster data (in MB)
  * @param options Creation options
  **/
-CPLErr ImgRaster::open(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory, const std::vector<std::string>& options)
+CPLErr Jim::open(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory, const std::vector<std::string>& options)
 {
   m_ncol = ncol;
   m_nrow = nrow;
@@ -3036,7 +3036,7 @@ CPLErr ImgRaster::open(const std::string& filename, int ncol, int nrow, int nban
  * @param nband Number of bands in image
  * @param dataType The data type of the image (one of the GDAL supported datatypes: GDT_Byte, GDT_[U]Int[16|32], GDT_Float[32|64])
  **/
-CPLErr ImgRaster::open(int ncol, int nrow, int nband, const GDALDataType& dataType)
+CPLErr Jim::open(int ncol, int nrow, int nband, const GDALDataType& dataType)
 {
   m_ncol = ncol;
   m_nrow = nrow;
@@ -3057,7 +3057,7 @@ CPLErr ImgRaster::open(int ncol, int nrow, int nband, const GDALDataType& dataTy
 }
 
 ///Open an image for writing
- CPLErr ImgRaster::open(int ncol, int nrow, int nband, int nplane, const GDALDataType& dataType){
+ CPLErr Jim::open(int ncol, int nrow, int nband, int nplane, const GDALDataType& dataType){
    m_ncol=ncol;
    m_nrow=nrow;
    m_nplane=nplane;
@@ -3085,7 +3085,7 @@ CPLErr ImgRaster::open(int ncol, int nrow, int nband, const GDALDataType& dataTy
  * @param filename Open a raster dataset with this filename
  * @param imageType Image type. Currently only those formats where the drivers support the Create method can be written
  **/
-CPLErr ImgRaster::setFile(const std::string& filename, const std::string& imageType, unsigned int memory, const std::vector<std::string>& options)
+CPLErr Jim::setFile(const std::string& filename, const std::string& imageType, unsigned int memory, const std::vector<std::string>& options)
 {
   CPLErr returnValue=CE_None;
   m_access=WRITE;
@@ -3119,7 +3119,7 @@ CPLErr ImgRaster::setFile(const std::string& filename, const std::string& imageT
  * @param co Creation option for output file. Multiple options can be specified.
  * @param nodata Nodata value to put in image.
  **/
-CPLErr ImgRaster::setFile(app::AppFactory &app){
+CPLErr Jim::setFile(app::AppFactory &app){
   Optionpk<std::string> input_opt("fn", "filename", "filename");
   Optionpk<std::string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
   Optionpk<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
@@ -3161,42 +3161,42 @@ CPLErr ImgRaster::setFile(app::AppFactory &app){
 }
 
 ///Copy data
-CPLErr ImgRaster::copyData(void* data, int band){
+CPLErr Jim::copyData(void* data, int band){
   memcpy(data,m_data[band],getDataTypeSizeBytes()*nrOfCol()*m_blockSize*nrOfPlane());
   // memcpy(data,m_data[band],(GDALGetDataTypeSize(getDataType())>>3)*nrOfCol()*m_blockSize);
   return(CE_None);
 };
 
- std::shared_ptr<ImgRaster> ImgRaster::createImg() {
-   return(std::make_shared<ImgRaster>());
+ std::shared_ptr<Jim> Jim::createImg() {
+   return(std::make_shared<Jim>());
  };
 
- std::shared_ptr<ImgRaster> ImgRaster::createImg(app::AppFactory &theApp){
-   std::shared_ptr<ImgRaster> pImgRaster=std::make_shared<ImgRaster>(theApp);
-   return(pImgRaster);
+ std::shared_ptr<Jim> Jim::createImg(app::AppFactory &theApp){
+   std::shared_ptr<Jim> pJim=std::make_shared<Jim>(theApp);
+   return(pJim);
  }
 
- std::shared_ptr<ImgRaster> ImgRaster::createImg(const std::shared_ptr<ImgRaster> pSrc, bool copyData){
-   std::shared_ptr<ImgRaster> pImgRaster=std::make_shared<ImgRaster>(*pSrc,copyData);
-   return(pImgRaster);
+ std::shared_ptr<Jim> Jim::createImg(const std::shared_ptr<Jim> pSrc, bool copyData){
+   std::shared_ptr<Jim> pJim=std::make_shared<Jim>(*pSrc,copyData);
+   return(pJim);
  }
 
- /* ///Create new shared pointer to ImgRaster object */
+ /* ///Create new shared pointer to Jim object */
  /**
   * @param input (type: std::string) input filename
-  * @return shared pointer to new ImgRaster object
+  * @return shared pointer to new Jim object
   **/
- std::shared_ptr<ImgRaster> ImgRaster::createImg(const std::string filename, bool readData, unsigned int memory){
-   std::shared_ptr<ImgRaster> pImgRaster=std::make_shared<ImgRaster>(filename,readData,memory);
-   // std::shared_ptr<ImgRaster> pImgRaster=std::make_shared<ImgRaster>(filename,memory);
-   return(pImgRaster);
+ std::shared_ptr<Jim> Jim::createImg(const std::string filename, bool readData, unsigned int memory){
+   std::shared_ptr<Jim> pJim=std::make_shared<Jim>(filename,readData,memory);
+   // std::shared_ptr<Jim> pJim=std::make_shared<Jim>(filename,memory);
+   return(pJim);
  }
 
 
 /**
  * @param metadata Set this metadata when writing the image (if supported byt the driver)
  **/
-CPLErr ImgRaster::setMetadata(char** metadata)
+CPLErr Jim::setMetadata(char** metadata)
 {
   if(m_gds){
     m_gds->SetMetadata(metadata);
@@ -3207,7 +3207,7 @@ CPLErr ImgRaster::setMetadata(char** metadata)
 }
 
 //default projection: ETSR-LAEA
-// std::string ImgRaster::setProjection(void)
+// std::string Jim::setProjection(void)
 // {
 //   std::string theProjection;
 //   OGRSpatialReference oSRS;
@@ -3230,7 +3230,7 @@ CPLErr ImgRaster::setMetadata(char** metadata)
  * @param filename ASCII file containing 5 columns: index R G B ALFA (0:transparent, 255:solid)
  * @param band band number to set color table (starting counting from 0)
  **/
-CPLErr ImgRaster::setColorTable(const std::string& filename, int band)
+CPLErr Jim::setColorTable(const std::string& filename, int band)
 {
   //todo: fool proof table in file (no checking currently done...)
   std::ifstream ftable(filename.c_str(),std::ios::in);
@@ -3258,7 +3258,7 @@ CPLErr ImgRaster::setColorTable(const std::string& filename, int band)
  * @param colorTable Instance of the GDAL class GDALColorTable
  * @param band band number to set color table (starting counting from 0)
  **/
-CPLErr ImgRaster::setColorTable(GDALColorTable* colorTable, int band)
+CPLErr Jim::setColorTable(GDALColorTable* colorTable, int band)
 {
   if(m_gds){
     (m_gds->GetRasterBand(band+1))->SetColorTable(colorTable);
@@ -3269,7 +3269,7 @@ CPLErr ImgRaster::setColorTable(GDALColorTable* colorTable, int band)
 }
 
 // //write an entire image from memory to file
-// bool ImgRaster::writeData(void* pdata, const GDALDataType& dataType, int band){
+// bool Jim::writeData(void* pdata, const GDALDataType& dataType, int band){
 //   //fetch raster band
 //   GDALRasterBand  *poBand;
 //   if(band>=nrOfBand()+1){
@@ -3298,7 +3298,7 @@ CPLErr ImgRaster::setColorTable(GDALColorTable* colorTable, int band)
  * May be REPLACE (the default) or ADD. REPLACE results in overwriting of value, while ADD adds the new value to the existing raster, suitable for heatmaps for instance.
  * @param layernames Names of the vector dataset layers to process. Leave empty to process all layers
  **/
-// CPLErr ImgRaster::rasterizeOgr(ImgReaderOgr& ogrReader, const std::vector<double>& burnValues, const std::vector<std::string>& eoption, const std::vector<std::string>& layernames ){
+// CPLErr Jim::rasterizeOgr(ImgReaderOgr& ogrReader, const std::vector<double>& burnValues, const std::vector<std::string>& eoption, const std::vector<std::string>& layernames ){
 //   std::vector<int> bands;
 //   if(burnValues.empty()&&eoption.empty()){
 //     std::string errorString="Error: either burn values or control options must be provided";
@@ -3364,7 +3364,7 @@ CPLErr ImgRaster::setColorTable(GDALColorTable* colorTable, int band)
 //  * @param burnValues Values to burn into raster cells (one value for each band)
 //  * @param layernames Names of the vector dataset layers to process. Leave empty to process all layers
 //  **/
-// CPLErr ImgRaster::rasterizeBuf(ImgReaderOgr& ogrReader, double burnValue, const std::vector<std::string>& layernames ){
+// CPLErr Jim::rasterizeBuf(ImgReaderOgr& ogrReader, double burnValue, const std::vector<std::string>& layernames ){
 //   if(m_blockSize<nrOfRow()){
 //     std::ostringstream s;
 //     s << "Error: increase memory to perform rasterize in entirely in buffer (now at " << 100.0*m_blockSize/nrOfRow() << "%)";
@@ -3402,7 +3402,7 @@ CPLErr ImgRaster::setColorTable(GDALColorTable* colorTable, int band)
 //   return(CE_None);
 // }
 
-CPLErr ImgRaster::rasterizeBuf(const std::string& ogrFilename){
+CPLErr Jim::rasterizeBuf(const std::string& ogrFilename){
   VectorOgr ogrReader;
   std::vector<std::string> layernames;
   layernames.clear();
@@ -3427,7 +3427,7 @@ CPLErr ImgRaster::rasterizeBuf(const std::string& ogrFilename){
  * May be REPLACE (the default) or ADD. REPLACE results in overwriting of value, while ADD adds the new value to the existing raster, suitable for heatmaps for instance.
  * @param layernames Names of the vector dataset layers to process. Leave empty to process all layers
  **/
-// CPLErr ImgRaster::rasterizeBuf(ImgReaderOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption, const std::vector<std::string>& layernames ){
+// CPLErr Jim::rasterizeBuf(ImgReaderOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption, const std::vector<std::string>& layernames ){
 //   if(m_blockSize<nrOfRow()){
 //     std::ostringstream s;
 //     s << "Error: increase memory to perform rasterize in entirely in buffer (now at " << 100.0*m_blockSize/nrOfRow() << "%)";
@@ -3468,7 +3468,7 @@ CPLErr ImgRaster::rasterizeBuf(const std::string& ogrFilename){
 
 //todo: support transform
 ///Warning: this function cannot be exported via SWIG to Python as such, as it is destructive
-CPLErr ImgRaster::rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption, const std::vector<std::string>& layernames ){
+CPLErr Jim::rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption, const std::vector<std::string>& layernames ){
   if(m_blockSize<nrOfRow()){
     std::ostringstream s;
     s << "Error: increase memory to perform rasterize in entirely in buffer (now at " << 100.0*m_blockSize/nrOfRow() << "%)";
@@ -3516,8 +3516,8 @@ CPLErr ImgRaster::rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std
  *
  * @return output image
  */
-std::shared_ptr<ImgRaster> ImgRaster::setThreshold(double t1, double t2){
-  std::shared_ptr<ImgRaster> imgWriter=ImgRaster::createImg();
+std::shared_ptr<Jim> Jim::setThreshold(double t1, double t2){
+  std::shared_ptr<Jim> imgWriter=Jim::createImg();
   setThreshold(*imgWriter, t1, t2);
   return(imgWriter);
 }
@@ -3530,8 +3530,8 @@ std::shared_ptr<ImgRaster> ImgRaster::setThreshold(double t1, double t2){
  *
  * @return output image
  */
-std::shared_ptr<ImgRaster> ImgRaster::setAbsThreshold(double t1, double t2){
-  std::shared_ptr<ImgRaster> imgWriter=ImgRaster::createImg();
+std::shared_ptr<Jim> Jim::setAbsThreshold(double t1, double t2){
+  std::shared_ptr<Jim> imgWriter=Jim::createImg();
   setAbsThreshold(*imgWriter, t1, t2);
   return(imgWriter);
 }
@@ -3545,7 +3545,7 @@ std::shared_ptr<ImgRaster> ImgRaster::setAbsThreshold(double t1, double t2){
  *
  * @return CE_None if success, CE_Failure if failed
  */
-CPLErr ImgRaster::setThreshold(ImgRaster& imgWriter, double t1, double t2){
+CPLErr Jim::setThreshold(Jim& imgWriter, double t1, double t2){
   try{
     imgWriter.open(*this,false);
     if(m_noDataValues.empty()){
@@ -3589,7 +3589,7 @@ CPLErr ImgRaster::setThreshold(ImgRaster& imgWriter, double t1, double t2){
  *
  * @return CE_None if success, CE_Failure if failed
  */
-CPLErr ImgRaster::setAbsThreshold(ImgRaster& imgWriter, double t1, double t2){
+CPLErr Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2){
   try{
     imgWriter.open(*this,false);
     if(m_noDataValues.empty()){
@@ -3633,8 +3633,8 @@ CPLErr ImgRaster::setAbsThreshold(ImgRaster& imgWriter, double t1, double t2){
  *
  * @return output image
  */
-std::shared_ptr<ImgRaster> ImgRaster::setThreshold(double t1, double t2, double value){
-  std::shared_ptr<ImgRaster> imgWriter=ImgRaster::createImg();
+std::shared_ptr<Jim> Jim::setThreshold(double t1, double t2, double value){
+  std::shared_ptr<Jim> imgWriter=Jim::createImg();
   setThreshold(*imgWriter, t1, t2, value);
   return(imgWriter);
 }
@@ -3648,14 +3648,14 @@ std::shared_ptr<ImgRaster> ImgRaster::setThreshold(double t1, double t2, double 
  *
  * @return output image
  */
-std::shared_ptr<ImgRaster> ImgRaster::setAbsThreshold(double t1, double t2, double value){
-  std::shared_ptr<ImgRaster> imgWriter=ImgRaster::createImg();
+std::shared_ptr<Jim> Jim::setAbsThreshold(double t1, double t2, double value){
+  std::shared_ptr<Jim> imgWriter=Jim::createImg();
   setAbsThreshold(*imgWriter, t1, t2, value);
   return(imgWriter);
 }
 
-std::shared_ptr<ImgRaster> ImgRaster::setThreshold(app::AppFactory &theApp){
-  std::shared_ptr<ImgRaster> imgWriter=ImgRaster::createImg();
+std::shared_ptr<Jim> Jim::setThreshold(app::AppFactory &theApp){
+  std::shared_ptr<Jim> imgWriter=Jim::createImg();
   setThreshold(*imgWriter, theApp);
   return(imgWriter);
 }
@@ -3668,7 +3668,7 @@ std::shared_ptr<ImgRaster> ImgRaster::setThreshold(app::AppFactory &theApp){
  *
  * @return CE_None if success, CE_Failure if failed
  */
-CPLErr ImgRaster::setThreshold(ImgRaster& imgWriter, double t1, double t2, double value){
+CPLErr Jim::setThreshold(Jim& imgWriter, double t1, double t2, double value){
   try{
     imgWriter.open(*this,false);
     if(m_noDataValues.empty()){
@@ -3712,7 +3712,7 @@ CPLErr ImgRaster::setThreshold(ImgRaster& imgWriter, double t1, double t2, doubl
  *
  * @return CE_None if success, CE_Failure if failed
  */
-CPLErr ImgRaster::setAbsThreshold(ImgRaster& imgWriter, double t1, double t2, double value){
+CPLErr Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2, double value){
   try{
     imgWriter.open(*this,false);
     if(m_noDataValues.empty()){
@@ -3747,7 +3747,7 @@ CPLErr ImgRaster::setAbsThreshold(ImgRaster& imgWriter, double t1, double t2, do
   return(CE_None);
 }
 
-CPLErr ImgRaster::setThreshold(ImgRaster& imgWriter, app::AppFactory &theApp){
+CPLErr Jim::setThreshold(Jim& imgWriter, app::AppFactory &theApp){
   Optionpk<double> min_opt("min", "min", "minimum value to be valid");
   Optionpk<double> max_opt("max", "max", "maximum value to be valid");
   Optionpk<double> value_opt("value", "value", "value to be set if within min and max (if not set, valid pixels will remain their input value)");
@@ -3797,22 +3797,22 @@ CPLErr ImgRaster::setThreshold(ImgRaster& imgWriter, app::AppFactory &theApp){
 }
 
 
-///crop ImgRaster image in memory returning ImgRaster image
-std::shared_ptr<ImgRaster> ImgRaster::cropOgr(VectorOgr& sampleReader, app::AppFactory& app){
-  std::shared_ptr<ImgRaster> imgWriter=ImgRaster::createImg();
+///crop Jim image in memory returning Jim image
+std::shared_ptr<Jim> Jim::cropOgr(VectorOgr& sampleReader, app::AppFactory& app){
+  std::shared_ptr<Jim> imgWriter=Jim::createImg();
   crop(sampleReader, *imgWriter, app);
   return(imgWriter);
 }
 
-///convert ImgRaster image in memory returning ImgRaster image (alias for crop)
-std::shared_ptr<ImgRaster> ImgRaster::warp(app::AppFactory& theApp){
-  std::shared_ptr<ImgRaster> imgWriter=ImgRaster::createImg();
+///convert Jim image in memory returning Jim image (alias for crop)
+std::shared_ptr<Jim> Jim::warp(app::AppFactory& theApp){
+  std::shared_ptr<Jim> imgWriter=Jim::createImg();
   warp(*imgWriter, theApp);
   return(imgWriter);
 }
 
-///convert ImgRaster image in memory returning ImgRaster image (alias for crop)
-CPLErr ImgRaster::warp(ImgRaster& imgWriter, app::AppFactory &theApp){
+///convert Jim image in memory returning Jim image (alias for crop)
+CPLErr Jim::warp(Jim& imgWriter, app::AppFactory &theApp){
   Optionpk<std::string> sourceSRS_opt("s_srs", "s_srs", "Source spatial reference for the input file, e.g., epsg:3035 to use European projection and force to European grid");
   Optionpk<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference for the output file, e.g., epsg:3035 to use European projection and force to European grid");
   Optionpk<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
@@ -3875,7 +3875,7 @@ CPLErr ImgRaster::warp(ImgRaster& imgWriter, app::AppFactory &theApp){
     app::AppFactory convertApp(theApp);
     convertApp.clearOption("t_srs");
     convertApp.clearOption("resample");
-    ImgRaster::convert(imgWriter,convertApp);
+    Jim::convert(imgWriter,convertApp);
     return res;
   }
   // char *sourceWKT=getProjectionRef().c_str();
@@ -3883,7 +3883,7 @@ CPLErr ImgRaster::warp(ImgRaster& imgWriter, app::AppFactory &theApp){
   targetSpatialRef.exportToWkt(&targetWKT);
   std::vector<double> sourceGT(6);
   std::vector<double> targetGT(6);
-  ImgRaster::getGeoTransform(sourceGT);
+  Jim::getGeoTransform(sourceGT);
   //todo: warp first band to open imgWriter and consecutive bands in parallel
   for(int iband=0;iband<nrOfBand();++iband){
     if(verbose_opt[0])

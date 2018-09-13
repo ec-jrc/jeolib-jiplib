@@ -8,7 +8,7 @@ Change log
 #include <string>
 #include "base/Optionpk.h"
 #include "algorithms/StatFactory.h"
-#include "imageclasses/ImgRaster.h"
+#include "imageclasses/Jim.h"
 
 using namespace std;
 using namespace statfactory;
@@ -36,10 +36,10 @@ int main(int argc, char *argv[])
         exit(1);
       }
     }
-    ImgRaster imgRaster(app);
+    Jim imgRaster(app);
     imgRaster.setFile(output_opt[0],oformat_opt[0],memory_opt[0],option_opt);
-    // ImgRaster imgRaster(output_opt[0],oformat_opt[0],memory_opt[0],option_opt);
-    // ImgRaster::createImg(imgRaster,app);
+    // Jim imgRaster(output_opt[0],oformat_opt[0],memory_opt[0],option_opt);
+    // Jim::createImg(imgRaster,app);
     imgRaster.close();
   }
   catch(string helpString){

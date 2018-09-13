@@ -22,7 +22,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #include <memory>
 #include "pkclassify_lib.h"
-#include "ImgRaster.h"
+#include "Jim.h"
 #include "VectorOgr.h"
 #include "base/Optionpk.h"
 #include "apps/AppFactory.h"
@@ -62,9 +62,9 @@ using namespace app;
  * @param random (type: bool) (default: 1) Randomize training data for balancing and bagging
  * @return shared pointer to classified image object
  **/
-shared_ptr<ImgRaster> ImgRaster::classify(app::AppFactory& app){
+shared_ptr<Jim> Jim::classify(app::AppFactory& app){
   try{
-    shared_ptr<ImgRaster> imgWriter=createImg();
+    shared_ptr<Jim> imgWriter=createImg();
     classify(*imgWriter, app);
     return(imgWriter);
   }
@@ -117,7 +117,7 @@ shared_ptr<VectorOgr> VectorOgr::classify(app::AppFactory& app){
  * @param random (type: bool) (default: 1) Randomize training data for balancing and bagging
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr ImgRaster::classify(ImgRaster& imgWriter, app::AppFactory& app){
+CPLErr Jim::classify(Jim& imgWriter, app::AppFactory& app){
   vector<double> priors;
 
   //--------------------------- command line options ------------------------------------
@@ -171,7 +171,7 @@ CPLErr ImgRaster::classify(ImgRaster& imgWriter, app::AppFactory& app){
 }
 
 
-CPLErr ImgRaster::train(ImgList& referenceReader, app::AppFactory& app){
+CPLErr Jim::train(JimList& referenceReader, app::AppFactory& app){
   //--------------------------- command line options ------------------------------------
   Optionpk<string> method_opt("m", "method", "classification method: 'sml' (symbolic machine learning)");
   Optionpk<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
@@ -284,7 +284,7 @@ OGRErr VectorOgr::train(app::AppFactory& app){
   }
 }
 
-std::string ImgRaster::trainMem(ImgList& referenceReader, app::AppFactory& app){
+std::string Jim::trainMem(JimList& referenceReader, app::AppFactory& app){
   //--------------------------- command line options ------------------------------------
   Optionpk<string> method_opt("m", "method", "classification method: 'svm' (support vector machine), 'ann' (artificial neural network)");
 

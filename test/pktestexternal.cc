@@ -9,7 +9,7 @@ Change log
 #include <fstream>
 #include <assert.h>
 #include "base/Optionpk.h"
-#include "imageclasses/ImgRaster.h"
+#include "imageclasses/Jim.h"
 
 using namespace std;
 
@@ -50,13 +50,13 @@ int main(int argc, char *argv[])
   }
 
   try{
-    ImgRaster inputReader(input_opt[0]);
+    Jim inputReader(input_opt[0]);
     std::vector<void*> vdata(inputReader.nrOfBand());
     for(size_t iband=0;iband<inputReader.nrOfBand();++iband)
       vdata[iband]=inputReader.getDataPointer(iband);
     if(verbose_opt[0])
       std::cout << "construct externalRaster" << std::endl;
-    ImgRaster externalRaster;
+    Jim externalRaster;
     externalRaster.open(vdata,inputReader.nrOfCol(),inputReader.nrOfRow(),inputReader.nrOfPlane(),inputReader.getGDALDataType());
     externalRaster.setExternalData(true);
     externalRaster.setFile(output_opt[0],"GTiff");

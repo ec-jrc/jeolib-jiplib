@@ -19,7 +19,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #include <assert.h>
 
-#include "imageclasses/ImgRaster.h"
+#include "imageclasses/Jim.h"
 #include "imageclasses/VectorOgr.h"
 #include "base/Optionpk.h"
 #include "apps/AppFactory.h"
@@ -31,8 +31,8 @@ using namespace app;
  * @param app application specific option arguments
  * @return output image
  **/
-shared_ptr<ImgRaster> ImgRaster::setMask(ImgList& maskReader, app::AppFactory& app){
-  shared_ptr<ImgRaster> imgWriter=createImg();
+shared_ptr<Jim> Jim::setMask(JimList& maskReader, app::AppFactory& app){
+  shared_ptr<Jim> imgWriter=createImg();
   setMask(maskReader, *imgWriter, app);
   return(imgWriter);
 }
@@ -41,8 +41,8 @@ shared_ptr<ImgRaster> ImgRaster::setMask(ImgList& maskReader, app::AppFactory& a
  * @param app application specific option arguments
  * @return output image
  **/
-shared_ptr<ImgRaster> ImgRaster::setMask(VectorOgr& ogrReader, app::AppFactory& app){
-  shared_ptr<ImgRaster> imgWriter=createImg();
+shared_ptr<Jim> Jim::setMask(VectorOgr& ogrReader, app::AppFactory& app){
+  shared_ptr<Jim> imgWriter=createImg();
   setMask(ogrReader, *imgWriter, app);
   return(imgWriter);
 }
@@ -51,7 +51,7 @@ shared_ptr<ImgRaster> ImgRaster::setMask(VectorOgr& ogrReader, app::AppFactory& 
  * @param imgWriter output raster setmask dataset
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr ImgRaster::setMask(ImgList& maskReader, ImgRaster& imgWriter, app::AppFactory& app){
+CPLErr Jim::setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app){
   //command line options
   // Optionpk<string> mask_opt("m", "mask", "Mask image(s)");
   Optionpk<string> vectorMask_opt("vm", "vectormask", "Vector mask dataset(s)");
@@ -101,7 +101,7 @@ CPLErr ImgRaster::setMask(ImgList& maskReader, ImgRaster& imgWriter, app::AppFac
       errorStream << std::endl;
       throw(errorStream.str());
     }
-    // ImgRaster
+    // Jim
     // open(input_opt[0],memory_opt[0]);
     GDALDataType theType=GDT_Unknown;
     if(otype_opt.size()){
@@ -117,7 +117,7 @@ CPLErr ImgRaster::setMask(ImgList& maskReader, ImgRaster& imgWriter, app::AppFac
     }
     if(verbose_opt[0])
       cout << "Output pixel type:  " << GDALGetDataTypeName(theType) << endl;
-    // ImgRaster imgWriter;
+    // Jim imgWriter;
     try{
       imgWriter.open(nrOfCol(),nrOfRow(),nrOfBand(),theType);
       // for(unsigned int iband=0;iband<nrOfBand();++iband)
@@ -152,7 +152,7 @@ CPLErr ImgRaster::setMask(ImgList& maskReader, ImgRaster& imgWriter, app::AppFac
       }
     }
 
-    // vector<ImgRaster> maskReader(nmask);
+    // vector<Jim> maskReader(nmask);
     if(vectorMask_opt.size()){
       // if(mask_opt.size()){
       if(maskReader.size()){
@@ -162,7 +162,7 @@ CPLErr ImgRaster::setMask(ImgList& maskReader, ImgRaster& imgWriter, app::AppFac
       try{
         imgWriter.open(nrOfCol(),nrOfRow(),nrOfBand(),theType);
         for(int imask=0;imask<vectorMask_opt.size();++imask){
-          shared_ptr<ImgRaster> imgMask=createImg();
+          shared_ptr<Jim> imgMask=createImg();
           imgMask->open(nrOfCol(),nrOfRow(),1,GDT_Float64);
           double gt[6];
           gt[0]=getUlx();
@@ -378,7 +378,7 @@ CPLErr ImgRaster::setMask(ImgList& maskReader, ImgRaster& imgWriter, app::AppFac
  * @param imgWriter output raster setmask dataset
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr ImgRaster::setMask(VectorOgr& ogrReader, ImgRaster& imgWriter, app::AppFactory& app){
+CPLErr Jim::setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app){
   //command line options
   Optionpk<string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
   Optionpk<double> nodata_opt("nodata", "nodata", "nodata value to put in image if not valid", 0);
@@ -445,11 +445,11 @@ CPLErr ImgRaster::setMask(VectorOgr& ogrReader, ImgRaster& imgWriter, app::AppFa
       imgWriter.setColorTable(getColorTable());
     imgWriter.setNoData(nodata_opt);
 
-    ImgList maskReader;
+    JimList maskReader;
 
     try{
       imgWriter.open(nrOfCol(),nrOfRow(),nrOfBand(),theType);
-      shared_ptr<ImgRaster> imgMask=createImg();
+      shared_ptr<Jim> imgMask=createImg();
       //todo: check if GDT_Float64 is needed (Float32 might be sufficient)
       imgMask->open(nrOfCol(),nrOfRow(),1,GDT_Float64);
       double gt[6];

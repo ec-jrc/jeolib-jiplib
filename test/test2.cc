@@ -8,7 +8,7 @@ Change log
 #include "base/Optionpk.h"
 #include "algorithms/Filter2d.h"
 #include "apps/AppFactory.h"
-#include "imageclasses/ImgRaster.h"
+#include "imageclasses/Jim.h"
 
 using namespace std;
 
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
         exit(1);
       }
     }
-    shared_ptr<ImgRaster> outputImg=ImgRaster::createImg(app);
+    shared_ptr<Jim> outputImg=Jim::createImg(app);
     outputImg->setFile(output_opt[0],oformat_opt[0]);
     outputImg->close();
     std::cout << "test2: done" << std::endl;

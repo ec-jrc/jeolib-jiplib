@@ -27,7 +27,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 // #include <boost/filesystem.hpp>
 #include <ogr_geometry.h>
-#include "imageclasses/ImgRaster.h"
+#include "imageclasses/Jim.h"
 #include "imageclasses/VectorOgr.h"
 #include "base/Optionpk.h"
 #include "algorithms/StatFactory.h"
@@ -50,7 +50,7 @@ namespace rule{
  * @return output Vector
  **/
 // make sure to setSpatialFilterRect on vector before entering here
-shared_ptr<VectorOgr> ImgRaster::extractOgr(VectorOgr& sampleReader, AppFactory& app){
+shared_ptr<VectorOgr> Jim::extractOgr(VectorOgr& sampleReader, AppFactory& app){
   shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
   if(extractOgr(sampleReader, *ogrWriter, app)!=OGRERR_NONE){
     std::cerr << "Failed to extract" << std::endl;
@@ -62,7 +62,7 @@ shared_ptr<VectorOgr> ImgRaster::extractOgr(VectorOgr& sampleReader, AppFactory&
  * @param app application specific option arguments
  * @return output Vector
  **/
-shared_ptr<VectorOgr> ImgRaster::extractSample(AppFactory& app){
+shared_ptr<VectorOgr> Jim::extractSample(AppFactory& app){
   shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
   if(extractSample(*ogrWriter, app)!=OGRERR_NONE){
     std::cerr << "Failed to extract" << std::endl;
@@ -78,7 +78,7 @@ shared_ptr<VectorOgr> ImgRaster::extractSample(AppFactory& app){
 //todo: support multiple layers for writing
 //output vector ogrWriter will take spatial reference system of input vector sampleReader
 // make sure to setSpatialFilterRect on vector before entering here
-CPLErr ImgRaster::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory& app){
+CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory& app){
   // Optionpk<string> image_opt("i", "input", "Raster input dataset containing band information");
   // Optionpk<string> sample_opt("s", "sample", "OGR vector dataset with features to be extracted from input data. Output will contain features with input band information included.");
   // Optionpk<string> layer_opt("ln", "ln", "Layer name(s) in sample (leave empty to select all)");
@@ -222,7 +222,7 @@ CPLErr ImgRaster::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFa
         srcnodata_opt.push_back(srcnodata_opt[0]);
       stat.setNoDataValues(srcnodata_opt);
     }
-    ImgRaster maskReader;
+    Jim maskReader;
     if(mask_opt.size()){
       try{
         //todo: open with resampling, resolution and projection according to input
@@ -324,8 +324,8 @@ CPLErr ImgRaster::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFa
         //rasterize vector sample
         // ImgReaderOgr sampleReader;
         // VectorOgr sampleReader;
-        // std::shared_ptr<ImgRaster> sampleMask=ImgRaster::createImg();
-        ImgRaster sampleMask;
+        // std::shared_ptr<Jim> sampleMask=Jim::createImg();
+        Jim sampleMask;
         // sampleReader.open(sample_opt[0]);
         //layer bounding box in SRS of this image raster
         // double ulx,uly,lrx,lry;
@@ -1511,7 +1511,7 @@ CPLErr ImgRaster::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFa
 
               if(verbose_opt[0]>1)
                 std::cout << "read data within polygon" << std::endl;
-              ImgRaster blockRaster;
+              Jim blockRaster;
               AppFactory anApp;
               anApp.pushLongOption("ulx",ulx);
               anApp.pushLongOption("uly",uly);
@@ -2258,7 +2258,7 @@ CPLErr ImgRaster::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFa
  * @return CE_None if success, CE_Failure if failure
  */
 //todo: support multiple layers for writing
-CPLErr ImgRaster::extractSample(VectorOgr& ogrWriter, AppFactory& app){
+CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
   // Optionpk<string> image_opt("i", "input", "Raster input dataset containing band information");
   // Optionpk<string> sample_opt("s", "sample", "OGR vector dataset with features to be extracted from input data. Output will contain features with input band information included.");
   Optionpk<string> layer_opt("ln", "ln", "Layer name of output vector dataset");
@@ -2395,7 +2395,7 @@ CPLErr ImgRaster::extractSample(VectorOgr& ogrWriter, AppFactory& app){
         srcnodata_opt.push_back(srcnodata_opt[0]);
       stat.setNoDataValues(srcnodata_opt);
     }
-    ImgRaster maskReader;
+    Jim maskReader;
     if(mask_opt.size()){
       try{
         //todo: open with resampling, resolution and projection according to input
@@ -4331,8 +4331,8 @@ CPLErr ImgRaster::extractSample(VectorOgr& ogrWriter, AppFactory& app){
 //todo: support multiple layers for writing
 //output vector ogrWriter will take spatial reference system of input vector sampleReader
 // make sure to setSpatialFilterRect on vector before entering here
-//todo: extract each ImgRaster individually and store in tmpWriter and then join the tmpWriter in ogrWriter if different number of bands (or this is behavior of ImgMultiList?)
-CPLErr ImgList::extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, AppFactory& app){
+//todo: extract each Jim individually and store in tmpWriter and then join the tmpWriter in ogrWriter if different number of bands (or this is behavior of ImgMultiList?)
+CPLErr JimList::extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, AppFactory& app){
 
   Optionpk<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
   Optionpk<std::string> combine_opt("combine", "combine", "Combine results of extract by append or join (default is append)","append");
@@ -4354,7 +4354,7 @@ CPLErr ImgList::extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, AppFac
       append=false;
     app.clearOption("combine");
     app::AppFactory extractApp(app);
-    std::list<std::shared_ptr<ImgRaster> >::const_iterator imit=begin();
+    std::list<std::shared_ptr<Jim> >::const_iterator imit=begin();
     CPLErr result=CE_None;
     size_t iband=0;
 
@@ -4442,7 +4442,7 @@ CPLErr ImgList::extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, AppFac
  * @return output Vector
  **/
 // make sure to setSpatialFilterRect on vector before entering here
-shared_ptr<VectorOgr> ImgList::extractOgr(VectorOgr& sampleReader, AppFactory& app){
+shared_ptr<VectorOgr> JimList::extractOgr(VectorOgr& sampleReader, AppFactory& app){
   shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
   if(extractOgr(sampleReader, *ogrWriter, app)!=OGRERR_NONE){
     std::cerr << "Failed to extract" << std::endl;
@@ -4450,7 +4450,7 @@ shared_ptr<VectorOgr> ImgList::extractOgr(VectorOgr& sampleReader, AppFactory& a
   return(ogrWriter);
 }
 
-size_t ImgList::extractOgrMem(VectorOgr& sampleReader, vector<unsigned char> &vbytes, AppFactory& app){
+size_t JimList::extractOgrMem(VectorOgr& sampleReader, vector<unsigned char> &vbytes, AppFactory& app){
   try{
     size_t filesize=0;
     Optionpk<string> output_opt("o", "output", "Output sample dataset","/vsimem/extractmem");
@@ -4461,7 +4461,7 @@ size_t ImgList::extractOgrMem(VectorOgr& sampleReader, vector<unsigned char> &vb
     ogrformat_opt.retrieveOption(app);
 
     VectorOgr ogrWriter;
-    std::list<std::shared_ptr<ImgRaster> >::const_iterator imit=begin();
+    std::list<std::shared_ptr<Jim> >::const_iterator imit=begin();
     for(imit=begin();imit!=end();++imit){
       if(!((*imit)->isGeoRef())){
         string errorstring="Error: input image is not georeferenced";

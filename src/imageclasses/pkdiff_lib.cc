@@ -18,9 +18,8 @@ You should have received a copy of the GNU General Public License
 along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #include <assert.h>
-#include "imageclasses/ImgRaster.h"
-#include "imageclasses/ImgReaderOgr.h"
-#include "imageclasses/ImgWriterOgr.h"
+#include "imageclasses/Jim.h"
+#include "imageclasses/VectorOgr.h"
 #include "base/Optionpk.h"
 #include "apps/AppFactory.h"
 #include "algorithms/ConfusionMatrix.h"
@@ -33,7 +32,7 @@ using namespace app;
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr ImgRaster::diff(ImgRaster& imgReference, app::AppFactory& app){
+CPLErr Jim::diff(Jim& imgReference, app::AppFactory& app){
   Optionpk<string> mask_opt("m", "mask", "Use the first band of the specified file as a validity mask. Nodata values can be set with the option msknodata.");
   Optionpk<double> msknodata_opt("msknodata", "msknodata", "Mask value(s) where image is invalid. Use negative value for valid data (example: use -t -1: if only -1 is valid value)", 0);
   Optionpk<double> nodata_opt("nodata", "nodata", "No data value(s) in input or reference dataset are ignored");
@@ -85,7 +84,7 @@ CPLErr ImgRaster::diff(ImgRaster& imgReference, app::AppFactory& app){
       helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
       throw(helpStream.str());//help was invoked, stop processing
     }
-    ImgRaster maskReader;
+    Jim maskReader;
 
     if(verbose_opt[0]){
       cout << "no data flag(s) set to";
@@ -185,7 +184,7 @@ CPLErr ImgRaster::diff(ImgRaster& imgReference, app::AppFactory& app){
     GDALProgressFunc pfnProgress=GDALTermProgress;
     float progress=0;
     // if(reference_opt[0].find(".shp")!=string::npos){
-    ImgRaster gdalWriter;
+    Jim gdalWriter;
     // this->open(input_opt[0],memory_opt[0]);
     if(mask_opt.size())
       maskReader.open(mask_opt[0]);

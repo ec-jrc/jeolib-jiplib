@@ -65,7 +65,7 @@
 #endif
   }
 
-  ERROR_TYPE _ConvertNumPyArrayToJim( PyArrayObject *psArray, std::shared_ptr< ImgRaster > ajim){
+  ERROR_TYPE _ConvertNumPyArrayToJim( PyArrayObject *psArray, std::shared_ptr< Jim > ajim){
 #if MIALIB == 1
     IMAGE *im=ajim->getMIA();
     im->p_im=memcpy( (void *)GetImPtr(im), (void *)(psArray->data), GetImNx(im)*GetImNy(im)*GetImNz(im)*(GetImBitPerPixel(im)/8));
@@ -79,7 +79,7 @@
   /* ERROR_TYPE RasterIOJim( std::shared_ptr< jiplib::Jim > ajim, PyArrayObject *psArray) { */
   /* int RasterIOJim( std::shared_ptr< jiplib::Jim > ajim, PyArrayObject *psArray) { */
   /* int RasterIOJim( std::shared_ptr< jiplib::Jim > ajim ) { */
-  void RasterIOJim( std::shared_ptr< ImgRaster > ajim, int typeSizeByte, PyArrayObject *psArray) {
+  void RasterIOJim( std::shared_ptr< Jim > ajim, int typeSizeByte, PyArrayObject *psArray) {
     psArray->data = (char *)memcpy((void *)(psArray->data), ajim->getDataPointer(), ajim->nrOfCol()*ajim->nrOfRow()*ajim->nrOfPlane()*typeSizeByte );
   }
 %}

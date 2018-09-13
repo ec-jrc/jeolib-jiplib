@@ -18,13 +18,12 @@ You should have received a copy of the GNU General Public License
 along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #include <assert.h>
-#include "ImgRaster.h"
-#include "ImgList.h"
-#include "ImgReaderOgr.h"
-#include "ImgWriterOgr.h"
+#include "Jim.h"
+#include "JimList.h"
 #include "base/Optionpk.h"
 #include "apps/AppFactory.h"
 #include "algorithms/ConfusionMatrix.h"
+#include "imageclasses/VectorOgr.h"
 
 using namespace std;
 using namespace app;
@@ -51,9 +50,9 @@ using namespace app;
  * @param circular (type: bool) (default: 0) Use circular boundary
  * @return CE_None if successful, CE_Failure if not
  **/
-CPLErr ImgRaster::validate(AppFactory& app){
-  ImgList singleList;
-  std::shared_ptr<ImgRaster> imgReader=shared_from_this();
+CPLErr Jim::validate(AppFactory& app){
+  JimList singleList;
+  std::shared_ptr<Jim> imgReader=shared_from_this();
   singleList.pushImage(imgReader);
   if(singleList.validate(app).size())
     return(CE_None);
@@ -83,7 +82,7 @@ CPLErr ImgRaster::validate(AppFactory& app){
  * @param circular (type: bool) (default: 0) Use circular boundary
  * @return reference to the image collection
  **/
-ImgList& ImgList::validate(app::AppFactory& app){
+JimList& JimList::validate(app::AppFactory& app){
   Optionpk<string> reference_opt("ref", "reference", "Reference vector dataset");
   Optionpk<string> layer_opt("ln", "ln", "Layer name(s) in sample. Leave empty to select all (for vector reference datasets only)");
   Optionpk<string> mask_opt("m", "mask", "Use the first band of the specified file as a validity mask. Nodata values can be set with the option msknodata.");
@@ -141,9 +140,9 @@ ImgList& ImgList::validate(app::AppFactory& app){
       throw(helpStream.str());//help was invoked, stop processing
     }
 
-    ImgRaster inputReader;
-    ImgRaster maskReader;
-    ImgReaderOgr referenceReaderOgr;
+    Jim inputReader;
+    Jim maskReader;
+    VectorOgr referenceReaderOgr;
     if(verbose_opt[0]){
       cout << "no data flag(s) set to";
       for(int iflag=0;iflag<nodata_opt.size();++iflag)
@@ -191,7 +190,7 @@ ImgList& ImgList::validate(app::AppFactory& app){
     float progress=0;
     // if(reference_opt[0].find(".shp")!=string::npos){
     unsigned int iinput=0;
-    std::list<std::shared_ptr<ImgRaster> >::const_iterator pimit=begin();
+    std::list<std::shared_ptr<Jim> >::const_iterator pimit=begin();
     for(pimit=begin();pimit!=end();++pimit){
     // for(int iinput=0;iinput<this->size();++iinput){
       // if(verbose_opt[0])
@@ -212,7 +211,7 @@ ImgList& ImgList::validate(app::AppFactory& app){
         if(confusion_opt[0])
           referenceRange=inputRange;
 
-        ImgWriterOgr ogrWriter;
+        VectorOgr ogrWriter;
         if(output_opt.size()){
           try{
             ogrWriter.open(output_opt[iref],ogrformat_opt[0]);
@@ -222,7 +221,7 @@ ImgList& ImgList::validate(app::AppFactory& app){
             exit(1);
           }
         }
-        int nlayer=referenceReaderOgr.getDataSource()->GetLayerCount();
+        int nlayer=referenceReaderOgr.getLayerCount();
         for(int ilayer=0;ilayer<nlayer;++ilayer){
           progress=0;
           OGRLayer *readLayer=referenceReaderOgr.getLayer(ilayer);
@@ -243,13 +242,14 @@ ImgList& ImgList::validate(app::AppFactory& app){
             if(verbose_opt[0])
               cout << "creating layer: " << readLayer->GetName() << endl;
             // if(ogrWriter.createLayer(layername, referenceReaderOgr.getProjection(ilayer), referenceReaderOgr.getGeometryType(ilayer), papszOptions)==NULL)
-            writeLayer=ogrWriter.createLayer(readLayer->GetName(), referenceReaderOgr.getProjection(ilayer), wkbPoint, papszOptions);
+            ogrWriter.pushLayer(readLayer->GetName(), referenceReaderOgr.getProjection(ilayer), wkbPoint, papszOptions);
+            writeLayer=ogrWriter.getLayer(readLayer->GetName());
             assert(writeLayer);
             if(verbose_opt[0]){
               cout << "created layer" << endl;
               cout << "copy fields from " << reference_opt[iref] << endl;
             }
-            ogrWriter.copyFields(referenceReaderOgr,ilayer,ilayer);
+            ogrWriter.copyFields(referenceReaderOgr,std::vector<std::string>(),ilayer);
             //create extra field for classified label
             short theDim=boundary_opt[0];
             for(int windowJ=-theDim/2;windowJ<(theDim+1)/2;++windowJ){

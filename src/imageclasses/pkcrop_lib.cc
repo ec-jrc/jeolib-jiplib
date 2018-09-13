@@ -22,9 +22,9 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <algorithm>
 #include <memory>
-#include "imageclasses/ImgRaster.h"
+#include "imageclasses/Jim.h"
 #include "imageclasses/VectorOgr.h"
-#include "imageclasses/ImgList.h"
+#include "imageclasses/JimList.h"
 #include "base/Optionpk.h"
 #include "algorithms/Egcs.h"
 #include "algorithms/StatFactory.h"
@@ -33,8 +33,8 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 using namespace app;
 
-shared_ptr<ImgRaster> ImgRaster::convert(AppFactory& app){
-  shared_ptr<ImgRaster> imgWriter=ImgRaster::createImg();
+shared_ptr<Jim> Jim::convert(AppFactory& app){
+  shared_ptr<Jim> imgWriter=Jim::createImg();
   convert(*imgWriter, app);
   return(imgWriter);
 }
@@ -43,8 +43,8 @@ shared_ptr<ImgRaster> ImgRaster::convert(AppFactory& app){
  * @param app application specific option arguments
  * @return output image
  **/
-shared_ptr<ImgRaster> ImgRaster::crop(AppFactory& app){
-  shared_ptr<ImgRaster> imgWriter=ImgRaster::createImg();
+shared_ptr<Jim> Jim::crop(AppFactory& app){
+  shared_ptr<Jim> imgWriter=Jim::createImg();
   crop(*imgWriter, app);
   return(imgWriter);
 }
@@ -53,8 +53,8 @@ shared_ptr<ImgRaster> ImgRaster::crop(AppFactory& app){
  * @param app application specific option arguments
  * @return output image
  **/
-shared_ptr<ImgRaster> ImgRaster::crop(VectorOgr& sampleReader, AppFactory& app){
-  shared_ptr<ImgRaster> imgWriter=ImgRaster::createImg();
+shared_ptr<Jim> Jim::crop(VectorOgr& sampleReader, AppFactory& app){
+  shared_ptr<Jim> imgWriter=Jim::createImg();
   crop(sampleReader, *imgWriter, app);
   return(imgWriter);
 }
@@ -63,13 +63,13 @@ shared_ptr<ImgRaster> ImgRaster::crop(VectorOgr& sampleReader, AppFactory& app){
  * @param app application specific option arguments
  * @return output image
  **/
-shared_ptr<ImgRaster> ImgRaster::crop(double ulx, double uly, double lrx, double lry){
-  shared_ptr<ImgRaster> imgWriter=ImgRaster::createImg();
+shared_ptr<Jim> Jim::crop(double ulx, double uly, double lrx, double lry){
+  shared_ptr<Jim> imgWriter=Jim::createImg();
   crop(*imgWriter, ulx, uly, lrx, lry);
   return(imgWriter);
 }
 
-CPLErr ImgRaster::crop(ImgRaster& imgWriter, double ulx, double uly, double lrx, double lry){
+CPLErr Jim::crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry){
   app::AppFactory app;
   app.setLongOption("ulx",ulx);
   app.setLongOption("uly",uly);
@@ -78,7 +78,7 @@ CPLErr ImgRaster::crop(ImgRaster& imgWriter, double ulx, double uly, double lrx,
   return(crop(imgWriter,app));
 }
 
-CPLErr ImgRaster::convert(ImgRaster& imgWriter, AppFactory& app){
+CPLErr Jim::convert(Jim& imgWriter, AppFactory& app){
   Optionpk<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
   Optionpk<double> autoscale_opt("as", "autoscale", "scale output to min and max, e.g., --autoscale 0 --autoscale 255");
   Optionpk<double> scale_opt("scale", "scale", "output=scale*input+offset");
@@ -225,7 +225,7 @@ CPLErr ImgRaster::convert(ImgRaster& imgWriter, AppFactory& app){
   }
 }
 
-CPLErr ImgRaster::crop(ImgRaster& imgWriter, AppFactory& app){
+CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
   Optionpk<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
   //todo: support layer names
   Optionpk<string>  extent_opt("e", "extent", "get boundary from extent from polygons in vector file");
@@ -524,7 +524,7 @@ CPLErr ImgRaster::crop(ImgRaster& imgWriter, AppFactory& app){
     int ncropcol=0;
     int ncroprow=0;
 
-    ImgRaster maskReader;
+    Jim maskReader;
     //todo: support transform of extent with cutline
     if(extent_opt.size()&&(cut_to_cutline_opt[0]||cut_in_cutline_opt[0]||eoption_opt.size())){
       if(mask_opt.size()){
@@ -948,7 +948,7 @@ CPLErr ImgRaster::crop(ImgRaster& imgWriter, AppFactory& app){
   }
 }
 
-CPLErr ImgRaster::crop(VectorOgr& sampleReader, ImgRaster& imgWriter, AppFactory& app){
+CPLErr Jim::crop(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
   Optionpk<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
   //todo: support layer names
   Optionpk<string>  layer_opt("ln", "ln", "layer name of extent to crop");
@@ -1217,7 +1217,7 @@ CPLErr ImgRaster::crop(VectorOgr& sampleReader, ImgRaster& imgWriter, AppFactory
     int ncropcol=0;
     int ncroprow=0;
 
-    ImgRaster maskReader;
+    Jim maskReader;
     if(cut_to_cutline_opt[0]||cut_in_cutline_opt[0]||eoption_opt.size()){
       try{
         if(sampleReader.getLayerCount()>1&&(layer_opt.size()>1||layer_opt.empty())){
@@ -1628,7 +1628,7 @@ CPLErr ImgRaster::crop(VectorOgr& sampleReader, ImgRaster& imgWriter, AppFactory
  * read the data of the current raster dataset assuming it has not been read yet (otherwise use crop instead). Typically used when current dataset was opened with argument noRead true.
  * @param app application options
  **/
-CPLErr ImgRaster::cropDS(ImgRaster& imgWriter, AppFactory& app){
+CPLErr Jim::cropDS(Jim& imgWriter, AppFactory& app){
   Optionpk<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
   Optionpk<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
   //todo: support layer names
@@ -2201,8 +2201,8 @@ CPLErr ImgRaster::cropDS(ImgRaster& imgWriter, AppFactory& app){
  * @param app application specific option arguments
  * @return output image
  **/
-shared_ptr<ImgRaster> ImgList::crop(AppFactory& app){
-  shared_ptr<ImgRaster> imgWriter=ImgRaster::createImg();
+shared_ptr<Jim> JimList::crop(AppFactory& app){
+  shared_ptr<Jim> imgWriter=Jim::createImg();
   crop(*imgWriter, app);
   return(imgWriter);
 }
@@ -2212,7 +2212,7 @@ shared_ptr<ImgRaster> ImgList::crop(AppFactory& app){
  * @return CE_None if successful, CE_Failure if failed
  **/
 //todo: support extent a VectorOgr argument instead of option in app
- ImgList& ImgList::crop(ImgRaster& imgWriter, AppFactory& app){
+ JimList& JimList::crop(Jim& imgWriter, AppFactory& app){
    Optionpk<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
    //todo: support layer names
    Optionpk<string>  extent_opt("e", "extent", "get boundary from extent from polygons in vector file");
@@ -2402,8 +2402,8 @@ shared_ptr<ImgRaster> ImgList::crop(AppFactory& app){
      string projectionString;
      // for(int iimg=0;iimg<input_opt.size();++iimg){
 
-     // std::vector<std::shared_ptr<ImgRaster> >::const_iterator imit=begin();
-     std::list<std::shared_ptr<ImgRaster> >::const_iterator imit=begin();
+     // std::vector<std::shared_ptr<Jim> >::const_iterator imit=begin();
+     std::list<std::shared_ptr<Jim> >::const_iterator imit=begin();
 
      for(imit=begin();imit!=end();++imit){
        //image must be georeferenced
@@ -2520,7 +2520,7 @@ shared_ptr<ImgRaster> ImgList::crop(AppFactory& app){
      int ncropcol=0;
      int ncroprow=0;
 
-     ImgRaster maskReader;
+     Jim maskReader;
      if(extent_opt.size()&&(cut_to_cutline_opt[0]||cut_in_cutline_opt[0]||eoption_opt.size())){
        if(mask_opt.size()){
          string errorString="Error: can only either mask or extent extent with cut_to_cutline / cut_in_cutline, not both";

@@ -1,5 +1,5 @@
 /**********************************************************************
-ImgList.cc: class to read raster files using GDAL API library
+JimList.cc: class to read raster files using GDAL API library
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -26,20 +26,20 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include "algorithms/StatFactory.h"
 #include "algorithms/Egcs.h"
 #include "apps/AppFactory.h"
-#include "ImgList.h"
+#include "JimList.h"
 
 //todo: namespace jiplib
 using namespace std;
 using namespace app;
 
-ImgList::ImgList(const std::list<std::shared_ptr<ImgRaster> > &jimlist){
-  std::list<std::shared_ptr<ImgRaster> >::const_iterator lit=jimlist.begin();
+JimList::JimList(const std::list<std::shared_ptr<Jim> > &jimlist){
+  std::list<std::shared_ptr<Jim> >::const_iterator lit=jimlist.begin();
   for(lit=jimlist.begin();lit!=jimlist.end();++lit)
     pushImage(*lit);
 }
 
 //   ///time period covering the image list (check http://www.boost.org/doc/libs/1_55_0/doc/html/date_time/examples.html#date_time.examples.time_periods for how to use boost period)
-// boost::posix_time::time_period ImgList::getTimePeriod(){
+// boost::posix_time::time_period JimList::getTimePeriod(){
 //   if(m_time.size()){
 //     std::vector<boost::posix_time::time_period>::iterator tit=m_time.begin();
 //     boost::posix_time::time_period timePeriod=*(tit++);
@@ -50,15 +50,15 @@ ImgList::ImgList(const std::list<std::shared_ptr<ImgRaster> > &jimlist){
 //   }
 // }
 
-ImgList::ImgList(unsigned int theSize){
+JimList::JimList(unsigned int theSize){
   for(unsigned int iimg=0;iimg<theSize;++iimg){
-    this->emplace_back(ImgRaster::createImg());
-    /* this->emplace_back(new(ImgRaster)); */
+    this->emplace_back(Jim::createImg());
+    /* this->emplace_back(new(Jim)); */
   }
 }
 
 ///constructor using a json string coming from a custom colllection
-ImgList& ImgList::open(const std::string& strjson){
+JimList& JimList::open(const std::string& strjson){
   Json::Value custom;
   Json::Reader reader;
   bool parsedSuccess=reader.parse(strjson,custom,false);
@@ -71,14 +71,14 @@ ImgList& ImgList::open(const std::string& strjson){
       //todo: open without reading?
       app::AppFactory theApp;
       theApp.setLongOption("filename",filename);
-      std::shared_ptr<ImgRaster> theImage=ImgRaster::createImg(theApp);
+      std::shared_ptr<Jim> theImage=Jim::createImg(theApp);
       pushImage(theImage);
     }
   }
   return(*this);
 }
 
-ImgList& ImgList::open(app::AppFactory& theApp){
+JimList& JimList::open(app::AppFactory& theApp){
   Optionpk<std::string> json_opt("json", "json", "The json object");
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
@@ -113,14 +113,14 @@ ImgList& ImgList::open(app::AppFactory& theApp){
     throw(errorString);
   }
   return(open(json_opt[0]));
-  // ImgList(std::string(""));
+  // JimList(std::string(""));
 }
 
-std::string ImgList::jl2json(){
+std::string JimList::jl2json(){
   Json::Value custom;
   custom["size"]=static_cast<int>(size());
   int iimg=0;
-  for(std::list<std::shared_ptr<ImgRaster> >::iterator lit=begin();lit!=end();++lit){
+  for(std::list<std::shared_ptr<Jim> >::iterator lit=begin();lit!=end();++lit){
     Json::Value image;
     image["path"]=(*lit)->getFileName();
     std::string wktString=(*lit)->getProjectionRef();
@@ -138,9 +138,9 @@ std::string ImgList::jl2json(){
   Json::FastWriter fastWriter;
   return(fastWriter.write(custom));
 }
-ImgList& ImgList::selectGeo(double ulx, double uly, double lrx, double lry){
-  /* std::vector<std::shared_ptr<ImgRaster>>::iterator it=begin(); */
-  std::list<std::shared_ptr<ImgRaster>>::iterator it=begin();
+JimList& JimList::selectGeo(double ulx, double uly, double lrx, double lry){
+  /* std::vector<std::shared_ptr<Jim>>::iterator it=begin(); */
+  std::list<std::shared_ptr<Jim>>::iterator it=begin();
   // std::vector<boost::posix_time::time_period>::iterator tit=m_time.begin();
   while(it!=end()){
     if((*it)->covers(ulx, uly, lrx, lry)){
@@ -157,9 +157,9 @@ ImgList& ImgList::selectGeo(double ulx, double uly, double lrx, double lry){
   return(*this);
 };
 
-ImgList& ImgList::selectGeo(double x, double y){
-  /* std::vector<std::shared_ptr<ImgRaster>>::iterator it=begin(); */
-  std::list<std::shared_ptr<ImgRaster>>::iterator it=begin();
+JimList& JimList::selectGeo(double x, double y){
+  /* std::vector<std::shared_ptr<Jim>>::iterator it=begin(); */
+  std::list<std::shared_ptr<Jim>>::iterator it=begin();
   // std::vector<boost::posix_time::time_period>::iterator tit=m_time.begin();
   while(it!=end()){
     if((*it)->covers(x,y)){
@@ -176,9 +176,9 @@ ImgList& ImgList::selectGeo(double x, double y){
   return(*this);
 };
 
-ImgList& ImgList::close(){
-  /* for(std::vector<std::shared_ptr<ImgRaster>>::iterator it=begin();it!=end();++it) */
-  for(std::list<std::shared_ptr<ImgRaster>>::iterator it=begin();it!=end();++it)
+JimList& JimList::close(){
+  /* for(std::vector<std::shared_ptr<Jim>>::iterator it=begin();it!=end();++it) */
+  for(std::list<std::shared_ptr<Jim>>::iterator it=begin();it!=end();++it)
     (*it)->close();
   return(*this);
 }
@@ -189,9 +189,9 @@ ImgList& ImgList::close(){
  * @param lrx lower left coordinate in x
  * @param lry lower left coordinate in y
  **/
-const ImgList& ImgList::getBoundingBox(double& ulx, double& uly, double& lrx, double& lry) const{
-  // std::vector<std::shared_ptr<ImgRaster> >::const_iterator it=begin();
-  std::list<std::shared_ptr<ImgRaster> >::const_iterator it=begin();
+const JimList& JimList::getBoundingBox(double& ulx, double& uly, double& lrx, double& lry) const{
+  // std::vector<std::shared_ptr<Jim> >::const_iterator it=begin();
+  std::list<std::shared_ptr<Jim> >::const_iterator it=begin();
   if(it!=end())
     (*(it++))->getBoundingBox(ulx,uly,lrx,lry);
   while(it!=end()){
@@ -209,7 +209,7 @@ const ImgList& ImgList::getBoundingBox(double& ulx, double& uly, double& lrx, do
  * @param x,y georeferenced coordinates in x and y
  * @return true if image covers the georeferenced location
  **/
-bool ImgList::covers(double x, double  y, OGRCoordinateTransformation *poCT) const
+bool JimList::covers(double x, double  y, OGRCoordinateTransformation *poCT) const
 {
   double theULX, theULY, theLRX, theLRY;
   getBoundingBox(theULX,theULY,theLRX,theLRY);
@@ -218,7 +218,7 @@ bool ImgList::covers(double x, double  y, OGRCoordinateTransformation *poCT) con
   if(poCT){
     if(!poCT->Transform(1,&ximg,&yimg)){
       std::ostringstream errorStream;
-      errorStream << "Error: cannot apply OGRCoordinateTransformation in ImgList::covers (1)" << std::endl;
+      errorStream << "Error: cannot apply OGRCoordinateTransformation in JimList::covers (1)" << std::endl;
       throw(errorStream.str());
     }
   }
@@ -228,7 +228,7 @@ bool ImgList::covers(double x, double  y, OGRCoordinateTransformation *poCT) con
          (yimg >theLRY));
 }
 
-bool ImgList::covers(double ulx, double  uly, double lrx, double lry, bool all, OGRCoordinateTransformation *poCT) const
+bool JimList::covers(double ulx, double  uly, double lrx, double lry, bool all, OGRCoordinateTransformation *poCT) const
 {
   double theULX, theULY, theLRX, theLRY;
   getBoundingBox(theULX,theULY,theLRX,theLRY);
@@ -249,7 +249,7 @@ bool ImgList::covers(double ulx, double  uly, double lrx, double lry, bool all, 
     yvector[3]=lryimg;
     if(!poCT->Transform(xvector.size(),&xvector[0],&yvector[0])){
       std::ostringstream errorStream;
-      errorStream << "Error: cannot apply OGRCoordinateTransformation in ImgList::covers (2)" << std::endl;
+      errorStream << "Error: cannot apply OGRCoordinateTransformation in JimList::covers (2)" << std::endl;
       throw(errorStream.str());
     }
     ulximg=std::min(xvector[0],xvector[2]);
@@ -263,7 +263,7 @@ bool ImgList::covers(double ulx, double  uly, double lrx, double lry, bool all, 
     return((ulximg < theLRX)&&(lrximg > theULX)&&(lryimg < theULY)&&(ulyimg > theLRY));
 }
 
-bool ImgList::covers(const ImgRaster& imgRaster, bool all) const{
+bool JimList::covers(const Jim& imgRaster, bool all) const{
   //image bounding box in SRS of the raster
   double img_ulx,img_uly,img_lrx,img_lry;
   imgRaster.getBoundingBox(img_ulx,img_uly,img_lrx,img_lry);
@@ -287,7 +287,7 @@ bool ImgList::covers(const ImgRaster& imgRaster, bool all) const{
  * @param noDataValues standard template library (stl) vector containing no data values
  * @return number of no data values in this dataset
  **/
-ImgList& ImgList::getNoDataValues(std::vector<double>& noDataValues)
+JimList& JimList::getNoDataValues(std::vector<double>& noDataValues)
 {
   if(m_noDataValues.size()){
     noDataValues=m_noDataValues;
@@ -299,7 +299,7 @@ ImgList& ImgList::getNoDataValues(std::vector<double>& noDataValues)
  * @param noDataValue no data value to be pushed for this dataset
  * @return number of no data values in this dataset
  **/
-ImgList& ImgList::pushNoDataValue(double noDataValue)
+JimList& JimList::pushNoDataValue(double noDataValue)
 {
   if(find(m_noDataValues.begin(),m_noDataValues.end(),noDataValue)==m_noDataValues.end())
     m_noDataValues.push_back(noDataValue);

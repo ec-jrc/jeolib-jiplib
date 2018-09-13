@@ -19,7 +19,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #include <assert.h>
 #include <vector>
-#include "imageclasses/ImgRaster.h"
+#include "imageclasses/Jim.h"
 #include "base/Optionpk.h"
 #include "apps/AppFactory.h"
 
@@ -30,8 +30,8 @@ using namespace app;
  * @param app application specific option arguments
  * @return output image
  **/
-shared_ptr<ImgRaster> ImgRaster::getMask(app::AppFactory& app){
-  shared_ptr<ImgRaster> imgWriter=createImg();
+shared_ptr<Jim> Jim::getMask(app::AppFactory& app){
+  shared_ptr<Jim> imgWriter=createImg();
   getMask(*imgWriter, app);
   return(imgWriter);
 }
@@ -40,7 +40,7 @@ shared_ptr<ImgRaster> ImgRaster::getMask(app::AppFactory& app){
  * @param imgWriter output raster getmask dataset
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr ImgRaster::getMask(ImgRaster& imgWriter, app::AppFactory& app){
+CPLErr Jim::getMask(Jim& imgWriter, app::AppFactory& app){
   Optionpk<short> band_opt("b", "band", "band(s) used for mask", 0);
   Optionpk<double> min_opt("min", "min", "Values smaller than min threshold(s) are masked as invalid. Use one threshold for each band");
   Optionpk<double> max_opt("max", "max", "Values greater than max threshold(s) are masked as invalid. Use one threshold for each band");

@@ -30,13 +30,13 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <map>
 #include <memory>
-#include "ImgRaster.h"
+#include "Jim.h"
 #include "VectorOgr.h"
 #include "base/Optionpk.h"
 #include "apps/AppFactory.h"
 
 ///get unique pixels
-// template<typename T> std::map<std::vector<T>,std::vector<std::pair<unsigned short,unsigned short> > > ImgRaster::getUniquePixels(unsigned short startband, unsigned short endband){
+// template<typename T> std::map<std::vector<T>,std::vector<std::pair<unsigned short,unsigned short> > > Jim::getUniquePixels(unsigned short startband, unsigned short endband){
 //   std::map<std::vector<T>,std::vector<std::pair<unsigned short,unsigned short> > > umap;
 //   for(int y=0;y<nrOfRow();++y){
 //     Vector2d<T> lineInput(nrOfBand(),nrOfCol());
@@ -51,8 +51,8 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 
 
 ///train SML
-/* template<typename T> CPLErr ImgRaster::trainSML(ImgList& referenceReader, app::AppFactory& app){ */
-template<typename T> std::string ImgRaster::trainSML(ImgList& referenceReader, app::AppFactory& app){
+/* template<typename T> CPLErr Jim::trainSML(JimList& referenceReader, app::AppFactory& app){ */
+template<typename T> std::string Jim::trainSML(JimList& referenceReader, app::AppFactory& app){
   /* Optionpk<std::string> model_opt("model", "model", "Model filename to save trained classifier."); */
   Optionpk<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
   Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
@@ -224,7 +224,7 @@ template<typename T> std::string ImgRaster::trainSML(ImgList& referenceReader, a
 
 
 ///classify raster dataset with SML
-template<typename T> CPLErr ImgRaster::classifySML(ImgRaster& imgWriter, app::AppFactory& app){
+template<typename T> CPLErr Jim::classifySML(Jim& imgWriter, app::AppFactory& app){
   Optionpk<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
   Optionpk<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
   Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
@@ -274,7 +274,7 @@ template<typename T> CPLErr ImgRaster::classifySML(ImgRaster& imgWriter, app::Ap
     }
 
     VectorOgr extentReader;
-    ImgRaster maskReader;
+    Jim maskReader;
 
     double ulx=0;
     double uly=0;
@@ -468,7 +468,7 @@ template<typename T> CPLErr ImgRaster::classifySML(ImgRaster& imgWriter, app::Ap
 }
 
 /* ///classify raster dataset with SML */
-/* template<typename T> CPLErr ImgRaster::classifySML(ImgList& referenceReader, ImgRaster& imgWriter, app::AppFactory& app){ */
+/* template<typename T> CPLErr Jim::classifySML(JimList& referenceReader, Jim& imgWriter, app::AppFactory& app){ */
 /*   Optionpk<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)"); */
 /*   Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number"); */
 /*   Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number"); */
@@ -512,7 +512,7 @@ template<typename T> CPLErr ImgRaster::classifySML(ImgRaster& imgWriter, app::Ap
 /*     } */
 
 /*     VectorOgr extentReader; */
-/*     ImgRaster maskReader; */
+/*     Jim maskReader; */
 
 /*     double ulx=0; */
 /*     double uly=0; */
@@ -791,13 +791,13 @@ template<typename T> CPLErr ImgRaster::classifySML(ImgRaster& imgWriter, app::Ap
 /*   } */
 /* } */
 ///classify raster dataset with SML
-///this ImgRaster contains input bands and reference with binary class information)
+///this Jim contains input bands and reference with binary class information)
 /**
  * @param imgWriter output classified raster dataset
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-/* template<typename T> CPLErr ImgRaster::classifySML(ImgRaster& imgWriter, app::AppFactory& app){ */
+/* template<typename T> CPLErr Jim::classifySML(Jim& imgWriter, app::AppFactory& app){ */
 /*   Optionpk<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)"); */
 /*   Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number"); */
 /*   Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number"); */
@@ -838,7 +838,7 @@ template<typename T> CPLErr ImgRaster::classifySML(ImgRaster& imgWriter, app::Ap
 /*     } */
 
 /*     VectorOgr extentReader; */
-/*     ImgRaster maskReader; */
+/*     Jim maskReader; */
 
 /*     double ulx=0; */
 /*     double uly=0; */
@@ -1010,9 +1010,9 @@ template<typename T> CPLErr ImgRaster::classifySML(ImgRaster& imgWriter, app::Ap
 /*   } */
 /* } */
 
-/* template<typename T> std::shared_ptr<ImgRaster> ImgRaster::classifySML(ImgList& referenceReader, app::AppFactory& app){ */
+/* template<typename T> std::shared_ptr<Jim> Jim::classifySML(JimList& referenceReader, app::AppFactory& app){ */
 /*   try{ */
-/*     std::shared_ptr<ImgRaster> imgWriter=createImg(); */
+/*     std::shared_ptr<Jim> imgWriter=createImg(); */
 /*     classifySML<T>(referenceReader,*imgWriter, app); */
 /*     return(imgWriter); */
 /*   } */
@@ -1026,9 +1026,9 @@ template<typename T> CPLErr ImgRaster::classifySML(ImgRaster& imgWriter, app::Ap
  * @param app application specific option arguments
  * @return output classified raster dataset
  **/
-template<typename T> std::shared_ptr<ImgRaster> ImgRaster::classifySML(app::AppFactory& app){
+template<typename T> std::shared_ptr<Jim> Jim::classifySML(app::AppFactory& app){
   try{
-    std::shared_ptr<ImgRaster> imgWriter=createImg();
+    std::shared_ptr<Jim> imgWriter=createImg();
     classifySML<T>(*imgWriter, app);
     return(imgWriter);
   }

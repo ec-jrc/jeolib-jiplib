@@ -18,7 +18,8 @@ parser.add_argument("-cut_to_cutline","--cut_to_cutline",help="Crop the extent o
 parser.add_argument("-cut_in_cutline","--cut_in_cutline",help="Crop the extent of the target dataset to the extent of the cutline, setting the inner area to nodata",dest="cut_in_cutline",required=False,type=bool,default=False)
 args = parser.parse_args()
 
-try:
+# try:
+if True:
     jim0=jl.createJim(args.input)
     rules=['centroid','min','max','mean','stdev']
     jlv=jl.createVector(args.extent);
@@ -43,6 +44,8 @@ try:
         jim0.cropOgr(jlv,{'align':True}).write({'filename':args.output}).close()
     jim0.close()
     jlv.close()
+try:
+    print("ok")
     print("Success: crop")
 except:
     print("Failed: crop")

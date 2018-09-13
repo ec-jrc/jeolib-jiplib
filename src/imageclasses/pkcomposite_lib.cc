@@ -22,8 +22,8 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <string>
 #include <memory>
-#include "ImgRaster.h"
-#include "ImgList.h"
+#include "Jim.h"
+#include "JimList.h"
 #include "VectorOgr.h"
 #include "base/Vector2d.h"
 #include "base/Optionpk.h"
@@ -38,8 +38,8 @@ using namespace app;
  * @param app application specific option arguments
  * @return output image
  **/
-shared_ptr<ImgRaster> ImgList::composite(AppFactory& app){
-  shared_ptr<ImgRaster> imgWriter=ImgRaster::createImg();
+shared_ptr<Jim> JimList::composite(AppFactory& app){
+  shared_ptr<Jim> imgWriter=Jim::createImg();
   composite(*imgWriter, app);
   return(imgWriter);
 }
@@ -49,7 +49,7 @@ shared_ptr<ImgRaster> ImgList::composite(AppFactory& app){
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr ImgList::composite(ImgRaster& imgWriter, AppFactory& app){
+CPLErr JimList::composite(Jim& imgWriter, AppFactory& app){
   Optionpk<unsigned int>  band_opt("b", "band", "band index(es) to crop (leave empty if all bands must be retained)");
   Optionpk<double>  dx_opt("dx", "dx", "Output resolution in x (in meter) (empty: keep original resolution)");
   Optionpk<double>  dy_opt("dy", "dy", "Output resolution in y (in meter) (empty: keep original resolution)");
@@ -281,8 +281,8 @@ CPLErr ImgList::composite(ImgRaster& imgWriter, AppFactory& app){
     // GDALColorTable* theColorTable=NULL;
     bool init=false;
 
-    // std::vector<std::shared_ptr<ImgRaster> >::const_iterator imit=begin();
-    std::list<std::shared_ptr<ImgRaster> >::const_iterator imit=begin();
+    // std::vector<std::shared_ptr<Jim> >::const_iterator imit=begin();
+    std::list<std::shared_ptr<Jim> >::const_iterator imit=begin();
     for(imit=begin();imit!=end();++imit){
       // for(int ifile=0;ifile<(*imit).size();++ifile){
       //todo: must be in init part only?
@@ -502,7 +502,7 @@ CPLErr ImgList::composite(ImgRaster& imgWriter, AppFactory& app){
       imgWriter.setProjection(theProjection);
     }
 
-    ImgRaster maskReader;
+    Jim maskReader;
     if(extent_opt.size()&&(cut_opt[0]||eoption_opt.size())){
       if(mask_opt.size()){
         string errorString="Error: can only either mask or extent extent with cutline, not both";
@@ -552,7 +552,7 @@ CPLErr ImgList::composite(ImgRaster& imgWriter, AppFactory& app){
     Vector2d<short> maxBuffer;//buffer used for maximum voting
     // Vector2d<double> readBuffer(nband);
     vector<Vector2d<unsigned short> > readBuffer(size());
-    // std::list<std::shared_ptr<ImgRaster> >::const_iterator imit=begin();
+    // std::list<std::shared_ptr<Jim> >::const_iterator imit=begin();
     unsigned int ifile=0;
     for(imit=begin();imit!=end();++imit){
       readBuffer[ifile].resize((*imit)->nrOfBand());

@@ -21,7 +21,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <map>
 #include <algorithm>
-#include "ImgRaster.h"
+#include "Jim.h"
 #include "VectorOgr.h"
 // #include "ImgReaderOgr.h"
 // #include "ImgWriterOgr.h"
@@ -408,9 +408,9 @@ std::string VectorOgr::trainANN(app::AppFactory& app){
  * @param app application specific option arguments
  * @return output classified raster dataset
  **/
-shared_ptr<ImgRaster> ImgRaster::classifyANN(app::AppFactory& app){
+shared_ptr<Jim> Jim::classifyANN(app::AppFactory& app){
   try{
-    shared_ptr<ImgRaster> imgWriter=createImg();
+    shared_ptr<Jim> imgWriter=createImg();
     classifyANN(*imgWriter, app);
     return(imgWriter);
   }
@@ -424,9 +424,9 @@ shared_ptr<ImgRaster> ImgRaster::classifyANN(app::AppFactory& app){
  * @param app application specific option arguments
  * @return output classified raster dataset
  **/
-// shared_ptr<ImgRaster> ImgRaster::ann(app::AppFactory& app){
+// shared_ptr<Jim> Jim::ann(app::AppFactory& app){
 //   try{
-//     shared_ptr<ImgRaster> imgWriter=createImg();
+//     shared_ptr<Jim> imgWriter=createImg();
 //     ann(*imgWriter, app);
 //     return(imgWriter);
 //   }
@@ -441,7 +441,7 @@ shared_ptr<ImgRaster> ImgRaster::classifyANN(app::AppFactory& app){
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr ImgRaster::classifyANN(ImgRaster& imgWriter, app::AppFactory& app){
+CPLErr Jim::classifyANN(Jim& imgWriter, app::AppFactory& app){
   vector<double> priors;
 
   //--------------------------- command line options ------------------------------------
@@ -519,7 +519,7 @@ CPLErr ImgRaster::classifyANN(ImgRaster& imgWriter, app::AppFactory& app){
 
     // ImgReaderOgr extentReader;
     VectorOgr extentReader;
-    ImgRaster maskReader;
+    Jim maskReader;
     // OGRLayer  *readLayer;
 
     double ulx=0;
@@ -642,7 +642,7 @@ CPLErr ImgRaster::classifyANN(ImgRaster& imgWriter, app::AppFactory& app){
       imgWriter.setProjection(this->getProjection());
       if(colorTable_opt.size())
         imgWriter.setColorTable(colorTable_opt[0],0);
-      ImgRaster priorReader;
+      Jim priorReader;
       if(priorimg_opt.size()){
         if(verbose_opt[0]>=1)
           std::cout << "opening prior image " << priorimg_opt[0] << std::endl;
@@ -653,8 +653,8 @@ CPLErr ImgRaster::classifyANN(ImgRaster& imgWriter, app::AppFactory& app){
 
       vector<char> classOut(ncol);//classified line for writing to image file
 
-      ImgRaster probImage;
-      ImgRaster entropyImage;
+      Jim probImage;
+      Jim entropyImage;
 
       string imageType=imgWriter.getImageType();
       if(prob_opt.size()){
@@ -862,7 +862,7 @@ CPLErr ImgRaster::classifyANN(ImgRaster& imgWriter, app::AppFactory& app){
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-// CPLErr ImgRaster::ann(ImgRaster& imgWriter, app::AppFactory& app){
+// CPLErr Jim::ann(Jim& imgWriter, app::AppFactory& app){
 //   vector<double> priors;
 
 //   //--------------------------- command line options ------------------------------------
@@ -1002,7 +1002,7 @@ CPLErr ImgRaster::classifyANN(ImgRaster& imgWriter, app::AppFactory& app){
 //       std::cout << "number of bootstrap aggregations: " << nbag << std::endl;
 
 //     ImgReaderOgr extentReader;
-//     ImgRaster maskReader;
+//     Jim maskReader;
 //     // OGRLayer  *readLayer;
 
 //     double ulx=0;
@@ -1492,7 +1492,7 @@ CPLErr ImgRaster::classifyANN(ImgRaster& imgWriter, app::AppFactory& app){
 //       imgWriter.setProjection(this->getProjection());
 //       if(colorTable_opt.size())
 //         imgWriter.setColorTable(colorTable_opt[0],0);
-//       ImgRaster priorReader;
+//       Jim priorReader;
 //       if(priorimg_opt.size()){
 //         if(verbose_opt[0]>=1)
 //           std::cout << "opening prior image " << priorimg_opt[0] << std::endl;
@@ -1504,10 +1504,10 @@ CPLErr ImgRaster::classifyANN(ImgRaster& imgWriter, app::AppFactory& app){
 //       vector<char> classOut(ncol);//classified line for writing to image file
 
 //       //   assert(nband==imgWriter.nrOfBand());
-//       ImgRaster classImageBag;
-//       // ImgRaster classImageOut;
-//       ImgRaster probImage;
-//       ImgRaster entropyImage;
+//       Jim classImageBag;
+//       // Jim classImageOut;
+//       Jim probImage;
+//       Jim entropyImage;
 
 //       string imageType=imgWriter.getImageType();
 //       if(classBag_opt.size()){
@@ -1542,7 +1542,7 @@ CPLErr ImgRaster::classifyANN(ImgRaster& imgWriter, app::AppFactory& app){
 //       //   mask_opt.clear();
 //       //   mask_opt.push_back("/vsimem/mask.tif");
 //       // }
-//       // // ImgRaster maskReader;
+//       // // Jim maskReader;
 //       if(mask_opt.size()){
 //         if(verbose_opt[0]>=1)
 //           std::cout << "opening mask image file " << mask_opt[0] << std::endl;

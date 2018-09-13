@@ -28,8 +28,8 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include "base/Vector2d.h"
 #include "algorithms/Filter2d.h"
 #include "algorithms/Filter.h"
-#include "imageclasses/ImgRaster.h"
-#include "imageclasses/ImgList.h"
+#include "imageclasses/Jim.h"
+#include "imageclasses/JimList.h"
 #include "algorithms/StatFactory.h"
 #include "apps/AppFactory.h"
 #include "config_jiplib.h"
@@ -43,8 +43,8 @@ using namespace app;
  * @param otype (type: std::string) (default: GDT_Unknown) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
  * @return shared pointer to image object
  **/
-shared_ptr<ImgRaster> ImgList::statProfile(app::AppFactory& app){
-  shared_ptr<ImgRaster> imgWriter=ImgRaster::createImg();
+shared_ptr<Jim> JimList::statProfile(app::AppFactory& app){
+  shared_ptr<Jim> imgWriter=Jim::createImg();
   statProfile(*imgWriter, app);
   return(imgWriter);
 }
@@ -57,7 +57,7 @@ shared_ptr<ImgRaster> ImgList::statProfile(app::AppFactory& app){
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr ImgList::statProfile(ImgRaster& imgWriter, app::AppFactory& app){
+CPLErr JimList::statProfile(Jim& imgWriter, app::AppFactory& app){
   Optionpk<std::string> function_opt("f", "function", "Statistics function (mean, median, var, stdev, min, max, sum, mode (provide classes), minindex, maxindex, proportion (provide classes), percentile, nvalid");
   Optionpk<double> percentile_opt("perc","perc","Percentile value(s) used for rule percentile",90);
   // Optionpk<short> class_opt("class", "class", "class value(s) to use for mode, proportion");
@@ -165,7 +165,7 @@ CPLErr ImgList::statProfile(ImgRaster& imgWriter, app::AppFactory& app){
     MyProgressFunc(progress,pszMessage,pProgressArg);
     Vector2d<double> lineInput_transposed(this->front()->nrOfCol(),size());//band interleaved by pixel
     for(unsigned int y=0;y<this->front()->nrOfRow();++y){
-      std::list<std::shared_ptr<ImgRaster> >::const_iterator imit=begin();
+      std::list<std::shared_ptr<Jim> >::const_iterator imit=begin();
       unsigned int ifile=0;
       for(imit=begin();imit!=end();++imit){
         (*imit)->readData(lineInput[ifile],y);
@@ -274,9 +274,9 @@ CPLErr ImgList::statProfile(ImgRaster& imgWriter, app::AppFactory& app){
  * @param otype (type: std::string) (default: GDT_Unknown) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
  * @return shared pointer to image object
  **/
-shared_ptr<ImgRaster> ImgRaster::statProfile(app::AppFactory& app){
+shared_ptr<Jim> Jim::statProfile(app::AppFactory& app){
   try{
-    shared_ptr<ImgRaster> imgWriter=ImgRaster::createImg();
+    shared_ptr<Jim> imgWriter=Jim::createImg();
     statProfile(*imgWriter, app);
     return(imgWriter);
   }
@@ -294,7 +294,7 @@ shared_ptr<ImgRaster> ImgRaster::statProfile(app::AppFactory& app){
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr ImgRaster::statProfile(ImgRaster& imgWriter, app::AppFactory& app){
+CPLErr Jim::statProfile(Jim& imgWriter, app::AppFactory& app){
   Optionpk<std::string> function_opt("f", "function", "Statistics function (mean, median, var, stdev, min, max, sum, mode, minindex, maxindex, proportion (provide classes), percentile, nvalid");
   Optionpk<double> percentile_opt("perc","perc","Percentile value(s) used for rule percentile",90);
   // Optionpk<short> class_opt("class", "class", "class value(s) to use for mode, proportion");

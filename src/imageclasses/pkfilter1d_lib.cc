@@ -27,7 +27,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include "base/Optionpk.h"
 #include "fileclasses/FileReaderAscii.h"
-#include "imageclasses/ImgRaster.h"
+#include "imageclasses/Jim.h"
 #include "algorithms/StatFactory.h"
 #include "algorithms/Filter.h"
 #include "apps/AppFactory.h"
@@ -61,9 +61,9 @@ using namespace filter;
  * @return shared pointer to image object
 **/
 
-shared_ptr<ImgRaster> ImgRaster::filter1d(app::AppFactory& app){
+shared_ptr<Jim> Jim::filter1d(app::AppFactory& app){
   try{
-    shared_ptr<ImgRaster> imgWriter=createImg();
+    shared_ptr<Jim> imgWriter=createImg();
     filter1d(*imgWriter, app);
     return(imgWriter);
   }
@@ -97,7 +97,7 @@ shared_ptr<ImgRaster> ImgRaster::filter1d(app::AppFactory& app){
  * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid). Use none to ommit color table
  * @return CE_None if successful, CE_Failure if failed
 **/
-CPLErr ImgRaster::filter1d(ImgRaster& imgWriter, app::AppFactory& app){
+CPLErr Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
   Optionpk<std::string> method_opt("f", "filter", "filter function (nvalid, median, var, min, max, sum, mean, dilate, erode, close, open, mode (majority voting), only for classes), smoothnodata (smooth nodata values only) values, ismin, ismax, order (rank pixels in order), stdev, mrf, dwt, dwti, dwt_cut, dwt_cut_from, savgolay, percentile, proportion)");
   Optionpk<int> dimZ_opt("dz", "dz", "filter kernel size in z (spectral/temporal dimension), must be odd (example: 3).",3);
   Optionpk<std::string> wavelet_type_opt("wt", "wavelet", "wavelet type: daubechies,daubechies_centered, haar, haar_centered, bspline, bspline_centered", "daubechies");

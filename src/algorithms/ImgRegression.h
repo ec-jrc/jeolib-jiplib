@@ -21,7 +21,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #define _IMGREGRESSION_H_
 
 #include <vector>
-#include "imageclasses/ImgRaster.h"
+#include "imageclasses/Jim.h"
 #include "StatFactory.h"
 
 namespace imgregression
@@ -30,12 +30,12 @@ namespace imgregression
   public:
     ImgRegression(void);
     ~ImgRegression(void);
-    double getRMSE(ImgRaster& imgReader1, ImgRaster& imgReader2, double &c0, double &c1, unsigned int b1=0, unsigned int b2=0, short verbose=0) const;
-    double getRMSE(ImgRaster& imgReader, unsigned int b1, unsigned int b2, double& c0, double& c1, short verbose=0) const;
-    double getR2(ImgRaster& imgReader1, ImgRaster& imgReader2, double &c0, double &c1, unsigned int b1=0, unsigned int b2=0, short verbose=0) const;
-    double pgetR2(ImgRaster& imgReader1, ImgRaster& imgReader2, double& c0, double& c1, unsigned int band1, unsigned int band2, short verbose=0) const;
-    double getR2(ImgRaster& imgReader, unsigned int b1, unsigned int b2, double& c0, double& c1, short verbose=0) const;
-    double pgetR2(ImgRaster& imgReader, unsigned int band1, unsigned int band2, double& c0, double& c1, short verbose=0) const;
+    double getRMSE(Jim& imgReader1, Jim& imgReader2, double &c0, double &c1, unsigned int b1=0, unsigned int b2=0, short verbose=0) const;
+    double getRMSE(Jim& imgReader, unsigned int b1, unsigned int b2, double& c0, double& c1, short verbose=0) const;
+    double getR2(Jim& imgReader1, Jim& imgReader2, double &c0, double &c1, unsigned int b1=0, unsigned int b2=0, short verbose=0) const;
+    double pgetR2(Jim& imgReader1, Jim& imgReader2, double& c0, double& c1, unsigned int band1, unsigned int band2, short verbose=0) const;
+    double getR2(Jim& imgReader, unsigned int b1, unsigned int b2, double& c0, double& c1, short verbose=0) const;
+    double pgetR2(Jim& imgReader, unsigned int band1, unsigned int band2, double& c0, double& c1, short verbose=0) const;
 
     void setThreshold(double theThreshold){m_threshold=theThreshold;};
     void setDown(int theDown){m_down=theDown;};

@@ -1,5 +1,5 @@
 /**********************************************************************
-ImgRaster.h: class to read/write raster files using GDAL API library
+Jim.h: class to read/write raster files using GDAL API library
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -23,8 +23,8 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
    2017-05-08  Kris Vanhoof (vhoofk): Fix rounding issues in bilinear interpolation
    2017-05-08  Kris Vanhoof (vhoofk): Handle nodata values in bilinear interpolation
 */
-#ifndef _IMGRASTER_H_
-#define _IMGRASTER_H_
+#ifndef _JIM_H_
+#define _JIM_H_
 
 #include <cfloat>
 #include <typeinfo>
@@ -39,7 +39,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <assert.h>
 #include "gdal_priv.h"
 #include "base/Vector2d.h"
-#include "ImgList.h"
+#include "JimList.h"
 #include "apps/AppFactory.h"
 #include "config_jiplib.h"
 
@@ -180,7 +180,7 @@ static GDALRIOResampleAlg getGDALResample(const std::string &resampleString){
     return(GRIORA_NearestNeighbour);
 }
 
-class ImgList;
+class JimList;
 class VectorOgr;
 
 //todo: create name space jiplib?
@@ -190,102 +190,102 @@ enum JIPLIBDataType {JDT_Int64=14, JDT_UInt64=15};
 /**
    Base class for raster dataset (read and write) in a format supported by GDAL. This general raster class is used to store e.g., filename, number of columns, rows and bands of the dataset.
 **/
-class ImgRaster : public std::enable_shared_from_this<ImgRaster>
+class Jim : public std::enable_shared_from_this<Jim>
 {
  public:
     ///default constructor
-  ImgRaster();
+  Jim();
     ///constructor opening an image in memory using an external data pointer
-  ImgRaster(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType);
-  ImgRaster(std::vector<void*> dataPointers, int ncol, int nrow, const GDALDataType& dataType);
-  ImgRaster(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType);
-  ImgRaster(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType);
+  Jim(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType);
+  Jim(std::vector<void*> dataPointers, int ncol, int nrow, const GDALDataType& dataType);
+  Jim(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType);
+  Jim(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType);
     ///constructor input image
 #if MIALIB == 1
-  ImgRaster(IMAGE *mia);
+  Jim(IMAGE *mia);
 #endif
     ///constructor input image
-  ImgRaster(const std::string& filename, bool readData=true, unsigned int memory=0);
+  Jim(const std::string& filename, bool readData=true, unsigned int memory=0);
     ///constructor output image
-  ImgRaster(const std::string& filename, const ImgRaster& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>());
+  Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>());
     ///constructor input image
-    /* ImgRaster(std::shared_ptr<ImgRaster> imgSrc, bool copyData=true) : m_nplane(1), ImgRaster(imgSrc, copyData){}; */
+    /* Jim(std::shared_ptr<Jim> imgSrc, bool copyData=true) : m_nplane(1), Jim(imgSrc, copyData){}; */
     ///constructor input image
-  ImgRaster(ImgRaster& imgSrc, bool copyData=true);
+  Jim(Jim& imgSrc, bool copyData=true);
     ///constructor output image
-  ImgRaster(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>());
+  Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>());
   ///constructor output image with nplane
-  ImgRaster(int ncol, int nrow, int nband, int nplane, const GDALDataType& dataType);
+  Jim(int ncol, int nrow, int nband, int nplane, const GDALDataType& dataType);
     ///constructor output image
-  ImgRaster(int ncol, int nrow, int nband, const GDALDataType& dataType);
+  Jim(int ncol, int nrow, int nband, const GDALDataType& dataType);
   ///constructor from app
-  ImgRaster(app::AppFactory &theApp);
+  Jim(app::AppFactory &theApp);
 
   //from Reader
- /* ImgRaster(const std::string& filename, unsigned int memory=0){ */
+ /* Jim(const std::string& filename, unsigned int memory=0){ */
  /*    reset(); */
  /*    open(filename, memory); */
  /*  }; */
-  // ImgRaster(const std::string& filename, const GDALAccess& readMode=GA_ReadOnly, unsigned int memory=0) : m_writeMode(false) {open(filename, readMode, memory);};
+  // Jim(const std::string& filename, const GDALAccess& readMode=GA_ReadOnly, unsigned int memory=0) : m_writeMode(false) {open(filename, readMode, memory);};
   //from Writer
  /*  ///constructor opening an image for writing, copying image attributes from a source image. Caching is supported when memory>0 */
- /* ImgRaster(const std::string& filename, const ImgRaster& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) {open(filename, imgSrc, memory, options); */
+ /* Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) {open(filename, imgSrc, memory, options); */
  /*  }; */
  /*  ///copy constructor opening an image for writing in memory, copying image attributes from a source image. */
- /* ImgRaster(ImgRaster& imgSrc, bool copyData=true){ */
+ /* Jim(Jim& imgSrc, bool copyData=true){ */
  /*   reset(); */
  /*   open(imgSrc,copyData); */
  /*  }; */
   ///copy constructor opening an image for writing in memory, copying image attributes from a source image.
-  /* ImgRaster(std::shared_ptr<ImgRaster> imgSrc, bool copyData=true){ */
+  /* Jim(std::shared_ptr<Jim> imgSrc, bool copyData=true){ */
   /*   reset(); */
   /*   open(imgSrc,copyData); */
   /* }; */
   ///constructor opening an image for writing, defining all image attributes. Caching is supported when memory>0
- /* ImgRaster(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) { */
+ /* Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>()) { */
  /*   reset(); */
  /*   open(filename, ncol, nrow, nband, dataType, imageType, memory, options); */
  /*  }; */
   ///constructor opening an image for writing in memory, defining all image attributes
- /* ImgRaster(int ncol, int nrow, int nband, const GDALDataType& dataType) { */
+ /* Jim(int ncol, int nrow, int nband, const GDALDataType& dataType) { */
  /*   reset(); */
  /*   open(ncol, nrow, nband, dataType); */
  /*  }; */
  /*  ///constructor opening an image for reading or writing using application arguments */
- /* ImgRaster(app::AppFactory& app){ */
+ /* Jim(app::AppFactory& app){ */
  /*   reset(); */
  /*   open(app); */
  /* }; */
 
   ///destructor
- /* virtual ~ImgRaster(void){freeMem();}; */
- virtual ~ImgRaster(void);
+ /* virtual ~Jim(void){freeMem();}; */
+ virtual ~Jim(void);
 
-  ///Create new shared pointer to ImgRaster object
+  ///Create new shared pointer to Jim object
   /**
    *
-   * @return shared pointer to new ImgRaster object
+   * @return shared pointer to new Jim object
    */
- static std::shared_ptr<ImgRaster> createImg();
+ static std::shared_ptr<Jim> createImg();
  /* { */
- /*   return(std::make_shared<ImgRaster>()); */
+ /*   return(std::make_shared<Jim>()); */
  /* }; */
-  ///create shared pointer to ImgRaster
- static std::shared_ptr<ImgRaster> createImg(const std::shared_ptr<ImgRaster> pSrc, bool copyData=true);
+  ///create shared pointer to Jim
+ static std::shared_ptr<Jim> createImg(const std::shared_ptr<Jim> pSrc, bool copyData=true);
  /* { */
- /*   std::shared_ptr<ImgRaster> pRaster=std::make_shared<ImgRaster>(*pSrc,copyData); */
+ /*   std::shared_ptr<Jim> pRaster=std::make_shared<Jim>(*pSrc,copyData); */
  /*   return(pRaster); */
  /* }; */
-  ///create shared pointer to ImgRaster with random values only for in memory
- static std::shared_ptr<ImgRaster> createImg(app::AppFactory &theApp);
+  ///create shared pointer to Jim with random values only for in memory
+ static std::shared_ptr<Jim> createImg(app::AppFactory &theApp);
  /* { */
- /*    std::shared_ptr<ImgRaster> pRaster=std::make_shared<ImgRaster>(theApp); */
+ /*    std::shared_ptr<Jim> pRaster=std::make_shared<Jim>(theApp); */
  /*    return(pRaster); */
  /*  } */
-  ///create shared pointer to ImgRaster with random values only for in memory
- static std::shared_ptr<ImgRaster> createImg(const std::string filename, bool readData=true, unsigned int memory=0);
+  ///create shared pointer to Jim with random values only for in memory
+ static std::shared_ptr<Jim> createImg(const std::string filename, bool readData=true, unsigned int memory=0);
  /* { */
- /*    std::shared_ptr<ImgRaster> pRaster=std::make_shared<ImgRaster>(filename,memory); */
+ /*    std::shared_ptr<Jim> pRaster=std::make_shared<Jim>(filename,memory); */
  /*    return(pRaster); */
  /*  } */
   ///get write mode
@@ -338,9 +338,9 @@ class ImgRaster : public std::enable_shared_from_this<ImgRaster>
   //void open(void* dataPointer, int ncol, int nrow, int nband, const GDALDataType& dataType);
   ///Close the image.
   CPLErr close();
-  ///write to file previously set (eg., with setFile). Specialization of the writeData member function of ImgRaster, avoiding reset of the memory.
+  ///write to file previously set (eg., with setFile). Specialization of the writeData member function of Jim, avoiding reset of the memory.
   CPLErr write();
-  ///write to file Specialization of the writeData member function of ImgRaster, avoiding reset of the memory.
+  ///write to file Specialization of the writeData member function of Jim, avoiding reset of the memory.
   /**
    * @param output (type: std::string) Output image file
    * @param oformat (type: std::string) (default: GTiff) Output image format (see also gdal_translate).
@@ -349,7 +349,7 @@ class ImgRaster : public std::enable_shared_from_this<ImgRaster>
    * @param nodata Nodata value to put in image.
    **/
 #ifdef SWIG
-  %pythonprepend write(app::AppFactory&)  "\"\"\"HELP.METHOD.ImgRaster.write(dict)\"\"\""
+  %pythonprepend write(app::AppFactory&)  "\"\"\"HELP.METHOD.Jim.write(dict)\"\"\""
 #endif
      CPLErr write(app::AppFactory &theApp);
   ///Get the filename of this dataset
@@ -381,7 +381,7 @@ class ImgRaster : public std::enable_shared_from_this<ImgRaster>
   CPLErr setGeoTransform(const std::vector<double>& gt);
   CPLErr setGeoTransform(double* gt);
   ///Copy geotransform information from another georeferenced image
-  CPLErr copyGeoTransform(const ImgRaster& imgSrc);
+  CPLErr copyGeoTransform(const Jim& imgSrc);
   ///Set the projection for this dataset in well known text (wkt) format
   CPLErr setProjection(const std::string& projection){setProjectionProj4(projection);};
   ///Set the projection for this dataset from user input (supports epsg:<number> format)
@@ -448,7 +448,7 @@ class ImgRaster : public std::enable_shared_from_this<ImgRaster>
   ///Check if a region of interest is (partially or all if all is set) covered by this dataset. Only the bounding box is checked, irrespective of no data values.
   bool covers(double ulx, double  uly, double lrx, double lry, bool all=false, OGRCoordinateTransformation *poCT=NULL) const;
   ///Check if an image is (partially or all if all is set) covered by this dataset. Only the bounding box is checked, irrespective of no data values.
-  bool covers(const std::shared_ptr<ImgRaster> imgRaster, bool all=false) const{
+  bool covers(const std::shared_ptr<Jim> imgRaster, bool all=false) const{
     OGRSpatialReference thisSpatialRef(getProjectionRef().c_str());
     OGRSpatialReference thatSpatialRef(imgRaster->getProjectionRef().c_str());
     OGRCoordinateTransformation *that2this = OGRCreateCoordinateTransformation(&thatSpatialRef, &thisSpatialRef);
@@ -489,7 +489,7 @@ class ImgRaster : public std::enable_shared_from_this<ImgRaster>
   ///Copy data
   CPLErr copyData(void* data, int band=0);
   ///Copy data
-  // void copyData(ImgRaster& imgRaster, int band=0);
+  // void copyData(Jim& imgRaster, int band=0);
   //todo: introduce smart pointer instead of void*
   // std::unique_ptr<void> getDataPointer(int band=0){return(m_data[band]);};
   ///Get the GDAL rasterband for this dataset
@@ -556,14 +556,14 @@ class ImgRaster : public std::enable_shared_from_this<ImgRaster>
     return nYBlocks;
   }
 
-  ///Create a JSON string from a ImgRaster image
+  ///Create a JSON string from a Jim image
   std::string jim2json();
-  ///Clone as new shared pointer to ImgRaster object
-  /* std::shared_ptr<ImgRaster> clone() { */
+  ///Clone as new shared pointer to Jim object
+  /* std::shared_ptr<Jim> clone() { */
   /*   return(cloneImpl()); */
   /* }; */
-  std::shared_ptr<ImgRaster> clone(bool copyData=true);
-  std::shared_ptr<ImgRaster> getShared(){return(std::dynamic_pointer_cast<ImgRaster>(shared_from_this()));};
+  std::shared_ptr<Jim> clone(bool copyData=true);
+  std::shared_ptr<Jim> getShared(){return(std::dynamic_pointer_cast<Jim>(shared_from_this()));};
   ///Read all pixels from image in memory for specific dataset band
   CPLErr readDataDS(int band, int ds_band);
   ///Read all pixels from image in memory for specific band
@@ -621,9 +621,9 @@ class ImgRaster : public std::enable_shared_from_this<ImgRaster>
   // void open(const std::string& filename, const GDALAccess& readMode=GA_ReadOnly, unsigned int memory=0);
   //From Writer
   ///Open an image for writing, copying image attributes from a source image. Image is directly written to file. Use the constructor with memory>0 to support caching
-  CPLErr open(const std::string& filename, const ImgRaster& imgSrc, const std::vector<std::string>& options=std::vector<std::string>());
+  CPLErr open(const std::string& filename, const Jim& imgSrc, const std::vector<std::string>& options=std::vector<std::string>());
   ///Open an image for writing, copying image attributes from a source image. Caching is supported when memory>0
-  CPLErr open(const std::string& filename, const ImgRaster& imgSrc, unsigned int memory, const std::vector<std::string>& options=std::vector<std::string>());
+  CPLErr open(const std::string& filename, const Jim& imgSrc, unsigned int memory, const std::vector<std::string>& options=std::vector<std::string>());
   ///Open an image for writing, defining all image attributes. Image is directly written to file. Use the constructor with memory>0 to support caching
   // void open(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, const std::vector<std::string>& options=std::vector<std::string>());
   ///Open an image for writing, defining all image attributes. Caching is supported when memory>0
@@ -633,9 +633,9 @@ class ImgRaster : public std::enable_shared_from_this<ImgRaster>
   ///Open an image for writing in memory with nplane, defining image attributes.
   CPLErr open(int ncol, int nrow, int nband, int nplane, const GDALDataType& dataType);
   ///Open an image for writing in memory, copying image attributes from a source image.
-  CPLErr open(ImgRaster& imgSrc,  bool copyData=true);
+  CPLErr open(Jim& imgSrc,  bool copyData=true);
   ///Open an image for writing in memory, copying image attributes from a source image.
-  /* CPLErr open(std::shared_ptr<ImgRaster> imgSrc,  bool copyData=true); */
+  /* CPLErr open(std::shared_ptr<Jim> imgSrc,  bool copyData=true); */
   ///Open an image for writing using an external data pointer (not tested yet)
   CPLErr open(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType);
   ///Open an image for writing using an external data pointer
@@ -665,76 +665,69 @@ class ImgRaster : public std::enable_shared_from_this<ImgRaster>
   ///Prepare image writer to write to file
   CPLErr setFile(app::AppFactory &app);
   ///Prepare image writer to write to file
-  // void setFile(const std::string& filename, const ImgRaster& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>());
+  // void setFile(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>());
   ///Set the color table using an (ASCII) file with 5 columns (value R G B alpha)
   CPLErr setColorTable(const std::string& filename, int band=0);
   ///Set the color table using the GDAL class GDALColorTable
   CPLErr setColorTable(GDALColorTable* colorTable, int band=0);
   ///Set specific metadata (driver specific)
   CPLErr setMetadata(char** metadata);
-  ///Rasterize an OGR vector dataset using the gdal algorithm "GDALRasterizeLayers"
-  //CPLErr rasterizeOgr(ImgReaderOgr& ogrReader, const std::vector<double>& burnValues, const std::vector<std::string>& controlOptions=std::vector<std::string>(), const std::vector<std::string>& layernames=std::vector<std::string>());
-  ///Rasterize an OGR vector dataset in memory using the gdal algorithm "GDALRasterizeLayersBuf"
-  /* CPLErr rasterizeBuf(ImgReaderOgr& ogrReader){double burnValue=1.0; std::vector<std::string> layernames;rasterizeBuf(ogrReader,burnValue,layernames);}; */
   CPLErr rasterizeBuf(const std::string& ogrFilename);
-  //CPLErr rasterizeBuf(ImgReaderOgr& ogrReader, double burnValue, const std::vector<std::string>& layernames);
-  //CPLErr rasterizeBuf(ImgReaderOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption=std::vector<std::string>(), const std::vector<std::string>& layernames=std::vector<std::string>());
   CPLErr rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption=std::vector<std::string>(), const std::vector<std::string>& layernames=std::vector<std::string>());
 
   /* CPLErr rasterizeLayersBuf(std::vector<OGRLayer*>& layers, double burnValue=1.0); */
   /* CPLErr rasterizeLayersBuf(OGRLayer* layer, double burnValue=1.0){std::vector<OGRLayer*> layers;layers.push_back(layer);rasterizeLayersBuf(layers,burnValue);}; */
-  /* void rasterizeBuf(ImgReaderOgr& ogrReader, const std::vector<std::string>& controlOptions=std::vector<std::string>(), const std::vector<std::string>& layernames=std::vector<std::string>()); */
   ///Apply thresholds: set to no data if not within thresholds t1 and t2
-  CPLErr setThreshold(ImgRaster& imgWriter, double t1, double t2);
+  CPLErr setThreshold(Jim& imgWriter, double t1, double t2);
   ///Apply absolute thresholds: set to no data if not within thresholds t1 and t2
-  CPLErr setAbsThreshold(ImgRaster& imgWriter, double t1, double t2);
+  CPLErr setAbsThreshold(Jim& imgWriter, double t1, double t2);
   ///Apply thresholds for in memory: set to no data if not within thresholds t1 and t2
-  std::shared_ptr<ImgRaster> setThreshold(double t1, double t2);
+  std::shared_ptr<Jim> setThreshold(double t1, double t2);
   ///Apply absolute thresholds for in memory: set to no data if not within thresholds t1 and t2
-  std::shared_ptr<ImgRaster> setAbsThreshold(double t1, double t2);
+  std::shared_ptr<Jim> setAbsThreshold(double t1, double t2);
   ///Apply thresholds: set to no data if not within thresholds t1 and t2, else set to value
-  CPLErr setThreshold(ImgRaster& imgWriter, double t1, double t2, double value);
+  CPLErr setThreshold(Jim& imgWriter, double t1, double t2, double value);
   ///Apply absolute thresholds: set to no data if not within thresholds t1 and t2, else set to value
-  CPLErr setAbsThreshold(ImgRaster& imgWriter, double t1, double t2, double value);
+  CPLErr setAbsThreshold(Jim& imgWriter, double t1, double t2, double value);
   ///Apply thresholds for in memory: set to no data if not within thresholds t1 and t2, else set to value
-  std::shared_ptr<ImgRaster> setThreshold(double t1, double t2, double value);
+  std::shared_ptr<Jim> setThreshold(double t1, double t2, double value);
   ///Apply absolute thresholds for in memory: set to no data if not within thresholds t1 and t2, else set to value
-  std::shared_ptr<ImgRaster> setAbsThreshold(double t1, double t2, double value);
+  std::shared_ptr<Jim> setAbsThreshold(double t1, double t2, double value);
   ///Apply thresholds with theApp
-  CPLErr setThreshold(ImgRaster& imgWriter, app::AppFactory &theApp);
+  CPLErr setThreshold(Jim& imgWriter, app::AppFactory &theApp);
   ///Apply thresholds for in memory with theApp
-  std::shared_ptr<ImgRaster> setThreshold(app::AppFactory &theApp);
+  std::shared_ptr<Jim> setThreshold(app::AppFactory &theApp);
 
   ///assignment operator
-  /* ImgRaster& operator=(ImgRaster& imgSrc); */
+  /* Jim& operator=(Jim& imgSrc); */
 /* #if MIALIB == 1 */
-/*   bool isEqual(std::shared_ptr<ImgRaster> refImg); */
+/*   bool isEqual(std::shared_ptr<Jim> refImg); */
 /* #endif */
   //lib functions
   ///convert image
-  CPLErr convert(ImgRaster& imgWriter, app::AppFactory& app);
+  CPLErr convert(Jim& imgWriter, app::AppFactory& app);
   ///crop image
-  CPLErr crop(ImgRaster& imgWriter, app::AppFactory& app);
+  CPLErr crop(Jim& imgWriter, app::AppFactory& app);
   ///crop image
-  CPLErr crop(VectorOgr& sampleReader, ImgRaster& imgWriter, app::AppFactory& app);
-  ///crop image if it has not been read yet (typically used when ImgRaster has been opened with argument noRead true)
-  CPLErr cropDS(ImgRaster& imgWriter, app::AppFactory& app);
+  CPLErr crop(VectorOgr& sampleReader, Jim& imgWriter, app::AppFactory& app);
+  ///crop image if it has not been read yet (typically used when Jim has been opened with argument noRead true)
+  CPLErr cropDS(Jim& imgWriter, app::AppFactory& app);
   ///crop image
-  CPLErr crop(ImgRaster& imgWriter, double ulx, double uly, double lrx, double lry);
+  CPLErr crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry);
   ///convert image only for in memory
-  std::shared_ptr<ImgRaster> convert(app::AppFactory& app);
+  std::shared_ptr<Jim> convert(app::AppFactory& app);
   ///crop image only for in memory
-  std::shared_ptr<ImgRaster> crop(app::AppFactory& app);
+  std::shared_ptr<Jim> crop(app::AppFactory& app);
   ///crop image only for in memory
-  std::shared_ptr<ImgRaster> crop(VectorOgr& sampleReader, app::AppFactory& app);
+  std::shared_ptr<Jim> crop(VectorOgr& sampleReader, app::AppFactory& app);
   ///crop image only for in memory
-  std::shared_ptr<ImgRaster> crop(double ulx, double uly, double lrx, double lry);
+  std::shared_ptr<Jim> crop(double ulx, double uly, double lrx, double lry);
   ///crop Jim image in memory based on VectorOgr returning Jim image
-  std::shared_ptr<ImgRaster> cropOgr(VectorOgr& sampleReader, app::AppFactory& app);
+  std::shared_ptr<Jim> cropOgr(VectorOgr& sampleReader, app::AppFactory& app);
   ///warp Jim image in memory
-  std::shared_ptr<ImgRaster> warp(app::AppFactory& theApp);
+  std::shared_ptr<Jim> warp(app::AppFactory& theApp);
   ///warp image
-  CPLErr warp(ImgRaster& imgWriter, app::AppFactory &theApp);
+  CPLErr warp(Jim& imgWriter, app::AppFactory &theApp);
   ///extract pixel values from raster image from a vector sample
   CPLErr extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, app::AppFactory& app);
   ///extract pixel values from raster image from a vector sample
@@ -744,83 +737,83 @@ class ImgRaster : public std::enable_shared_from_this<ImgRaster>
   ///extract pixel values from raster image with random or grid sampling
   std::shared_ptr<VectorOgr> extractSample(app::AppFactory& app);
   ///extract pixel values from raster image from a raster sample
-  CPLErr extractImg(ImgRaster& classReader, VectorOgr& ogrWriter, app::AppFactory& app);
+  CPLErr extractImg(Jim& classReader, VectorOgr& ogrWriter, app::AppFactory& app);
   ///extract pixel values from raster image from a raster sample
-  std::shared_ptr<VectorOgr> extractImg(ImgRaster& classReader, app::AppFactory& app);
+  std::shared_ptr<VectorOgr> extractImg(Jim& classReader, app::AppFactory& app);
   ///calculate statistics profile based on multiband raster dataset
-  CPLErr statProfile(ImgRaster& imgWriter, app::AppFactory& app);
+  CPLErr statProfile(Jim& imgWriter, app::AppFactory& app);
   ///calculate statistics profile based on multiband raster dataset only for in memory
-  std::shared_ptr<ImgRaster> statProfile(app::AppFactory& app);
+  std::shared_ptr<Jim> statProfile(app::AppFactory& app);
   ///filter raster dataset
-  /* CPLErr filter(ImgRaster& imgWriter, app::AppFactory& app); */
+  /* CPLErr filter(Jim& imgWriter, app::AppFactory& app); */
   ///filter raster dataset in spectral/temporal domain
-  CPLErr filter1d(ImgRaster& imgWriter, app::AppFactory& app);
+  CPLErr filter1d(Jim& imgWriter, app::AppFactory& app);
   ///filter raster dataset in spatial domain
-  CPLErr filter2d(ImgRaster& imgWriter, const app::AppFactory& app);
+  CPLErr filter2d(Jim& imgWriter, const app::AppFactory& app);
   ///filter raster dataset only for in memory
-  /* std::shared_ptr<ImgRaster> filter(app::AppFactory& app); */
+  /* std::shared_ptr<Jim> filter(app::AppFactory& app); */
   ///filter raster dataset in spectral/temporal domain only for in memory
-  std::shared_ptr<ImgRaster> filter1d(app::AppFactory& app);
+  std::shared_ptr<Jim> filter1d(app::AppFactory& app);
   ///filter raster dataset in spatial domain only for in memory
-  std::shared_ptr<ImgRaster> filter2d(const app::AppFactory& app);
+  std::shared_ptr<Jim> filter2d(const app::AppFactory& app);
   ///check the difference between two images (validate in case of classification image)
-  CPLErr diff(ImgRaster& imgReference, app::AppFactory& app);
+  CPLErr diff(Jim& imgReference, app::AppFactory& app);
   ///check the difference between two images (validate in case of classification image)
   CPLErr validate(app::AppFactory& app);
   ///train raster dataset
-  CPLErr train(ImgList& referenceReader, app::AppFactory& app);
+  CPLErr train(JimList& referenceReader, app::AppFactory& app);
   ///classify raster dataset
-  CPLErr classify(ImgRaster& imgWriter, app::AppFactory& app);
+  CPLErr classify(Jim& imgWriter, app::AppFactory& app);
   ///classify raster dataset only for in memory
-  std::shared_ptr<ImgRaster> classify(app::AppFactory& app);
+  std::shared_ptr<Jim> classify(app::AppFactory& app);
   ///svm raster dataset
-  CPLErr classifySVM(ImgRaster& imgWriter, app::AppFactory& app);
+  CPLErr classifySVM(Jim& imgWriter, app::AppFactory& app);
   ///svm raster dataset only for in memory
-  std::shared_ptr<ImgRaster> classifySVM(app::AppFactory& app);
+  std::shared_ptr<Jim> classifySVM(app::AppFactory& app);
   ///svm raster dataset
-  /* CPLErr svm(ImgRaster& imgWriter, app::AppFactory& app); */
+  /* CPLErr svm(Jim& imgWriter, app::AppFactory& app); */
   ///svm raster dataset only for in memory
-  /* std::shared_ptr<ImgRaster> svm(app::AppFactory& app); */
+  /* std::shared_ptr<Jim> svm(app::AppFactory& app); */
   ///artificial neural network raster dataset
-  CPLErr classifyANN(ImgRaster& imgWriter, app::AppFactory& app);
+  CPLErr classifyANN(Jim& imgWriter, app::AppFactory& app);
   ///artificial neural network raster dataset only for in memory
-  std::shared_ptr<ImgRaster> classifyANN(app::AppFactory& app);
+  std::shared_ptr<Jim> classifyANN(app::AppFactory& app);
   ///artificial neural network raster dataset
-  //CPLErr ann(ImgRaster& imgWriter, app::AppFactory& app);
+  //CPLErr ann(Jim& imgWriter, app::AppFactory& app);
   ///ann raster dataset only for in memory
-  //std::shared_ptr<ImgRaster> ann(app::AppFactory& app);
+  //std::shared_ptr<Jim> ann(app::AppFactory& app);
   ///train sml raster dataset
-  template<typename T> std::string trainSML(ImgList& referenceReader, app::AppFactory& app);
+  template<typename T> std::string trainSML(JimList& referenceReader, app::AppFactory& app);
   ///train sml raster dataset in memory
-  std::string trainMem(ImgList& referenceReader, app::AppFactory& app);
+  std::string trainMem(JimList& referenceReader, app::AppFactory& app);
   ///classify raster dataset using SML
-  template<typename T> CPLErr classifySML(ImgRaster& imgWriter, app::AppFactory& app);
+  template<typename T> CPLErr classifySML(Jim& imgWriter, app::AppFactory& app);
   ///sml raster dataset only for in memory
-  template<typename T> std::shared_ptr<ImgRaster> classifySML(app::AppFactory& app);
+  template<typename T> std::shared_ptr<Jim> classifySML(app::AppFactory& app);
   ///sml raster dataset
-  /* template<typename T> CPLErr classifySML(ImgRaster& imgWriter, app::AppFactory& app); */
+  /* template<typename T> CPLErr classifySML(Jim& imgWriter, app::AppFactory& app); */
   ///stretch raster dataset
-  CPLErr stretch(ImgRaster& imgWriter, app::AppFactory& app);
+  CPLErr stretch(Jim& imgWriter, app::AppFactory& app);
   ///stretch raster dataset only for in memory
-  std::shared_ptr<ImgRaster> stretch(app::AppFactory& app);
+  std::shared_ptr<Jim> stretch(app::AppFactory& app);
   ///reclass raster dataset
-  CPLErr reclass(ImgRaster& imgWriter, app::AppFactory& app);
+  CPLErr reclass(Jim& imgWriter, app::AppFactory& app);
   ///reclass raster dataset only for in memory
-  std::shared_ptr<ImgRaster> reclass(app::AppFactory& app);
+  std::shared_ptr<Jim> reclass(app::AppFactory& app);
   ///set mask to raster dataset
-  CPLErr setMask(VectorOgr& ogrReader, ImgRaster& imgWriter, app::AppFactory& app);
+  CPLErr setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app);
   ///set mask to raster dataset
-  CPLErr setMask(ImgList& maskReader, ImgRaster& imgWriter, app::AppFactory& app);
-  /* CPLErr setMask(ImgRaster& imgWriter, app::AppFactory& app); */
+  CPLErr setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app);
+  /* CPLErr setMask(Jim& imgWriter, app::AppFactory& app); */
   ///setmask raster dataset only for in memory
-  std::shared_ptr<ImgRaster> setMask(VectorOgr& ogrReader, app::AppFactory& app);
+  std::shared_ptr<Jim> setMask(VectorOgr& ogrReader, app::AppFactory& app);
   ///setmask raster dataset only for in memory
-  std::shared_ptr<ImgRaster> setMask(ImgList& maskReader, app::AppFactory& app);
-  /* std::shared_ptr<ImgRaster> setMask(app::AppFactory& app); */
+  std::shared_ptr<Jim> setMask(JimList& maskReader, app::AppFactory& app);
+  /* std::shared_ptr<Jim> setMask(app::AppFactory& app); */
   ///get mask to raster dataset
-  CPLErr getMask(ImgRaster& imgWriter, app::AppFactory& app);
+  CPLErr getMask(Jim& imgWriter, app::AppFactory& app);
   ///getmask raster dataset only for in memory
-  std::shared_ptr<ImgRaster> getMask(app::AppFactory& app);
+  std::shared_ptr<Jim> getMask(app::AppFactory& app);
   ///dump raster dataset
   CPLErr dumpImg(app::AppFactory& app);
   ///get statistics
@@ -927,8 +920,8 @@ class ImgRaster : public std::enable_shared_from_this<ImgRaster>
   CPLErr writeNewBlock(int row, int band);
 
  private:
-  std::shared_ptr<ImgRaster> cloneImpl(bool copyData) {
-    return(std::make_shared<ImgRaster>(*this,copyData));
+  std::shared_ptr<Jim> cloneImpl(bool copyData) {
+    return(std::make_shared<Jim>(*this,copyData));
   };
 #if MIALIB == 1
   std::vector<IMAGE*> m_mia;
@@ -941,7 +934,7 @@ class ImgRaster : public std::enable_shared_from_this<ImgRaster>
  * @param[in] row The row number to read (counting starts from 0)
  * @param[in] band The band number to read (counting starts from 0)
  **/
-template<typename T> CPLErr ImgRaster::readData(T& value, int col, int row, int band)
+template<typename T> CPLErr Jim::readData(T& value, int col, int row, int band)
 {
   try{
     if(nrOfBand()<=band){
@@ -1033,7 +1026,7 @@ template<typename T> CPLErr ImgRaster::readData(T& value, int col, int row, int 
  * @param[in] row The row number to read (counting starts from 0)
  * @param[in] band The band number to read (counting starts from 0)
  **/
-template<typename T> CPLErr ImgRaster::readData(std::vector<T>& buffer, int minCol, int maxCol, int row, int band)
+template<typename T> CPLErr Jim::readData(std::vector<T>& buffer, int minCol, int maxCol, int row, int band)
 {
   try{
     if(nrOfBand()<=band){
@@ -1161,7 +1154,7 @@ template<typename T> CPLErr ImgRaster::readData(std::vector<T>& buffer, int minC
  * @param[in] band The band number to read (counting starts from 0)
  * @param[in] resample The resampling method (currently only BILINEAR and NEAR are supported)
  **/
-template<typename T> CPLErr ImgRaster::readData(std::vector<T>& buffer, int minCol, int maxCol, double row, int band, RESAMPLE resample)
+template<typename T> CPLErr Jim::readData(std::vector<T>& buffer, int minCol, int maxCol, double row, int band, RESAMPLE resample)
 {
   CPLErr returnValue=CE_None;
   std::vector<T> readBuffer_upper;
@@ -1211,7 +1204,7 @@ template<typename T> CPLErr ImgRaster::readData(std::vector<T>& buffer, int minC
  * @param[in] maxRow Last row that must be read (counting starts from 0)
  * @param[in] band The band number to read (counting starts from 0)
  **/
-template<typename T> CPLErr ImgRaster::readDataBlock(Vector2d<T>& buffer2d, int minCol, int maxCol, int minRow, int maxRow, int band)
+template<typename T> CPLErr Jim::readDataBlock(Vector2d<T>& buffer2d, int minCol, int maxCol, int minRow, int maxRow, int band)
 {
   CPLErr returnValue=CE_None;
   buffer2d.resize(maxRow-minRow+1,maxCol-minCol+1);
@@ -1236,7 +1229,7 @@ template<typename T> CPLErr ImgRaster::readDataBlock(Vector2d<T>& buffer2d, int 
  * @param[in] maxRow Last row that must be read (counting starts from 0)
  * @param[in] band The band number to read (counting starts from 0)
  **/
-template<typename T> CPLErr ImgRaster::readDataBlock(std::vector<T>& buffer, int minCol, int maxCol, int minRow, int maxRow, int band)
+template<typename T> CPLErr Jim::readDataBlock(std::vector<T>& buffer, int minCol, int maxCol, int minRow, int maxRow, int band)
 {
   try{
     CPLErr returnValue=CE_None;
@@ -1333,7 +1326,7 @@ template<typename T> CPLErr ImgRaster::readDataBlock(std::vector<T>& buffer, int
  * @param[in] row The row number to read (counting starts from 0)
  * @param[in] band The band number to read (counting starts from 0)
  **/
-template<typename T> CPLErr ImgRaster::readData(std::vector<T>& buffer, int row, int band)
+template<typename T> CPLErr Jim::readData(std::vector<T>& buffer, int row, int band)
 {
   return(readData(buffer,0,nrOfCol()-1,row,band));
 }
@@ -1344,7 +1337,7 @@ template<typename T> CPLErr ImgRaster::readData(std::vector<T>& buffer, int row,
  * @param[in] band The band number to read (counting starts from 0)
  * @param[in] resample The resampling method (currently only BILINEAR and NEAR are supported).
  **/
-template<typename T> CPLErr ImgRaster::readData(std::vector<T>& buffer, double row, int band, RESAMPLE resample)
+template<typename T> CPLErr Jim::readData(std::vector<T>& buffer, double row, int band, RESAMPLE resample)
 {
   return(readData(buffer,0,nrOfCol()-1,row,band,resample));
 }
@@ -1357,7 +1350,7 @@ template<typename T> CPLErr ImgRaster::readData(std::vector<T>& buffer, double r
  * @param[in] band The band number to write (counting starts from 0)
  * @return true if write successful
  **/
-template<typename T> CPLErr ImgRaster::writeData(const T& value, int col, int row, int band)
+template<typename T> CPLErr Jim::writeData(const T& value, int col, int row, int band)
 {
   CPLErr returnValue=CE_None;
   if(band>=nrOfBand()+1){
@@ -1447,7 +1440,7 @@ template<typename T> CPLErr ImgRaster::writeData(const T& value, int col, int ro
  * @param[in] band The band number to write (counting starts from 0)
  * @return true if write successful
  **/
-template<typename T> CPLErr ImgRaster::writeData(std::vector<T>& buffer, int minCol, int maxCol, int row, int band)
+template<typename T> CPLErr Jim::writeData(std::vector<T>& buffer, int minCol, int maxCol, int row, int band)
 {
   CPLErr returnValue=CE_None;
   if(buffer.size()!=maxCol-minCol+1){
@@ -1561,7 +1554,7 @@ template<typename T> CPLErr ImgRaster::writeData(std::vector<T>& buffer, int min
  * @param[in] band The band number to write (counting starts from 0)
  * @return true if write successful
  **/
-template<typename T> CPLErr ImgRaster::writeData(std::vector<T>& buffer, int row, int band)
+template<typename T> CPLErr Jim::writeData(std::vector<T>& buffer, int row, int band)
 {
   return writeData(buffer,0,nrOfCol()-1,row,band);
 }
@@ -1574,7 +1567,7 @@ template<typename T> CPLErr ImgRaster::writeData(std::vector<T>& buffer, int row
  * @param[in] band The band number to write (counting starts from 0)
  * @return true if write successful
  **/
-template<typename T> CPLErr ImgRaster::writeDataBlock(Vector2d<T>& buffer2d, int minCol, int maxCol, int minRow, int maxRow, int band)
+template<typename T> CPLErr Jim::writeDataBlock(Vector2d<T>& buffer2d, int minCol, int maxCol, int minRow, int maxRow, int band)
 {
   CPLErr returnValue=CE_None;
   double theScale=1;
@@ -1694,4 +1687,4 @@ template<typename T> CPLErr ImgRaster::writeDataBlock(Vector2d<T>& buffer2d, int
   return(returnValue);
 }
 
-#endif // _IMGRASTER_H_
+#endif // _JIM_H_

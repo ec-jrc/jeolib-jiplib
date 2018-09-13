@@ -20,8 +20,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <iostream>
 #include <memory>
-#include "imageclasses/ImgRaster.h"
-#include "imageclasses/ImgReaderOgr.h"
+#include "imageclasses/Jim.h"
 #include "base/Optionpk.h"
 #include "apps/AppFactory.h"
 
@@ -32,7 +31,7 @@ using namespace app;
  * @param imgWriter output raster dumpimg dataset
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr ImgRaster::dumpImg(app::AppFactory& app){
+CPLErr Jim::dumpImg(app::AppFactory& app){
 
   Optionpk<string> output_opt("o", "output", "Output ascii file (Default is empty: dump to standard output)");
   Optionpk<string> oformat_opt("of", "oformat", "Output format: matrix or list (x,y,z) form. Default is matrix", "matrix");

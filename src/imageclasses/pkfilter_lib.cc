@@ -27,7 +27,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include "base/Optionpk.h"
 #include "fileclasses/FileReaderAscii.h"
-#include "imageclasses/ImgRaster.h"
+#include "imageclasses/Jim.h"
 #include "algorithms/StatFactory.h"
 #include "algorithms/Filter.h"
 #include "algorithms/Filter2d.h"
@@ -41,9 +41,9 @@ using namespace filter;
  * @param app application specific option arguments
  * @return output filtered raster dataset
  **/
-shared_ptr<ImgRaster> ImgRaster::filter2dFast(const app::AppFactory& app){
+shared_ptr<Jim> Jim::filter2dFast(const app::AppFactory& app){
   try{
-    shared_ptr<ImgRaster> imgWriter=createImg();
+    shared_ptr<Jim> imgWriter=createImg();
     filter2dFast(*imgWriter, app);
     return(imgWriter);
   }
@@ -57,9 +57,9 @@ shared_ptr<ImgRaster> ImgRaster::filter2dFast(const app::AppFactory& app){
  * @param app application specific option arguments
  * @return output filtered raster dataset
  **/
-shared_ptr<ImgRaster> ImgRaster::filter(app::AppFactory& app){
+shared_ptr<Jim> Jim::filter(app::AppFactory& app){
   try{
-    shared_ptr<ImgRaster> imgWriter=createImg();
+    shared_ptr<Jim> imgWriter=createImg();
     filter(*imgWriter, app);
     return(imgWriter);
   }
@@ -74,7 +74,7 @@ shared_ptr<ImgRaster> ImgRaster::filter(app::AppFactory& app){
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr ImgRaster::filter(ImgRaster& imgWriter, app::AppFactory& app){
+CPLErr Jim::filter(Jim& imgWriter, app::AppFactory& app){
   Optionpk<bool> disc_opt("circ", "circular", "circular disc kernel for dilation and erosion", false);
   // Optionpk<double> angle_opt("a", "angle", "angle used for directional filtering in dilation (North=0, East=90, South=180, West=270).");
   Optionpk<std::string> method_opt("f", "filter", "filter function (nvalid, median, var, min, max, sum, mean, dilate, erode, close, open, homog (central pixel must be identical to all other pixels within window), heterog (central pixel must be different than all other pixels within window), sauvola, sobelx (horizontal edge detection), sobely (vertical edge detection), sobelxy (diagonal edge detection NE-SW),sobelyx (diagonal edge detection NW-SE), density, countid, mode (majority voting), only for classes), smooth, smoothnodata (smooth nodata values only) values, ismin, ismax, order (rank pixels in order), stdev, mrf, dwt, dwti, dwt_cut, dwt_cut_from, scramble, shift, savgolay, percentile, proportion)");
@@ -894,7 +894,7 @@ CPLErr ImgRaster::filter(ImgRaster& imgWriter, app::AppFactory& app){
 }
 
 ///Fast implementation of filter2d, not taking care of boundary effects (values at the boundary will be initialized as 0 as they will be cut of by caller)
-CPLErr ImgRaster::filter2dFast(ImgRaster& imgWriter, const app::AppFactory& app)
+CPLErr Jim::filter2dFast(Jim& imgWriter, const app::AppFactory& app)
 {
   Optionpk<unsigned int>  band_opt("b", "band", "band index to crop (leave empty to retain all bands)");
   Optionpk<bool> disc_opt("circ", "circular", "circular disc kernel for dilation and erosion", false);

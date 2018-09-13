@@ -29,7 +29,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include "apps/AppFactory.h"
 #include "ogr_feature.h"
 #include "ogrsf_frmts.h"
-#include "ImgRaster.h"
+#include "Jim.h"
 #include "cpl_string.h"
 
 /* enum OGR_DATA_ACCESS { READ_ONLY = 0, UPDATE = 1, WRITE = 3}; */

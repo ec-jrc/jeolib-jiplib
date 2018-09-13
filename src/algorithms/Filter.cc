@@ -62,7 +62,7 @@ unsigned int filter::Filter::setNoDataValues(std::vector<double> vnodata){
   return m_noDataValues.size();
 };
 
-void filter::Filter::dwtForward(ImgRaster& input, ImgRaster& output, const std::string& wavelet_type, int family){
+void filter::Filter::dwtForward(Jim& input, Jim& output, const std::string& wavelet_type, int family){
   const char* pszMessage;
   void* pProgressArg=NULL;
   GDALProgressFunc pfnProgress=GDALTermProgress;
@@ -93,7 +93,7 @@ void filter::Filter::dwtForward(ImgRaster& input, ImgRaster& output, const std::
   }
 }
 
-void filter::Filter::dwtInverse(ImgRaster& input, ImgRaster& output, const std::string& wavelet_type, int family){
+void filter::Filter::dwtInverse(Jim& input, Jim& output, const std::string& wavelet_type, int family){
   const char* pszMessage;
   void* pProgressArg=NULL;
   GDALProgressFunc pfnProgress=GDALTermProgress;
@@ -124,7 +124,7 @@ void filter::Filter::dwtInverse(ImgRaster& input, ImgRaster& output, const std::
   }
 }
 
-void filter::Filter::dwtCut(ImgRaster& input, ImgRaster& output, const std::string& wavelet_type, int family, double cut){
+void filter::Filter::dwtCut(Jim& input, Jim& output, const std::string& wavelet_type, int family, double cut){
   const char* pszMessage;
   void* pProgressArg=NULL;
   GDALProgressFunc pfnProgress=GDALTermProgress;
@@ -155,7 +155,7 @@ void filter::Filter::dwtCut(ImgRaster& input, ImgRaster& output, const std::stri
   }
 }
 
-void filter::Filter::dwtCutFrom(ImgRaster& input, ImgRaster& output, const std::string& wavelet_type, int family, int band){
+void filter::Filter::dwtCutFrom(Jim& input, Jim& output, const std::string& wavelet_type, int family, int band){
   const char* pszMessage;
   void* pProgressArg=NULL;
   GDALProgressFunc pfnProgress=GDALTermProgress;
@@ -257,7 +257,7 @@ void filter::Filter::dwtCut(std::vector<double>& data, const std::string& wavele
   gsl_wavelet_workspace_free (work);
 }
 
-void filter::Filter::morphology(ImgRaster& input, ImgRaster& output, const std::string& method, int dim, short verbose)
+void filter::Filter::morphology(Jim& input, Jim& output, const std::string& method, int dim, short verbose)
 {
   // bool bverbose=(verbose>1)? true:false;
   Vector2d<double> lineInput(input.nrOfBand(),input.nrOfCol());
@@ -304,7 +304,7 @@ void filter::Filter::morphology(ImgRaster& input, ImgRaster& output, const std::
   }
 }
 
-void filter::Filter::smoothNoData(ImgRaster& input, const std::string& interpolationType, ImgRaster& output)
+void filter::Filter::smoothNoData(Jim& input, const std::string& interpolationType, Jim& output)
 {
   Vector2d<double> lineInput(input.nrOfBand(),input.nrOfCol());
   Vector2d<double> lineOutput(input.nrOfBand(),input.nrOfCol());
@@ -337,7 +337,7 @@ void filter::Filter::smoothNoData(ImgRaster& input, const std::string& interpola
   }
 }
 
-void filter::Filter::smooth(ImgRaster& input, ImgRaster& output, short dim)
+void filter::Filter::smooth(Jim& input, Jim& output, short dim)
 {
   assert(dim>0);
   m_taps.resize(dim);
@@ -346,7 +346,7 @@ void filter::Filter::smooth(ImgRaster& input, ImgRaster& output, short dim)
   filter(input,output);
 }
 
-void filter::Filter::filter(ImgRaster& input, ImgRaster& output)
+void filter::Filter::filter(Jim& input, Jim& output)
 {
   Vector2d<double> lineInput(input.nrOfBand(),input.nrOfCol());
   Vector2d<double> lineOutput(input.nrOfBand(),input.nrOfCol());
@@ -379,7 +379,7 @@ void filter::Filter::filter(ImgRaster& input, ImgRaster& output)
   }
 }
 
-void filter::Filter::stat(ImgRaster& input, ImgRaster& output, const std::string& method)
+void filter::Filter::stat(Jim& input, Jim& output, const std::string& method)
 {
   Vector2d<double> lineInput(input.nrOfBand(),input.nrOfCol());
   assert(output.nrOfCol()==input.nrOfCol());
@@ -440,7 +440,7 @@ void filter::Filter::stat(ImgRaster& input, ImgRaster& output, const std::string
   }
 }
 
-void filter::Filter::stats(ImgRaster& input, ImgRaster& output, const vector<std::string>& methods)
+void filter::Filter::stats(Jim& input, Jim& output, const vector<std::string>& methods)
 {
   assert(output.nrOfBand()==methods.size());
   Vector2d<double> lineInput(input.nrOfBand(),input.nrOfCol());
@@ -513,7 +513,7 @@ void filter::Filter::stats(ImgRaster& input, ImgRaster& output, const vector<std
   }
 }
 
-void filter::Filter::filter(ImgRaster& input, ImgRaster& output, const std::string& method, int dim)
+void filter::Filter::filter(Jim& input, Jim& output, const std::string& method, int dim)
 {
   Vector2d<double> lineInput(input.nrOfBand(),input.nrOfCol());
   Vector2d<double> lineOutput(input.nrOfBand(),input.nrOfCol());;
@@ -743,7 +743,7 @@ double filter::Filter::getCentreWavelength(const std::vector<double> &wavelength
   return(centreWavelength);
 }
 
-// void filter::Filter::applyFwhm(const vector<double> &wavelengthIn, const ImgRaster& input, const vector<double> &wavelengthOut, const vector<double> &fwhm, const std::string& interpolationType, ImgRaster& output, bool verbose){
+// void filter::Filter::applyFwhm(const vector<double> &wavelengthIn, const Jim& input, const vector<double> &wavelengthOut, const vector<double> &fwhm, const std::string& interpolationType, Jim& output, bool verbose){
 //   Vector2d<double> lineInput(input.nrOfBand(),input.nrOfCol());
 //   Vector2d<double> lineOutput(wavelengthOut.size(),input.nrOfCol());
 //   const char* pszMessage;
@@ -768,7 +768,7 @@ double filter::Filter::getCentreWavelength(const std::vector<double> &wavelength
 //   }
 // }
 
-// void filter::Filter::applySrf(const vector<double> &wavelengthIn, const ImgRaster& input, const vector< Vector2d<double> > &srf, const std::string& interpolationType, ImgRaster& output, bool verbose){
+// void filter::Filter::applySrf(const vector<double> &wavelengthIn, const Jim& input, const vector< Vector2d<double> > &srf, const std::string& interpolationType, Jim& output, bool verbose){
 //   assert(output.nrOfBand()==srf.size());
 //   double centreWavelength=0;
 //   Vector2d<double> lineInput(input.nrOfBand(),input.nrOfCol());

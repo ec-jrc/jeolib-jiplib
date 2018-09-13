@@ -8,7 +8,7 @@ Change log
 #include <string>
 #include "base/Optionpk.h"
 #include "algorithms/StatFactory.h"
-#include "imageclasses/ImgRaster.h"
+#include "imageclasses/Jim.h"
 
 using namespace std;
 using namespace statfactory;
@@ -26,12 +26,12 @@ int main(int argc, char *argv[])
     doProcess=number_opt.retrieveOption(app);
     memory_opt.retrieveOption(app);
 
-    std::shared_ptr<ImgRaster> imgRaster1;
-    std::shared_ptr<ImgRaster> imgRaster2;
+    std::shared_ptr<Jim> imgRaster1;
+    std::shared_ptr<Jim> imgRaster2;
     for(int i=0;i<number_opt[0];++i){
       std::cout << "Creating shared pointer to image " << i << std::endl;
-      imgRaster1=ImgRaster::createImg(app);
-      imgRaster2=ImgRaster::createImg(app);
+      imgRaster1=Jim::createImg(app);
+      imgRaster2=Jim::createImg(app);
       std::cout << "Number of rows, cols, bands: "  << imgRaster1->nrOfRow() << ", " << imgRaster1->nrOfCol() << ", " << imgRaster1->nrOfBand() << std::endl;
       // std::cout << "getMax(): "  << imgRaster->getMax() << std::endl;
       imgRaster1->close();

@@ -21,7 +21,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <memory>
 #include "base/Optionpk.h"
-#include "imageclasses/ImgRaster.h"
+#include "imageclasses/Jim.h"
 #include "apps/AppFactory.h"
 
 using namespace std;
@@ -31,10 +31,10 @@ using namespace app;
  * @param app application specific option arguments
  * @return output stretched raster dataset
  **/
-shared_ptr<ImgRaster> ImgRaster::stretch(app::AppFactory& app){
+shared_ptr<Jim> Jim::stretch(app::AppFactory& app){
   try{
-    shared_ptr<ImgRaster> imgWriter=createImg();
-    // imgWriter=this->clone();//create clone to first object, allowing for polymorphism in case of derived ImgRaster objects (not working in Python)
+    shared_ptr<Jim> imgWriter=createImg();
+    // imgWriter=this->clone();//create clone to first object, allowing for polymorphism in case of derived Jim objects (not working in Python)
     stretch(*imgWriter, app);
     return(imgWriter);
   }
@@ -49,7 +49,7 @@ shared_ptr<ImgRaster> ImgRaster::stretch(app::AppFactory& app){
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr ImgRaster::stretch(ImgRaster& imgWriter, app::AppFactory& app){
+CPLErr Jim::stretch(Jim& imgWriter, app::AppFactory& app){
   Optionpk<double> nodata_opt("nodata", "nodata", "nodata value(s) (first value will be put in output image)");
   Optionpk<double> src_min_opt("src_min","src_min","clip source below this minimum value");
   Optionpk<double> src_max_opt("src_max","src_max","clip source above this maximum value");

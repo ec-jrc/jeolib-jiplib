@@ -25,7 +25,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <ctime>
 #include <vector>
-#include "imageclasses/ImgRaster.h"
+#include "imageclasses/Jim.h"
 #include "imageclasses/VectorOgr.h"
 // #include "imageclasses/ImgWriterOgr.h"
 #include "base/Optionpk.h"
@@ -44,13 +44,13 @@ using namespace app;
  * @param app application specific option arguments
  * @return output Vector
  **/
-shared_ptr<VectorOgr> ImgRaster::extractImg(ImgRaster& classReader, AppFactory& app){
+shared_ptr<VectorOgr> Jim::extractImg(Jim& classReader, AppFactory& app){
   shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
   extractImg(classReader, *ogrWriter, app);
   return(ogrWriter);
 }
 
-CPLErr ImgRaster::extractImg(ImgRaster& classReader, VectorOgr& ogrWriter, app::AppFactory& app){
+CPLErr Jim::extractImg(Jim& classReader, VectorOgr& ogrWriter, app::AppFactory& app){
   // Optionpk<string> sample_opt("s", "sample", "Raster dataset with features to be extracted from input data. Output will contain features with input band information included.");
   Optionpk<string> output_opt("o", "output", "Output sample dataset");
   Optionpk<std::string> layer_opt("ln", "ln", "output layer name","sample");
@@ -156,7 +156,7 @@ CPLErr ImgRaster::extractImg(ImgRaster& classReader, VectorOgr& ogrWriter, app::
       classmap[class_opt[iclass]]=iclass;
     }
 
-    // ImgRaster imgReader;
+    // Jim imgReader;
     // if(image_opt.empty()){
     //   std::cerr << "No image dataset provided (use option -i). Use --help for help information";
     //     exit(0);
@@ -260,7 +260,7 @@ CPLErr ImgRaster::extractImg(ImgRaster& classReader, VectorOgr& ogrWriter, app::
 
     bool sampleIsRaster=true;
 
-    // ImgRaster classReader;
+    // Jim classReader;
     // ImgWriterOgr sampleWriterOgr;
     // VectorOgr sampleWriterOgr;
 
@@ -590,7 +590,7 @@ CPLErr ImgRaster::extractImg(ImgRaster& classReader, VectorOgr& ogrWriter, app::
         assert(class_opt[0]);
         //   if(class_opt[0]){
         assert(threshold_opt.size()==1||threshold_opt.size()==class_opt.size());
-        // ImgRaster classReader;
+        // Jim classReader;
         // ImgWriterOgr ogrWriter;
         // VectorOgr ogrWriter;
         if(verbose_opt[0]>1){

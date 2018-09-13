@@ -34,10 +34,10 @@ using namespace app;
  * @param app application specific option arguments
  * @return ostringstream with statistics
  **/
-// CPLErr ImgRaster::getStats(AppFactory& app){
-std::multimap<std::string,std::string> ImgRaster::getStats(AppFactory& app){
-  ImgList singleList;
-  std::shared_ptr<ImgRaster> imgReader=shared_from_this();
+// CPLErr Jim::getStats(AppFactory& app){
+std::multimap<std::string,std::string> Jim::getStats(AppFactory& app){
+  JimList singleList;
+  std::shared_ptr<Jim> imgReader=shared_from_this();
   singleList.pushImage(imgReader);
   return(singleList.getStats(app));
   // if(singleList.getStats(app).front())
@@ -64,8 +64,8 @@ std::multimap<std::string,std::string> ImgRaster::getStats(AppFactory& app){
  * @param kde (type: bool) (default: 0) Use Kernel density estimation when producing histogram. The standard deviation is estimated based on Silverman's rule of thumb
  * @return this object
  **/
-// ImgList& ImgList::getStats(AppFactory& app){
-std::multimap<std::string,std::string> ImgList::getStats(AppFactory& app){
+// JimList& JimList::getStats(AppFactory& app){
+std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
   Optionpk<unsigned short> band_opt("cb","cband","band(s) on which to calculate statistics",0);
   Optionpk<std::string> function_opt("f", "function", "Statistics function (invalid, valid, filename, basic, gdal, mean, median, var, skewness, kurtosis,stdev, sum, minmax, min, max, histogram, histogram2d, rmse, regression, regressionError, regressionPerpendicular","basic");
   // Optionpk<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box");
@@ -197,7 +197,7 @@ std::multimap<std::string,std::string> ImgList::getStats(AppFactory& app){
     std::vector<double> histogramOutput;
     double nsample=0;
 
-    // ImgRaster imgReader;
+    // Jim imgReader;
     if(scale_opt.size()){
       while(scale_opt.size()<size())
         scale_opt.push_back(scale_opt[0]);
@@ -206,7 +206,7 @@ std::multimap<std::string,std::string> ImgList::getStats(AppFactory& app){
       while(offset_opt.size()<size())
         offset_opt.push_back(offset_opt[0]);
     }
-    std::list<std::shared_ptr<ImgRaster> >::const_iterator imit=begin();
+    std::list<std::shared_ptr<Jim> >::const_iterator imit=begin();
     for(imit=begin();imit!=end();++imit){
       if(filename_opt)
         mapString.insert(std::make_pair("filename",(*imit)->getFileName()));
@@ -668,8 +668,8 @@ std::multimap<std::string,std::string> ImgList::getStats(AppFactory& app){
     //     while(src_max_opt.size()<input_opt.size())
     //  src_max_opt.push_back(src_max_opt[0]);
     //   }
-    //   ImgRaster imgReader1(input_opt[0]);
-    //   ImgRaster imgReader2(input_opt[1]);
+    //   Jim imgReader1(input_opt[0]);
+    //   Jim imgReader2(input_opt[1]);
 
     //   if(offset_opt.size())
     //     imgReader1.setOffset(offset_opt[0],band_opt[0]);
@@ -739,8 +739,8 @@ std::multimap<std::string,std::string> ImgList::getStats(AppFactory& app){
         while(src_max_opt.size()<size())
           src_max_opt.push_back(src_max_opt[0]);
       }
-      // ImgRaster imgReader1(input_opt[0]);
-      // ImgRaster imgReader2(input_opt[1]);
+      // Jim imgReader1(input_opt[0]);
+      // Jim imgReader2(input_opt[1]);
 
       if(offset_opt.size())
         getImage(0)->setOffset(offset_opt[0],band_opt[0]);
@@ -786,8 +786,8 @@ std::multimap<std::string,std::string> ImgList::getStats(AppFactory& app){
         while(src_max_opt.size()<size())
           src_max_opt.push_back(src_max_opt[0]);
       }
-      // ImgRaster imgReader1(input_opt[0]);
-      // ImgRaster imgReader2(input_opt[1]);
+      // Jim imgReader1(input_opt[0]);
+      // Jim imgReader2(input_opt[1]);
 
       if(offset_opt.size())
         getImage(0)->setOffset(offset_opt[0],band_opt[0]);
@@ -833,8 +833,8 @@ std::multimap<std::string,std::string> ImgList::getStats(AppFactory& app){
         while(src_max_opt.size()<size())
           src_max_opt.push_back(src_max_opt[0]);
       }
-      // ImgRaster imgReader1(input_opt[0]);
-      // ImgRaster imgReader2(input_opt[1]);
+      // Jim imgReader1(input_opt[0]);
+      // Jim imgReader2(input_opt[1]);
 
       if(offset_opt.size())
         getImage(0)->setOffset(offset_opt[0],band_opt[0]);
@@ -880,8 +880,8 @@ std::multimap<std::string,std::string> ImgList::getStats(AppFactory& app){
         while(src_max_opt.size()<size())
           src_max_opt.push_back(src_max_opt[0]);
       }
-      // ImgRaster imgReader1(input_opt[0]);
-      // ImgRaster imgReader2(input_opt[1]);
+      // Jim imgReader1(input_opt[0]);
+      // Jim imgReader2(input_opt[1]);
 
       if(offset_opt.size())
         getImage(0)->setOffset(offset_opt[0],band_opt[0]);
@@ -919,8 +919,8 @@ std::multimap<std::string,std::string> ImgList::getStats(AppFactory& app){
         while(src_max_opt.size()<size())
           src_max_opt.push_back(src_max_opt[0]);
       }
-      // ImgRaster imgReader1(input_opt[0]);
-      // ImgRaster imgReader2(input_opt[1]);
+      // Jim imgReader1(input_opt[0]);
+      // Jim imgReader2(input_opt[1]);
 
       if(offset_opt.size())
         getImage(0)->setOffset(offset_opt[0],band_opt[0]);

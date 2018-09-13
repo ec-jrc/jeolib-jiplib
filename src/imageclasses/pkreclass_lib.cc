@@ -20,9 +20,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <assert.h>
 #include <map>
 #include "base/Optionpk.h"
-#include "imageclasses/ImgReaderOgr.h"
-#include "imageclasses/ImgWriterOgr.h"
-#include "imageclasses/ImgRaster.h"
+#include "imageclasses/Jim.h"
 #include "apps/AppFactory.h"
 
 using namespace std;
@@ -32,8 +30,8 @@ using namespace app;
  * @param app application specific option arguments
  * @return output image
  **/
-shared_ptr<ImgRaster> ImgRaster::reclass(app::AppFactory& app){
-  shared_ptr<ImgRaster> imgWriter=createImg();
+shared_ptr<Jim> Jim::reclass(app::AppFactory& app){
+  shared_ptr<Jim> imgWriter=createImg();
   reclass(*imgWriter, app);
   return(imgWriter);
 }
@@ -42,7 +40,7 @@ shared_ptr<ImgRaster> ImgRaster::reclass(app::AppFactory& app){
  * @param imgWriter output raster crop dataset
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr ImgRaster::reclass(ImgRaster& imgWriter, app::AppFactory& app){
+CPLErr Jim::reclass(Jim& imgWriter, app::AppFactory& app){
   Optionpk<string> mask_opt("m", "mask", "Mask image(s)");
   Optionpk<unsigned short> masknodata_opt("msknodata", "msknodata", "Mask value(s) where image has nodata. Use one value for each mask, or multiple values for a single mask.", 1);
   Optionpk<int> nodata_opt("nodata", "nodata", "nodata value to put in image if not valid (0)", 0);
@@ -132,7 +130,7 @@ CPLErr ImgRaster::reclass(ImgRaster& imgWriter, app::AppFactory& app){
       throw(errorString);
     }
     else{//image file
-      vector<ImgRaster> maskReader(mask_opt.size());
+      vector<Jim> maskReader(mask_opt.size());
       for(int imask=0;imask<mask_opt.size();++imask){
         if(verbose_opt[0])
           cout << "opening mask image file " << mask_opt[imask] << endl;

@@ -1,5 +1,5 @@
 /**********************************************************************
-ImgList.h: class to read raster files using GDAL API library
+JimList.h: class to read raster files using GDAL API library
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -17,8 +17,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
-#ifndef _IMGLIST_H_
-#define _IMGLIST_H_
+#ifndef _JIMLIST_H_
+#define _JIMLIST_H_
 
 #include <string>
 #include <vector>
@@ -26,7 +26,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 // #include "boost/date_time/posix_time/posix_time.hpp"
 /* #include "ImgReaderOgr.h" */
-#include "ImgRaster.h"
+#include "Jim.h"
 #include "VectorOgr.h"
 #include "apps/AppFactory.h"
 
@@ -61,49 +61,49 @@ namespace app{
 class AppFactory;
 }
 
-class ImgRaster;
+class Jim;
 class VectorOgr;
 /**
    This class is used to store a list of raster images
 **/
-/* class ImgList : public std::vector<std::shared_ptr<ImgRaster> > */
-class ImgList : public std::list<std::shared_ptr<ImgRaster> >
+/* class JimList : public std::vector<std::shared_ptr<Jim> > */
+class JimList : public std::list<std::shared_ptr<Jim> >
 {
 public:
   enum CRULE_TYPE {overwrite=0, maxndvi=1, maxband=2, minband=3, validband=4, mean=5, mode=6, median=7,sum=8,minallbands=9,maxallbands=10,stdev=11};
   ///default constructor
-  ImgList(){};// : std::vector<ImgRaster*>() {};
+  JimList(){};// : std::vector<Jim*>() {};
   ///copy constructor
-  ImgList(const ImgList &coll){
-    /* std::vector<std::shared_ptr<ImgRaster> >::const_iterator pimit=coll.begin(); */
-    std::list<std::shared_ptr<ImgRaster> >::const_iterator pimit=coll.begin();
+  JimList(const JimList &coll){
+    /* std::vector<std::shared_ptr<Jim> >::const_iterator pimit=coll.begin(); */
+    std::list<std::shared_ptr<Jim> >::const_iterator pimit=coll.begin();
     for(pimit=coll.begin();pimit!=coll.end();++pimit)
       pushImage(*pimit);
   }
-  /* ImgList(const std::vector<std::shared_ptr<ImgRaster> > &coll){ */
-  /*   std::vector<std::shared_ptr<ImgRaster> >::const_iterator pimit=coll.begin(); */
+  /* JimList(const std::vector<std::shared_ptr<Jim> > &coll){ */
+  /*   std::vector<std::shared_ptr<Jim> >::const_iterator pimit=coll.begin(); */
   /*   for(pimit=coll.begin();pimit!=coll.end();++pimit) */
   /*     pushImage(*pimit); */
   /* } */
-  ImgList(unsigned int theSize);
+  JimList(unsigned int theSize);
   ///constructor using vector of images
-  ImgList(const std::list<std::shared_ptr<ImgRaster> > &jimlist);
+  JimList(const std::list<std::shared_ptr<Jim> > &jimlist);
   ///constructor from an AppFactory
-  ImgList(app::AppFactory& theApp){open(theApp);};
+  JimList(app::AppFactory& theApp){open(theApp);};
   ///constructor from a JSON string
-  ImgList& open(const std::string& strjson);
+  JimList& open(const std::string& strjson);
   ///constructor from an app
-  ImgList& open(app::AppFactory& theApp);
+  JimList& open(app::AppFactory& theApp);
   ///create a JSON string from a list
   std::string jl2json();
   ///destructor
-  ~ImgList(){};
+  ~JimList(){};
 
-  // ImgList(const ImgList&) = default;
-  // ImgList& operator=(const ImgList&) = default;
+  // JimList(const JimList&) = default;
+  // JimList& operator=(const JimList&) = default;
 
   ///get bounding box of image list
-  const ImgList& getBoundingBox(double& ulx, double& uly, double& lrx, double& lry) const;
+  const JimList& getBoundingBox(double& ulx, double& uly, double& lrx, double& lry) const;
   ///get upper left x coordinate of image list
   double getUlx() const {double ulx, uly, lrx, lry;getBoundingBox(ulx,uly,lrx,lry);return(ulx);};
   ///get upper left y coordinate of image list
@@ -118,7 +118,7 @@ public:
   // ///filter list according to period
   // void filterTime(const boost::posix_time::time_period& thePeriod){
   //   unsigned int index=0;
-  //   std::vector<std::shared_ptr<ImgRaster>>::iterator it=begin();
+  //   std::vector<std::shared_ptr<Jim>>::iterator it=begin();
   //   std::vector<boost::posix_time::time_period>::iterator tit=m_time.begin();
   //   while(it!=end()&&tit!=m_time.end()){
   //     if(thePeriod.contains(m_time[m_index])){
@@ -133,32 +133,32 @@ public:
   //   m_index=0;
   // };
   ///filter list according to bounding box
-  ImgList& selectGeo(double ulx, double uly, double lrx, double lry);
+  JimList& selectGeo(double ulx, double uly, double lrx, double lry);
   ///filter list according to position
-  ImgList& selectGeo(double x, double y);
+  JimList& selectGeo(double x, double y);
   ///push image to list
-  ImgList& pushImage(const std::shared_ptr<ImgRaster> imgRaster){
+  JimList& pushImage(const std::shared_ptr<Jim> imgRaster){
     this->emplace_back(imgRaster);
     return(*this);
   };
   ///pop image from list
-  ImgList& popImage(){
+  JimList& popImage(){
     this->pop_back();
     return(*this);
   };
   ///get image from list (not recommended, because unlike random access vector iterator the complexity for a list iterator is linear in index)
-  std::shared_ptr<ImgRaster> getImage(int index) const{
+  std::shared_ptr<Jim> getImage(int index) const{
     if(index>=this->size()){
       std::cerr << "Error: index>=list size" << std::endl;
       return(0);
     }
-    std::list<std::shared_ptr<ImgRaster>>::const_iterator it=begin();
+    std::list<std::shared_ptr<Jim>>::const_iterator it=begin();
     std::advance(it,index);
     return(*it);
   }
   size_t getSize() const{return size();};
   // ///push image to list with corresponding period
-  // void pushImage(std::shared_ptr<ImgRaster> imgRaster, boost::posix_time::time_period imgPeriod){
+  // void pushImage(std::shared_ptr<Jim> imgRaster, boost::posix_time::time_period imgPeriod){
   //   this->emplace_back(imgRaster);
   //   // m_time.push_back(imgPeriod);
   // };
@@ -179,14 +179,14 @@ public:
   ///Check if a region of interest is (partially) covered by this dataset. Only the bounding box is checked, irrespective of no data values.
   bool covers(double ulx, double  uly, double lrx, double lry, bool all=false, OGRCoordinateTransformation *poCT=0) const;
   ///Check if an image raster dataset is (partially) covered by this dataset. Only the bounding box is checked, irrespective of no data values.
-  bool covers(const ImgRaster &imgRaster, bool all=false) const;
-  // std::shared_ptr<ImgRaster> getNextImage(){
+  bool covers(const Jim &imgRaster, bool all=false) const;
+  // std::shared_ptr<Jim> getNextImage(){
   //   if(m_index<size())
   //     return(this->at(m_index++));
   //   else
   //     return(0);
   // }
-  // std::shared_ptr<ImgRaster> getNextImage(boost::posix_time::time_period& imgPeriod){
+  // std::shared_ptr<Jim> getNextImage(boost::posix_time::time_period& imgPeriod){
   //   if(m_index<size()){
   //     if(m_index<m_time.size())
   //       imgPeriod=m_time[m_index];
@@ -195,45 +195,45 @@ public:
   //   else
   //     return(0);
   // }
-  /* ImgList& resetIterator(){m_index=0;return(*this);}; */
-  ImgList& clear(){std::list<std::shared_ptr<ImgRaster> >::clear();return(*this);};
-  ImgList& close();
+  /* JimList& resetIterator(){m_index=0;return(*this);}; */
+  JimList& clear(){std::list<std::shared_ptr<Jim> >::clear();return(*this);};
+  JimList& close();
   ///Get the no data values of this dataset as a standard template library (stl) vector
-  ImgList& getNoDataValues(std::vector<double>& noDataValues);
+  JimList& getNoDataValues(std::vector<double>& noDataValues);
   ///Check if value is nodata in this dataset
   bool isNoData(double value) const{if(m_noDataValues.empty()) return false;else return find(m_noDataValues.begin(),m_noDataValues.end(),value)!=m_noDataValues.end();};
   ///Push a no data value for this dataset
-  ImgList& pushNoDataValue(double noDataValue);
+  JimList& pushNoDataValue(double noDataValue);
   ///Set the no data values of this dataset using a standard template library (stl) vector as input
-  ImgList& setNoData(const std::vector<double>& nodata){m_noDataValues=nodata; return(*this);};
+  JimList& setNoData(const std::vector<double>& nodata){m_noDataValues=nodata; return(*this);};
   ///Clear the no data values
-  ImgList& clearNoData(){m_noDataValues.clear();return(*this);}
+  JimList& clearNoData(){m_noDataValues.clear();return(*this);}
 
   ///composite image
-  CPLErr composite(ImgRaster& imgWriter, app::AppFactory& app);
+  CPLErr composite(Jim& imgWriter, app::AppFactory& app);
   ///composite image only for in memory
-  std::shared_ptr<ImgRaster> composite(app::AppFactory& app);
+  std::shared_ptr<Jim> composite(app::AppFactory& app);
   ///crop image
-  ImgList& crop(ImgRaster& imgWriter, app::AppFactory& app);
+  JimList& crop(Jim& imgWriter, app::AppFactory& app);
   ///crop image only for in memory
-  std::shared_ptr<ImgRaster> crop(app::AppFactory& app);
+  std::shared_ptr<Jim> crop(app::AppFactory& app);
   ///stack image (alias for crop)
-  ImgList& stack(ImgRaster& imgWriter, app::AppFactory& app){return(crop(imgWriter,app));};
+  JimList& stack(Jim& imgWriter, app::AppFactory& app){return(crop(imgWriter,app));};
   ///stack image (alias for crop)
-  ImgList& stack(ImgRaster& imgWriter){app::AppFactory app;return(crop(imgWriter,app));};
+  JimList& stack(Jim& imgWriter){app::AppFactory app;return(crop(imgWriter,app));};
   ///stack image only for in memory (alias for crop)
-  std::shared_ptr<ImgRaster> stack(app::AppFactory& app){return(crop(app));};
+  std::shared_ptr<Jim> stack(app::AppFactory& app){return(crop(app));};
   ///stack image only for in memory (alias for crop)
-  std::shared_ptr<ImgRaster> stack(){app::AppFactory app;return(stack(app));};
+  std::shared_ptr<Jim> stack(){app::AppFactory app;return(stack(app));};
   ///stat profile image
-  CPLErr statProfile(ImgRaster& imgWriter, app::AppFactory& app);
+  CPLErr statProfile(Jim& imgWriter, app::AppFactory& app);
   ///stat profile image only for in memory
-  std::shared_ptr<ImgRaster> statProfile(app::AppFactory& app);
+  std::shared_ptr<Jim> statProfile(app::AppFactory& app);
   ///get statistics
   std::multimap<std::string,std::string> getStats(app::AppFactory& app);
-  //ImgList& getStats(app::AppFactory& app);
+  //JimList& getStats(app::AppFactory& app);
   ///validate image based on reference vector dataset (-ref)
-  ImgList& validate(app::AppFactory& app);
+  JimList& validate(app::AppFactory& app);
   ///extract vector layer from list
   CPLErr extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, app::AppFactory& app);
   ///extract vector layer from list only for in memory
@@ -245,6 +245,6 @@ private:
   std::vector<double> m_noDataValues;
   // std::vector<boost::posix_time::time_period> m_time;
 };
-static ImgList createImgList(){ImgList alist; return alist;};
-static ImgList createImgList(const std::list<std::shared_ptr<ImgRaster> > &jimlist){ImgList alist(jimlist);return alist;};
-#endif // _IMGLIST_H_
+static JimList createJimList(){JimList alist; return alist;};
+static JimList createJimList(const std::list<std::shared_ptr<Jim> > &jimlist){JimList alist(jimlist);return alist;};
+#endif // _JIIMLIST_H_
