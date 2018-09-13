@@ -8,7 +8,8 @@
 # Change log
 #
 ###############################################################################
-cmake_minimum_required(VERSION 2.6.0)
+cmake_minimum_required(VERSION 2.8)
+# cmake_minimum_required(VERSION 2.6.0)
 ###############################################################################
 
 # The project's name and version
@@ -35,10 +36,7 @@ set(BUILD_WITH_PYTHON TRUE CACHE BOOL "Choose if jiplib is to be built with PYTH
 set(PROCESS_IN_PARALLEL TRUE CACHE BOOL "Choose if jiplib should be run in parallel")
 set(BUILD_WITH_MIALIB TRUE CACHE BOOL "Choose if jiplib should be compiled with mialib")
 
-set (PROJECT_BINARY_DIR bin)
-set (PROJECT_LIBRARY_DIR lib)
 set (PROJECT_INCLUDE_DIR include/jiplib)
-set (PROJECT_SOURCE_DIR src)
 set (PROJECT_TEST_DIR test)
 
 set(CMAKE_COLOR_MAKEFILE ON)
@@ -142,30 +140,25 @@ configure_file (
   )
 
 configure_file ( "cmake-config.in" "${CMAKE_CURRENT_BINARY_DIR}/jiplib-config" @ONLY )
-# configure_file ( "cmake-config.h.in" "${CMAKE_SOURCE_DIR}/config_jiplib.h" @ONLY )
-# configure_file ( "cmake.pc.in" "jiplib.pc"  @ONLY)
 add_definitions(-DHAVE_CONFIG_H)
 
-
-# configure_file ( "cmake-config.in" "${CMAKE_CURRENT_BINARY_DIR}/jiplib-config" @ONLY )
-# configure_file ( "cmake-config.in" "${CMAKE_CURRENT_BINARY_DIR}/config_jiplib" @ONLY )
 configure_file ( "cmake.pc.in" "jiplib.pc"  @ONLY)
 
 
 
 # Name of C++ library
 set(JIPLIB_LIB_NAME jiplib)
-# set(JIPLIB_LIB_NAME jiplib-${JIPLIB_VERSION_MAJOR}.${JIPLIB_VERSION_MINOR}.${JIPLIB_VERSION_PATCH})
 
 set(BUILD_WITH_MIALIB TRUE CACHE BOOL "JIPlib needs to be built with mialiab")
+
 # Include directories
 ###############################################################################
-# include_directories("${PROJECT_SOURCE_DIR}")
 # include_directories("${CMAKE_SOURCE_DIR}")
 include_directories("${PROJECT_BINARY_DIR}")# needed for config_jiplib.h
-include_directories("${CMAKE_CURRENT_BINARY_DIR}")# needed for config_jiplib.h
-include_directories("${CMAKE_CURRENT_BINARY_DIR}/src/")# this is where Jim.h will go
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
+include_directories("${PROJECT_BINARY_DIR}/src")#  this is where sources will go
+# INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
+# include_directories("${CMAKE_CURRENT_BINARY_DIR}")# needed for config_jiplib.h
+# include_directories("${CMAKE_CURRENT_BINARY_DIR}/src/")#
 # include_directories("${CMAKE_CURRENT_BINARY_DIR}/doc")#needed for jiplib_doc.i
 ###############################################################################
 # Instruct CMake to inspect the following subfolders (with CMakeLists.txt in each subfolder)
@@ -186,12 +179,21 @@ if (BUILD_WITH_FANN)
 endif(BUILD_WITH_FANN)
 
 
-set(BASE_SRC_DIR src/base)
-set(ALGOR_SRC_DIR src/algorithms)
-set(FILECLASS_SRC_DIR src/fileclasses)
-set(IMGCLASS_SRC_DIR src/imageclasses)
-set(LASCLASS_SRC_DIR src/lasclasses)
-set(APP_SRC_DIR src/apps)
+###############################################################################
+
+#we will use a copy of the imageclasses in the binary build directory, where we can change the content (for MIALIB)
+
+message(STATUS "cmake_current_binary_dir: ${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY ${PROJECT_SOURCE_DIR}/src DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+set(BASE_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/base)
+set(ALGOR_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/algorithms)
+set(FILECLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/fileclasses)
+set(IMGCLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+set(IMGCLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+set(LASCLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/lasclasses)
+set(APP_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/apps)
+# set(PYTHON_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/swig)
 # set(PYTHON_SRC_DIR src/swig)
 
 set(BASE_H
@@ -286,32 +288,7 @@ set(APP_H
   ${APP_SRC_DIR}/AppFactory.h
   )
 
-set(PYTHON_CC
-  ${PYTHON_SRC_DIR}/jiplib_wrap.cc
-  )
-
-set(JIPLIB_I
-  ${PYTHON_SRC_DIR}/jiplib.i
-  )
-###############################################################################
-
-set(JIM_H ${IMGCLASS_SRC_DIR}/Jim.h)
-set(JIM_CC ${IMGCLASS_SRC_DIR}/Jim.cc)
-set(JIMLIST_H ${IMGCLASS_SRC_DIR}/JimList.h)
-set(JIMLIST_CC ${IMGCLASS_SRC_DIR}/JimList.cc)
-
-#we will use a copy of the imageclasses in the binary build directory, where we can change the content (from MIALIB)
-
-message(STATUS "cmake_current_binary_dir: ${CMAKE_CURRENT_BINARY_DIR}")
-file(COPY ${IMGCLASS_H} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-file(COPY ${IMGCLASS_CC} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-
 set(IMGCLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-
-set(JIM_H ${IMGCLASS_SRC_DIR}/Jim.h)
-set(JIM_CC ${IMGCLASS_SRC_DIR}/Jim.cc)
-set(JIMLIST_H ${IMGCLASS_SRC_DIR}/JimList.h)
-set(JIMLIST_CC ${IMGCLASS_SRC_DIR}/JimList.cc)
 
 set(IMGCLASS_H
   ${IMGCLASS_SRC_DIR}/Jim.h
@@ -375,15 +352,15 @@ if(PYTHONINTERP_FOUND)
   if(BUILD_WITH_MIALIB)
     MESSAGE(STATUS "PythonInterp was found")
     #file(COPY ${PROJECT_SOURCE_DIR}/old2NewNames.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src)
-    file(COPY ${PROJECT_SOURCE_DIR}/imageclasses/rename.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    file(COPY ${PROJECT_SOURCE_DIR}/imageclasses/rename.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    file(COPY ${PROJECT_SOURCE_DIR}/imageclasses/fun2method_imagetype.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    file(COPY ${PROJECT_SOURCE_DIR}/imageclasses/fun2method_imagetype_multi.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    file(COPY ${PROJECT_SOURCE_DIR}/imageclasses/fun2method_imagetype_jimlist.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    file(COPY ${PROJECT_SOURCE_DIR}/imageclasses/fun2method_imagelisttype.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    file(COPY ${PROJECT_SOURCE_DIR}/imageclasses/fun2method_errortype.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    file(COPY ${PROJECT_SOURCE_DIR}/imageclasses/fun2method_errortype_d.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    file(COPY ${PROJECT_SOURCE_DIR}/imageclasses/fun2method_errortype_nd.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+    # file(COPY ${PROJECT_SOURCE_DIR}/src/imageclasses/rename.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+    # file(COPY ${PROJECT_SOURCE_DIR}/src/imageclasses/rename.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+    # file(COPY ${PROJECT_SOURCE_DIR}/src/imageclasses/fun2method_imagetype.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+    # file(COPY ${PROJECT_SOURCE_DIR}/src/imageclasses/fun2method_imagetype_multi.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+    # file(COPY ${PROJECT_SOURCE_DIR}/src/imageclasses/fun2method_imagetype_jimlist.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+    # file(COPY ${PROJECT_SOURCE_DIR}/src/imageclasses/fun2method_imagelisttype.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+    # file(COPY ${PROJECT_SOURCE_DIR}/src/imageclasses/fun2method_errortype.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+    # file(COPY ${PROJECT_SOURCE_DIR}/src/imageclasses/fun2method_errortype_d.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+    # file(COPY ${PROJECT_SOURCE_DIR}/src/imageclasses/fun2method_errortype_nd.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
 
     file(GLOB MIA_HEADER_FILES ${MIA_INCLUDE_DIR}/mialib_*.h)
     MESSAGE(STATUS "MIA_INCLUDE_DIR: ${MIA_INCLUDE_DIR}")
@@ -450,13 +427,13 @@ if(PYTHONINTERP_FOUND)
     execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_errortype_nd/,/\\/\\/end insert from fun2method_errortype_nd/{/\\/\\/start insert from fun2method_errortype_nd/!{/\\/\\/end insert from fun2method_errortype_nd/!d}}' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
     execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_errortype_nd/ {p; r fun2method_errortype_nd.h' -e ':a; n; /\\/\\/end insert from fun2method_errortype_nd/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
     #Append the source files to Jim.cc
-    file(APPEND ${JIM_CC} "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype.cc\"\n")
-    file(APPEND ${JIM_CC} "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype_multi.cc\"\n")
-    file(APPEND ${JIM_CC} "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype_jimlist.cc\"\n")
-    file(APPEND ${JIM_CC} "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagelisttype.cc\"\n")
-    file(APPEND ${JIM_CC} "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype.cc\"\n")
-    file(APPEND ${JIM_CC} "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_d.cc\"\n")
-    file(APPEND ${JIM_CC} "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_nd.cc\"\n")
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype.cc\"\n")
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype_multi.cc\"\n")
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagelisttype.cc\"\n")
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype.cc\"\n")
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_d.cc\"\n")
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_nd.cc\"\n")
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/JimList.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype_jimlist.cc\"\n")
   endif(BUILD_WITH_MIALIB)
 else(PYTHONINTERP_FOUND)
     MESSAGE(STATUS "Error: PythonInterp not found")
@@ -511,23 +488,27 @@ else(BUILD_WITH_MIALIB)
     )
 endif(BUILD_WITH_MIALIB)
 ########## SWIG #############
+set(PYTHON_SRC_DIR src/swig)
+# set(PYTHON_CC
+#   ${PYTHON_SRC_DIR}/jiplib_wrap.cc
+#   )
 
+set(JIPLIB_I ${PYTHON_SRC_DIR}/jiplib.i)
 FIND_PACKAGE(SWIG REQUIRED)
-SET(PYTHON_SRC_DIR ${PROJECT_SOURCE_DIR}/swig)
-FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/swig)
 INCLUDE(${SWIG_USE_FILE})
-# INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
-# INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-# INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/doc)
-# SET(CMAKE_SWIG_FLAGS "")
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/src)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 SET(CMAKE_SWIG_FLAGS "-keyword")
-SET_PROPERTY(SOURCE ${PYTHON_SRC_DIR}/jiplib.i PROPERTY CPLUSPLUS ON)
-SWIG_ADD_MODULE(jiplib python ${PYTHON_SRC_DIR}/jiplib.i)
-# SET_SOURCE_FILES_PROPERTIES(${PYTHON_SRC_DIR}/jiplib.i PROPERTIES SWIG_FLAGS "-Wall")
-SET_SOURCE_FILES_PROPERTIES(${PYTHON_SRC_DIR}/jiplib.i PROPERTIES SWIG_FLAGS "-W2")
+SET_PROPERTY(SOURCE ${JIPLIB_I} PROPERTY CPLUSPLUS ON)
+SWIG_ADD_MODULE(jiplib python ${JIPLIB_I})
+SET_SOURCE_FILES_PROPERTIES(${JIPLIB_I} PROPERTIES SWIG_FLAGS "-W2")
 SWIG_LINK_LIBRARIES(jiplib ${PYTHON_LIBRARIES} ${JIPLIB_LIB_NAME} ${BOOST_LIBRARIES})
+
+# SET_PROPERTY(SOURCE ${PYTHON_SRC_DIR}/jiplib.i PROPERTY CPLUSPLUS ON)
+# SWIG_ADD_MODULE(jiplib python ${PYTHON_SRC_DIR}/jiplib.i)
+# SET_SOURCE_FILES_PROPERTIES(${PYTHON_SRC_DIR}/jiplib.i PROPERTIES SWIG_FLAGS "-W2")
+# SWIG_LINK_LIBRARIES(jiplib ${PYTHON_LIBRARIES} ${JIPLIB_LIB_NAME} ${BOOST_LIBRARIES})
 
 ########## INSTALL ##########
 INSTALL (TARGETS ${JIPLIB_LIB_NAME} LIBRARY DESTINATION lib)

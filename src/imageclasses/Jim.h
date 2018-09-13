@@ -842,6 +842,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   int GDAL2MIADataType(GDALDataType aGDALDataType);
   ///convert a MIA data type to GDAL data type
   int MIA2JIPLIBDataType(int aMIADataType);
+#endif
   //start insert from fun2method_imagetype
   //end insert from fun2method_imagetype
   //start insert from fun2method_imagetype_multi
@@ -854,7 +855,6 @@ class Jim : public std::enable_shared_from_this<Jim>
   //end insert from fun2method_errortype_d
   //start insert from fun2method_errortype_nd
   //end insert from fun2method_errortype_nd
-#endif
  protected:
   ///reset all member variables
   void reset();
