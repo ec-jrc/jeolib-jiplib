@@ -199,7 +199,7 @@ set(APP_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/apps)
 set(BASE_H
   ${BASE_SRC_DIR}/IndexValue.h
   ${BASE_SRC_DIR}/typeconversion.h
-  ${BASE_SRC_DIR}/Optionpk.h
+  ${BASE_SRC_DIR}/Optionjl.h
   ${BASE_SRC_DIR}/PosValue.h
   ${BASE_SRC_DIR}/Vector2d.h
   )
@@ -242,40 +242,6 @@ set(FILECLASS_CC
   ${FILECLASS_SRC_DIR}/FileReaderAscii.cc
   )
 
-set(IMGCLASS_H
-  ${IMGCLASS_SRC_DIR}/Jim.h
-  ${IMGCLASS_SRC_DIR}/JimList.h
-  ${IMGCLASS_SRC_DIR}/VectorOgr.h
-  ${IMGCLASS_SRC_DIR}/pksml_lib.h
-  ${IMGCLASS_SRC_DIR}/pkclassify_lib.h
-  )
-
-set(IMGCLASS_CC
-  ${IMGCLASS_SRC_DIR}/Jim.cc
-  ${IMGCLASS_SRC_DIR}/JimList.cc
-  ${IMGCLASS_SRC_DIR}/VectorOgr.cc
-  ${IMGCLASS_SRC_DIR}/pkcomposite_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkcrop_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkextractogr_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkextractimg_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkstatprofile_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkfilter1d_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkfilter2d_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkclassify_lib.cc
-  ${IMGCLASS_SRC_DIR}/pksvm_lib.cc
-  ${IMGCLASS_SRC_DIR}/pksvmogr_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkann_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkannogr_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkdiff_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkvalidate_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkstretch_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkdumpimg_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkreclass_lib.cc
-  ${IMGCLASS_SRC_DIR}/pksetmask_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkgetmask_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkstat_lib.cc
-  )
-
 set(LASCLASS_H
   ${LASCLASS_SRC_DIR}/FileReaderLas.h
   )
@@ -294,34 +260,34 @@ set(IMGCLASS_H
   ${IMGCLASS_SRC_DIR}/Jim.h
   ${IMGCLASS_SRC_DIR}/JimList.h
   ${IMGCLASS_SRC_DIR}/VectorOgr.h
-  ${IMGCLASS_SRC_DIR}/pksml_lib.h
-  ${IMGCLASS_SRC_DIR}/pkclassify_lib.h
+  ${IMGCLASS_SRC_DIR}/jlsml_lib.h
+  ${IMGCLASS_SRC_DIR}/jlclassify_lib.h
   )
 
 set(IMGCLASS_CC
   ${IMGCLASS_SRC_DIR}/Jim.cc
   ${IMGCLASS_SRC_DIR}/JimList.cc
   ${IMGCLASS_SRC_DIR}/VectorOgr.cc
-  ${IMGCLASS_SRC_DIR}/pkcomposite_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkcrop_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkextractogr_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkextractimg_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkstatprofile_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkfilter1d_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkfilter2d_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkclassify_lib.cc
-  ${IMGCLASS_SRC_DIR}/pksvm_lib.cc
-  ${IMGCLASS_SRC_DIR}/pksvmogr_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkann_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkannogr_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkdiff_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkvalidate_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkstretch_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkdumpimg_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkreclass_lib.cc
-  ${IMGCLASS_SRC_DIR}/pksetmask_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkgetmask_lib.cc
-  ${IMGCLASS_SRC_DIR}/pkstat_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlcomposite_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlcrop_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlextractogr_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlextractimg_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlstatprofile_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlfilter1d_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlfilter2d_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlclassify_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlsvm_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlsvmogr_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlann_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlannogr_lib.cc
+  ${IMGCLASS_SRC_DIR}/jldiff_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlvalidate_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlstretch_lib.cc
+  ${IMGCLASS_SRC_DIR}/jldumpimg_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlreclass_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlsetmask_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlgetmask_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlstat_lib.cc
   )
 
 if(BUILD_WITH_MIALIB)
@@ -500,6 +466,7 @@ INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/src)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 SET(CMAKE_SWIG_FLAGS "-keyword")
+SET(CMAKE_SWIG_FLAGS "-DMIALIB=${MIA_BOOL}")
 SET_PROPERTY(SOURCE ${JIPLIB_I} PROPERTY CPLUSPLUS ON)
 SWIG_ADD_MODULE(jiplib python ${JIPLIB_I})
 SET_SOURCE_FILES_PROPERTIES(${JIPLIB_I} PROPERTIES SWIG_FLAGS "-W2")

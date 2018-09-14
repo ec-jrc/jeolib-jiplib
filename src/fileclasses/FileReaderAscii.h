@@ -23,7 +23,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 #include <fstream>
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 //#include <armadillo>
 
 //--------------------------------------------------------------------------

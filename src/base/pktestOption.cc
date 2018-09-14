@@ -1,5 +1,5 @@
 /**********************************************************************
-pktestOption: example program how to use class Optionpk pktestOption.cc 
+pktestOption: example program how to use class Optionjl pktestOption.cc 
 Copyright (C) 2008-2013 Pieter Kempeneers
 
 This file is part of pktools
@@ -19,13 +19,13 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #include <iostream>
 #include <string>
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 
 int main(int argc, char *argv[])
 {
-  Optionpk<std::string> foo_opt("f","foo","command line option **foo** of type string can be invoked with either short (f) or long (foo) option","defaultString");
-  Optionpk<int> bar_opt("\0","bar","command line option **bar** of type int has no short option");//bar will only be visible in long help (hide=1)
-  Optionpk<bool> easterEgg_opt("egg","egg","this help information is useless");//this option will not be shown in help (hide=2)
+  Optionjl<std::string> foo_opt("f","foo","command line option **foo** of type string can be invoked with either short (f) or long (foo) option","defaultString");
+  Optionjl<int> bar_opt("\0","bar","command line option **bar** of type int has no short option");//bar will only be visible in long help (hide=1)
+  Optionjl<bool> easterEgg_opt("egg","egg","this help information is useless");//this option will not be shown in help (hide=2)
 
   bar_opt.setHide(1);//option only visible with long help (--help)
   easterEgg_opt.setHide(2);//hidden option

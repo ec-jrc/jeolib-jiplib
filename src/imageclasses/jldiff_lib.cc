@@ -1,5 +1,5 @@
 /**********************************************************************
-pkdiff_lib.cc: program to compare two raster image files
+jldiff_lib.cc: program to compare two raster image files
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -20,7 +20,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <assert.h>
 #include "imageclasses/Jim.h"
 #include "imageclasses/VectorOgr.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "apps/AppFactory.h"
 #include "algorithms/ConfusionMatrix.h"
 
@@ -33,26 +33,26 @@ using namespace app;
  * @return CE_None if successful, CE_Failure if failed
  **/
 CPLErr Jim::diff(Jim& imgReference, app::AppFactory& app){
-  Optionpk<string> mask_opt("m", "mask", "Use the first band of the specified file as a validity mask. Nodata values can be set with the option msknodata.");
-  Optionpk<double> msknodata_opt("msknodata", "msknodata", "Mask value(s) where image is invalid. Use negative value for valid data (example: use -t -1: if only -1 is valid value)", 0);
-  Optionpk<double> nodata_opt("nodata", "nodata", "No data value(s) in input or reference dataset are ignored");
-  Optionpk<unsigned int> band_opt("b", "band", "Input (reference) raster band. Optionally, you can define different bands for input and reference bands respectively: -b 1 -b 0.", 0);
-  Optionpk<bool> rmse_opt("rmse", "rmse", "Report root mean squared error", false);
-  Optionpk<bool> regression_opt("reg", "reg", "Report linear regression (Input = c0+c1*Reference)", false);
-  Optionpk<bool> confusion_opt("cm", "confusion", "Create confusion matrix (to std out)", false);
-  Optionpk<string> cmformat_opt("cmf","cmf","Format for confusion matrix (ascii or latex)","ascii");
-  Optionpk<string> cmoutput_opt("cmo","cmo","Output file for confusion matrix");
-  Optionpk<bool> se95_opt("se95","se95","Report standard error for 95 confidence interval",false);
-  Optionpk<string> classname_opt("c", "class", "List of class names.");
-  Optionpk<short> classvalue_opt("r", "reclass", "List of class values (use same order as in classname option).");
-  Optionpk<string> output_opt("o", "output", "Output dataset (optional)");
-  Optionpk<string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
-  Optionpk<string> colorTable_opt("ct", "ct", "Color table in ASCII format having 5 columns: id R G B ALFA (0: transparent, 255: solid).");
-  Optionpk<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-  Optionpk<short> valueE_opt("\0", "correct", "Value for correct pixels", 0,2);
-  Optionpk<short> valueO_opt("\0", "omission", "Value for omission errors: input label > reference label", 1,2);
-  Optionpk<short> valueC_opt("\0", "commission", "Value for commission errors: input label < reference label", 2,1);
-  Optionpk<short> verbose_opt("v", "verbose", "Verbose level", 0,2);
+  Optionjl<string> mask_opt("m", "mask", "Use the first band of the specified file as a validity mask. Nodata values can be set with the option msknodata.");
+  Optionjl<double> msknodata_opt("msknodata", "msknodata", "Mask value(s) where image is invalid. Use negative value for valid data (example: use -t -1: if only -1 is valid value)", 0);
+  Optionjl<double> nodata_opt("nodata", "nodata", "No data value(s) in input or reference dataset are ignored");
+  Optionjl<unsigned int> band_opt("b", "band", "Input (reference) raster band. Optionally, you can define different bands for input and reference bands respectively: -b 1 -b 0.", 0);
+  Optionjl<bool> rmse_opt("rmse", "rmse", "Report root mean squared error", false);
+  Optionjl<bool> regression_opt("reg", "reg", "Report linear regression (Input = c0+c1*Reference)", false);
+  Optionjl<bool> confusion_opt("cm", "confusion", "Create confusion matrix (to std out)", false);
+  Optionjl<string> cmformat_opt("cmf","cmf","Format for confusion matrix (ascii or latex)","ascii");
+  Optionjl<string> cmoutput_opt("cmo","cmo","Output file for confusion matrix");
+  Optionjl<bool> se95_opt("se95","se95","Report standard error for 95 confidence interval",false);
+  Optionjl<string> classname_opt("c", "class", "List of class names.");
+  Optionjl<short> classvalue_opt("r", "reclass", "List of class values (use same order as in classname option).");
+  Optionjl<string> output_opt("o", "output", "Output dataset (optional)");
+  Optionjl<string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
+  Optionjl<string> colorTable_opt("ct", "ct", "Color table in ASCII format having 5 columns: id R G B ALFA (0: transparent, 255: solid).");
+  Optionjl<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<short> valueE_opt("\0", "correct", "Value for correct pixels", 0,2);
+  Optionjl<short> valueO_opt("\0", "omission", "Value for omission errors: input label > reference label", 1,2);
+  Optionjl<short> valueC_opt("\0", "commission", "Value for commission errors: input label < reference label", 2,1);
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose level", 0,2);
 
   output_opt.setHide(1);
   oformat_opt.setHide(1);

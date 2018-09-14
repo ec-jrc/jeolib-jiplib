@@ -1,5 +1,5 @@
 /**********************************************************************
-pkdumpimg_lib.cc: dump image on screen or ASCII file
+jldumpimg_lib.cc: dump image on screen or ASCII file
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -21,7 +21,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <memory>
 #include "imageclasses/Jim.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "apps/AppFactory.h"
 
 using namespace std;
@@ -33,14 +33,14 @@ using namespace app;
  **/
 CPLErr Jim::dumpImg(app::AppFactory& app){
 
-  Optionpk<string> output_opt("o", "output", "Output ascii file (Default is empty: dump to standard output)");
-  Optionpk<string> oformat_opt("of", "oformat", "Output format: matrix or list (x,y,z) form. Default is matrix", "matrix");
-  Optionpk<bool>  geo_opt("geo", "geo", "Dump x and y in spatial reference system of raster dataset (for list form only)", false);
-  Optionpk<int> band_opt("b", "band", "Band index to crop");
-  // Optionpk<short> dstnodata_opt("dstnodata", "dstnodata", "nodata value for output if out of bounds.", 0);
-  Optionpk<double> srcnodata_opt("srcnodata", "srcnodata", "Do not dump these no data values if oformat is in list form");
-  Optionpk<bool> force_opt("f", "force", "Force full dump even for large images (above 100 rows and cols)", false);
-  Optionpk<short> verbose_opt("v", "verbose", "verbose", 0,2);
+  Optionjl<string> output_opt("o", "output", "Output ascii file (Default is empty: dump to standard output)");
+  Optionjl<string> oformat_opt("of", "oformat", "Output format: matrix or list (x,y,z) form. Default is matrix", "matrix");
+  Optionjl<bool>  geo_opt("geo", "geo", "Dump x and y in spatial reference system of raster dataset (for list form only)", false);
+  Optionjl<int> band_opt("b", "band", "Band index to crop");
+  // Optionjl<short> dstnodata_opt("dstnodata", "dstnodata", "nodata value for output if out of bounds.", 0);
+  Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Do not dump these no data values if oformat is in list form");
+  Optionjl<bool> force_opt("f", "force", "Force full dump even for large images (above 100 rows and cols)", false);
+  Optionjl<short> verbose_opt("v", "verbose", "verbose", 0,2);
 
   srcnodata_opt.setHide(1);
   // dstnodata_opt.setHide(1);

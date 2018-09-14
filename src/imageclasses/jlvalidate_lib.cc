@@ -1,5 +1,5 @@
 /**********************************************************************
-pkvalidate_lib.cc: program to validate classified raster image based on reference vector dataset
+jlvalidate_lib.cc: program to validate classified raster image based on reference vector dataset
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -20,7 +20,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <assert.h>
 #include "Jim.h"
 #include "JimList.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "apps/AppFactory.h"
 #include "algorithms/ConfusionMatrix.h"
 #include "imageclasses/VectorOgr.h"
@@ -83,26 +83,26 @@ CPLErr Jim::validate(AppFactory& app){
  * @return reference to the image collection
  **/
 JimList& JimList::validate(app::AppFactory& app){
-  Optionpk<string> reference_opt("ref", "reference", "Reference vector dataset");
-  Optionpk<string> layer_opt("ln", "ln", "Layer name(s) in sample. Leave empty to select all (for vector reference datasets only)");
-  Optionpk<string> mask_opt("m", "mask", "Use the first band of the specified file as a validity mask. Nodata values can be set with the option msknodata.");
-  Optionpk<double> msknodata_opt("msknodata", "msknodata", "Mask value(s) where image is invalid. Use negative value for valid data (example: use -t -1: if only -1 is valid value)", 0);
-  Optionpk<double> nodata_opt("nodata", "nodata", "No data value(s) in input or reference dataset are ignored");
-  Optionpk<unsigned int> band_opt("b", "band", "Input (reference) raster band. Optionally, you can define different bands for input and reference bands respectively: -b 1 -b 0.", 0);
-  Optionpk<bool> confusion_opt("cm", "confusion", "Create confusion matrix (to std out)", true);
-  Optionpk<string> cmformat_opt("cmf","cmf","Format for confusion matrix (ascii or latex)","ascii");
-  Optionpk<string> cmoutput_opt("cmo","cmo","Output file for confusion matrix");
-  Optionpk<bool> se95_opt("se95","se95","Report standard error for 95 confidence interval",false);
-  Optionpk<string> labelref_opt("lr", "lref", "Attribute name of the reference label (for vector reference datasets only)", "label");
-  Optionpk<string> classname_opt("c", "class", "List of class names.");
-  Optionpk<short> classvalue_opt("r", "reclass", "List of class values (use same order as in classname option).");
-  Optionpk<string> output_opt("o", "output", "Output dataset (optional)");
-  Optionpk<string> ogrformat_opt("f", "f", "OGR format for output vector","SQLite");
-  Optionpk<string> labelclass_opt("lc", "lclass", "Attribute name of the classified label", "class");
-  Optionpk<short> boundary_opt("bnd", "boundary", "Boundary for selecting the sample", 1,1);
-  Optionpk<bool> homogeneous_opt("hom", "homogeneous", "Only take regions with homogeneous boundary into account (for reference datasets only)", false,1);
-  Optionpk<bool> disc_opt("circ", "circular", "Use circular boundary", false,1);
-  Optionpk<short> verbose_opt("v", "verbose", "Verbose level", 0,2);
+  Optionjl<string> reference_opt("ref", "reference", "Reference vector dataset");
+  Optionjl<string> layer_opt("ln", "ln", "Layer name(s) in sample. Leave empty to select all (for vector reference datasets only)");
+  Optionjl<string> mask_opt("m", "mask", "Use the first band of the specified file as a validity mask. Nodata values can be set with the option msknodata.");
+  Optionjl<double> msknodata_opt("msknodata", "msknodata", "Mask value(s) where image is invalid. Use negative value for valid data (example: use -t -1: if only -1 is valid value)", 0);
+  Optionjl<double> nodata_opt("nodata", "nodata", "No data value(s) in input or reference dataset are ignored");
+  Optionjl<unsigned int> band_opt("b", "band", "Input (reference) raster band. Optionally, you can define different bands for input and reference bands respectively: -b 1 -b 0.", 0);
+  Optionjl<bool> confusion_opt("cm", "confusion", "Create confusion matrix (to std out)", true);
+  Optionjl<string> cmformat_opt("cmf","cmf","Format for confusion matrix (ascii or latex)","ascii");
+  Optionjl<string> cmoutput_opt("cmo","cmo","Output file for confusion matrix");
+  Optionjl<bool> se95_opt("se95","se95","Report standard error for 95 confidence interval",false);
+  Optionjl<string> labelref_opt("lr", "lref", "Attribute name of the reference label (for vector reference datasets only)", "label");
+  Optionjl<string> classname_opt("c", "class", "List of class names.");
+  Optionjl<short> classvalue_opt("r", "reclass", "List of class values (use same order as in classname option).");
+  Optionjl<string> output_opt("o", "output", "Output dataset (optional)");
+  Optionjl<string> ogrformat_opt("f", "f", "OGR format for output vector","SQLite");
+  Optionjl<string> labelclass_opt("lc", "lclass", "Attribute name of the classified label", "class");
+  Optionjl<short> boundary_opt("bnd", "boundary", "Boundary for selecting the sample", 1,1);
+  Optionjl<bool> homogeneous_opt("hom", "homogeneous", "Only take regions with homogeneous boundary into account (for reference datasets only)", false,1);
+  Optionjl<bool> disc_opt("circ", "circular", "Use circular boundary", false,1);
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose level", 0,2);
 
   output_opt.setHide(1);
   ogrformat_opt.setHide(1);

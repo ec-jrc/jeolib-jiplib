@@ -1,5 +1,5 @@
 /**********************************************************************
-pkcomposite_lib.cc: program to mosaic and composite geo-referenced images
+jlcomposite_lib.cc: program to mosaic and composite geo-referenced images
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -26,7 +26,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include "JimList.h"
 #include "VectorOgr.h"
 #include "base/Vector2d.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "algorithms/StatFactory.h"
 #include "algorithms/Egcs.h"
 #include "apps/AppFactory.h"
@@ -50,38 +50,38 @@ shared_ptr<Jim> JimList::composite(AppFactory& app){
  * @return CE_None if successful, CE_Failure if failed
  **/
 CPLErr JimList::composite(Jim& imgWriter, AppFactory& app){
-  Optionpk<unsigned int>  band_opt("b", "band", "band index(es) to crop (leave empty if all bands must be retained)");
-  Optionpk<double>  dx_opt("dx", "dx", "Output resolution in x (in meter) (empty: keep original resolution)");
-  Optionpk<double>  dy_opt("dy", "dy", "Output resolution in y (in meter) (empty: keep original resolution)");
-  Optionpk<string>  extent_opt("e", "extent", "get boundary from extent from polygons in vector file");
-  Optionpk<string>  layer_opt("ln", "ln", "layer name of extent to crop");
-  Optionpk<bool> cut_opt("cut", "crop_to_cutline", "Crop the extent of the target dataset to the extent of the cutline.",false);
-  Optionpk<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
-  Optionpk<string> mask_opt("m", "mask", "Use the specified file as a validity mask.");
-  Optionpk<unsigned int> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed)", 0);
-  Optionpk<float> msknodata_opt("msknodata", "msknodata", "Mask value not to consider for composite.", 0);
-  Optionpk<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box", 0.0);
-  Optionpk<double>  uly_opt("uly", "uly", "Upper left y value bounding box", 0.0);
-  Optionpk<double>  lrx_opt("lrx", "lrx", "Lower right x value bounding box", 0.0);
-  Optionpk<double>  lry_opt("lry", "lry", "Lower right y value bounding box", 0.0);
-  Optionpk<string> crule_opt("cr", "crule", "Composite rule (overwrite, maxndvi, maxband, minband, mean, mode (only for byte images), median, sum, maxallbands, minallbands, stdev", "overwrite");
-  Optionpk<unsigned int> ruleBand_opt("cb", "cband", "band index used for the composite rule (e.g., for ndvi, use --cband=0 --cband=1 with 0 and 1 indices for red and nir band respectively", 0);
-  Optionpk<double> srcnodata_opt("srcnodata", "srcnodata", "invalid value(s) for input raster dataset");
-  Optionpk<unsigned int> bndnodata_opt("bndnodata", "bndnodata", "Band(s) in input image to check if pixel is valid (used for srcnodata, min and max options)", 0);
-  Optionpk<double> minValue_opt("min", "min", "flag values smaller or equal to this value as invalid.");
-  Optionpk<double> maxValue_opt("max", "max", "flag values larger or equal to this value as invalid.");
-  Optionpk<double>  dstnodata_opt("dstnodata", "dstnodata", "nodata value to put in output raster dataset if not valid or out of bounds.", 0);
-  Optionpk<string>  resample_opt("r", "resample", "Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).", "near");
-  Optionpk<string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
-  Optionpk<string>  projection_opt("a_srs", "a_srs", "Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
-  Optionpk<short> file_opt("file", "file", "write number of observations (1) and/or sequence nr of selected file (2) for each pixels as additional layer in composite");
-  Optionpk<short> weight_opt("w", "weight", "Weights (type: short) for the composite, use one weight for each input file in same order as input files are provided). Use value 1 for equal weights.", 1);
-  Optionpk<short> class_opt("c", "class", "classes for multi-band output image: each band represents the number of observations for one specific class. Use value 0 for no multi-band output image.", 0);
-  Optionpk<string>  colorTable_opt("ct", "ct", "color table file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
-  Optionpk<string>  description_opt("d", "description", "Set image description");
-  Optionpk<bool>  align_opt("align", "align", "Align output bounding box to input image",false);
-  // Optionpk<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
-  Optionpk<short>  verbose_opt("v", "verbose", "verbose", 0,2);
+  Optionjl<unsigned int>  band_opt("b", "band", "band index(es) to crop (leave empty if all bands must be retained)");
+  Optionjl<double>  dx_opt("dx", "dx", "Output resolution in x (in meter) (empty: keep original resolution)");
+  Optionjl<double>  dy_opt("dy", "dy", "Output resolution in y (in meter) (empty: keep original resolution)");
+  Optionjl<string>  extent_opt("e", "extent", "get boundary from extent from polygons in vector file");
+  Optionjl<string>  layer_opt("ln", "ln", "layer name of extent to crop");
+  Optionjl<bool> cut_opt("cut", "crop_to_cutline", "Crop the extent of the target dataset to the extent of the cutline.",false);
+  Optionjl<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
+  Optionjl<string> mask_opt("m", "mask", "Use the specified file as a validity mask.");
+  Optionjl<unsigned int> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed)", 0);
+  Optionjl<float> msknodata_opt("msknodata", "msknodata", "Mask value not to consider for composite.", 0);
+  Optionjl<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box", 0.0);
+  Optionjl<double>  uly_opt("uly", "uly", "Upper left y value bounding box", 0.0);
+  Optionjl<double>  lrx_opt("lrx", "lrx", "Lower right x value bounding box", 0.0);
+  Optionjl<double>  lry_opt("lry", "lry", "Lower right y value bounding box", 0.0);
+  Optionjl<string> crule_opt("cr", "crule", "Composite rule (overwrite, maxndvi, maxband, minband, mean, mode (only for byte images), median, sum, maxallbands, minallbands, stdev", "overwrite");
+  Optionjl<unsigned int> ruleBand_opt("cb", "cband", "band index used for the composite rule (e.g., for ndvi, use --cband=0 --cband=1 with 0 and 1 indices for red and nir band respectively", 0);
+  Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "invalid value(s) for input raster dataset");
+  Optionjl<unsigned int> bndnodata_opt("bndnodata", "bndnodata", "Band(s) in input image to check if pixel is valid (used for srcnodata, min and max options)", 0);
+  Optionjl<double> minValue_opt("min", "min", "flag values smaller or equal to this value as invalid.");
+  Optionjl<double> maxValue_opt("max", "max", "flag values larger or equal to this value as invalid.");
+  Optionjl<double>  dstnodata_opt("dstnodata", "dstnodata", "nodata value to put in output raster dataset if not valid or out of bounds.", 0);
+  Optionjl<string>  resample_opt("r", "resample", "Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).", "near");
+  Optionjl<string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
+  Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
+  Optionjl<short> file_opt("file", "file", "write number of observations (1) and/or sequence nr of selected file (2) for each pixels as additional layer in composite");
+  Optionjl<short> weight_opt("w", "weight", "Weights (type: short) for the composite, use one weight for each input file in same order as input files are provided). Use value 1 for equal weights.", 1);
+  Optionjl<short> class_opt("c", "class", "classes for multi-band output image: each band represents the number of observations for one specific class. Use value 0 for no multi-band output image.", 0);
+  Optionjl<string>  colorTable_opt("ct", "ct", "color table file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
+  Optionjl<string>  description_opt("d", "description", "Set image description");
+  Optionjl<bool>  align_opt("align", "align", "Align output bounding box to input image",false);
+  // Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+  Optionjl<short>  verbose_opt("v", "verbose", "verbose", 0,2);
 
   extent_opt.setHide(1);
   layer_opt.setHide(1);

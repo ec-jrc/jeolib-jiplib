@@ -1,5 +1,5 @@
 /**********************************************************************
-pkstretch_lib.cc: program to stretch raster images: histogram stretching
+jlstretch_lib.cc: program to stretch raster images: histogram stretching
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -20,7 +20,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <iostream>
 #include <memory>
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "imageclasses/Jim.h"
 #include "apps/AppFactory.h"
 
@@ -50,17 +50,17 @@ shared_ptr<Jim> Jim::stretch(app::AppFactory& app){
  * @return CE_None if successful, CE_Failure if failed
  **/
 CPLErr Jim::stretch(Jim& imgWriter, app::AppFactory& app){
-  Optionpk<double> nodata_opt("nodata", "nodata", "nodata value(s) (first value will be put in output image)");
-  Optionpk<double> src_min_opt("src_min","src_min","clip source below this minimum value");
-  Optionpk<double> src_max_opt("src_max","src_max","clip source above this maximum value");
-  Optionpk<double> fromValue_opt("dst_min", "dst_min", "mininum value in output image", 0);
-  Optionpk<double> toValue_opt("dst_max", "dst_max", "maximum value in output image", 255);
-  Optionpk<double> minp_opt("cc_min", "cc_min", "cumulative count cut from");
-  Optionpk<double> maxp_opt("cc_max", "cc_max", "cumulative count cut to");
-  Optionpk<int> band_opt("b", "b", "band");
-  Optionpk<bool> equalize_opt("eq", "eq", "Histogram equalization",false);
-  Optionpk<std::string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
-  Optionpk<short> verbose_opt("v", "verbose", "verbose mode if > 0", 0,2);
+  Optionjl<double> nodata_opt("nodata", "nodata", "nodata value(s) (first value will be put in output image)");
+  Optionjl<double> src_min_opt("src_min","src_min","clip source below this minimum value");
+  Optionjl<double> src_max_opt("src_max","src_max","clip source above this maximum value");
+  Optionjl<double> fromValue_opt("dst_min", "dst_min", "mininum value in output image", 0);
+  Optionjl<double> toValue_opt("dst_max", "dst_max", "maximum value in output image", 255);
+  Optionjl<double> minp_opt("cc_min", "cc_min", "cumulative count cut from");
+  Optionjl<double> maxp_opt("cc_max", "cc_max", "cumulative count cut to");
+  Optionjl<int> band_opt("b", "b", "band");
+  Optionjl<bool> equalize_opt("eq", "eq", "Histogram equalization",false);
+  Optionjl<std::string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
+  Optionjl<short> verbose_opt("v", "verbose", "verbose mode if > 0", 0,2);
 
   src_min_opt.setHide(1);
   src_max_opt.setHide(1);

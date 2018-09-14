@@ -1,5 +1,5 @@
 /**********************************************************************
-pkann_lib.cc: classify raster image using Artificial Neural Network
+jlann_lib.cc: classify raster image using Artificial Neural Network
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -25,7 +25,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include "VectorOgr.h"
 // #include "ImgReaderOgr.h"
 // #include "ImgWriterOgr.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "base/PosValue.h"
 #include "algorithms/ConfusionMatrix.h"
 #include "floatfann.h"
@@ -38,29 +38,29 @@ std::string VectorOgr::trainANN(app::AppFactory& app){
   confusionmatrix::ConfusionMatrix cm;
 
   //--------------------------- command line options ------------------------------------
-  // Optionpk<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
-  // Optionpk<std::string> tlayer_opt("tln", "tln", "Sample layer name(s)");
-  // Optionpk<std::string> attribute_opt("af", "af", "Attribute filter");
-  Optionpk<std::string> label_opt("label", "label", "Attribute name for class label in training vector file.","label");
-  Optionpk<unsigned int> balance_opt("bal", "balance", "Balance the input data to this number of samples for each class", 0);
-  Optionpk<bool> random_opt("random", "random", "Randomize training data for balancing", true, 2);
-  Optionpk<unsigned int> minSize_opt("min", "min", "If number of training pixels is less then min, do not take this class into account (0: consider all classes)", 0);
-  // Optionpk<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
-  // Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
-  // Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number");
-  Optionpk<std::string> bandNames_opt("bn", "bandname", "Band name(s) to use. Leave empty to use all bands");
-  Optionpk<double> offset_opt("offset", "offset", "Offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
-  Optionpk<double> scale_opt("scale", "scale", "Scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
-  Optionpk<unsigned short> cv_opt("cv", "cv", "N-fold cross validation mode",0);
-  Optionpk<std::string> cmformat_opt("cmf","cmf","Format for confusion matrix (ascii or latex)","ascii");
-  Optionpk<unsigned int> nneuron_opt("nn", "nneuron", "number of neurons in hidden layers in neural network (multiple hidden layers are set by defining multiple number of neurons: -n 15 -n 1, default is one hidden layer with 5 neurons)", 5);
-  Optionpk<float> connection_opt("\0", "connection", "connection rate (default: 1.0 for a fully connected network)", 1.0);
-  Optionpk<float> learning_opt("l", "learning", "learning rate (default: 0.7)", 0.7);
-  Optionpk<float> weights_opt("w", "weights", "weights for neural network. Apply to fully connected network only, starting from first input neuron to last output neuron, including the bias neurons (last neuron in each but last layer)", 0.0);
-  Optionpk<unsigned int> maxit_opt("\0", "maxit", "number of maximum iterations (epoch) (default: 500)", 500);
-  Optionpk<std::string> classname_opt("c", "class", "List of class names.");
-  Optionpk<short> classvalue_opt("r", "reclass", "List of class values (use same order as in class opt).");
-  Optionpk<short> verbose_opt("v", "verbose", "Verbose level",0,2);
+  // Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
+  // Optionjl<std::string> tlayer_opt("tln", "tln", "Sample layer name(s)");
+  // Optionjl<std::string> attribute_opt("af", "af", "Attribute filter");
+  Optionjl<std::string> label_opt("label", "label", "Attribute name for class label in training vector file.","label");
+  Optionjl<unsigned int> balance_opt("bal", "balance", "Balance the input data to this number of samples for each class", 0);
+  Optionjl<bool> random_opt("random", "random", "Randomize training data for balancing", true, 2);
+  Optionjl<unsigned int> minSize_opt("min", "min", "If number of training pixels is less then min, do not take this class into account (0: consider all classes)", 0);
+  // Optionjl<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
+  // Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
+  // Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
+  Optionjl<std::string> bandNames_opt("bn", "bandname", "Band name(s) to use. Leave empty to use all bands");
+  Optionjl<double> offset_opt("offset", "offset", "Offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
+  Optionjl<double> scale_opt("scale", "scale", "Scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
+  Optionjl<unsigned short> cv_opt("cv", "cv", "N-fold cross validation mode",0);
+  Optionjl<std::string> cmformat_opt("cmf","cmf","Format for confusion matrix (ascii or latex)","ascii");
+  Optionjl<unsigned int> nneuron_opt("nn", "nneuron", "number of neurons in hidden layers in neural network (multiple hidden layers are set by defining multiple number of neurons: -n 15 -n 1, default is one hidden layer with 5 neurons)", 5);
+  Optionjl<float> connection_opt("\0", "connection", "connection rate (default: 1.0 for a fully connected network)", 1.0);
+  Optionjl<float> learning_opt("l", "learning", "learning rate (default: 0.7)", 0.7);
+  Optionjl<float> weights_opt("w", "weights", "weights for neural network. Apply to fully connected network only, starting from first input neuron to last output neuron, including the bias neurons (last neuron in each but last layer)", 0.0);
+  Optionjl<unsigned int> maxit_opt("\0", "maxit", "number of maximum iterations (epoch) (default: 500)", 500);
+  Optionjl<std::string> classname_opt("c", "class", "List of class names.");
+  Optionjl<short> classvalue_opt("r", "reclass", "List of class values (use same order as in class opt).");
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose level",0,2);
 
   random_opt.setHide(1);
   minSize_opt.setHide(1);
@@ -445,26 +445,26 @@ CPLErr Jim::classifyANN(Jim& imgWriter, app::AppFactory& app){
   vector<double> priors;
 
   //--------------------------- command line options ------------------------------------
-  Optionpk<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
-  Optionpk<unsigned int> band_opt("b", "band", "band index (starting from 0, either use band option or use start to end)");
-  // Optionpk<std::string> bandNames_opt("bn", "bandname", "Band name(s) to use. Leave empty to use all bands");
-  Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
-  Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number");
-  Optionpk<double> offset_opt("offset", "offset", "offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
-  Optionpk<double> scale_opt("scale", "scale", "scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
-  Optionpk<double> priors_opt("prior", "prior", "prior probabilities for each class (e.g., -p 0.3 -p 0.3 -p 0.2 )", 0.0);
-  Optionpk<string> priorimg_opt("pim", "priorimg", "prior probability image (multi-band img with band for each class","",2);
-  Optionpk<string> extent_opt("e", "extent", "Only classify within extent from polygons in vector file");
-  Optionpk<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
-  Optionpk<string> mask_opt("m", "mask", "Only classify within specified mask (vector or raster). For raster mask, set nodata values with the option msknodata.");
-  Optionpk<short> msknodata_opt("msknodata", "msknodata", "mask value(s) not to consider for classification. Values will be taken over in classification image. Default is 0", 0);
-  Optionpk<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0);
-  Optionpk<unsigned short> dstnodata_opt("dstnodata", "dstnodata", "Nodata value to put where image is masked as nodata", 0);
-  // Optionpk<unsigned short> nodata_opt("nodata", "nodata", "nodata value to put where image is masked as nodata", 0);
-  Optionpk<string> colorTable_opt("ct", "ct", "colour table in ASCII format having 5 columns: id R G B ALFA (0: transparent, 255: solid)");
-  Optionpk<string> prob_opt("\0", "prob", "probability image. Default is no probability image");
-  Optionpk<string> entropy_opt("entropy", "entropy", "entropy image (measure for uncertainty of classifier output","",2);
-  Optionpk<short> verbose_opt("v", "verbose", "set to: 0 (results only), 1 (confusion matrix), 2 (debug)",0,2);
+  Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
+  Optionjl<unsigned int> band_opt("b", "band", "band index (starting from 0, either use band option or use start to end)");
+  // Optionjl<std::string> bandNames_opt("bn", "bandname", "Band name(s) to use. Leave empty to use all bands");
+  Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
+  Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
+  Optionjl<double> offset_opt("offset", "offset", "offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
+  Optionjl<double> scale_opt("scale", "scale", "scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
+  Optionjl<double> priors_opt("prior", "prior", "prior probabilities for each class (e.g., -p 0.3 -p 0.3 -p 0.2 )", 0.0);
+  Optionjl<string> priorimg_opt("pim", "priorimg", "prior probability image (multi-band img with band for each class","",2);
+  Optionjl<string> extent_opt("e", "extent", "Only classify within extent from polygons in vector file");
+  Optionjl<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
+  Optionjl<string> mask_opt("m", "mask", "Only classify within specified mask (vector or raster). For raster mask, set nodata values with the option msknodata.");
+  Optionjl<short> msknodata_opt("msknodata", "msknodata", "mask value(s) not to consider for classification. Values will be taken over in classification image. Default is 0", 0);
+  Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0);
+  Optionjl<unsigned short> dstnodata_opt("dstnodata", "dstnodata", "Nodata value to put where image is masked as nodata", 0);
+  // Optionjl<unsigned short> nodata_opt("nodata", "nodata", "nodata value to put where image is masked as nodata", 0);
+  Optionjl<string> colorTable_opt("ct", "ct", "colour table in ASCII format having 5 columns: id R G B ALFA (0: transparent, 255: solid)");
+  Optionjl<string> prob_opt("\0", "prob", "probability image. Default is no probability image");
+  Optionjl<string> entropy_opt("entropy", "entropy", "entropy image (measure for uncertainty of classifier output","",2);
+  Optionjl<short> verbose_opt("v", "verbose", "set to: 0 (results only), 1 (confusion matrix), 2 (debug)",0,2);
   extent_opt.setHide(1);
   eoption_opt.setHide(1);
   band_opt.setHide(1);
@@ -691,7 +691,7 @@ CPLErr Jim::classifyANN(Jim& imgWriter, app::AppFactory& app){
             if(verbose_opt[0]==2)
               std::cout << "reading band " << band_opt[iband] << std::endl;
             assert(band_opt[iband]>=0);
-            assert(band_opt[iband]<imgWriter.nrOfBand());
+            assert(band_opt[iband]<nrOfBand());
             readData(buffer,iline,band_opt[iband]);
             for(unsigned int icol=0;icol<ncol;++icol)
               hpixel[icol].push_back(buffer[icol]);
@@ -702,7 +702,7 @@ CPLErr Jim::classifyANN(Jim& imgWriter, app::AppFactory& app){
             if(verbose_opt[0]==2)
               std::cout << "reading band " << iband << std::endl;
             assert(iband>=0);
-            assert(iband<imgWriter.nrOfBand());
+            assert(iband<nrOfBand());
             readData(buffer,iline,iband);
             for(unsigned int icol=0;icol<ncol;++icol)
               hpixel[icol].push_back(buffer[icol]);
@@ -866,46 +866,46 @@ CPLErr Jim::classifyANN(Jim& imgWriter, app::AppFactory& app){
 //   vector<double> priors;
 
 //   //--------------------------- command line options ------------------------------------
-//   Optionpk<string> training_opt("t", "training", "training vector file. A single vector file contains all training features (must be set as: B0, B1, B2,...) for all classes (class numbers identified by label option). Use multiple training files for bootstrap aggregation (alternative to the bag and bsize options, where a random subset is taken from a single training file)");
-//   Optionpk<string> tlayer_opt("tln", "tln", "training layer name(s)");
-//   Optionpk<string> label_opt("label", "label", "identifier for class label in training vector file.","label");
-//   Optionpk<unsigned int> balance_opt("bal", "balance", "balance the input data to this number of samples for each class", 0);
-//   Optionpk<bool> random_opt("random", "random", "in case of balance, randomize input data", true,2);
-//   Optionpk<int> minSize_opt("min", "min", "if number of training pixels is less then min, do not take this class into account (0: consider all classes)", 0);
-//   Optionpk<unsigned int> band_opt("b", "band", "band index (starting from 0, either use band option or use start to end)");
-//   Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
-//   Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number");
-//   Optionpk<double> offset_opt("offset", "offset", "offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
-//   Optionpk<double> scale_opt("scale", "scale", "scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
-//   Optionpk<double> priors_opt("prior", "prior", "prior probabilities for each class (e.g., -p 0.3 -p 0.3 -p 0.2 )", 0.0);
-//   Optionpk<string> priorimg_opt("pim", "priorimg", "prior probability image (multi-band img with band for each class","",2);
-//   Optionpk<unsigned short> cv_opt("cv", "cv", "n-fold cross validation mode",0);
-//   Optionpk<string> cmformat_opt("cmf","cmf","Format for confusion matrix (ascii or latex)","ascii");
-//   Optionpk<unsigned short> comb_opt("comb", "comb", "how to combine bootstrap aggregation classifiers (0: sum rule, 1: product rule, 2: max rule). Also used to aggregate classes with rc option. Default is sum rule (0)",0);
-//   Optionpk<unsigned short> bag_opt("bag", "bag", "Number of bootstrap aggregations (default is no bagging: 1)", 1);
-//   Optionpk<int> bagSize_opt("bs", "bsize", "Percentage of features used from available training features for each bootstrap aggregation (one size for all classes, or a different size for each class respectively", 100);
-//   Optionpk<string> classBag_opt("cb", "classbag", "output for each individual bootstrap aggregation (default is blank)");
-//   Optionpk<string> extent_opt("e", "extent", "Only classify within extent from polygons in vector file");
-//   Optionpk<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
-//   Optionpk<string> mask_opt("m", "mask", "Only classify within specified mask (vector or raster). For raster mask, set nodata values with the option msknodata.");
-//   Optionpk<short> msknodata_opt("msknodata", "msknodata", "mask value(s) not to consider for classification. Values will be taken over in classification image. Default is 0", 0);
-//   Optionpk<unsigned short> nodata_opt("nodata", "nodata", "nodata value to put where image is masked as nodata", 0);
-//   Optionpk<string> output_opt("o", "output", "output classification image");
-//   Optionpk<string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
-//   Optionpk<string> colorTable_opt("ct", "ct", "colour table in ASCII format having 5 columns: id R G B ALFA (0: transparent, 255: solid)");
-//   Optionpk<string> prob_opt("\0", "prob", "probability image. Default is no probability image");
-//   Optionpk<string> entropy_opt("entropy", "entropy", "entropy image (measure for uncertainty of classifier output","",2);
-//   Optionpk<string> active_opt("active", "active", "ogr output for active training sample.","",2);
-//   Optionpk<string> ogrformat_opt("f", "f", "Output ogr format for active training sample","SQLite");
-//   Optionpk<unsigned int> nactive_opt("na", "nactive", "number of active training points",1);
-//   Optionpk<string> classname_opt("c", "class", "list of class names.");
-//   Optionpk<short> classvalue_opt("r", "reclass", "list of class values (use same order as in class opt).");
-//   Optionpk<short> verbose_opt("v", "verbose", "set to: 0 (results only), 1 (confusion matrix), 2 (debug)",0,2);
-//   Optionpk<unsigned int> nneuron_opt("nn", "nneuron", "number of neurons in hidden layers in neural network (multiple hidden layers are set by defining multiple number of neurons: -n 15 -n 1, default is one hidden layer with 5 neurons)", 5);
-//   Optionpk<float> connection_opt("\0", "connection", "connection reate (default: 1.0 for a fully connected network)", 1.0);
-//   Optionpk<float> learning_opt("l", "learning", "learning rate (default: 0.7)", 0.7);
-//   Optionpk<float> weights_opt("w", "weights", "weights for neural network. Apply to fully connected network only, starting from first input neuron to last output neuron, including the bias neurons (last neuron in each but last layer)", 0.0);
-//   Optionpk<unsigned int> maxit_opt("\0", "maxit", "number of maximum iterations (epoch) (default: 500)", 500);
+//   Optionjl<string> training_opt("t", "training", "training vector file. A single vector file contains all training features (must be set as: B0, B1, B2,...) for all classes (class numbers identified by label option). Use multiple training files for bootstrap aggregation (alternative to the bag and bsize options, where a random subset is taken from a single training file)");
+//   Optionjl<string> tlayer_opt("tln", "tln", "training layer name(s)");
+//   Optionjl<string> label_opt("label", "label", "identifier for class label in training vector file.","label");
+//   Optionjl<unsigned int> balance_opt("bal", "balance", "balance the input data to this number of samples for each class", 0);
+//   Optionjl<bool> random_opt("random", "random", "in case of balance, randomize input data", true,2);
+//   Optionjl<int> minSize_opt("min", "min", "if number of training pixels is less then min, do not take this class into account (0: consider all classes)", 0);
+//   Optionjl<unsigned int> band_opt("b", "band", "band index (starting from 0, either use band option or use start to end)");
+//   Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
+//   Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
+//   Optionjl<double> offset_opt("offset", "offset", "offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
+//   Optionjl<double> scale_opt("scale", "scale", "scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
+//   Optionjl<double> priors_opt("prior", "prior", "prior probabilities for each class (e.g., -p 0.3 -p 0.3 -p 0.2 )", 0.0);
+//   Optionjl<string> priorimg_opt("pim", "priorimg", "prior probability image (multi-band img with band for each class","",2);
+//   Optionjl<unsigned short> cv_opt("cv", "cv", "n-fold cross validation mode",0);
+//   Optionjl<string> cmformat_opt("cmf","cmf","Format for confusion matrix (ascii or latex)","ascii");
+//   Optionjl<unsigned short> comb_opt("comb", "comb", "how to combine bootstrap aggregation classifiers (0: sum rule, 1: product rule, 2: max rule). Also used to aggregate classes with rc option. Default is sum rule (0)",0);
+//   Optionjl<unsigned short> bag_opt("bag", "bag", "Number of bootstrap aggregations (default is no bagging: 1)", 1);
+//   Optionjl<int> bagSize_opt("bs", "bsize", "Percentage of features used from available training features for each bootstrap aggregation (one size for all classes, or a different size for each class respectively", 100);
+//   Optionjl<string> classBag_opt("cb", "classbag", "output for each individual bootstrap aggregation (default is blank)");
+//   Optionjl<string> extent_opt("e", "extent", "Only classify within extent from polygons in vector file");
+//   Optionjl<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
+//   Optionjl<string> mask_opt("m", "mask", "Only classify within specified mask (vector or raster). For raster mask, set nodata values with the option msknodata.");
+//   Optionjl<short> msknodata_opt("msknodata", "msknodata", "mask value(s) not to consider for classification. Values will be taken over in classification image. Default is 0", 0);
+//   Optionjl<unsigned short> nodata_opt("nodata", "nodata", "nodata value to put where image is masked as nodata", 0);
+//   Optionjl<string> output_opt("o", "output", "output classification image");
+//   Optionjl<string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
+//   Optionjl<string> colorTable_opt("ct", "ct", "colour table in ASCII format having 5 columns: id R G B ALFA (0: transparent, 255: solid)");
+//   Optionjl<string> prob_opt("\0", "prob", "probability image. Default is no probability image");
+//   Optionjl<string> entropy_opt("entropy", "entropy", "entropy image (measure for uncertainty of classifier output","",2);
+//   Optionjl<string> active_opt("active", "active", "ogr output for active training sample.","",2);
+//   Optionjl<string> ogrformat_opt("f", "f", "Output ogr format for active training sample","SQLite");
+//   Optionjl<unsigned int> nactive_opt("na", "nactive", "number of active training points",1);
+//   Optionjl<string> classname_opt("c", "class", "list of class names.");
+//   Optionjl<short> classvalue_opt("r", "reclass", "list of class values (use same order as in class opt).");
+//   Optionjl<short> verbose_opt("v", "verbose", "set to: 0 (results only), 1 (confusion matrix), 2 (debug)",0,2);
+//   Optionjl<unsigned int> nneuron_opt("nn", "nneuron", "number of neurons in hidden layers in neural network (multiple hidden layers are set by defining multiple number of neurons: -n 15 -n 1, default is one hidden layer with 5 neurons)", 5);
+//   Optionjl<float> connection_opt("\0", "connection", "connection reate (default: 1.0 for a fully connected network)", 1.0);
+//   Optionjl<float> learning_opt("l", "learning", "learning rate (default: 0.7)", 0.7);
+//   Optionjl<float> weights_opt("w", "weights", "weights for neural network. Apply to fully connected network only, starting from first input neuron to last output neuron, including the bias neurons (last neuron in each but last layer)", 0.0);
+//   Optionjl<unsigned int> maxit_opt("\0", "maxit", "number of maximum iterations (epoch) (default: 500)", 500);
 //   extent_opt.setHide(1);
 //   eoption_opt.setHide(1);
 //   band_opt.setHide(1);

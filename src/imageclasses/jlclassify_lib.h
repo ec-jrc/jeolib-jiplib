@@ -1,5 +1,5 @@
 /**********************************************************************
-pkclassify_lib.h: classify raster image
+jlclassify_lib.h: classify raster image
 Copyright (C) 2018 Pieter Kempeneers
 
 This file is part of pktools

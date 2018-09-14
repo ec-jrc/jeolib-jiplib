@@ -1,5 +1,5 @@
 /**********************************************************************
-pkstat_lib.cc: program to calculate basic statistics from raster dataset
+jlstat_lib.cc: program to calculate basic statistics from raster dataset
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -20,7 +20,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <fstream>
 #include <math.h>
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "algorithms/StatFactory.h"
 #include "algorithms/ImgRegression.h"
 #if PKTOOLS_BUILD_WITH_PYTHON==1
@@ -66,23 +66,23 @@ std::multimap<std::string,std::string> Jim::getStats(AppFactory& app){
  **/
 // JimList& JimList::getStats(AppFactory& app){
 std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
-  Optionpk<unsigned short> band_opt("cb","cband","band(s) on which to calculate statistics",0);
-  Optionpk<std::string> function_opt("f", "function", "Statistics function (invalid, valid, filename, basic, gdal, mean, median, var, skewness, kurtosis,stdev, sum, minmax, min, max, histogram, histogram2d, rmse, regression, regressionError, regressionPerpendicular","basic");
-  // Optionpk<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box");
-  // Optionpk<double>  uly_opt("uly", "uly", "Upper left y value bounding box");
-  // Optionpk<double>  lrx_opt("lrx", "lrx", "Lower right x value bounding box");
-  // Optionpk<double>  lry_opt("lry", "lry", "Lower right y value bounding box");
-  Optionpk<double> nodata_opt("nodata","nodata","Set nodata value(s)");
-  Optionpk<short> down_opt("down", "down", "Down sampling factor (for raster sample datasets only). Can be used to create grid points", 1);
-  Optionpk<unsigned int> random_opt("rnd", "rnd", "generate random numbers", 0);
-  Optionpk<double>  scale_opt("scale", "scale", "Scale(s) for reading input image(s)");
-  Optionpk<double>  offset_opt("offset", "offset", "Offset(s) for reading input image(s)");
-  Optionpk<double> src_min_opt("src_min","src_min","start reading source from this minimum value");
-  Optionpk<double> src_max_opt("src_max","src_max","stop reading source from this maximum value");
-  Optionpk<short> nbin_opt("nbin","nbin","number of bins to calculate histogram");
-  Optionpk<bool> relative_opt("rel","relative","use percentiles for histogram to calculate histogram",false);
-  Optionpk<bool> kde_opt("kde","kde","Use Kernel density estimation when producing histogram. The standard deviation is estimated based on Silverman's rule of thumb",false);
-  Optionpk<short> verbose_opt("v", "verbose", "verbose mode when positive", 0,2);
+  Optionjl<unsigned short> band_opt("cb","cband","band(s) on which to calculate statistics",0);
+  Optionjl<std::string> function_opt("f", "function", "Statistics function (invalid, valid, filename, basic, gdal, mean, median, var, skewness, kurtosis,stdev, sum, minmax, min, max, histogram, histogram2d, rmse, regression, regressionError, regressionPerpendicular","basic");
+  // Optionjl<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box");
+  // Optionjl<double>  uly_opt("uly", "uly", "Upper left y value bounding box");
+  // Optionjl<double>  lrx_opt("lrx", "lrx", "Lower right x value bounding box");
+  // Optionjl<double>  lry_opt("lry", "lry", "Lower right y value bounding box");
+  Optionjl<double> nodata_opt("nodata","nodata","Set nodata value(s)");
+  Optionjl<short> down_opt("down", "down", "Down sampling factor (for raster sample datasets only). Can be used to create grid points", 1);
+  Optionjl<unsigned int> random_opt("rnd", "rnd", "generate random numbers", 0);
+  Optionjl<double>  scale_opt("scale", "scale", "Scale(s) for reading input image(s)");
+  Optionjl<double>  offset_opt("offset", "offset", "Offset(s) for reading input image(s)");
+  Optionjl<double> src_min_opt("src_min","src_min","start reading source from this minimum value");
+  Optionjl<double> src_max_opt("src_max","src_max","stop reading source from this maximum value");
+  Optionjl<short> nbin_opt("nbin","nbin","number of bins to calculate histogram");
+  Optionjl<bool> relative_opt("rel","relative","use percentiles for histogram to calculate histogram",false);
+  Optionjl<bool> kde_opt("kde","kde","Use Kernel density estimation when producing histogram. The standard deviation is estimated based on Silverman's rule of thumb",false);
+  Optionjl<short> verbose_opt("v", "verbose", "verbose mode when positive", 0,2);
   // ulx_opt.setHide(1);
   // uly_opt.setHide(1);
   // lrx_opt.setHide(1);

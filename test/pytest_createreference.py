@@ -27,18 +27,14 @@ try:
     jim0=jl.createJim(**dict)
     #create a reference
     jim1=jim0
-    print("debug0")
     jim0.d_pointOpBlank(500)
+    print(jim0)
     if not jim1.isEqual(jim0):
         print("Failed: isEqual")
         throw()
-    print("debug1")
     theStats0=jim0.getStats({'function':['max']})
-    print("debug2")
     theStats1=jim1.getStats({'function':['max']})
-    print("debug3")
     jim0=None
-    print("debug4")
     if theStats0['max']!=500:
         print("Failed: jim0 max")
         throw()

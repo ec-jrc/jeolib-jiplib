@@ -1,5 +1,5 @@
 /**********************************************************************
-pkcrop_lib.cc: perform raster data operations on image such as crop, extract and stack bands
+jlcrop_lib.cc: perform raster data operations on image such as crop, extract and stack bands
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -25,7 +25,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include "imageclasses/Jim.h"
 #include "imageclasses/VectorOgr.h"
 #include "imageclasses/JimList.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "algorithms/Egcs.h"
 #include "algorithms/StatFactory.h"
 #include "apps/AppFactory.h"
@@ -79,14 +79,14 @@ CPLErr Jim::crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry)
 }
 
 CPLErr Jim::convert(Jim& imgWriter, AppFactory& app){
-  Optionpk<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
-  Optionpk<double> autoscale_opt("as", "autoscale", "scale output to min and max, e.g., --autoscale 0 --autoscale 255");
-  Optionpk<double> scale_opt("scale", "scale", "output=scale*input+offset");
-  Optionpk<double> offset_opt("offset", "offset", "output=scale*input+offset");
-  Optionpk<string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
-  Optionpk<double>  nodata_opt("nodata", "nodata", "No data value");
-  Optionpk<string>  description_opt("d", "description", "Set image description");
-  Optionpk<short>  verbose_opt("v", "verbose", "verbose", 0,2);
+  Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
+  Optionjl<double> autoscale_opt("as", "autoscale", "scale output to min and max, e.g., --autoscale 0 --autoscale 255");
+  Optionjl<double> scale_opt("scale", "scale", "output=scale*input+offset");
+  Optionjl<double> offset_opt("offset", "offset", "output=scale*input+offset");
+  Optionjl<string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
+  Optionjl<double>  nodata_opt("nodata", "nodata", "No data value");
+  Optionjl<string>  description_opt("d", "description", "Set image description");
+  Optionjl<short>  verbose_opt("v", "verbose", "verbose", 0,2);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
@@ -226,43 +226,43 @@ CPLErr Jim::convert(Jim& imgWriter, AppFactory& app){
 }
 
 CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
-  Optionpk<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
+  Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
   //todo: support layer names
-  Optionpk<string>  extent_opt("e", "extent", "get boundary from extent from polygons in vector file");
-  Optionpk<string>  layer_opt("ln", "ln", "layer name of extent to crop");
-  Optionpk<bool> cut_to_cutline_opt("crop_to_cutline", "crop_to_cutline", "Crop the extent of the target dataset to the extent of the cutline, setting the outside area to nodata.",false);
-  Optionpk<bool> cut_in_cutline_opt("crop_in_cutline", "crop_in_cutline", "Crop the extent of the target dataset to the extent of the cutline, setting the inner area to nodata.",false);
-  Optionpk<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
-  Optionpk<string> mask_opt("m", "mask", "Use the the specified file as a validity mask (0 is nodata).");
-  Optionpk<double> msknodata_opt("msknodata", "msknodata", "Mask value not to consider for crop.", 0);
-  Optionpk<unsigned int> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed)", 0);
-  Optionpk<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box", 0.0);
-  Optionpk<double>  uly_opt("uly", "uly", "Upper left y value bounding box", 0.0);
-  Optionpk<double>  lrx_opt("lrx", "lrx", "Lower right x value bounding box", 0.0);
-  Optionpk<double>  lry_opt("lry", "lry", "Lower right y value bounding box", 0.0);
-  Optionpk<double>  dx_opt("dx", "dx", "Output resolution in x (in meter) (empty: keep original resolution)");
-  Optionpk<double>  dy_opt("dy", "dy", "Output resolution in y (in meter) (empty: keep original resolution)");
-  Optionpk<double> cx_opt("x", "x", "x-coordinate of image center to crop (in meter)");
-  Optionpk<double> cy_opt("y", "y", "y-coordinate of image center to crop (in meter)");
-  Optionpk<double> nx_opt("nx", "nx", "image size in x to crop (in meter)");
-  Optionpk<double> ny_opt("ny", "ny", "image size in y to crop (in meter)");
-  Optionpk<unsigned int> ns_opt("ns", "ns", "number of samples  to crop (in pixels)");
-  Optionpk<unsigned int> nl_opt("nl", "nl", "number of lines to crop (in pixels)");
-  Optionpk<unsigned int>  band_opt("b", "band", "band index to crop (leave empty to retain all bands)");
-  Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
-  Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number");
-  Optionpk<double> autoscale_opt("as", "autoscale", "scale output to min and max, e.g., --autoscale 0 --autoscale 255");
-  Optionpk<double> scale_opt("scale", "scale", "output=scale*input+offset");
-  Optionpk<double> offset_opt("offset", "offset", "output=scale*input+offset");
-  Optionpk<string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
-  // Optionpk<string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
-  // Optionpk<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-  Optionpk<string>  colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
-  Optionpk<double>  nodata_opt("nodata", "nodata", "Nodata value to put in image if out of bounds.");
-  Optionpk<string>  resample_opt("r", "resampling-method", "Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).", "near");
-  Optionpk<string>  description_opt("d", "description", "Set image description");
-  Optionpk<bool>  align_opt("align", "align", "Align output bounding box to input image",false);
-  Optionpk<short>  verbose_opt("v", "verbose", "verbose", 0,2);
+  Optionjl<string>  extent_opt("e", "extent", "get boundary from extent from polygons in vector file");
+  Optionjl<string>  layer_opt("ln", "ln", "layer name of extent to crop");
+  Optionjl<bool> cut_to_cutline_opt("crop_to_cutline", "crop_to_cutline", "Crop the extent of the target dataset to the extent of the cutline, setting the outside area to nodata.",false);
+  Optionjl<bool> cut_in_cutline_opt("crop_in_cutline", "crop_in_cutline", "Crop the extent of the target dataset to the extent of the cutline, setting the inner area to nodata.",false);
+  Optionjl<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
+  Optionjl<string> mask_opt("m", "mask", "Use the the specified file as a validity mask (0 is nodata).");
+  Optionjl<double> msknodata_opt("msknodata", "msknodata", "Mask value not to consider for crop.", 0);
+  Optionjl<unsigned int> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed)", 0);
+  Optionjl<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box", 0.0);
+  Optionjl<double>  uly_opt("uly", "uly", "Upper left y value bounding box", 0.0);
+  Optionjl<double>  lrx_opt("lrx", "lrx", "Lower right x value bounding box", 0.0);
+  Optionjl<double>  lry_opt("lry", "lry", "Lower right y value bounding box", 0.0);
+  Optionjl<double>  dx_opt("dx", "dx", "Output resolution in x (in meter) (empty: keep original resolution)");
+  Optionjl<double>  dy_opt("dy", "dy", "Output resolution in y (in meter) (empty: keep original resolution)");
+  Optionjl<double> cx_opt("x", "x", "x-coordinate of image center to crop (in meter)");
+  Optionjl<double> cy_opt("y", "y", "y-coordinate of image center to crop (in meter)");
+  Optionjl<double> nx_opt("nx", "nx", "image size in x to crop (in meter)");
+  Optionjl<double> ny_opt("ny", "ny", "image size in y to crop (in meter)");
+  Optionjl<unsigned int> ns_opt("ns", "ns", "number of samples  to crop (in pixels)");
+  Optionjl<unsigned int> nl_opt("nl", "nl", "number of lines to crop (in pixels)");
+  Optionjl<unsigned int>  band_opt("b", "band", "band index to crop (leave empty to retain all bands)");
+  Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
+  Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
+  Optionjl<double> autoscale_opt("as", "autoscale", "scale output to min and max, e.g., --autoscale 0 --autoscale 255");
+  Optionjl<double> scale_opt("scale", "scale", "output=scale*input+offset");
+  Optionjl<double> offset_opt("offset", "offset", "output=scale*input+offset");
+  Optionjl<string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
+  // Optionjl<string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
+  // Optionjl<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<string>  colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
+  Optionjl<double>  nodata_opt("nodata", "nodata", "Nodata value to put in image if out of bounds.");
+  Optionjl<string>  resample_opt("r", "resampling-method", "Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).", "near");
+  Optionjl<string>  description_opt("d", "description", "Set image description");
+  Optionjl<bool>  align_opt("align", "align", "Align output bounding box to input image",false);
+  Optionjl<short>  verbose_opt("v", "verbose", "verbose", 0,2);
 
   extent_opt.setHide(1);
   layer_opt.setHide(1);
@@ -458,13 +458,9 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
 
         OGRSpatialReference *vectorSpatialRef=extentReader.getLayer(0)->GetSpatialRef();
         OGRCoordinateTransformation *vector2raster=0;
-        //test
-        std::cout << "debug0" << std::endl;
         vector2raster = OGRCreateCoordinateTransformation(vectorSpatialRef, &gdsSpatialRef);
         if(gdsSpatialRef.IsSame(vectorSpatialRef)){
           vector2raster=0;
-          //test
-          std::cout << "vector2raster is 0" << std::endl;
         }
         else{
           if(!vector2raster){
@@ -473,18 +469,12 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
             throw(errorStream.str());
           }
         }
-        //test
-        std::cout << "debug1" << std::endl;
         extentReader.getExtent(e_ulx,e_uly,e_lrx,e_lry,vector2raster);
-        //test
-        std::cout << "debug2" << std::endl;
         ulx_opt.push_back(e_ulx);
         uly_opt.push_back(e_uly);
         lrx_opt.push_back(e_lrx);
         lry_opt.push_back(e_lry);
         extentReader.close();
-        //test
-        std::cout << "debug3" << std::endl;
       }
       e_ulx=stat.mymin(ulx_opt);
       e_uly=stat.mymax(uly_opt);
@@ -498,12 +488,8 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
       uly_opt.push_back(e_uly);
       lrx_opt.push_back(e_lrx);
       lry_opt.push_back(e_lry);
-      //test
-      std::cout << "debug4" << std::endl;
       if(cut_to_cutline_opt.size()||cut_in_cutline_opt.size()||eoption_opt.size())
         extentReader.open(extent_opt[0],layer_opt,true);
-      //test
-      std::cout << "debug5" << std::endl;
     }
     else if(cx_opt.size()&&cy_opt.size()&&nx_opt.size()&&ny_opt.size()){
       ulx_opt[0]=cx_opt[0]-nx_opt[0]/2.0;
@@ -949,33 +935,33 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
 }
 
 CPLErr Jim::crop(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
-  Optionpk<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
+  Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
   //todo: support layer names
-  Optionpk<string>  layer_opt("ln", "ln", "layer name of extent to crop");
-  Optionpk<bool> cut_to_cutline_opt(
+  Optionjl<string>  layer_opt("ln", "ln", "layer name of extent to crop");
+  Optionjl<bool> cut_to_cutline_opt(
 "cut_to_cutline", "crop_to_cutline", "Crop the extent of the target dataset to the extent of the cutline, setting the outside area to nodata.",false);
-  Optionpk<bool> cut_in_cutline_opt("cut_in_cutline", "crop_in_cutline", "Crop the extent of the target dataset to the extent of the cutline, setting the inner area to nodata.",false);
-  Optionpk<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
-  Optionpk<double> msknodata_opt("msknodata", "msknodata", "Mask value not to consider for crop.", 0);
-  Optionpk<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box", 0.0);
-  Optionpk<double>  uly_opt("uly", "uly", "Upper left y value bounding box", 0.0);
-  Optionpk<double>  lrx_opt("lrx", "lrx", "Lower right x value bounding box", 0.0);
-  Optionpk<double>  lry_opt("lry", "lry", "Lower right y value bounding box", 0.0);
-  Optionpk<double>  dx_opt("dx", "dx", "Output resolution in x (in meter) (empty: keep original resolution)");
-  Optionpk<double>  dy_opt("dy", "dy", "Output resolution in y (in meter) (empty: keep original resolution)");
-  Optionpk<unsigned int>  band_opt("b", "band", "band index to crop (leave empty to retain all bands)");
-  Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
-  Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number");
-  Optionpk<double> autoscale_opt("as", "autoscale", "scale output to min and max, e.g., --autoscale 0 --autoscale 255");
-  Optionpk<double> scale_opt("scale", "scale", "output=scale*input+offset");
-  Optionpk<double> offset_opt("offset", "offset", "output=scale*input+offset");
-  Optionpk<string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
-  Optionpk<string>  colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
-  Optionpk<double>  nodata_opt("nodata", "nodata", "Nodata value to put in image if out of bounds.");
-  Optionpk<string>  resample_opt("r", "resampling-method", "Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).", "near");
-  Optionpk<string>  description_opt("d", "description", "Set image description");
-  Optionpk<bool>  align_opt("align", "align", "Align output bounding box to input image",false);
-  Optionpk<short>  verbose_opt("v", "verbose", "verbose", 0,2);
+  Optionjl<bool> cut_in_cutline_opt("cut_in_cutline", "crop_in_cutline", "Crop the extent of the target dataset to the extent of the cutline, setting the inner area to nodata.",false);
+  Optionjl<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
+  Optionjl<double> msknodata_opt("msknodata", "msknodata", "Mask value not to consider for crop.", 0);
+  Optionjl<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box", 0.0);
+  Optionjl<double>  uly_opt("uly", "uly", "Upper left y value bounding box", 0.0);
+  Optionjl<double>  lrx_opt("lrx", "lrx", "Lower right x value bounding box", 0.0);
+  Optionjl<double>  lry_opt("lry", "lry", "Lower right y value bounding box", 0.0);
+  Optionjl<double>  dx_opt("dx", "dx", "Output resolution in x (in meter) (empty: keep original resolution)");
+  Optionjl<double>  dy_opt("dy", "dy", "Output resolution in y (in meter) (empty: keep original resolution)");
+  Optionjl<unsigned int>  band_opt("b", "band", "band index to crop (leave empty to retain all bands)");
+  Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
+  Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
+  Optionjl<double> autoscale_opt("as", "autoscale", "scale output to min and max, e.g., --autoscale 0 --autoscale 255");
+  Optionjl<double> scale_opt("scale", "scale", "output=scale*input+offset");
+  Optionjl<double> offset_opt("offset", "offset", "output=scale*input+offset");
+  Optionjl<string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
+  Optionjl<string>  colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
+  Optionjl<double>  nodata_opt("nodata", "nodata", "Nodata value to put in image if out of bounds.");
+  Optionjl<string>  resample_opt("r", "resampling-method", "Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).", "near");
+  Optionjl<string>  description_opt("d", "description", "Set image description");
+  Optionjl<bool>  align_opt("align", "align", "Align output bounding box to input image",false);
+  Optionjl<short>  verbose_opt("v", "verbose", "verbose", 0,2);
 
   layer_opt.setHide(1);
   cut_to_cutline_opt.setHide(1);
@@ -1629,34 +1615,34 @@ CPLErr Jim::crop(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
  * @param app application options
  **/
 CPLErr Jim::cropDS(Jim& imgWriter, AppFactory& app){
-  Optionpk<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
-  Optionpk<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
+  Optionjl<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
+  Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
   //todo: support layer names
-  Optionpk<string>  extent_opt("e", "extent", "get boundary from extent from polygons in vector file");
-  Optionpk<string>  layer_opt("ln", "ln", "layer name of extent to crop");
-  Optionpk<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box", 0.0);
-  Optionpk<double>  uly_opt("uly", "uly", "Upper left y value bounding box", 0.0);
-  Optionpk<double>  lrx_opt("lrx", "lrx", "Lower right x value bounding box", 0.0);
-  Optionpk<double>  lry_opt("lry", "lry", "Lower right y value bounding box", 0.0);
-  Optionpk<double>  dx_opt("dx", "dx", "Output resolution in x (in meter) (empty: keep original resolution)");
-  Optionpk<double>  dy_opt("dy", "dy", "Output resolution in y (in meter) (empty: keep original resolution)");
-  Optionpk<double> cx_opt("x", "x", "x-coordinate of image center to crop (in meter)");
-  Optionpk<double> cy_opt("y", "y", "y-coordinate of image center to crop (in meter)");
-  Optionpk<double> nx_opt("nx", "nx", "image size in x to crop (in meter)");
-  Optionpk<double> ny_opt("ny", "ny", "image size in y to crop (in meter)");
-  Optionpk<unsigned int> ns_opt("ns", "ns", "number of samples  to crop (in pixels)");
-  Optionpk<unsigned int> nl_opt("nl", "nl", "number of lines to crop (in pixels)");
-  Optionpk<unsigned int>  band_opt("b", "band", "band index to crop (leave empty to retain all bands)");
-  Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
-  Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number");
-  Optionpk<string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
-  // Optionpk<string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
-  // Optionpk<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-  Optionpk<string>  colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
-  Optionpk<double>  nodata_opt("nodata", "nodata", "Nodata value to put in image if out of bounds.");
-  Optionpk<string>  description_opt("d", "description", "Set image description");
-  Optionpk<bool>  align_opt("align", "align", "Align output bounding box to input image",false);
-  Optionpk<short>  verbose_opt("v", "verbose", "verbose", 0,2);
+  Optionjl<string>  extent_opt("e", "extent", "get boundary from extent from polygons in vector file");
+  Optionjl<string>  layer_opt("ln", "ln", "layer name of extent to crop");
+  Optionjl<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box", 0.0);
+  Optionjl<double>  uly_opt("uly", "uly", "Upper left y value bounding box", 0.0);
+  Optionjl<double>  lrx_opt("lrx", "lrx", "Lower right x value bounding box", 0.0);
+  Optionjl<double>  lry_opt("lry", "lry", "Lower right y value bounding box", 0.0);
+  Optionjl<double>  dx_opt("dx", "dx", "Output resolution in x (in meter) (empty: keep original resolution)");
+  Optionjl<double>  dy_opt("dy", "dy", "Output resolution in y (in meter) (empty: keep original resolution)");
+  Optionjl<double> cx_opt("x", "x", "x-coordinate of image center to crop (in meter)");
+  Optionjl<double> cy_opt("y", "y", "y-coordinate of image center to crop (in meter)");
+  Optionjl<double> nx_opt("nx", "nx", "image size in x to crop (in meter)");
+  Optionjl<double> ny_opt("ny", "ny", "image size in y to crop (in meter)");
+  Optionjl<unsigned int> ns_opt("ns", "ns", "number of samples  to crop (in pixels)");
+  Optionjl<unsigned int> nl_opt("nl", "nl", "number of lines to crop (in pixels)");
+  Optionjl<unsigned int>  band_opt("b", "band", "band index to crop (leave empty to retain all bands)");
+  Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
+  Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
+  Optionjl<string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
+  // Optionjl<string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
+  // Optionjl<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<string>  colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
+  Optionjl<double>  nodata_opt("nodata", "nodata", "Nodata value to put in image if out of bounds.");
+  Optionjl<string>  description_opt("d", "description", "Set image description");
+  Optionjl<bool>  align_opt("align", "align", "Align output bounding box to input image",false);
+  Optionjl<short>  verbose_opt("v", "verbose", "verbose", 0,2);
 
   extent_opt.setHide(1);
   layer_opt.setHide(1);
@@ -2213,43 +2199,43 @@ shared_ptr<Jim> JimList::crop(AppFactory& app){
  **/
 //todo: support extent a VectorOgr argument instead of option in app
  JimList& JimList::crop(Jim& imgWriter, AppFactory& app){
-   Optionpk<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
+   Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
    //todo: support layer names
-   Optionpk<string>  extent_opt("e", "extent", "get boundary from extent from polygons in vector file");
-   Optionpk<string>  layer_opt("ln", "ln", "layer name of extent to crop");
-   Optionpk<bool> cut_to_cutline_opt("cut_to_cutline", "crop_to_cutline", "Crop the extent of the target dataset to the extent of the cutline, setting the outside area to nodata.",false);
-   Optionpk<bool> cut_in_cutline_opt("cut_in_cutline", "crop_in_cutline", "Crop the extent of the target dataset to the extent of the cutline, setting the inner area to nodata.",false);
-   Optionpk<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
-   Optionpk<string> mask_opt("m", "mask", "Use the the specified file as a validity mask (0 is nodata).");
-   Optionpk<double> msknodata_opt("msknodata", "msknodata", "Mask value not to consider for crop.", 0);
-   Optionpk<unsigned int> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed)", 0);
-   Optionpk<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box", 0.0);
-   Optionpk<double>  uly_opt("uly", "uly", "Upper left y value bounding box", 0.0);
-   Optionpk<double>  lrx_opt("lrx", "lrx", "Lower right x value bounding box", 0.0);
-   Optionpk<double>  lry_opt("lry", "lry", "Lower right y value bounding box", 0.0);
-   Optionpk<double>  dx_opt("dx", "dx", "Output resolution in x (in meter) (empty: keep original resolution)");
-   Optionpk<double>  dy_opt("dy", "dy", "Output resolution in y (in meter) (empty: keep original resolution)");
-   Optionpk<double> cx_opt("x", "x", "x-coordinate of image center to crop (in meter)");
-   Optionpk<double> cy_opt("y", "y", "y-coordinate of image center to crop (in meter)");
-   Optionpk<double> nx_opt("nx", "nx", "image size in x to crop (in meter)");
-   Optionpk<double> ny_opt("ny", "ny", "image size in y to crop (in meter)");
-   Optionpk<unsigned int> ns_opt("ns", "ns", "number of samples  to crop (in pixels)");
-   Optionpk<unsigned int> nl_opt("nl", "nl", "number of lines to crop (in pixels)");
-   Optionpk<unsigned int>  band_opt("b", "band", "band index to crop (leave empty to retain all bands)");
-   Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
-   Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number");
-   Optionpk<double> autoscale_opt("as", "autoscale", "scale output to min and max, e.g., --autoscale 0 --autoscale 255");
-   Optionpk<double> scale_opt("scale", "scale", "output=scale*input+offset");
-   Optionpk<double> offset_opt("offset", "offset", "output=scale*input+offset");
-   Optionpk<string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
-   // Optionpk<string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
-   // Optionpk<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-   Optionpk<string>  colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
-   Optionpk<double>  nodata_opt("nodata", "nodata", "Nodata value to put in image if out of bounds.");
-   Optionpk<string>  resample_opt("r", "resample", "Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).", "near");
-   Optionpk<string>  description_opt("d", "description", "Set image description");
-   Optionpk<bool>  align_opt("align", "align", "Align output bounding box to input image",false);
-   Optionpk<short>  verbose_opt("v", "verbose", "verbose", 0,2);
+   Optionjl<string>  extent_opt("e", "extent", "get boundary from extent from polygons in vector file");
+   Optionjl<string>  layer_opt("ln", "ln", "layer name of extent to crop");
+   Optionjl<bool> cut_to_cutline_opt("cut_to_cutline", "crop_to_cutline", "Crop the extent of the target dataset to the extent of the cutline, setting the outside area to nodata.",false);
+   Optionjl<bool> cut_in_cutline_opt("cut_in_cutline", "crop_in_cutline", "Crop the extent of the target dataset to the extent of the cutline, setting the inner area to nodata.",false);
+   Optionjl<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
+   Optionjl<string> mask_opt("m", "mask", "Use the the specified file as a validity mask (0 is nodata).");
+   Optionjl<double> msknodata_opt("msknodata", "msknodata", "Mask value not to consider for crop.", 0);
+   Optionjl<unsigned int> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed)", 0);
+   Optionjl<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box", 0.0);
+   Optionjl<double>  uly_opt("uly", "uly", "Upper left y value bounding box", 0.0);
+   Optionjl<double>  lrx_opt("lrx", "lrx", "Lower right x value bounding box", 0.0);
+   Optionjl<double>  lry_opt("lry", "lry", "Lower right y value bounding box", 0.0);
+   Optionjl<double>  dx_opt("dx", "dx", "Output resolution in x (in meter) (empty: keep original resolution)");
+   Optionjl<double>  dy_opt("dy", "dy", "Output resolution in y (in meter) (empty: keep original resolution)");
+   Optionjl<double> cx_opt("x", "x", "x-coordinate of image center to crop (in meter)");
+   Optionjl<double> cy_opt("y", "y", "y-coordinate of image center to crop (in meter)");
+   Optionjl<double> nx_opt("nx", "nx", "image size in x to crop (in meter)");
+   Optionjl<double> ny_opt("ny", "ny", "image size in y to crop (in meter)");
+   Optionjl<unsigned int> ns_opt("ns", "ns", "number of samples  to crop (in pixels)");
+   Optionjl<unsigned int> nl_opt("nl", "nl", "number of lines to crop (in pixels)");
+   Optionjl<unsigned int>  band_opt("b", "band", "band index to crop (leave empty to retain all bands)");
+   Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
+   Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
+   Optionjl<double> autoscale_opt("as", "autoscale", "scale output to min and max, e.g., --autoscale 0 --autoscale 255");
+   Optionjl<double> scale_opt("scale", "scale", "output=scale*input+offset");
+   Optionjl<double> offset_opt("offset", "offset", "output=scale*input+offset");
+   Optionjl<string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
+   // Optionjl<string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
+   // Optionjl<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+   Optionjl<string>  colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
+   Optionjl<double>  nodata_opt("nodata", "nodata", "Nodata value to put in image if out of bounds.");
+   Optionjl<string>  resample_opt("r", "resample", "Resampling method (near: nearest neighbor, bilinear: bi-linear interpolation).", "near");
+   Optionjl<string>  description_opt("d", "description", "Set image description");
+   Optionjl<bool>  align_opt("align", "align", "Align output bounding box to input image",false);
+   Optionjl<short>  verbose_opt("v", "verbose", "verbose", 0,2);
 
    extent_opt.setHide(1);
    layer_opt.setHide(1);

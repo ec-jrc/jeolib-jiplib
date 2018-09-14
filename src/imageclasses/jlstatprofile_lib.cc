@@ -1,5 +1,5 @@
 /**********************************************************************
-pkstatprofile_lib.cc: program to calculate statistics in temporal or spectral profile
+jlstatprofile_lib.cc: program to calculate statistics in temporal or spectral profile
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -24,7 +24,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <math.h>
 #include <sys/types.h>
 #include <stdio.h>
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "base/Vector2d.h"
 #include "algorithms/Filter2d.h"
 #include "algorithms/Filter.h"
@@ -58,13 +58,13 @@ shared_ptr<Jim> JimList::statProfile(app::AppFactory& app){
  * @return CE_None if successful, CE_Failure if failed
  **/
 CPLErr JimList::statProfile(Jim& imgWriter, app::AppFactory& app){
-  Optionpk<std::string> function_opt("f", "function", "Statistics function (mean, median, var, stdev, min, max, sum, mode (provide classes), minindex, maxindex, proportion (provide classes), percentile, nvalid");
-  Optionpk<double> percentile_opt("perc","perc","Percentile value(s) used for rule percentile",90);
-  // Optionpk<short> class_opt("class", "class", "class value(s) to use for mode, proportion");
-  Optionpk<double> nodata_opt("nodata", "nodata", "nodata value");
-  Optionpk<std::string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image","GDT_Unknown");
-  // Optionpk<short> down_opt("d", "down", "down sampling factor. Use value 1 for no downsampling). Use value n>1 for downsampling (aggregation)", 1);
-  Optionpk<short> verbose_opt("v", "verbose", "verbose mode if > 0", 0,2);
+  Optionjl<std::string> function_opt("f", "function", "Statistics function (mean, median, var, stdev, min, max, sum, mode (provide classes), minindex, maxindex, proportion (provide classes), percentile, nvalid");
+  Optionjl<double> percentile_opt("perc","perc","Percentile value(s) used for rule percentile",90);
+  // Optionjl<short> class_opt("class", "class", "class value(s) to use for mode, proportion");
+  Optionjl<double> nodata_opt("nodata", "nodata", "nodata value");
+  Optionjl<std::string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image","GDT_Unknown");
+  // Optionjl<short> down_opt("d", "down", "down sampling factor. Use value 1 for no downsampling). Use value n>1 for downsampling (aggregation)", 1);
+  Optionjl<short> verbose_opt("v", "verbose", "verbose mode if > 0", 0,2);
 
   // percentile_opt.setHide(1);
   // class_opt.setHide(1);
@@ -295,13 +295,13 @@ shared_ptr<Jim> Jim::statProfile(app::AppFactory& app){
  * @return CE_None if successful, CE_Failure if failed
  **/
 CPLErr Jim::statProfile(Jim& imgWriter, app::AppFactory& app){
-  Optionpk<std::string> function_opt("f", "function", "Statistics function (mean, median, var, stdev, min, max, sum, mode, minindex, maxindex, proportion (provide classes), percentile, nvalid");
-  Optionpk<double> percentile_opt("perc","perc","Percentile value(s) used for rule percentile",90);
-  // Optionpk<short> class_opt("class", "class", "class value(s) to use for mode, proportion");
-  Optionpk<double> nodata_opt("nodata", "nodata", "nodata value)");
-  Optionpk<std::string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image","GDT_Unknown");
-  // Optionpk<short> down_opt("d", "down", "down sampling factor. Use value 1 for no downsampling). Use value n>1 for downsampling (aggregation)", 1);
-  Optionpk<short> verbose_opt("v", "verbose", "verbose mode if > 0", 0,2);
+  Optionjl<std::string> function_opt("f", "function", "Statistics function (mean, median, var, stdev, min, max, sum, mode, minindex, maxindex, proportion (provide classes), percentile, nvalid");
+  Optionjl<double> percentile_opt("perc","perc","Percentile value(s) used for rule percentile",90);
+  // Optionjl<short> class_opt("class", "class", "class value(s) to use for mode, proportion");
+  Optionjl<double> nodata_opt("nodata", "nodata", "nodata value)");
+  Optionjl<std::string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image","GDT_Unknown");
+  // Optionjl<short> down_opt("d", "down", "down sampling factor. Use value 1 for no downsampling). Use value n>1 for downsampling (aggregation)", 1);
+  Optionjl<short> verbose_opt("v", "verbose", "verbose mode if > 0", 0,2);
 
   // percentile_opt.setHide(1);
   // class_opt.setHide(1);

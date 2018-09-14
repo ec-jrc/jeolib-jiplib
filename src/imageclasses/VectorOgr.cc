@@ -19,7 +19,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #include <unordered_map>
 #include "VectorOgr.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 
 using namespace std;
 using namespace statfactory;
@@ -257,16 +257,16 @@ OGRErr VectorOgr::open(const std::string& filename, const std::vector<std::strin
 
 ///open vector dataset for reading/writing
 OGRErr VectorOgr::open(app::AppFactory& app){
-  Optionpk<std::string> filename_opt("fn", "filename", "filename");
-  Optionpk<std::string> layer_opt("ln", "ln", "Layer name");
-  Optionpk<std::string> projection_opt("a_srs", "a_srs", "Assign projection");
-  Optionpk<std::string> geometryType_opt("gtype", "gtype", "Geometry type","wkbUnknown");
-  Optionpk<std::string> options_opt("co", "co", "format dependent options controlling creation of the output file");
-  Optionpk<std::string> ogrformat_opt("f", "oformat", "Output sample dataset format","SQLite");
-  Optionpk<unsigned int> access_opt("access", "access", "Access (0: GDAL_OF_READ_ONLY, 1: GDAL_OF_UPDATE)",0);
-  Optionpk<bool> noread_opt("noread", "noread", "do not read features when opening)",false);
-  Optionpk<std::string> attributeFilter_opt("af", "attributeFilter", "attribute filter");
-  Optionpk<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
+  Optionjl<std::string> filename_opt("fn", "filename", "filename");
+  Optionjl<std::string> layer_opt("ln", "ln", "Layer name");
+  Optionjl<std::string> projection_opt("a_srs", "a_srs", "Assign projection");
+  Optionjl<std::string> geometryType_opt("gtype", "gtype", "Geometry type","wkbUnknown");
+  Optionjl<std::string> options_opt("co", "co", "format dependent options controlling creation of the output file");
+  Optionjl<std::string> ogrformat_opt("f", "oformat", "Output sample dataset format","SQLite");
+  Optionjl<unsigned int> access_opt("access", "access", "Access (0: GDAL_OF_READ_ONLY, 1: GDAL_OF_UPDATE)",0);
+  Optionjl<bool> noread_opt("noread", "noread", "do not read features when opening)",false);
+  Optionjl<std::string> attributeFilter_opt("af", "attributeFilter", "attribute filter");
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
@@ -581,7 +581,7 @@ OGRErr VectorOgr::pushLayer(const std::string& layername, const std::string& the
 ///perform a deep copy, including layers and features
 OGRErr VectorOgr::copy(VectorOgr& other, app::AppFactory &app){
   char **papszOptions=NULL;
-  Optionpk<std::string> options_opt("co", "co", "format dependent options controlling creation of the output file");
+  Optionjl<std::string> options_opt("co", "co", "format dependent options controlling creation of the output file");
   options_opt.retrieveOption(app);
   for(std::vector<std::string>::const_iterator optionIt=options_opt.begin();optionIt!=options_opt.end();++optionIt)
     papszOptions=CSLAddString(papszOptions,optionIt->c_str());
@@ -950,13 +950,13 @@ size_t VectorOgr::serialize(vector<unsigned char> &vbytes){
 
 ///joins two VectorOgr based on key value
 OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFactory& app){
-  Optionpk<string> output_opt("o", "output", "Filename of joined vector dataset");
-  Optionpk<string> ogrformat_opt("f", "f", "Output ogr format for joined vector dataset","SQLite");
-  Optionpk<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-  Optionpk<unsigned int> access_opt("access", "access", "Access (0: GDAL_OF_READ_ONLY, 1: GDAL_OF_UPDATE)",1);
-  Optionpk<std::string> key_opt("key", "key", "Key(s) used to join", "fid");
-  Optionpk<std::string> method_opt("method", "method", "Join method (INNER, OUTER_LEFT, OUTER_RIGHT, OUTER_FULL)", "INNER");
-  Optionpk<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
+  Optionjl<string> output_opt("o", "output", "Filename of joined vector dataset");
+  Optionjl<string> ogrformat_opt("f", "f", "Output ogr format for joined vector dataset","SQLite");
+  Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<unsigned int> access_opt("access", "access", "Access (0: GDAL_OF_READ_ONLY, 1: GDAL_OF_UPDATE)",1);
+  Optionjl<std::string> key_opt("key", "key", "Key(s) used to join", "fid");
+  Optionjl<std::string> method_opt("method", "method", "Join method (INNER, OUTER_LEFT, OUTER_RIGHT, OUTER_FULL)", "INNER");
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
@@ -1622,12 +1622,12 @@ bool VectorOgr::transform(OGREnvelope *pEnv, OGRCoordinateTransformation *poCT){
 
 ///static function to join
 // OGRErr VectorOgr::join(VectorOgr &ogrReader1, VectorOgr &ogrReader2, VectorOgr &ogrWriter, app::AppFactory& app){
-//   Optionpk<string> output_opt("o", "output", "Filename of joined vector dataset");
-//   Optionpk<string> ogrformat_opt("f", "f", "Output ogr format for joined vector dataset","SQLite");
-//   Optionpk<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-//   Optionpk<std::string> key_opt("key", "key", "Key(s) used to join", "fid");
-//   Optionpk<std::string> method_opt("method", "method", "Join method (INNER, OUTER_LEFT, OUTER_RIGHT, OUTER_FULL)", "INNER");
-//   Optionpk<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
+//   Optionjl<string> output_opt("o", "output", "Filename of joined vector dataset");
+//   Optionjl<string> ogrformat_opt("f", "f", "Output ogr format for joined vector dataset","SQLite");
+//   Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+//   Optionjl<std::string> key_opt("key", "key", "Key(s) used to join", "fid");
+//   Optionjl<std::string> method_opt("method", "method", "Join method (INNER, OUTER_LEFT, OUTER_RIGHT, OUTER_FULL)", "INNER");
+//   Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
 
 //   bool doProcess;//stop process when program was invoked with help option (-h --help)
 //   try{

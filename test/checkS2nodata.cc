@@ -5,7 +5,7 @@ History
 Change log
 ***********************************************************************/
 #include <memory>
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "algorithms/Filter2d.h"
 #include "apps/AppFactory.h"
 #include "imageclasses/ImgCollection.h"
@@ -16,9 +16,9 @@ using namespace jiplib;
 
 int main(int argc, char *argv[])
 {
-Optionpk<string>  input_opt("i", "input", "Input image file(s). If input contains multiple images, a multi-band output is created");
-  Optionpk<unsigned short>  nodata_opt("nodata", "nodata", "Nodata value to check in image.",0);
-  Optionpk<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+Optionjl<string>  input_opt("i", "input", "Input image file(s). If input contains multiple images, a multi-band output is created");
+  Optionjl<unsigned short>  nodata_opt("nodata", "nodata", "Nodata value to check in image.",0);
+  Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
 
   memory_opt.setHide(1);
 

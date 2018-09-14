@@ -1,5 +1,5 @@
 /**********************************************************************
-pkreclass_lib.cc: program to replace categorical pixel values in raster dataset
+jlreclass_lib.cc: program to replace categorical pixel values in raster dataset
 Copyright (C) 2008-2018 Pieter Kempeneers
 
 This file is part of pktools
@@ -19,7 +19,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #include <assert.h>
 #include <map>
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "imageclasses/Jim.h"
 #include "apps/AppFactory.h"
 
@@ -41,18 +41,18 @@ shared_ptr<Jim> Jim::reclass(app::AppFactory& app){
  * @return CE_None if successful, CE_Failure if failed
  **/
 CPLErr Jim::reclass(Jim& imgWriter, app::AppFactory& app){
-  Optionpk<string> mask_opt("m", "mask", "Mask image(s)");
-  Optionpk<unsigned short> masknodata_opt("msknodata", "msknodata", "Mask value(s) where image has nodata. Use one value for each mask, or multiple values for a single mask.", 1);
-  Optionpk<int> nodata_opt("nodata", "nodata", "nodata value to put in image if not valid (0)", 0);
-  Optionpk<string> colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
-  Optionpk<unsigned short>  band_opt("b", "band", "band index(es) to replace (other bands are copied to output)", 0);
-  Optionpk<string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image", "");
-  Optionpk<string> code_opt("code", "code", "Recode text file (2 columns: from to)");
-  Optionpk<string> class_opt("c", "class", "list of classes to reclass (in combination with reclass option)");
-  Optionpk<string> reclass_opt("r", "reclass", "list of recoded classes (in combination with class option)");
-  // Optionpk<string> fieldname_opt("n", "fname", "field name of the shape file to be replaced", "label");
-  // Optionpk<string> description_opt("d", "description", "Set image description");
-  Optionpk<short> verbose_opt("v", "verbose", "verbose", 0);
+  Optionjl<string> mask_opt("m", "mask", "Mask image(s)");
+  Optionjl<unsigned short> masknodata_opt("msknodata", "msknodata", "Mask value(s) where image has nodata. Use one value for each mask, or multiple values for a single mask.", 1);
+  Optionjl<int> nodata_opt("nodata", "nodata", "nodata value to put in image if not valid (0)", 0);
+  Optionjl<string> colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
+  Optionjl<unsigned short>  band_opt("b", "band", "band index(es) to replace (other bands are copied to output)", 0);
+  Optionjl<string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image", "");
+  Optionjl<string> code_opt("code", "code", "Recode text file (2 columns: from to)");
+  Optionjl<string> class_opt("c", "class", "list of classes to reclass (in combination with reclass option)");
+  Optionjl<string> reclass_opt("r", "reclass", "list of recoded classes (in combination with class option)");
+  // Optionjl<string> fieldname_opt("n", "fname", "field name of the shape file to be replaced", "label");
+  // Optionjl<string> description_opt("d", "description", "Set image description");
+  Optionjl<short> verbose_opt("v", "verbose", "verbose", 0);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{

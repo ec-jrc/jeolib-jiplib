@@ -1,5 +1,5 @@
 /**********************************************************************
-pkextractogr_lib.cc: extract pixel values from raster image from a vector sample
+jlextractogr_lib.cc: extract pixel values from raster image from a vector sample
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -29,7 +29,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <ogr_geometry.h>
 #include "imageclasses/Jim.h"
 #include "imageclasses/VectorOgr.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "algorithms/StatFactory.h"
 #include "apps/AppFactory.h"
 
@@ -79,39 +79,39 @@ shared_ptr<VectorOgr> Jim::extractSample(AppFactory& app){
 //output vector ogrWriter will take spatial reference system of input vector sampleReader
 // make sure to setSpatialFilterRect on vector before entering here
 CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory& app){
-  // Optionpk<string> image_opt("i", "input", "Raster input dataset containing band information");
-  // Optionpk<string> sample_opt("s", "sample", "OGR vector dataset with features to be extracted from input data. Output will contain features with input band information included.");
-  // Optionpk<string> layer_opt("ln", "ln", "Layer name(s) in sample (leave empty to select all)");
-  // Optionpk<unsigned int> random_opt("rand", "random", "Create simple random sample of points. Provide number of points to generate");
-  // Optionpk<double> grid_opt("grid", "grid", "Create systematic grid of points. Provide cell grid size (in projected units, e.g,. m)");
-  Optionpk<string> output_opt("o", "output", "Output sample dataset");
-  Optionpk<int> label_opt("label", "label", "Create extra label field with this value");
-  Optionpk<std::string> fid_opt("fid", "fid", "Create extra field with field identifier (sequence in which the features have been read");
-  Optionpk<string> copyFields_opt("copy", "copy", "Restrict these fields only to copy from input to output vector dataset (default is to copy all fields)");
-  Optionpk<int> class_opt("c", "class", "Class(es) in input raster dataset t take into account for the rules mode, proportion and count");
-  Optionpk<float> threshold_opt("t", "threshold", "Probability threshold for selecting samples (randomly). Provide probability in percentage (>0) or absolute (<0). Use a single threshold per vector sample layer.  Use value 100 to select all pixels for selected class(es)", 100);
-  Optionpk<double> percentile_opt("perc","perc","Percentile value(s) used for rule percentile",95);
-  Optionpk<string> ogrformat_opt("f", "oformat", "Output vector dataset format","SQLite");
-  Optionpk<unsigned int> access_opt("access", "access", "Access (0: GDAL_OF_READ_ONLY, 1: GDAL_OF_UPDATE)",1);
-  Optionpk<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-  Optionpk<string> ftype_opt("ft", "ftype", "Field type (only Real or Integer)", "Real");
-  Optionpk<int> band_opt("b", "band", "Band index(es) to extract (0 based). Leave empty to use all bands");
-  Optionpk<std::string> bandNames_opt("bn", "bandname", "Band name(s) corresponding to band index(es).");
-  Optionpk<unsigned short> bstart_opt("sband", "startband", "Start band sequence number");
-  Optionpk<unsigned short> bend_opt("eband", "endband", "End band sequence number");
-  Optionpk<string> rule_opt("r", "rule", "Rule how to report image information per feature. point (single point within polygon), allpoints (all points within polygon), centroid, mean, stdev, median, proportion, count, min, max, mode, sum, percentile.","centroid");
-  Optionpk<double> srcnodata_opt("srcnodata", "srcnodata", "Invalid value(s) for input image");
-  Optionpk<int> bndnodata_opt("bndnodata", "bndnodata", "Band(s) in input image to check if pixel is valid (used for srcnodata)", 0);
-  Optionpk<string> mask_opt("m", "mask", "Use the the specified file as a validity mask (0 is nodata).");
-  Optionpk<double> msknodata_opt("msknodata", "msknodata", "Mask value not to extract.", 0);
-  Optionpk<unsigned int> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed)", 0);
-  Optionpk<float> polythreshold_opt("tp", "thresholdPolygon", "(absolute) threshold for selecting samples in each polygon");
-  Optionpk<short> buffer_opt("buf", "buffer", "Buffer for calculating statistics for point features (in number of pixels) ",0);
-  Optionpk<bool> disc_opt("circ", "circular", "Use a circular disc kernel buffer (for vector point sample datasets only, use in combination with buffer option)", false);
-  Optionpk<bool> allCovered_opt("ac", "all_covered", "Set this flag to include only those polygons that are entirely covered by the raster", false);
-  Optionpk<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
-  Optionpk<int> s_srs_opt("s_srs", "s_srs", "Spatial reference system of vector dataset (in EPSG)");
-  Optionpk<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
+  // Optionjl<string> image_opt("i", "input", "Raster input dataset containing band information");
+  // Optionjl<string> sample_opt("s", "sample", "OGR vector dataset with features to be extracted from input data. Output will contain features with input band information included.");
+  // Optionjl<string> layer_opt("ln", "ln", "Layer name(s) in sample (leave empty to select all)");
+  // Optionjl<unsigned int> random_opt("rand", "random", "Create simple random sample of points. Provide number of points to generate");
+  // Optionjl<double> grid_opt("grid", "grid", "Create systematic grid of points. Provide cell grid size (in projected units, e.g,. m)");
+  Optionjl<string> output_opt("o", "output", "Output sample dataset");
+  Optionjl<int> label_opt("label", "label", "Create extra label field with this value");
+  Optionjl<std::string> fid_opt("fid", "fid", "Create extra field with field identifier (sequence in which the features have been read");
+  Optionjl<string> copyFields_opt("copy", "copy", "Restrict these fields only to copy from input to output vector dataset (default is to copy all fields)");
+  Optionjl<int> class_opt("c", "class", "Class(es) in input raster dataset t take into account for the rules mode, proportion and count");
+  Optionjl<float> threshold_opt("t", "threshold", "Probability threshold for selecting samples (randomly). Provide probability in percentage (>0) or absolute (<0). Use a single threshold per vector sample layer.  Use value 100 to select all pixels for selected class(es)", 100);
+  Optionjl<double> percentile_opt("perc","perc","Percentile value(s) used for rule percentile",95);
+  Optionjl<string> ogrformat_opt("f", "oformat", "Output vector dataset format","SQLite");
+  Optionjl<unsigned int> access_opt("access", "access", "Access (0: GDAL_OF_READ_ONLY, 1: GDAL_OF_UPDATE)",1);
+  Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<string> ftype_opt("ft", "ftype", "Field type (only Real or Integer)", "Real");
+  Optionjl<int> band_opt("b", "band", "Band index(es) to extract (0 based). Leave empty to use all bands");
+  Optionjl<std::string> bandNames_opt("bn", "bandname", "Band name(s) corresponding to band index(es).");
+  Optionjl<unsigned short> bstart_opt("sband", "startband", "Start band sequence number");
+  Optionjl<unsigned short> bend_opt("eband", "endband", "End band sequence number");
+  Optionjl<string> rule_opt("r", "rule", "Rule how to report image information per feature. point (single point within polygon), allpoints (all points within polygon), centroid, mean, stdev, median, proportion, count, min, max, mode, sum, percentile.","centroid");
+  Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Invalid value(s) for input image");
+  Optionjl<int> bndnodata_opt("bndnodata", "bndnodata", "Band(s) in input image to check if pixel is valid (used for srcnodata)", 0);
+  Optionjl<string> mask_opt("m", "mask", "Use the the specified file as a validity mask (0 is nodata).");
+  Optionjl<double> msknodata_opt("msknodata", "msknodata", "Mask value not to extract.", 0);
+  Optionjl<unsigned int> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed)", 0);
+  Optionjl<float> polythreshold_opt("tp", "thresholdPolygon", "(absolute) threshold for selecting samples in each polygon");
+  Optionjl<short> buffer_opt("buf", "buffer", "Buffer for calculating statistics for point features (in number of pixels) ",0);
+  Optionjl<bool> disc_opt("circ", "circular", "Use a circular disc kernel buffer (for vector point sample datasets only, use in combination with buffer option)", false);
+  Optionjl<bool> allCovered_opt("ac", "all_covered", "Set this flag to include only those polygons that are entirely covered by the raster", false);
+  Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+  Optionjl<int> s_srs_opt("s_srs", "s_srs", "Spatial reference system of vector dataset (in EPSG)");
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
 
   bstart_opt.setHide(1);
   bend_opt.setHide(1);
@@ -2259,36 +2259,36 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
  */
 //todo: support multiple layers for writing
 CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
-  // Optionpk<string> image_opt("i", "input", "Raster input dataset containing band information");
-  // Optionpk<string> sample_opt("s", "sample", "OGR vector dataset with features to be extracted from input data. Output will contain features with input band information included.");
-  Optionpk<string> layer_opt("ln", "ln", "Layer name of output vector dataset");
-  Optionpk<unsigned int> random_opt("rand", "random", "Create simple random sample of points. Provide number of points to generate");
-  Optionpk<double> grid_opt("grid", "grid", "Create systematic grid of points. Provide cell grid size (in projected units, e.g,. m)");
-  Optionpk<string> output_opt("o", "output", "Output sample dataset");
-  Optionpk<int> label_opt("label", "label", "Create extra label field with this value");
-  Optionpk<std::string> fid_opt("fid", "fid", "Create extra field with field identifier (sequence in which the features have been read");
-  Optionpk<int> class_opt("c", "class", "Class(es) to extract from input sample image. Leave empty to extract all valid data pixels from sample dataset. Make sure to set classes if rule is set to mode, proportion or count");
-  Optionpk<float> threshold_opt("t", "threshold", "Probability threshold for selecting samples (randomly). Provide probability in percentage (>0) or absolute (<0). Use a single threshold per vector sample layer.  Use value 100 to select all pixels for selected class(es)", 100);
-  Optionpk<double> percentile_opt("perc","perc","Percentile value(s) used for rule percentile",95);
-  Optionpk<string> ogrformat_opt("f", "oformat", "Output sample dataset format","SQLite");
-  Optionpk<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-  Optionpk<string> ftype_opt("ft", "ftype", "Field type (only Real or Integer)", "Real");
-  Optionpk<int> band_opt("b", "band", "Band index(es) to extract (0 based). Leave empty to use all bands");
-  Optionpk<std::string> bandNames_opt("bn", "bandname", "Band name(s) corresponding to band index(es). Leave empty to use all bands");
-  Optionpk<unsigned short> bstart_opt("sband", "startband", "Start band sequence number");
-  Optionpk<unsigned short> bend_opt("eband", "endband", "End band sequence number");
-  Optionpk<string> rule_opt("r", "rule", "Rule how to report image information per feature. point (single point within polygon), allpoints (all points within polygon), centroid, mean, stdev, median, proportion, count, min, max, mode, sum, percentile.","centroid");
-  Optionpk<double> srcnodata_opt("srcnodata", "srcnodata", "Invalid value(s) for input image");
-  Optionpk<int> bndnodata_opt("bndnodata", "bndnodata", "Band(s) in input image to check if pixel is valid (used for srcnodata)", 0);
-  Optionpk<string> mask_opt("m", "mask", "Use the the specified file as a validity mask (0 is nodata).");
-  Optionpk<double> msknodata_opt("msknodata", "msknodata", "Mask value not to consider for crop.", 0);
-  Optionpk<unsigned int> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed)", 0);
-  Optionpk<float> polythreshold_opt("tp", "thresholdPolygon", "(absolute) threshold for selecting samples in each polygon");
-  Optionpk<short> buffer_opt("buf", "buffer", "Buffer for calculating statistics for point features (in number of pixels) ",0);
-  Optionpk<bool> disc_opt("circ", "circular", "Use a circular disc kernel buffer (for vector point sample datasets only, use in combination with buffer option)", false);
-  Optionpk<bool> allCovered_opt("ac", "all_covered", "Set this flag to include only those polygons that are entirely covered by the raster", false);
-  Optionpk<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
-  Optionpk<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
+  // Optionjl<string> image_opt("i", "input", "Raster input dataset containing band information");
+  // Optionjl<string> sample_opt("s", "sample", "OGR vector dataset with features to be extracted from input data. Output will contain features with input band information included.");
+  Optionjl<string> layer_opt("ln", "ln", "Layer name of output vector dataset");
+  Optionjl<unsigned int> random_opt("rand", "random", "Create simple random sample of points. Provide number of points to generate");
+  Optionjl<double> grid_opt("grid", "grid", "Create systematic grid of points. Provide cell grid size (in projected units, e.g,. m)");
+  Optionjl<string> output_opt("o", "output", "Output sample dataset");
+  Optionjl<int> label_opt("label", "label", "Create extra label field with this value");
+  Optionjl<std::string> fid_opt("fid", "fid", "Create extra field with field identifier (sequence in which the features have been read");
+  Optionjl<int> class_opt("c", "class", "Class(es) to extract from input sample image. Leave empty to extract all valid data pixels from sample dataset. Make sure to set classes if rule is set to mode, proportion or count");
+  Optionjl<float> threshold_opt("t", "threshold", "Probability threshold for selecting samples (randomly). Provide probability in percentage (>0) or absolute (<0). Use a single threshold per vector sample layer.  Use value 100 to select all pixels for selected class(es)", 100);
+  Optionjl<double> percentile_opt("perc","perc","Percentile value(s) used for rule percentile",95);
+  Optionjl<string> ogrformat_opt("f", "oformat", "Output sample dataset format","SQLite");
+  Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<string> ftype_opt("ft", "ftype", "Field type (only Real or Integer)", "Real");
+  Optionjl<int> band_opt("b", "band", "Band index(es) to extract (0 based). Leave empty to use all bands");
+  Optionjl<std::string> bandNames_opt("bn", "bandname", "Band name(s) corresponding to band index(es). Leave empty to use all bands");
+  Optionjl<unsigned short> bstart_opt("sband", "startband", "Start band sequence number");
+  Optionjl<unsigned short> bend_opt("eband", "endband", "End band sequence number");
+  Optionjl<string> rule_opt("r", "rule", "Rule how to report image information per feature. point (single point within polygon), allpoints (all points within polygon), centroid, mean, stdev, median, proportion, count, min, max, mode, sum, percentile.","centroid");
+  Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Invalid value(s) for input image");
+  Optionjl<int> bndnodata_opt("bndnodata", "bndnodata", "Band(s) in input image to check if pixel is valid (used for srcnodata)", 0);
+  Optionjl<string> mask_opt("m", "mask", "Use the the specified file as a validity mask (0 is nodata).");
+  Optionjl<double> msknodata_opt("msknodata", "msknodata", "Mask value not to consider for crop.", 0);
+  Optionjl<unsigned int> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed)", 0);
+  Optionjl<float> polythreshold_opt("tp", "thresholdPolygon", "(absolute) threshold for selecting samples in each polygon");
+  Optionjl<short> buffer_opt("buf", "buffer", "Buffer for calculating statistics for point features (in number of pixels) ",0);
+  Optionjl<bool> disc_opt("circ", "circular", "Use a circular disc kernel buffer (for vector point sample datasets only, use in combination with buffer option)", false);
+  Optionjl<bool> allCovered_opt("ac", "all_covered", "Set this flag to include only those polygons that are entirely covered by the raster", false);
+  Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
 
   bstart_opt.setHide(1);
   bend_opt.setHide(1);
@@ -4334,9 +4334,9 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
 //todo: extract each Jim individually and store in tmpWriter and then join the tmpWriter in ogrWriter if different number of bands (or this is behavior of ImgMultiList?)
 CPLErr JimList::extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, AppFactory& app){
 
-  Optionpk<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
-  Optionpk<std::string> combine_opt("combine", "combine", "Combine results of extract by append or join (default is append)","append");
-  Optionpk<std::string> bandNames_opt("bn", "bandname", "Band name(s) corresponding to band index(es).");
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
+  Optionjl<std::string> combine_opt("combine", "combine", "Combine results of extract by append or join (default is append)","append");
+  Optionjl<std::string> bandNames_opt("bn", "bandname", "Band name(s) corresponding to band index(es).");
 
   try{
     bool doProcess;//stop process when program was invoked with help option (-h --help)
@@ -4453,8 +4453,8 @@ shared_ptr<VectorOgr> JimList::extractOgr(VectorOgr& sampleReader, AppFactory& a
 size_t JimList::extractOgrMem(VectorOgr& sampleReader, vector<unsigned char> &vbytes, AppFactory& app){
   try{
     size_t filesize=0;
-    Optionpk<string> output_opt("o", "output", "Output sample dataset","/vsimem/extractmem");
-    Optionpk<string> ogrformat_opt("f", "oformat", "Output sample dataset format","SQLite");
+    Optionjl<string> output_opt("o", "output", "Output sample dataset","/vsimem/extractmem");
+    Optionjl<string> ogrformat_opt("f", "oformat", "Output sample dataset format","SQLite");
     output_opt.clear();
     ogrformat_opt.clear();
     output_opt.retrieveOption(app);

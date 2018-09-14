@@ -1,5 +1,5 @@
 /**********************************************************************
-pksvm_lib.cc: classify raster image using Support Vector Machine
+jlsvm_lib.cc: classify raster image using Support Vector Machine
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -24,7 +24,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <algorithm>
 #include "Jim.h"
 #include "VectorOgr.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "base/PosValue.h"
 #include "algorithms/ConfusionMatrix.h"
 #include "algorithms/StatFactory.h"
@@ -46,37 +46,37 @@ std::string VectorOgr::trainSVM(app::AppFactory& app){
   confusionmatrix::ConfusionMatrix cm;
 
   //--------------------------- command line options ------------------------------------
-  // Optionpk<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
-  // Optionpk<std::string> tlayer_opt("tln", "tln", "Sample layer name(s)");
-  // Optionpk<std::string> attribute_opt("af", "af", "Attribute filter");
-  Optionpk<std::string> label_opt("label", "label", "Attribute name for class label in training vector file.","label");
-  Optionpk<unsigned int> balance_opt("bal", "balance", "Balance the input data to this number of samples for each class", 0);
-  Optionpk<bool> random_opt("random", "random", "Randomize training data for balancing", true, 2);
-  Optionpk<unsigned int> minSize_opt("min", "min", "If number of training pixels is less then min, do not take this class into account (0: consider all classes)", 0);
-  // Optionpk<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
-  // Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
-  // Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number");
-  Optionpk<std::string> bandNames_opt("bn", "bandname", "Band name(s) to use. Leave empty to use all bands");
-  Optionpk<double> offset_opt("offset", "offset", "Offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
-  Optionpk<double> scale_opt("scale", "scale", "Scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
-  Optionpk<unsigned short> cv_opt("cv", "cv", "N-fold cross validation mode",0);
-  Optionpk<std::string> cmformat_opt("cmf","cmf","Format for confusion matrix (ascii or latex)","ascii");
-  Optionpk<std::string> svm_type_opt("svmt", "svmtype", "Type of SVM (C_SVC, nu_SVC,one_class, epsilon_SVR, nu_SVR)","C_SVC");
-  Optionpk<std::string> kernel_type_opt("kt", "kerneltype", "Type of kernel function (linear,polynomial,radial,sigmoid) ","radial");
-  Optionpk<unsigned short> kernel_degree_opt("kd", "kd", "Degree in kernel function",3);
-  Optionpk<float> gamma_opt("g", "gamma", "Gamma in kernel function",1.0);
-  Optionpk<float> coef0_opt("c0", "coef0", "Coef0 in kernel function",0);
-  Optionpk<float> ccost_opt("cc", "ccost", "The parameter C of C_SVC, epsilon_SVR, and nu_SVR",1000);
-  Optionpk<float> nu_opt("nu", "nu", "The parameter nu of nu_SVC, one_class SVM, and nu_SVR",0.5);
-  Optionpk<float> epsilon_loss_opt("eloss", "eloss", "The epsilon in loss function of epsilon_SVR",0.1);
-  Optionpk<int> cache_opt("cache", "cache", "Cache memory size in MB",100);
-  Optionpk<float> epsilon_tol_opt("etol", "etol", "The tolerance of termination criterion",0.001);
-  Optionpk<bool> shrinking_opt("shrink", "shrink", "Whether to use the shrinking heuristics",false);
-  Optionpk<bool> prob_est_opt("pe", "probest", "Whether to train a SVC or SVR model for probability estimates",true,2);
-  // Optionpk<bool> weight_opt("wi", "wi", "Set the parameter C of class i to weight*C, for C_SVC",true);
-  Optionpk<std::string> classname_opt("c", "class", "List of class names.");
-  Optionpk<short> classvalue_opt("r", "reclass", "List of class values (use same order as in class opt).");
-  Optionpk<short> verbose_opt("v", "verbose", "Verbose level",0,2);
+  // Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
+  // Optionjl<std::string> tlayer_opt("tln", "tln", "Sample layer name(s)");
+  // Optionjl<std::string> attribute_opt("af", "af", "Attribute filter");
+  Optionjl<std::string> label_opt("label", "label", "Attribute name for class label in training vector file.","label");
+  Optionjl<unsigned int> balance_opt("bal", "balance", "Balance the input data to this number of samples for each class", 0);
+  Optionjl<bool> random_opt("random", "random", "Randomize training data for balancing", true, 2);
+  Optionjl<unsigned int> minSize_opt("min", "min", "If number of training pixels is less then min, do not take this class into account (0: consider all classes)", 0);
+  // Optionjl<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
+  // Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
+  // Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
+  Optionjl<std::string> bandNames_opt("bn", "bandname", "Band name(s) to use. Leave empty to use all bands");
+  Optionjl<double> offset_opt("offset", "offset", "Offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
+  Optionjl<double> scale_opt("scale", "scale", "Scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
+  Optionjl<unsigned short> cv_opt("cv", "cv", "N-fold cross validation mode",0);
+  Optionjl<std::string> cmformat_opt("cmf","cmf","Format for confusion matrix (ascii or latex)","ascii");
+  Optionjl<std::string> svm_type_opt("svmt", "svmtype", "Type of SVM (C_SVC, nu_SVC,one_class, epsilon_SVR, nu_SVR)","C_SVC");
+  Optionjl<std::string> kernel_type_opt("kt", "kerneltype", "Type of kernel function (linear,polynomial,radial,sigmoid) ","radial");
+  Optionjl<unsigned short> kernel_degree_opt("kd", "kd", "Degree in kernel function",3);
+  Optionjl<float> gamma_opt("g", "gamma", "Gamma in kernel function",1.0);
+  Optionjl<float> coef0_opt("c0", "coef0", "Coef0 in kernel function",0);
+  Optionjl<float> ccost_opt("cc", "ccost", "The parameter C of C_SVC, epsilon_SVR, and nu_SVR",1000);
+  Optionjl<float> nu_opt("nu", "nu", "The parameter nu of nu_SVC, one_class SVM, and nu_SVR",0.5);
+  Optionjl<float> epsilon_loss_opt("eloss", "eloss", "The epsilon in loss function of epsilon_SVR",0.1);
+  Optionjl<int> cache_opt("cache", "cache", "Cache memory size in MB",100);
+  Optionjl<float> epsilon_tol_opt("etol", "etol", "The tolerance of termination criterion",0.001);
+  Optionjl<bool> shrinking_opt("shrink", "shrink", "Whether to use the shrinking heuristics",false);
+  Optionjl<bool> prob_est_opt("pe", "probest", "Whether to train a SVC or SVR model for probability estimates",true,2);
+  // Optionjl<bool> weight_opt("wi", "wi", "Set the parameter C of class i to weight*C, for C_SVC",true);
+  Optionjl<std::string> classname_opt("c", "class", "List of class names.");
+  Optionjl<short> classvalue_opt("r", "reclass", "List of class values (use same order as in class opt).");
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose level",0,2);
 
   // band_opt.setHide(1);
   // bstart_opt.setHide(1);
@@ -435,28 +435,28 @@ CPLErr Jim::classifySVM(Jim& imgWriter, app::AppFactory& app){
   vector<double> priors;
 
   //--------------------------- command line options ------------------------------------
-  Optionpk<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
-  Optionpk<unsigned int> band_opt("b", "band", "Band index (starting from 0). The band order must correspond to the band names defined in the model. Leave empty to use all bands");
-  // Optionpk<std::string> bandNames_opt("bn", "bandname", "Band name(s) to use. Leave empty to use all bands");
-  Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
-  Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number");
-  Optionpk<double> offset_opt("offset", "offset", "Offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
-  Optionpk<double> scale_opt("scale", "scale", "Scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
-  Optionpk<double> priors_opt("prior", "prior", "Prior probabilities for each class (e.g., -p 0.3 -p 0.3 -p 0.2 ). Used for input only", 0.0);
-  Optionpk<string> priorimg_opt("pim", "priorimg", "Prior probability image (multi-band img with band for each class","",2);
-  Optionpk<string> extent_opt("e", "extent", "Only classify within extent from polygons in vector file");
-  Optionpk<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
-  Optionpk<string> mask_opt("m", "mask", "Only classify within specified mask. For raster mask, set nodata values with the option msknodata.");
-  Optionpk<short> msknodata_opt("msknodata", "msknodata", "Mask value(s) not to consider for classification. Values will be taken over in classification image.", 0);
-  Optionpk<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0);
-  Optionpk<unsigned short> dstnodata_opt("dstnodata", "dstnodata", "Nodata value to put where image is masked as nodata", 0);
-  // Optionpk<unsigned short> nodata_opt("nodata", "nodata", "Nodata value to put where image is masked as nodata", 0);
-  Optionpk<string> colorTable_opt("ct", "ct", "Color table in ASCII format having 5 columns: id R G B ALFA (0: transparent, 255: solid)");
-  Optionpk<string> prob_opt("prob", "prob", "Probability image.");
-  Optionpk<string> entropy_opt("entropy", "entropy", "Entropy image (measure for uncertainty of classifier output","",2);
-  // Optionpk<string> classname_opt("c", "class", "List of class names.");
-  // Optionpk<short> classvalue_opt("r", "reclass", "List of class values (use same order as in class opt).");
-  Optionpk<short> verbose_opt("v", "verbose", "Verbose level",0,2);
+  Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
+  Optionjl<unsigned int> band_opt("b", "band", "Band index (starting from 0). The band order must correspond to the band names defined in the model. Leave empty to use all bands");
+  // Optionjl<std::string> bandNames_opt("bn", "bandname", "Band name(s) to use. Leave empty to use all bands");
+  Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
+  Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
+  Optionjl<double> offset_opt("offset", "offset", "Offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
+  Optionjl<double> scale_opt("scale", "scale", "Scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
+  Optionjl<double> priors_opt("prior", "prior", "Prior probabilities for each class (e.g., -p 0.3 -p 0.3 -p 0.2 ). Used for input only", 0.0);
+  Optionjl<string> priorimg_opt("pim", "priorimg", "Prior probability image (multi-band img with band for each class","",2);
+  Optionjl<string> extent_opt("e", "extent", "Only classify within extent from polygons in vector file");
+  Optionjl<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
+  Optionjl<string> mask_opt("m", "mask", "Only classify within specified mask. For raster mask, set nodata values with the option msknodata.");
+  Optionjl<short> msknodata_opt("msknodata", "msknodata", "Mask value(s) not to consider for classification. Values will be taken over in classification image.", 0);
+  Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0);
+  Optionjl<unsigned short> dstnodata_opt("dstnodata", "dstnodata", "Nodata value to put where image is masked as nodata", 0);
+  // Optionjl<unsigned short> nodata_opt("nodata", "nodata", "Nodata value to put where image is masked as nodata", 0);
+  Optionjl<string> colorTable_opt("ct", "ct", "Color table in ASCII format having 5 columns: id R G B ALFA (0: transparent, 255: solid)");
+  Optionjl<string> prob_opt("prob", "prob", "Probability image.");
+  Optionjl<string> entropy_opt("entropy", "entropy", "Entropy image (measure for uncertainty of classifier output","",2);
+  // Optionjl<string> classname_opt("c", "class", "List of class names.");
+  // Optionjl<short> classvalue_opt("r", "reclass", "List of class values (use same order as in class opt).");
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose level",0,2);
 
   extent_opt.setHide(1);
   eoption_opt.setHide(1);
@@ -697,7 +697,7 @@ CPLErr Jim::classifySVM(Jim& imgWriter, app::AppFactory& app){
             if(verbose_opt[0]>=2)
               std::cout << "reading band " << band_opt[iband] << std::endl;
             assert(band_opt[iband]>=0);
-            assert(band_opt[iband]<imgWriter.nrOfBand());
+            assert(band_opt[iband]<nrOfBand());
             readData(buffer,iline,band_opt[iband]);
             for(unsigned int icol=0;icol<ncol;++icol)
               hpixel[icol].push_back(buffer[icol]);
@@ -708,7 +708,7 @@ CPLErr Jim::classifySVM(Jim& imgWriter, app::AppFactory& app){
             if(verbose_opt[0]>=2)
               std::cout << "reading band " << iband << std::endl;
             assert(iband>=0);
-            assert(iband<imgWriter.nrOfBand());
+            assert(iband<nrOfBand());
             readData(buffer,iline,iband);
             for(unsigned int icol=0;icol<ncol;++icol)
               hpixel[icol].push_back(buffer[icol]);
@@ -903,52 +903,52 @@ CPLErr Jim::classifySVM(Jim& imgWriter, app::AppFactory& app){
 //   vector<double> priors;
 
 //   //--------------------------- command line options ------------------------------------
-//   Optionpk<string> training_opt("t", "training", "Training vector file. A single vector file contains all training features (must be set as: b0, b1, b2,...) for all classes (class numbers identified by label option). Use multiple training files for bootstrap aggregation (alternative to the bag and bsize options, where a random subset is taken from a single training file)");
-//   Optionpk<string> tlayer_opt("tln", "tln", "Training layer name(s)");
-//   Optionpk<string> label_opt("label", "label", "Attribute name for class label in training vector file.","label");
-//   Optionpk<unsigned int> balance_opt("bal", "balance", "Balance the input data to this number of samples for each class", 0);
-//   Optionpk<bool> random_opt("random", "random", "Randomize training data for balancing and bagging", true, 2);
-//   Optionpk<unsigned int> minSize_opt("min", "min", "If number of training pixels is less then min, do not take this class into account (0: consider all classes)", 0);
-//   Optionpk<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
-//   Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
-//   Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number");
-//   Optionpk<double> offset_opt("offset", "offset", "Offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
-//   Optionpk<double> scale_opt("scale", "scale", "Scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
-//   Optionpk<double> priors_opt("prior", "prior", "Prior probabilities for each class (e.g., -p 0.3 -p 0.3 -p 0.2 ). Used for input only (ignored for cross validation)", 0.0);
-//   Optionpk<string> priorimg_opt("pim", "priorimg", "Prior probability image (multi-band img with band for each class","",2);
-//   Optionpk<unsigned short> cv_opt("cv", "cv", "N-fold cross validation mode",0);
-//   Optionpk<string> cmformat_opt("cmf","cmf","Format for confusion matrix (ascii or latex)","ascii");
-//   Optionpk<std::string> svm_type_opt("svmt", "svmtype", "Type of SVM (C_SVC, nu_SVC,one_class, epsilon_SVR, nu_SVR)","C_SVC");
-//   Optionpk<std::string> kernel_type_opt("kt", "kerneltype", "Type of kernel function (linear,polynomial,radial,sigmoid) ","radial");
-//   Optionpk<unsigned short> kernel_degree_opt("kd", "kd", "Degree in kernel function",3);
-//   Optionpk<float> gamma_opt("g", "gamma", "Gamma in kernel function",1.0);
-//   Optionpk<float> coef0_opt("c0", "coef0", "Coef0 in kernel function",0);
-//   Optionpk<float> ccost_opt("cc", "ccost", "The parameter C of C_SVC, epsilon_SVR, and nu_SVR",1000);
-//   Optionpk<float> nu_opt("nu", "nu", "The parameter nu of nu_SVC, one_class SVM, and nu_SVR",0.5);
-//   Optionpk<float> epsilon_loss_opt("eloss", "eloss", "The epsilon in loss function of epsilon_SVR",0.1);
-//   Optionpk<int> cache_opt("cache", "cache", "Cache memory size in MB",100);
-//   Optionpk<float> epsilon_tol_opt("etol", "etol", "The tolerance of termination criterion",0.001);
-//   Optionpk<bool> shrinking_opt("shrink", "shrink", "Whether to use the shrinking heuristics",false);
-//   Optionpk<bool> prob_est_opt("pe", "probest", "Whether to train a SVC or SVR model for probability estimates",true,2);
-//   // Optionpk<bool> weight_opt("wi", "wi", "Set the parameter C of class i to weight*C, for C_SVC",true);
-//   Optionpk<unsigned short> comb_opt("comb", "comb", "How to combine bootstrap aggregation classifiers (0: sum rule, 1: product rule, 2: max rule). Also used to aggregate classes with rc option.",0);
-//   Optionpk<unsigned short> bag_opt("bag", "bag", "Number of bootstrap aggregations", 1);
-//   Optionpk<int> bagSize_opt("bagsize", "bagsize", "Percentage of features used from available training features for each bootstrap aggregation (one size for all classes, or a different size for each class respectively", 100);
-//   Optionpk<string> classBag_opt("cb", "classbag", "Output for each individual bootstrap aggregation");
-//   Optionpk<string> extent_opt("e", "extent", "Only classify within extent from polygons in vector file");
-//   Optionpk<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
-//   Optionpk<string> mask_opt("m", "mask", "Only classify within specified mask. For raster mask, set nodata values with the option msknodata.");
-//   Optionpk<short> msknodata_opt("msknodata", "msknodata", "Mask value(s) not to consider for classification. Values will be taken over in classification image.", 0);
-//   Optionpk<unsigned short> nodata_opt("nodata", "nodata", "Nodata value to put where image is masked as nodata", 0);
-//   Optionpk<string> colorTable_opt("ct", "ct", "Color table in ASCII format having 5 columns: id R G B ALFA (0: transparent, 255: solid)");
-//   Optionpk<string> prob_opt("prob", "prob", "Probability image.");
-//   Optionpk<string> entropy_opt("entropy", "entropy", "Entropy image (measure for uncertainty of classifier output","",2);
-//   Optionpk<string> active_opt("active", "active", "Ogr output for active training sample.","",2);
-//   Optionpk<string> ogrformat_opt("f", "f", "Output ogr format for active training sample","SQLite");
-//   Optionpk<unsigned int> nactive_opt("na", "nactive", "Number of active training points",1);
-//   Optionpk<string> classname_opt("c", "class", "List of class names.");
-//   Optionpk<short> classvalue_opt("r", "reclass", "List of class values (use same order as in class opt).");
-//   Optionpk<short> verbose_opt("v", "verbose", "Verbose level",0,2);
+//   Optionjl<string> training_opt("t", "training", "Training vector file. A single vector file contains all training features (must be set as: b0, b1, b2,...) for all classes (class numbers identified by label option). Use multiple training files for bootstrap aggregation (alternative to the bag and bsize options, where a random subset is taken from a single training file)");
+//   Optionjl<string> tlayer_opt("tln", "tln", "Training layer name(s)");
+//   Optionjl<string> label_opt("label", "label", "Attribute name for class label in training vector file.","label");
+//   Optionjl<unsigned int> balance_opt("bal", "balance", "Balance the input data to this number of samples for each class", 0);
+//   Optionjl<bool> random_opt("random", "random", "Randomize training data for balancing and bagging", true, 2);
+//   Optionjl<unsigned int> minSize_opt("min", "min", "If number of training pixels is less then min, do not take this class into account (0: consider all classes)", 0);
+//   Optionjl<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
+//   Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
+//   Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
+//   Optionjl<double> offset_opt("offset", "offset", "Offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
+//   Optionjl<double> scale_opt("scale", "scale", "Scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
+//   Optionjl<double> priors_opt("prior", "prior", "Prior probabilities for each class (e.g., -p 0.3 -p 0.3 -p 0.2 ). Used for input only (ignored for cross validation)", 0.0);
+//   Optionjl<string> priorimg_opt("pim", "priorimg", "Prior probability image (multi-band img with band for each class","",2);
+//   Optionjl<unsigned short> cv_opt("cv", "cv", "N-fold cross validation mode",0);
+//   Optionjl<string> cmformat_opt("cmf","cmf","Format for confusion matrix (ascii or latex)","ascii");
+//   Optionjl<std::string> svm_type_opt("svmt", "svmtype", "Type of SVM (C_SVC, nu_SVC,one_class, epsilon_SVR, nu_SVR)","C_SVC");
+//   Optionjl<std::string> kernel_type_opt("kt", "kerneltype", "Type of kernel function (linear,polynomial,radial,sigmoid) ","radial");
+//   Optionjl<unsigned short> kernel_degree_opt("kd", "kd", "Degree in kernel function",3);
+//   Optionjl<float> gamma_opt("g", "gamma", "Gamma in kernel function",1.0);
+//   Optionjl<float> coef0_opt("c0", "coef0", "Coef0 in kernel function",0);
+//   Optionjl<float> ccost_opt("cc", "ccost", "The parameter C of C_SVC, epsilon_SVR, and nu_SVR",1000);
+//   Optionjl<float> nu_opt("nu", "nu", "The parameter nu of nu_SVC, one_class SVM, and nu_SVR",0.5);
+//   Optionjl<float> epsilon_loss_opt("eloss", "eloss", "The epsilon in loss function of epsilon_SVR",0.1);
+//   Optionjl<int> cache_opt("cache", "cache", "Cache memory size in MB",100);
+//   Optionjl<float> epsilon_tol_opt("etol", "etol", "The tolerance of termination criterion",0.001);
+//   Optionjl<bool> shrinking_opt("shrink", "shrink", "Whether to use the shrinking heuristics",false);
+//   Optionjl<bool> prob_est_opt("pe", "probest", "Whether to train a SVC or SVR model for probability estimates",true,2);
+//   // Optionjl<bool> weight_opt("wi", "wi", "Set the parameter C of class i to weight*C, for C_SVC",true);
+//   Optionjl<unsigned short> comb_opt("comb", "comb", "How to combine bootstrap aggregation classifiers (0: sum rule, 1: product rule, 2: max rule). Also used to aggregate classes with rc option.",0);
+//   Optionjl<unsigned short> bag_opt("bag", "bag", "Number of bootstrap aggregations", 1);
+//   Optionjl<int> bagSize_opt("bagsize", "bagsize", "Percentage of features used from available training features for each bootstrap aggregation (one size for all classes, or a different size for each class respectively", 100);
+//   Optionjl<string> classBag_opt("cb", "classbag", "Output for each individual bootstrap aggregation");
+//   Optionjl<string> extent_opt("e", "extent", "Only classify within extent from polygons in vector file");
+//   Optionjl<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
+//   Optionjl<string> mask_opt("m", "mask", "Only classify within specified mask. For raster mask, set nodata values with the option msknodata.");
+//   Optionjl<short> msknodata_opt("msknodata", "msknodata", "Mask value(s) not to consider for classification. Values will be taken over in classification image.", 0);
+//   Optionjl<unsigned short> nodata_opt("nodata", "nodata", "Nodata value to put where image is masked as nodata", 0);
+//   Optionjl<string> colorTable_opt("ct", "ct", "Color table in ASCII format having 5 columns: id R G B ALFA (0: transparent, 255: solid)");
+//   Optionjl<string> prob_opt("prob", "prob", "Probability image.");
+//   Optionjl<string> entropy_opt("entropy", "entropy", "Entropy image (measure for uncertainty of classifier output","",2);
+//   Optionjl<string> active_opt("active", "active", "Ogr output for active training sample.","",2);
+//   Optionjl<string> ogrformat_opt("f", "f", "Output ogr format for active training sample","SQLite");
+//   Optionjl<unsigned int> nactive_opt("na", "nactive", "Number of active training points",1);
+//   Optionjl<string> classname_opt("c", "class", "List of class names.");
+//   Optionjl<short> classvalue_opt("r", "reclass", "List of class values (use same order as in class opt).");
+//   Optionjl<short> verbose_opt("v", "verbose", "Verbose level",0,2);
 
   // extent_opt.setHide(1);
   // eoption_opt.setHide(1);

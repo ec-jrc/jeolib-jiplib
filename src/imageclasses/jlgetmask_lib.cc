@@ -1,5 +1,5 @@
 /**********************************************************************
-pkgetmask_lib.cc: program to create mask image based on values in input raster image
+jlgetmask_lib.cc: program to create mask image based on values in input raster image
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -20,7 +20,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <assert.h>
 #include <vector>
 #include "imageclasses/Jim.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "apps/AppFactory.h"
 
 using namespace std;
@@ -41,18 +41,18 @@ shared_ptr<Jim> Jim::getMask(app::AppFactory& app){
  * @return CE_None if successful, CE_Failure if failed
  **/
 CPLErr Jim::getMask(Jim& imgWriter, app::AppFactory& app){
-  Optionpk<short> band_opt("b", "band", "band(s) used for mask", 0);
-  Optionpk<double> min_opt("min", "min", "Values smaller than min threshold(s) are masked as invalid. Use one threshold for each band");
-  Optionpk<double> max_opt("max", "max", "Values greater than max threshold(s) are masked as invalid. Use one threshold for each band");
-  Optionpk<string> operator_opt("p", "operator", "Operator: [AND,OR].", "OR");
-  Optionpk<unsigned short> data_opt("data", "data", "value(s) for valid pixels: between min and max", 1);
-  Optionpk<unsigned short> nodata_opt("nodata", "nodata", "value(s) for invalid pixels: not between min and max", 0);
-  Optionpk<string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image", "Byte");
-  // Optionpk<string> oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
-  Optionpk<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-  Optionpk<string> colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
-  Optionpk<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
-  Optionpk<short> verbose_opt("v", "verbose", "verbose", 0,2);
+  Optionjl<short> band_opt("b", "band", "band(s) used for mask", 0);
+  Optionjl<double> min_opt("min", "min", "Values smaller than min threshold(s) are masked as invalid. Use one threshold for each band");
+  Optionjl<double> max_opt("max", "max", "Values greater than max threshold(s) are masked as invalid. Use one threshold for each band");
+  Optionjl<string> operator_opt("p", "operator", "Operator: [AND,OR].", "OR");
+  Optionjl<unsigned short> data_opt("data", "data", "value(s) for valid pixels: between min and max", 1);
+  Optionjl<unsigned short> nodata_opt("nodata", "nodata", "value(s) for invalid pixels: not between min and max", 0);
+  Optionjl<string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image", "Byte");
+  // Optionjl<string> oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
+  Optionjl<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<string> colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
+  Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+  Optionjl<short> verbose_opt("v", "verbose", "verbose", 0,2);
 
   band_opt.setHide(1);
   operator_opt.setHide(1);

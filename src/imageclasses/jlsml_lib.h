@@ -1,5 +1,5 @@
 /**********************************************************************
-pksml_lib.h: classify raster image using SML
+jlsml_lib.h: classify raster image using SML
 Copyright (C) 2018 Pieter Kempeneers
 
 This file is part of pktools
@@ -32,7 +32,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 #include "Jim.h"
 #include "VectorOgr.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "apps/AppFactory.h"
 
 ///get unique pixels
@@ -53,14 +53,14 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 ///train SML
 /* template<typename T> CPLErr Jim::trainSML(JimList& referenceReader, app::AppFactory& app){ */
 template<typename T> std::string Jim::trainSML(JimList& referenceReader, app::AppFactory& app){
-  /* Optionpk<std::string> model_opt("model", "model", "Model filename to save trained classifier."); */
-  Optionpk<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
-  Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
-  Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number");
-  Optionpk<unsigned short> class_opt("c", "class", "Class(es) to extract from reference. Leave empty to extract two classes only: 1 against rest",1);
-  Optionpk<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0);
-  Optionpk<double> dstnodata_opt("dstnodata", "dstnodata", "Nodata value to put where image is masked as nodata", 0);
-  Optionpk<short> verbose_opt("v", "verbose", "Verbose level",0,2);
+  /* Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier."); */
+  Optionjl<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
+  Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
+  Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
+  Optionjl<unsigned short> class_opt("c", "class", "Class(es) to extract from reference. Leave empty to extract two classes only: 1 against rest",1);
+  Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0);
+  Optionjl<double> dstnodata_opt("dstnodata", "dstnodata", "Nodata value to put where image is masked as nodata", 0);
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose level",0,2);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
@@ -225,20 +225,20 @@ template<typename T> std::string Jim::trainSML(JimList& referenceReader, app::Ap
 
 ///classify raster dataset with SML
 template<typename T> CPLErr Jim::classifySML(Jim& imgWriter, app::AppFactory& app){
-  Optionpk<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
-  Optionpk<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
-  Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
-  Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number");
-  Optionpk<unsigned short> class_opt("c", "class", "Class(es) to extract from reference. Leave empty to extract two classes only: 1 against rest",1);
-  Optionpk<std::string> extent_opt("e", "extent", "Only classify within extent from polygons in vector file");
-  Optionpk<std::string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
-  Optionpk<std::string> mask_opt("m", "mask", "Only classify within specified mask. For raster mask, set nodata values with the option msknodata.");
-  Optionpk<short> msknodata_opt("msknodata", "msknodata", "Mask value(s) not to consider for classification. Values will be taken over in classification image.", 0);
-  Optionpk<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0);
-  Optionpk<double> dstnodata_opt("dstnodata", "dstnodata", "Nodata value to put where image is masked as nodata", 0);
-  /* Optionpk<double> nodata_opt("nodata", "nodata", "Nodata value to put where image is masked as nodata", 0); */
-  Optionpk<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image","GDT_Byte");
-  Optionpk<short> verbose_opt("v", "verbose", "Verbose level",0,2);
+  Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
+  Optionjl<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
+  Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
+  Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
+  Optionjl<unsigned short> class_opt("c", "class", "Class(es) to extract from reference. Leave empty to extract two classes only: 1 against rest",1);
+  Optionjl<std::string> extent_opt("e", "extent", "Only classify within extent from polygons in vector file");
+  Optionjl<std::string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname");
+  Optionjl<std::string> mask_opt("m", "mask", "Only classify within specified mask. For raster mask, set nodata values with the option msknodata.");
+  Optionjl<short> msknodata_opt("msknodata", "msknodata", "Mask value(s) not to consider for classification. Values will be taken over in classification image.", 0);
+  Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0);
+  Optionjl<double> dstnodata_opt("dstnodata", "dstnodata", "Nodata value to put where image is masked as nodata", 0);
+  /* Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put where image is masked as nodata", 0); */
+  Optionjl<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image","GDT_Byte");
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose level",0,2);
 
   extent_opt.setHide(1);
   eoption_opt.setHide(1);
@@ -469,20 +469,20 @@ template<typename T> CPLErr Jim::classifySML(Jim& imgWriter, app::AppFactory& ap
 
 /* ///classify raster dataset with SML */
 /* template<typename T> CPLErr Jim::classifySML(JimList& referenceReader, Jim& imgWriter, app::AppFactory& app){ */
-/*   Optionpk<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)"); */
-/*   Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number"); */
-/*   Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number"); */
-/*   Optionpk<std::string> model_opt("model", "model", "Model filename to save trained classifier."); */
-/*   Optionpk<unsigned short> class_opt("c", "class", "Class(es) to extract from reference. Leave empty to extract two classes only: 1 against rest",1); */
-/*   Optionpk<std::string> extent_opt("e", "extent", "Only classify within extent from polygons in vector file"); */
-/*   Optionpk<std::string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname"); */
-/*   Optionpk<std::string> mask_opt("m", "mask", "Only classify within specified mask. For raster mask, set nodata values with the option msknodata."); */
-/*   Optionpk<short> msknodata_opt("msknodata", "msknodata", "Mask value(s) not to consider for classification. Values will be taken over in classification image.", 0); */
-/*   Optionpk<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0); */
-/*   Optionpk<double> dstnodata_opt("dstnodata", "dstnodata", "Nodata value to put where image is masked as nodata", 0); */
-/*   /\* Optionpk<double> nodata_opt("nodata", "nodata", "Nodata value to put where image is masked as nodata", 0); *\/ */
-/*   Optionpk<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image","GDT_Byte"); */
-/*   Optionpk<short> verbose_opt("v", "verbose", "Verbose level",0,2); */
+/*   Optionjl<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)"); */
+/*   Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number"); */
+/*   Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number"); */
+/*   Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier."); */
+/*   Optionjl<unsigned short> class_opt("c", "class", "Class(es) to extract from reference. Leave empty to extract two classes only: 1 against rest",1); */
+/*   Optionjl<std::string> extent_opt("e", "extent", "Only classify within extent from polygons in vector file"); */
+/*   Optionjl<std::string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname"); */
+/*   Optionjl<std::string> mask_opt("m", "mask", "Only classify within specified mask. For raster mask, set nodata values with the option msknodata."); */
+/*   Optionjl<short> msknodata_opt("msknodata", "msknodata", "Mask value(s) not to consider for classification. Values will be taken over in classification image.", 0); */
+/*   Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0); */
+/*   Optionjl<double> dstnodata_opt("dstnodata", "dstnodata", "Nodata value to put where image is masked as nodata", 0); */
+/*   /\* Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put where image is masked as nodata", 0); *\/ */
+/*   Optionjl<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image","GDT_Byte"); */
+/*   Optionjl<short> verbose_opt("v", "verbose", "Verbose level",0,2); */
 
 /*   extent_opt.setHide(1); */
 /*   eoption_opt.setHide(1); */
@@ -798,18 +798,18 @@ template<typename T> CPLErr Jim::classifySML(Jim& imgWriter, app::AppFactory& ap
  * @return CE_None if successful, CE_Failure if failed
  **/
 /* template<typename T> CPLErr Jim::classifySML(Jim& imgWriter, app::AppFactory& app){ */
-/*   Optionpk<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)"); */
-/*   Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number"); */
-/*   Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number"); */
-/*   Optionpk<unsigned int> cband_opt("cb", "cband", "band index(es) used for the reference class information", 0); */
-/*   Optionpk<unsigned short> class_opt("c", "class", "Class(es) to extract from reference. Leave empty to extract two classes only: 1 against rest",1); */
-/*   Optionpk<std::string> extent_opt("e", "extent", "Only classify within extent from polygons in vector file"); */
-/*   Optionpk<std::string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname"); */
-/*   Optionpk<std::string> mask_opt("m", "mask", "Only classify within specified mask. For raster mask, set nodata values with the option msknodata."); */
-/*   Optionpk<short> msknodata_opt("msknodata", "msknodata", "Mask value(s) not to consider for classification. Values will be taken over in classification image.", 0); */
-/*   Optionpk<double> nodata_opt("nodata", "nodata", "Nodata value to put where image is masked as nodata", 0); */
-/*   Optionpk<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image","GDT_Byte"); */
-/*   Optionpk<short> verbose_opt("v", "verbose", "Verbose level",0,2); */
+/*   Optionjl<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)"); */
+/*   Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number"); */
+/*   Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number"); */
+/*   Optionjl<unsigned int> cband_opt("cb", "cband", "band index(es) used for the reference class information", 0); */
+/*   Optionjl<unsigned short> class_opt("c", "class", "Class(es) to extract from reference. Leave empty to extract two classes only: 1 against rest",1); */
+/*   Optionjl<std::string> extent_opt("e", "extent", "Only classify within extent from polygons in vector file"); */
+/*   Optionjl<std::string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ATTRIBUTE=fieldname"); */
+/*   Optionjl<std::string> mask_opt("m", "mask", "Only classify within specified mask. For raster mask, set nodata values with the option msknodata."); */
+/*   Optionjl<short> msknodata_opt("msknodata", "msknodata", "Mask value(s) not to consider for classification. Values will be taken over in classification image.", 0); */
+/*   Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put where image is masked as nodata", 0); */
+/*   Optionjl<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image","GDT_Byte"); */
+/*   Optionjl<short> verbose_opt("v", "verbose", "Verbose level",0,2); */
 
 /*   extent_opt.setHide(1); */
 /*   eoption_opt.setHide(1); */

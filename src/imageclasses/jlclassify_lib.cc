@@ -1,5 +1,5 @@
 /**********************************************************************
-pkclassify_lib.cc: classify raster image
+jlclassify_lib.cc: classify raster image
 Copyright (C) 2008-2018 Pieter Kempeneers
 
 This file is part of pktools
@@ -21,12 +21,12 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <sstream>
 #include <memory>
-#include "pkclassify_lib.h"
+#include "jlclassify_lib.h"
 #include "Jim.h"
 #include "VectorOgr.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "apps/AppFactory.h"
-#include "pksml_lib.h"
+#include "jlsml_lib.h"
 
 using namespace std;
 using namespace app;
@@ -121,7 +121,7 @@ CPLErr Jim::classify(Jim& imgWriter, app::AppFactory& app){
   vector<double> priors;
 
   //--------------------------- command line options ------------------------------------
-  Optionpk<std::string> method_opt("m", "method", "classification method: 'svm' (support vector machine), 'ann' (artificial neural network), 'sml' (symbolic machine learning)");
+  Optionjl<std::string> method_opt("m", "method", "classification method: 'svm' (support vector machine), 'ann' (artificial neural network), 'sml' (symbolic machine learning)");
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
@@ -173,8 +173,8 @@ CPLErr Jim::classify(Jim& imgWriter, app::AppFactory& app){
 
 CPLErr Jim::train(JimList& referenceReader, app::AppFactory& app){
   //--------------------------- command line options ------------------------------------
-  Optionpk<string> method_opt("m", "method", "classification method: 'sml' (symbolic machine learning)");
-  Optionpk<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
+  Optionjl<string> method_opt("m", "method", "classification method: 'sml' (symbolic machine learning)");
+  Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
@@ -240,8 +240,8 @@ CPLErr Jim::train(JimList& referenceReader, app::AppFactory& app){
 
 OGRErr VectorOgr::train(app::AppFactory& app){
   //--------------------------- command line options ------------------------------------
-  Optionpk<std::string> method_opt("m", "method", "classification method: 'svm' (support vector machine), 'ann' (artificial neural network)");
-  Optionpk<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
+  Optionjl<std::string> method_opt("m", "method", "classification method: 'svm' (support vector machine), 'ann' (artificial neural network)");
+  Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
@@ -286,7 +286,7 @@ OGRErr VectorOgr::train(app::AppFactory& app){
 
 std::string Jim::trainMem(JimList& referenceReader, app::AppFactory& app){
   //--------------------------- command line options ------------------------------------
-  Optionpk<string> method_opt("m", "method", "classification method: 'svm' (support vector machine), 'ann' (artificial neural network)");
+  Optionjl<string> method_opt("m", "method", "classification method: 'svm' (support vector machine), 'ann' (artificial neural network)");
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
@@ -334,7 +334,7 @@ std::string Jim::trainMem(JimList& referenceReader, app::AppFactory& app){
 
 std::string VectorOgr::trainMem(app::AppFactory& app){
   //--------------------------- command line options ------------------------------------
-  Optionpk<string> method_opt("m", "method", "classification method: 'svm' (support vector machine), 'ann' (artificial neural network)");
+  Optionjl<string> method_opt("m", "method", "classification method: 'svm' (support vector machine), 'ann' (artificial neural network)");
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
@@ -369,7 +369,7 @@ OGRErr VectorOgr::classify(VectorOgr& ogrWriter, app::AppFactory& app){
   vector<double> priors;
 
   //--------------------------- command line options ------------------------------------
-  Optionpk<string> method_opt("m", "method", "classification method: 'svm' (support vector machine), 'ann' (artificial neural network)");
+  Optionjl<string> method_opt("m", "method", "classification method: 'svm' (support vector machine), 'ann' (artificial neural network)");
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{

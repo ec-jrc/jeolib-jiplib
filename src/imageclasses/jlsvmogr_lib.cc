@@ -1,5 +1,5 @@
 /**********************************************************************
-pkannogr_lib.cc: classify raster image using Artificial Neural Network
+jlsvmogr_lib.cc: classify vector dataset using Support Vector Machine
 Copyright (C) 2008-2018 Pieter Kempeneers
 
 This file is part of pktools
@@ -20,14 +20,21 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <vector>
 #include <map>
+#include <memory>
 #include <algorithm>
-#include "imageclasses/Jim.h"
-#include "imageclasses/VectorOgr.h"
-#include "base/Optionpk.h"
+#include "VectorOgr.h"
+#include "base/Optionjl.h"
 #include "base/PosValue.h"
 #include "algorithms/ConfusionMatrix.h"
-#include "floatfann.h"
-#include "algorithms/myfann_cpp.h"
+#include "algorithms/svm.h"
+#include "apps/AppFactory.h"
+
+namespace svm{
+  enum SVM_TYPE {C_SVC=0, nu_SVC=1,one_class=2, epsilon_SVR=3, nu_SVR=4};
+  enum KERNEL_TYPE {linear=0,polynomial=1,radial=2,sigmoid=3};
+}
+
+#define Malloc(type,n) (type *)malloc((n)*sizeof(type))
 
 using namespace std;
 using namespace app;
@@ -36,38 +43,38 @@ using namespace app;
  * @param app application specific option arguments
  * @return output Vector
  **/
-shared_ptr<VectorOgr> VectorOgr::classifyANN(app::AppFactory& app){
+shared_ptr<VectorOgr> VectorOgr::classifySVM(app::AppFactory& app){
   std::shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
-  if(classifyANN(*ogrWriter, app)!=OGRERR_NONE){
+  if(classifySVM(*ogrWriter, app)!=OGRERR_NONE){
     std::cerr << "Failed to extract" << std::endl;
   }
   return(ogrWriter);
 }
 
 /**
- * @param imgWriter output classified raster dataset
+ * @param ogrWriter output classified vector dataset
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-OGRErr VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
+OGRErr VectorOgr::classifySVM(VectorOgr& ogrWriter, app::AppFactory& app){
   //--------------------------- command line options ------------------------------------
-  Optionpk<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
-  Optionpk<unsigned int> band_opt("b", "band", "band index (starting from 0, either use band option or use start to end)");
-  Optionpk<std::string> bandNames_opt("bn", "bandname", "Band name(s) to use. Leave empty to use all bands");
-  Optionpk<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
-  Optionpk<unsigned int> bend_opt("eband", "endband", "End band sequence number");
-  Optionpk<double> offset_opt("offset", "offset", "offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
-  Optionpk<double> scale_opt("scale", "scale", "scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
-  Optionpk<double> priors_opt("prior", "prior", "prior probabilities for each class (e.g., -p 0.3 -p 0.3 -p 0.2 )");
-  Optionpk<string> output_opt("o", "output", "Filename of classified vector dataset");
-  Optionpk<string> ogrformat_opt("f", "f", "Output ogr format for active training sample","SQLite");
-  Optionpk<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-  Optionpk<string> copyFields_opt("copy", "copy", "copy these fields from input to output vector dataset");
-  Optionpk<short> verbose_opt("v", "verbose", "set to: 0 (results only), 1 (confusion matrix), 2 (debug)",0,2);
-  // Optionpk<string> cmformat_opt("cmf","cmf","Format for confusion matrix (ascii or latex)","ascii");
-  // Optionpk<std::string> label_opt("label", "label", "Attribute name for reference class label used for validation.","label");
-  // Optionpk<string> classname_opt("c", "class", "list of class names.");
-  // Optionpk<short> classvalue_opt("r", "reclass", "list of class values (use same order as in class opt).");
+  Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
+  Optionjl<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
+  Optionjl<std::string> bandNames_opt("bn", "bandname", "Band name(s) to use. Leave empty to use all bands");
+  Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
+  Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
+  Optionjl<double> offset_opt("offset", "offset", "Offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
+  Optionjl<double> scale_opt("scale", "scale", "Scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
+  Optionjl<double> priors_opt("prior", "prior", "Prior probabilities for each class (e.g., -p 0.3 -p 0.3 -p 0.2 ). Used for input only (ignored for cross validation)");
+  Optionjl<string> output_opt("o", "output", "Filename of classified vector dataset");
+  Optionjl<string> ogrformat_opt("f", "f", "Output ogr format for active training sample","SQLite");
+  Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<string> copyFields_opt("copy", "copy", "copy these fields from input to output vector dataset");
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose level",0,2);
+  // Optionjl<string> cmformat_opt("cmf","cmf","Format for confusion matrix (ascii or latex)","ascii");
+  // Optionjl<std::string> label_opt("label", "label", "Attribute name for reference class label used for validation.","label");
+  // Optionjl<string> classname_opt("c", "class", "List of class names.");
+  // Optionjl<short> classvalue_opt("r", "reclass", "List of class values (use same order as in class opt).");
 
   band_opt.setHide(1);
   bandNames_opt.setHide(1);
@@ -98,7 +105,7 @@ OGRErr VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
     // classvalue_opt.retrieveOption(app);
 
     if(!doProcess){
-      std::cout << std::endl;
+      cout << endl;
       std::ostringstream helpStream;
       helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
       throw(helpStream.str());//help was invoked, stop processing
@@ -127,16 +134,9 @@ OGRErr VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
     vector<std::string> nameVector;
     vector<std::string> bandNames;
 
-    FANN::neural_net net;//the neural network
+    struct svm_model* theModel=svm_load_model(model_opt[0].c_str(),offset,scale,classValueMap,nameVector,bandNames);
 
-    if(!net.create_from_file(model_opt[0],offset,scale,classValueMap,nameVector,bandNames)){
-      std::ostringstream errorStream;
-      errorStream << "Error: could not create neural network from file " << model_opt[0];
-      throw(errorStream.str());
-    }
-
-    //todo: check if get_num_output() is really the number of classes
-    unsigned int nclass=net.get_num_output();
+    unsigned int nclass=theModel->nr_class;
     unsigned int nband=bandNames.size()?bandNames.size():offset.size();//todo: find a more elegant way to define number of bands (in model?)
 
     if(verbose_opt[0]){
@@ -156,17 +156,17 @@ OGRErr VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
         std::cout << bandNames[index] << std::endl;
     }
 
-    //normalize priors from command line
+    //normalize 
     vector<double> priors;
-    if(priors_opt.size()>1){//priors from argument list
+    if(priors_opt.size()){//priors from argument list
       priors.resize(priors_opt.size());
       double normPrior=0;
-      for(unsigned int iclass=0;iclass<priors_opt.size();++iclass){
+      for(unsigned short iclass=0;iclass<priors_opt.size();++iclass){
         priors[iclass]=priors_opt[iclass];
         normPrior+=priors[iclass];
       }
       //normalize
-      for(unsigned int iclass=0;iclass<priors_opt.size();++iclass)
+      for(unsigned short iclass=0;iclass<priors_opt.size();++iclass)
         priors[iclass]/=normPrior;
     }
 
@@ -177,7 +177,7 @@ OGRErr VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
         throw(errorstring);
       }
       band_opt.clear();
-      for(unsigned int ipair=0;ipair<bstart_opt.size();++ipair){
+      for(int ipair=0;ipair<bstart_opt.size();++ipair){
         if(bend_opt[ipair]<=bstart_opt[ipair]){
           string errorstring="Error: index for end band must be smaller then start band";
           throw(errorstring);
@@ -218,13 +218,14 @@ OGRErr VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
 
     // cm.clearResults();
     //notice that fields have already been set by readDataImageOgr (taking into account appropriate bands)
+    // for(int ivalidation=0;ivalidation<vectorCollection.size();++ivalidation){
     int nvalidation=1;
     for(int ivalidation=0;ivalidation<nvalidation;++ivalidation){
       if(verbose_opt[0])
-        cout << "number of layers in input ogr file: " << getLayerCount() << std::endl;
-      for(unsigned int ilayer=0;ilayer<getLayerCount();++ilayer){
+        cout << "number of layers in input ogr file: " << getLayerCount() << endl;
+      for(int ilayer=0;ilayer<getLayerCount();++ilayer){
         if(verbose_opt[0])
-          std::cout << "processing input layer " << ilayer << std::endl;
+          cout << "processing input layer " << ilayer << endl;
         if(initWriter){
           if(ogrWriter.pushLayer(getLayerName(ilayer),getProjection(ilayer),getGeometryType(),papszOptions)!=OGRERR_NONE){
             ostringstream fs;
@@ -267,11 +268,11 @@ OGRErr VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
           OGRFeature *poDstFeature = NULL;
           poDstFeature=ogrWriter.createFeature(ilayer);
           if( poDstFeature->SetFrom( poFeature, TRUE ) != OGRERR_NONE ){
-              OGRFeature::DestroyFeature( poFeature );
-              OGRFeature::DestroyFeature( poDstFeature );
-              std::ostringstream errorStream;
-              errorStream << "Error: Unable to translate feature " << poFeature->GetFID() << "from layer " << ogrWriter.getLayerName(ilayer).c_str() << std::endl;
-              throw(errorStream.str());
+            OGRFeature::DestroyFeature( poFeature );
+            OGRFeature::DestroyFeature( poDstFeature );
+            std::ostringstream errorStream;
+            errorStream << "Error: Unable to translate feature " << poFeature->GetFID() << "from layer " << ogrWriter.getLayerName(ilayer).c_str() << std::endl;
+            throw(errorStream.str());
           }
           // poDstFeature->SetGeometry(poFeature->GetGeometryRef());
           std::vector<float> validationFeature;
@@ -281,22 +282,49 @@ OGRErr VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
             if(bandNames.size()){
               if(find(bandNames.begin(),bandNames.end(),fieldname)!=bandNames.end()){
                 double theValue=m_features[ilayer][ifeature]->GetFieldAsDouble(iField);
-                validationFeature.push_back((theValue-offset[iField])/scale[iField]);
+                // validationFeature.push_back((theValue-offset[iband])/scale[iband]);
+                validationFeature.push_back(theValue);
               }
             }
             else if(fieldname!="fid"){
               double theValue=m_features[ilayer][ifeature]->GetFieldAsDouble(iField);
-              validationFeature.push_back((theValue-offset[iField])/scale[iField]);
+              validationFeature.push_back(theValue);
             }
           }
-          vector<float> result(nclass);
-          result=net.run(validationFeature);
+          vector<double> result(nclass);
+          struct svm_node *x;
+          x = (struct svm_node *) malloc((validationFeature.size()+1)*sizeof(struct svm_node));
+          for(int iband=0;iband<validationFeature.size();++iband){
+            x[iband].index=iband+1;
+            x[iband].value=(validationFeature[iband]-offset[iband])/scale[iband];
+          }
+
+          x[validationFeature.size()].index=-1;//to end svm feature vector
+          double predict_label=0;
+          if(theModel->param.probability>0){
+            predict_label = svm_predict(theModel,x);
+            for(short iclass=0;iclass<nclass;++iclass){
+              if(iclass==static_cast<short>(predict_label))
+                result[iclass]=1;
+              else
+                result[iclass]=0;
+            }
+          }
+          else{
+            assert(svm_check_probability_model(theModel));
+            predict_label = svm_predict_probability(theModel,x,&(result[0]));
+          }
+          if(verbose_opt[0]>1){
+            std::cout << "predict_label: " << predict_label << std::endl;
+            for(int iclass=0;iclass<result.size();++iclass)
+              std::cout << result[iclass] << " ";
+            std::cout << std::endl;
+          }
 
           //calculate posterior prob and calculate max class prob
           float max=0;//max probability
           std::string classOut="Unclassified";
           for(short iclass=0;iclass<nclass;++iclass){
-            result[iclass]=(result[iclass]+1.0)/2.0;//bring back to scale [0,1]
             if(priors_opt.size())
               probOut[iclass]=priors[iclass]*result[iclass];
             else
@@ -314,13 +342,14 @@ OGRErr VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
           if(verbose_opt[0]>1)
             std::cout << "feature " << ifeature << " classOut " << classOut << std::endl;
 
+          free(x);
+
           if(classValueMap.size())
             poDstFeature->SetField("class",classValueMap[classOut]);
           else
             poDstFeature->SetField("class",classOut.c_str());
           //todo: might not be needed due to SetFrom
           poDstFeature->SetFID( poFeature->GetFID() );
-
           // int labelIndex=poFeature->GetFieldIndex(label_opt[0].c_str());
           // if(labelIndex>=0){
           //   string classRef=poFeature->GetFieldAsString(labelIndex);
@@ -338,12 +367,14 @@ OGRErr VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
             progress=static_cast<float>(ifeature+1.0)/nFeatures;
             pfnProgress(progress,pszMessage,pProgressArg);
           }
+          // OGRFeature::DestroyFeature( poFeature );
+          // OGRFeature::DestroyFeature( poDstFeature );
         }//get next feature
       }//next layer
     }
     // if(cm.nReference()){
     //   std::cout << cm << std::endl;
-    //   std::cout << "class #samples userAcc prodAcc" << std::endl;
+    //   cout << "class #samples userAcc prodAcc" << endl;
     //   double se95_ua=0;
     //   double se95_pa=0;
     //   double se95_oa=0;
@@ -353,12 +384,14 @@ OGRErr VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
     //   for(short iclass=0;iclass<cm.nClasses();++iclass){
     //     dua=cm.ua_pct(cm.getClass(iclass),&se95_ua);
     //     dpa=cm.pa_pct(cm.getClass(iclass),&se95_pa);
-    //     cout << cm.getClass(iclass) << " " << cm.nReference(cm.getClass(iclass)) << " " << dua << " (" << se95_ua << ")" << " " << dpa << " (" << se95_pa << ")" << std::endl;
+    //     cout << cm.getClass(iclass) << " " << cm.nReference(cm.getClass(iclass)) << " " << dua << " (" << se95_ua << ")" << " " << dpa << " (" << se95_pa << ")" << endl;
     //   }
     //   std::cout << "Kappa: " << cm.kappa() << std::endl;
-    //   doa=cm.oa_pct(&se95_oa);
-    //   std::cout << "Overall Accuracy: " << doa << " (" << se95_oa << ")"  << std::endl;
+    //   doa=cm.oa(&se95_oa);
+    //   std::cout << "Overall Accuracy: " << 100*doa << " (" << 100*se95_oa << ")"  << std::endl;
     // }
+
+    svm_free_and_destroy_model(&(theModel));
     return(CE_None);
   }
   catch(BadConversion conversionString){

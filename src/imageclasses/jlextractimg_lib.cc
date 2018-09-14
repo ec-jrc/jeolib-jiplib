@@ -1,5 +1,5 @@
 /**********************************************************************
-pkextractimg_lib.cc: extract pixel values from raster image using a raster sample
+jlextractimg_lib.cc: extract pixel values from raster image using a raster sample
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -28,7 +28,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include "imageclasses/Jim.h"
 #include "imageclasses/VectorOgr.h"
 // #include "imageclasses/ImgWriterOgr.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "algorithms/StatFactory.h"
 #include "apps/AppFactory.h"
 
@@ -51,26 +51,26 @@ shared_ptr<VectorOgr> Jim::extractImg(Jim& classReader, AppFactory& app){
 }
 
 CPLErr Jim::extractImg(Jim& classReader, VectorOgr& ogrWriter, app::AppFactory& app){
-  // Optionpk<string> sample_opt("s", "sample", "Raster dataset with features to be extracted from input data. Output will contain features with input band information included.");
-  Optionpk<string> output_opt("o", "output", "Output sample dataset");
-  Optionpk<std::string> layer_opt("ln", "ln", "output layer name","sample");
-  Optionpk<int> class_opt("c", "class", "Class(es) to extract from input sample image. Leave empty to extract all valid data pixels from sample dataset");
-  Optionpk<float> threshold_opt("t", "threshold", "Probability threshold for selecting samples (randomly). Provide probability in percentage (>0) or absolute (<0). Use a single threshold per vector sample layer. If using raster land cover maps as a sample dataset, you can provide a threshold value for each class (e.g. -t 80 -t 60). Use value 100 to select all pixels for selected class(es)", 100);
-  Optionpk<string> ogrformat_opt("f", "oformat", "Output sample dataset format","SQLite");
-  Optionpk<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-  Optionpk<string> ftype_opt("ft", "ftype", "Field type (only Real or Integer)", "Real");
-  Optionpk<string> ltype_opt("lt", "ltype", "Label type: In16 or String", "Integer");
-  Optionpk<unsigned int> band_opt("b", "band", "Band index(es) to extract (0 based). Leave empty to use all bands");
-  Optionpk<string> bandNames_opt("bn", "bandname", "Band name(s) corresponding to band index(es)","b");
-  Optionpk<unsigned short> bstart_opt("sband", "startband", "Start band sequence number");
-  Optionpk<unsigned short> bend_opt("eband", "endband", "End band sequence number");
-  Optionpk<double> srcnodata_opt("srcnodata", "srcnodata", "Invalid value(s) for input image");
-  Optionpk<unsigned int> bndnodata_opt("bndnodata", "bndnodata", "Band in input image to check if pixel is valid (used for srcnodata)", 0);
-  Optionpk<string> label_opt("cn", "cname", "Name of the class label in the output vector dataset", "label");
-  Optionpk<std::string> fid_opt("fid", "fid", "Create extra field with field identifier (sequence in which the features have been read");
-  Optionpk<short> down_opt("down", "down", "Down sampling factor", 1);
-  Optionpk<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
-  Optionpk<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
+  // Optionjl<string> sample_opt("s", "sample", "Raster dataset with features to be extracted from input data. Output will contain features with input band information included.");
+  Optionjl<string> output_opt("o", "output", "Output sample dataset");
+  Optionjl<std::string> layer_opt("ln", "ln", "output layer name","sample");
+  Optionjl<int> class_opt("c", "class", "Class(es) to extract from input sample image. Leave empty to extract all valid data pixels from sample dataset");
+  Optionjl<float> threshold_opt("t", "threshold", "Probability threshold for selecting samples (randomly). Provide probability in percentage (>0) or absolute (<0). Use a single threshold per vector sample layer. If using raster land cover maps as a sample dataset, you can provide a threshold value for each class (e.g. -t 80 -t 60). Use value 100 to select all pixels for selected class(es)", 100);
+  Optionjl<string> ogrformat_opt("f", "oformat", "Output sample dataset format","SQLite");
+  Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<string> ftype_opt("ft", "ftype", "Field type (only Real or Integer)", "Real");
+  Optionjl<string> ltype_opt("lt", "ltype", "Label type: In16 or String", "Integer");
+  Optionjl<unsigned int> band_opt("b", "band", "Band index(es) to extract (0 based). Leave empty to use all bands");
+  Optionjl<string> bandNames_opt("bn", "bandname", "Band name(s) corresponding to band index(es)","b");
+  Optionjl<unsigned short> bstart_opt("sband", "startband", "Start band sequence number");
+  Optionjl<unsigned short> bend_opt("eband", "endband", "End band sequence number");
+  Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Invalid value(s) for input image");
+  Optionjl<unsigned int> bndnodata_opt("bndnodata", "bndnodata", "Band in input image to check if pixel is valid (used for srcnodata)", 0);
+  Optionjl<string> label_opt("cn", "cname", "Name of the class label in the output vector dataset", "label");
+  Optionjl<std::string> fid_opt("fid", "fid", "Create extra field with field identifier (sequence in which the features have been read");
+  Optionjl<short> down_opt("down", "down", "Down sampling factor", 1);
+  Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
 
   bstart_opt.setHide(1);
   bend_opt.setHide(1);

@@ -22,7 +22,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <iostream>
 #include "base/Vector2d.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "algorithms/StatFactory.h"
 #include "algorithms/Egcs.h"
 #include "apps/AppFactory.h"
@@ -79,7 +79,7 @@ JimList& JimList::open(const std::string& strjson){
 }
 
 JimList& JimList::open(app::AppFactory& theApp){
-  Optionpk<std::string> json_opt("json", "json", "The json object");
+  Optionjl<std::string> json_opt("json", "json", "The json object");
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
     doProcess=json_opt.retrieveOption(theApp);

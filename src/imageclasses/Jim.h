@@ -366,17 +366,17 @@ class Jim : public std::enable_shared_from_this<Jim>
      ///Get the number of planes of this dataset
      int nrOfPlane() const { return m_nplane;};
   ///Is this dataset georeferenced (pixel size in y must be negative) ?
-  bool isGeoRef() const {std::vector<double> gt(6);getGeoTransform(gt);if(gt[5]<0) return true;else return false;};
+  bool isGeoRef() const {std::vector<double> gt(6);getGeoTransform(gt);if(gt.size()!=6) return false;else if(gt[5]<0) return true;else return false;};
   ///Get the projection string (deprecated, use getProjectionRef instead)
   std::string getProjection() const;
   ///Get the projection reference
   std::string getProjectionRef() const;
   ///Get the geotransform data for this dataset as a list of doubles
-  CPLErr getGeoTransform(double& gt0, double& gt1, double& gt2, double& gt3, double& gt4, double& gt5) const{std::vector<double> gt(6); CPLErr result=getGeoTransform(gt);gt0=gt[0];gt1=gt[1];gt2=gt[2];gt3=gt[3];gt4=gt[4];gt5=gt[5];return result;};
+  void getGeoTransform(double& gt0, double& gt1, double& gt2, double& gt3, double& gt4, double& gt5) const{std::vector<double> gt(6); getGeoTransform(gt);if (gt.size()==6){gt0=gt[0];gt1=gt[1];gt2=gt[2];gt3=gt[3];gt4=gt[4];gt5=gt[5];}};
   /* std::string getGeoTransform() const; */
   ///Get the geotransform data for this dataset
-  CPLErr getGeoTransform(std::vector<double>& gt) const;
-  CPLErr getGeoTransform(double* gt) const;
+  void getGeoTransform(std::vector<double>& gt) const;
+  void getGeoTransform(double* gt) const;
   ///Set the geotransform data for this dataset
   CPLErr setGeoTransform(const std::vector<double>& gt);
   CPLErr setGeoTransform(double* gt);
@@ -700,9 +700,9 @@ class Jim : public std::enable_shared_from_this<Jim>
 
   ///assignment operator
   /* Jim& operator=(Jim& imgSrc); */
-/* #if MIALIB == 1 */
-/*   bool isEqual(std::shared_ptr<Jim> refImg); */
-/* #endif */
+#if MIALIB == 1
+  bool isEqual(std::shared_ptr<Jim> refImg);
+#endif
   //lib functions
   ///convert image
   CPLErr convert(Jim& imgWriter, app::AppFactory& app);

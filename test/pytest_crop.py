@@ -20,13 +20,17 @@ args = parser.parse_args()
 
 # try:
 if True:
+    print("createJim")
     jim0=jl.createJim(args.input)
     rules=['centroid','min','max','mean','stdev']
+    print("createVector")
     jlv=jl.createVector(args.extent);
     if os.path.basename(args.extent)=='nuts_italy.sqlite':
         if args.cut_to_cutline:
             print("cut out")
+            print("milano")
             jim_milano=jim0.cropOgr(jlv,{'ln':'milano','crop_to_cutline':True,'nodata':args.nodata,'align':True})
+            print("lodi")
             jim_lodi=jim0.cropOgr(jlv,{'ln':'lodi','crop_to_cutline':True,'nodata':args.nodata,'align':True})
         elif args.cut_in_cutline:
             print("cut within")

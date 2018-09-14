@@ -30,13 +30,13 @@ extern "C" {
 #include <config_jiplib.h>
 #include "Jim.h"
 #include "VectorOgr.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "algorithms/StatFactory.h"
 
 using namespace std;
 
-Jim::Jim() : m_nplane(1){
-  // reset();//todo: check if needed (was not reset in Jim)
+Jim::Jim(){
+  reset();
 }
 
 size_t Jim::getDataTypeSizeBytes(int band) const {
@@ -308,8 +308,6 @@ void Jim::reset()
   m_gt.resize(6);
   for(int index=0;index<6;++index){m_gt[index]=0;};
   m_noDataValues.clear();
-  m_scale.clear();
-  m_offset.clear();
   m_projection=std::string();
   m_scale.clear();
   m_offset.clear();
@@ -326,7 +324,6 @@ void Jim::reset()
   //is there any reason why we cannot set external data to false?
   m_externalData=false;
 #if MIALIB == 1
-  m_nplane=1;
   for(int iband=0;iband<m_mia.size();++iband)
     delete(m_mia[iband]);
   m_mia.clear();
@@ -340,6 +337,7 @@ void Jim::reset()
  * @param dataType The data type of the image (one of the GDAL supported datatypes: GDT_Byte, GDT_[U]Int[16|32], GDT_Float[32|64])
  **/
 Jim::Jim(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType){
+  reset();
   open(dataPointer,ncol,nrow,dataType);
 }
 
@@ -350,54 +348,65 @@ Jim::Jim(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType){
  * @param dataType The data type of the image (one of the GDAL supported datatypes: GDT_Byte, GDT_[U]Int[16|32], GDT_Float[32|64])
  **/
 Jim::Jim(std::vector<void*> dataPointers, int ncol, int nrow, const GDALDataType& dataType){
+  reset();
   open(dataPointers,ncol,nrow,dataType);
 }
 
 ///constructor opening an image in memory using an external data pointer
 Jim::Jim(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType){
+  reset();
   open(dataPointer,ncol,nrow,nplane,dataType);
 }
 ///constructor opening a multiband image in memory using an external data pointer
 Jim::Jim(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType){
+  reset();
   open(dataPointers,ncol,nrow,nplane,dataType);
 }
 
 Jim::Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory, const std::vector<std::string>& options){
+  reset();
   open(filename,imgSrc,memory,options);
 }
 
 #if MIALIB == 1
 ///constructor input image
 Jim::Jim(IMAGE *mia) : m_nplane(1){
+  reset();
   setMIA(mia,0);
 }
 #endif
 
 ///constructor output image
 Jim::Jim(const std::string& filename, bool readData, unsigned int memory){
+  reset();
   open(filename,readData,memory);
 }
 
 ///constructor output image
 Jim::Jim(Jim& imgSrc, bool copyData){
+  reset();
   open(imgSrc,copyData);
 }
 ///constructor output image
 Jim::Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory, const std::vector<std::string>& options){
+  reset();
   open(filename, ncol, nrow, nband, dataType, imageType, memory, options);
 }
 ///constructor output image with nplane
 Jim::Jim(int ncol, int nrow, int nband, int nplane, const GDALDataType& dataType){
+  reset();
   open(ncol,nrow,nband,nplane,dataType);
 }
 ///constructor output image
 Jim::Jim(int ncol, int nrow, int nband, const GDALDataType& dataType){
+  reset();
   open(ncol, nrow, nband, dataType);
 }
 //test
 // Jim::Jim(app::AppFactory &theApp): m_nplane(1), Jim(theApp){};
 Jim::Jim(app::AppFactory &theApp){
-  reset();open(theApp);
+  reset();
+  open(theApp);
 }
 
 
@@ -480,31 +489,31 @@ void Jim::freeMem()
  * @param refImg Use this as the reference image
  * @return true if image is equal to reference image
  **/
-// #if MIALIB == 1
-// bool Jim::isEqual(std::shared_ptr<Jim> refImg){
-//   bool isEqual=true;
-//   if(nrOfBand()!=refImg->nrOfBand())
-//     return(false);
-//   if(nrOfRow()!=refImg->nrOfRow())
-//     return(false);
-//   if(nrOfCol()!=refImg->nrOfCol())
-//     return(false);
+#if MIALIB == 1
+bool Jim::isEqual(std::shared_ptr<Jim> refImg){
+  bool isEqual=true;
+  if(nrOfBand()!=refImg->nrOfBand())
+    return(false);
+  if(nrOfRow()!=refImg->nrOfRow())
+    return(false);
+  if(nrOfCol()!=refImg->nrOfCol())
+    return(false);
 
-//   for(int iband=0;iband<nrOfBand();++iband){
-//     if(getDataType(iband)!=refImg->getDataType(iband)){
-//       isEqual=false;
-//       break;
-//     }
-//     IMAGE* refMIA=refImg->getMIA(iband);
-//     IMAGE* thisMIA=this->getMIA(iband);
-//     if(::imequalp(thisMIA,refMIA)){
-//       isEqual=false;
-//       break;
-//     }
-//   }
-//   return(isEqual);
-// }
-// #endif
+  for(int iband=0;iband<nrOfBand();++iband){
+    if(getDataType(iband)!=refImg->getDataType(iband)){
+      isEqual=false;
+      break;
+    }
+    IMAGE* refMIA=refImg->getMIA(iband);
+    IMAGE* thisMIA=this->getMIA(iband);
+    if(::imequalp(thisMIA,refMIA)){
+      isEqual=false;
+      break;
+    }
+  }
+  return(isEqual);
+}
+#endif
 /**
  * @param imgSrc Use this source image as a template to copy image attributes
  **/
@@ -662,8 +671,9 @@ CPLErr Jim::open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane
 }
 CPLErr Jim::close()
 {
-  if(m_gds)
+  if(m_gds){
     GDALClose(m_gds);
+  }
   reset();
 }
 
@@ -910,7 +920,7 @@ CPLErr Jim::copyGeoTransform(const Jim& imgSrc)
  * @param GeoTransform[4] rotation, 0 if image is "north up"
  * @param GeoTransform[5] n-s pixel resolution
  **/
-CPLErr Jim::getGeoTransform(double* gt) const{
+void Jim::getGeoTransform(double* gt) const{
   if(m_gt.size()==6){
     gt[0]=m_gt[0];
     gt[1]=m_gt[1];
@@ -918,27 +928,13 @@ CPLErr Jim::getGeoTransform(double* gt) const{
     gt[3]=m_gt[3];
     gt[4]=m_gt[4];
     gt[5]=m_gt[5];
-    return(CE_None);
   }
   else
-    return(CE_Failure);
+    gt=0;
 }
 
-CPLErr Jim::getGeoTransform(vector<double>& gt) const{
+void Jim::getGeoTransform(vector<double>& gt) const{
   gt=m_gt;
-  if(gt.size()==6){
-    return(CE_None);
-  }
-  else
-    return(CE_Failure);
-  // gt[0]=m_gt[0];
-  // gt[1]=m_gt[1];
-  // gt[2]=m_gt[2];
-  // gt[3]=m_gt[3];
-  // gt[4]=m_gt[4];
-  // gt[5]=m_gt[5];
-  // }
-  return(CE_None);
 }
 
 /**
@@ -1362,8 +1358,8 @@ CPLErr Jim::pushNoDataValue(double noDataValue)
 }
 
 CPLErr Jim::open(const std::string& filename, bool readData, unsigned int memory){
-  reset();
-  m_nplane=1;
+  // reset();
+  // m_nplane=1;
   m_access=READ_ONLY;
   m_filename = filename;
   registerDriver();
@@ -1490,41 +1486,41 @@ CPLErr Jim::registerDriver()
 //Open raster dataset for reading or writing
 CPLErr Jim::open(app::AppFactory &app){
   //input
-  Optionpk<std::string> input_opt("fn", "filename", "filename");
-  Optionpk<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
-  // Optionpk<std::string> extra_opt("extra", "extra", "RGDALRasterIOExtraArg (check http://www.gdal.org/structGDALRasterIOExtraArg.html)");
-  // Optionpk<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference system in EPSG format (e.g., epsg:3035)");//todo
+  Optionjl<std::string> input_opt("fn", "filename", "filename");
+  Optionjl<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
+  // Optionjl<std::string> extra_opt("extra", "extra", "RGDALRasterIOExtraArg (check http://www.gdal.org/structGDALRasterIOExtraArg.html)");
+  // Optionjl<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference system in EPSG format (e.g., epsg:3035)");//todo
   //output
-  Optionpk<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.");
-  Optionpk<int> nsample_opt("ns", "ncol", "Number of columns");
-  Optionpk<int> nline_opt("nl", "nrow", "Number of rows");
-  Optionpk<int> nband_opt("nb", "nband", "Number of bands",1);
-  Optionpk<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64})","Byte");
-  Optionpk<std::string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
-  Optionpk<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-  Optionpk<unsigned long int> seed_opt("seed", "seed", "seed value for random generator",0);
-  Optionpk<double> mean_opt("mean", "mean", "Mean value for random generator",0);
-  Optionpk<double> stdev_opt("stdev", "stdev", "Standard deviation for Gaussian random generator",0);
-  Optionpk<double> uniform_opt("uniform", "uniform", "start and end values for random value with uniform distribution",0);
-  Optionpk<std::string> assignSRS_opt("a_srs", "a_srs", "Assign the spatial reference for the output file, e.g., epsg:3035 to use European projection and force to European grid");
-  Optionpk<std::string> sourceSRS_opt("s_srs", "s_srs", "Source spatial reference for the input file, e.g., epsg:3035 to use European projection and force to European grid");
-  Optionpk<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference for the output file, e.g., epsg:3035 to use European projection and force to European grid");
-  // Optionpk<std::string> description_opt("d", "description", "Set image description");
+  Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.");
+  Optionjl<int> nsample_opt("ns", "ncol", "Number of columns");
+  Optionjl<int> nline_opt("nl", "nrow", "Number of rows");
+  Optionjl<int> nband_opt("nb", "nband", "Number of bands",1);
+  Optionjl<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64})","Byte");
+  Optionjl<std::string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
+  Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<unsigned long int> seed_opt("seed", "seed", "seed value for random generator",0);
+  Optionjl<double> mean_opt("mean", "mean", "Mean value for random generator",0);
+  Optionjl<double> stdev_opt("stdev", "stdev", "Standard deviation for Gaussian random generator",0);
+  Optionjl<double> uniform_opt("uniform", "uniform", "start and end values for random value with uniform distribution",0);
+  Optionjl<std::string> assignSRS_opt("a_srs", "a_srs", "Assign the spatial reference for the output file, e.g., epsg:3035 to use European projection and force to European grid");
+  Optionjl<std::string> sourceSRS_opt("s_srs", "s_srs", "Source spatial reference for the input file, e.g., epsg:3035 to use European projection and force to European grid");
+  Optionjl<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference for the output file, e.g., epsg:3035 to use European projection and force to European grid");
+  // Optionjl<std::string> description_opt("d", "description", "Set image description");
   //input and output
-  Optionpk<int> band_opt("b", "band", "Bands to open, index starts from 0");
-  Optionpk<std::string> extent_opt("e", "extent", "get boundary from extent from polygons in vector file");
-  Optionpk<double> ulx_opt("ulx", "ulx", "Upper left x value bounding box");
-  Optionpk<double> uly_opt("uly", "uly", "Upper left y value bounding box");
-  Optionpk<double> lrx_opt("lrx", "lrx", "Lower right x value bounding box");
-  Optionpk<double> lry_opt("lry", "lry", "Lower right y value bounding box");
-  Optionpk<double> dx_opt("dx", "dx", "Resolution in x");
-  Optionpk<double> dy_opt("dy", "dy", "Resolution in y");
-  Optionpk<bool> align_opt("align", "align", "Align output bounding box to input image",false);
-  Optionpk<std::string> access_opt("access", "access", "access (READ_ONLY, UPDATE)","READ_ONLY",2);
-  Optionpk<bool> noread_opt("noread", "noread", "do not read data when opening",false);
-  Optionpk<bool> band2plane_opt("band2plane", "band2plane", "read bands as planes",false);
-  Optionpk<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
-  Optionpk<short> verbose_opt("verbose", "verbose", "verbose output",0,2);
+  Optionjl<int> band_opt("b", "band", "Bands to open, index starts from 0");
+  Optionjl<std::string> extent_opt("e", "extent", "get boundary from extent from polygons in vector file");
+  Optionjl<double> ulx_opt("ulx", "ulx", "Upper left x value bounding box");
+  Optionjl<double> uly_opt("uly", "uly", "Upper left y value bounding box");
+  Optionjl<double> lrx_opt("lrx", "lrx", "Lower right x value bounding box");
+  Optionjl<double> lry_opt("lry", "lry", "Lower right y value bounding box");
+  Optionjl<double> dx_opt("dx", "dx", "Resolution in x");
+  Optionjl<double> dy_opt("dy", "dy", "Resolution in y");
+  Optionjl<bool> align_opt("align", "align", "Align output bounding box to input image",false);
+  Optionjl<std::string> access_opt("access", "access", "access (READ_ONLY, UPDATE)","READ_ONLY",2);
+  Optionjl<bool> noread_opt("noread", "noread", "do not read data when opening",false);
+  Optionjl<bool> band2plane_opt("band2plane", "band2plane", "read bands as planes",false);
+  Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+  Optionjl<short> verbose_opt("verbose", "verbose", "verbose output",0,2);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
@@ -2856,8 +2852,9 @@ std::string Jim::jim2json(){
 
 std::shared_ptr<Jim> Jim::clone(bool copyData) {
   std::shared_ptr<Jim> pJim=std::dynamic_pointer_cast<Jim>(cloneImpl(copyData));
-  if(pJim)
+  if(pJim){
     return(pJim);
+  }
   else{
     std::cerr << "Warning: static pointer cast may slice object" << std::endl;
     return(std::static_pointer_cast<Jim>(cloneImpl(copyData)));
@@ -3120,11 +3117,11 @@ CPLErr Jim::setFile(const std::string& filename, const std::string& imageType, u
  * @param nodata Nodata value to put in image.
  **/
 CPLErr Jim::setFile(app::AppFactory &app){
-  Optionpk<std::string> input_opt("fn", "filename", "filename");
-  Optionpk<std::string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
-  Optionpk<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-  Optionpk<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.");
-  Optionpk<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+  Optionjl<std::string> input_opt("fn", "filename", "filename");
+  Optionjl<std::string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
+  Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.");
+  Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
 
   option_opt.setHide(1);
   memory_opt.setHide(1);
@@ -3748,11 +3745,11 @@ CPLErr Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2, double value){
 }
 
 CPLErr Jim::setThreshold(Jim& imgWriter, app::AppFactory &theApp){
-  Optionpk<double> min_opt("min", "min", "minimum value to be valid");
-  Optionpk<double> max_opt("max", "max", "maximum value to be valid");
-  Optionpk<double> value_opt("value", "value", "value to be set if within min and max (if not set, valid pixels will remain their input value)");
-  Optionpk<bool> abs_opt("abs", "abs", "check for absolute values",false);
-  Optionpk<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.");
+  Optionjl<double> min_opt("min", "min", "minimum value to be valid");
+  Optionjl<double> max_opt("max", "max", "maximum value to be valid");
+  Optionjl<double> value_opt("value", "value", "value to be set if within min and max (if not set, valid pixels will remain their input value)");
+  Optionjl<bool> abs_opt("abs", "abs", "check for absolute values",false);
+  Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.");
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   doProcess=min_opt.retrieveOption(theApp);
@@ -3799,7 +3796,10 @@ CPLErr Jim::setThreshold(Jim& imgWriter, app::AppFactory &theApp){
 
 ///crop Jim image in memory returning Jim image
 std::shared_ptr<Jim> Jim::cropOgr(VectorOgr& sampleReader, app::AppFactory& app){
+  std::cout << "we are entering Jim::createImg" << std::endl;
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
+  std::cout << "we are entering Jim::crop" << std::endl;
+  std::cout << "imgWriter has m_gds: " << m_gds << std::endl;
   crop(sampleReader, *imgWriter, app);
   return(imgWriter);
 }
@@ -3813,12 +3813,12 @@ std::shared_ptr<Jim> Jim::warp(app::AppFactory& theApp){
 
 ///convert Jim image in memory returning Jim image (alias for crop)
 CPLErr Jim::warp(Jim& imgWriter, app::AppFactory &theApp){
-  Optionpk<std::string> sourceSRS_opt("s_srs", "s_srs", "Source spatial reference for the input file, e.g., epsg:3035 to use European projection and force to European grid");
-  Optionpk<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference for the output file, e.g., epsg:3035 to use European projection and force to European grid");
-  Optionpk<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
-  Optionpk<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.",0);
-  Optionpk<std::string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
-  Optionpk<short> verbose_opt("verbose", "verbose", "verbose output",0,2);
+  Optionjl<std::string> sourceSRS_opt("s_srs", "s_srs", "Source spatial reference for the input file, e.g., epsg:3035 to use European projection and force to European grid");
+  Optionjl<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference for the output file, e.g., epsg:3035 to use European projection and force to European grid");
+  Optionjl<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
+  Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.",0);
+  Optionjl<std::string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
+  Optionjl<short> verbose_opt("verbose", "verbose", "verbose output",0,2);
 
   CPLErr res=CE_None;
 

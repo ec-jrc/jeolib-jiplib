@@ -6,7 +6,7 @@ Change log
 ***********************************************************************/
 #include <memory>
 #include <string>
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "algorithms/StatFactory.h"
 #include "imageclasses/Jim.h"
 
@@ -15,10 +15,10 @@ using namespace statfactory;
 
 int main(int argc, char *argv[])
 {
-  Optionpk<string> output_opt("o", "output", "Output image file");
-  Optionpk<string> oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
-  Optionpk<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-  Optionpk<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+  Optionjl<string> output_opt("o", "output", "Output image file");
+  Optionjl<string> oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
+  Optionjl<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
 
   memory_opt.setHide(1);
 

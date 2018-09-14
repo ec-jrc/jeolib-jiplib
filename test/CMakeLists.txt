@@ -25,7 +25,7 @@ set(TESTAPPS
   testMemoryLeak
   testCreateImg
   test2
-  pktestexternal
+  jltestexternal
   )
 
 set(JIPLIBS
@@ -59,12 +59,10 @@ endforeach()
 # add_executable(test2 ${PROJECT_TEST_DIR}/test2.cc)
 # target_link_libraries( testCreateImg
 #   ${JIPLIB_LIB_NAME}
-#   ${PKTOOLS_LIBRARIES}
 #   ${GSL_LIBRARIES}
 #   )
 # target_link_libraries( test2
 #   ${JIPLIB_LIB_NAME}
-#   ${PKTOOLS_LIBRARIES}
 #   ${GSL_LIBRARIES}
 #   )
 

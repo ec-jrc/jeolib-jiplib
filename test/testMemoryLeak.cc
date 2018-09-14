@@ -6,7 +6,7 @@ Change log
 ***********************************************************************/
 #include <memory>
 #include <string>
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "algorithms/StatFactory.h"
 #include "imageclasses/Jim.h"
 
@@ -15,8 +15,8 @@ using namespace statfactory;
 
 int main(int argc, char *argv[])
 {
-  Optionpk<int> number_opt("n", "number", "Number of images to create for memory test",10);
-  Optionpk<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+  Optionjl<int> number_opt("n", "number", "Number of images to create for memory test",10);
+  Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
 
   memory_opt.setHide(1);
   try{

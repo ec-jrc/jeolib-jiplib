@@ -1,5 +1,5 @@
 /**********************************************************************
-pksetmask_lib.cc: program to apply mask image (set invalid values) to raster image
+jlsetmask_lib.cc: program to apply mask image (set invalid values) to raster image
 Copyright (C) 2008-2016 Pieter Kempeneers
 
 This file is part of pktools
@@ -21,7 +21,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "imageclasses/Jim.h"
 #include "imageclasses/VectorOgr.h"
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "apps/AppFactory.h"
 
 using namespace std;
@@ -53,16 +53,16 @@ shared_ptr<Jim> Jim::setMask(VectorOgr& ogrReader, app::AppFactory& app){
  **/
 CPLErr Jim::setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app){
   //command line options
-  // Optionpk<string> mask_opt("m", "mask", "Mask image(s)");
-  Optionpk<string> vectorMask_opt("vm", "vectormask", "Vector mask dataset(s)");
-  Optionpk<string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
-  Optionpk<int> msknodata_opt("msknodata", "msknodata", "Mask value(s) where image has nodata. Use one value for each mask, or multiple values for a single mask.", 1);
-  Optionpk<short> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed). Provide band for each mask.", 0);
-  Optionpk<char> operator_opt("p", "operator", "Operator: < = > !. Use operator for each msknodata option", '=');
-  Optionpk<double> nodata_opt("nodata", "nodata", "nodata value to put in image if not valid", 0);
-  Optionpk<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ALL_TOUCHED=TRUE");
-  Optionpk<string> layernames_opt("ln", "ln", "Layer names");
-  Optionpk<short> verbose_opt("v", "verbose", "verbose", 0,2);
+  // Optionjl<string> mask_opt("m", "mask", "Mask image(s)");
+  Optionjl<string> vectorMask_opt("vm", "vectormask", "Vector mask dataset(s)");
+  Optionjl<string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
+  Optionjl<int> msknodata_opt("msknodata", "msknodata", "Mask value(s) where image has nodata. Use one value for each mask, or multiple values for a single mask.", 1);
+  Optionjl<short> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed). Provide band for each mask.", 0);
+  Optionjl<char> operator_opt("p", "operator", "Operator: < = > !. Use operator for each msknodata option", '=');
+  Optionjl<double> nodata_opt("nodata", "nodata", "nodata value to put in image if not valid", 0);
+  Optionjl<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ALL_TOUCHED=TRUE");
+  Optionjl<string> layernames_opt("ln", "ln", "Layer names");
+  Optionjl<short> verbose_opt("v", "verbose", "verbose", 0,2);
 
   otype_opt.setHide(1);
   mskband_opt.setHide(1);
@@ -380,11 +380,11 @@ CPLErr Jim::setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app){
  **/
 CPLErr Jim::setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app){
   //command line options
-  Optionpk<string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
-  Optionpk<double> nodata_opt("nodata", "nodata", "nodata value to put in image if not valid", 0);
-  Optionpk<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ALL_TOUCHED=TRUE");
-  Optionpk<string> layernames_opt("ln", "ln", "Layer names");
-  Optionpk<short> verbose_opt("v", "verbose", "verbose", 0,2);
+  Optionjl<string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
+  Optionjl<double> nodata_opt("nodata", "nodata", "nodata value to put in image if not valid", 0);
+  Optionjl<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ALL_TOUCHED=TRUE");
+  Optionjl<string> layernames_opt("ln", "ln", "Layer names");
+  Optionjl<short> verbose_opt("v", "verbose", "verbose", 0,2);
 
   otype_opt.setHide(1);
 

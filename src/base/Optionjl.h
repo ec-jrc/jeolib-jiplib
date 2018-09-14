@@ -1,5 +1,5 @@
 /**********************************************************************
-Optionpk.h: class to handle command line options (inherits from stl vector class)
+Optionjl.h: class to handle command line options (inherits from stl vector class)
 Copyright (C) 2008-2012 Pieter Kempeneers
 
 This file is part of pktools
@@ -71,20 +71,20 @@ All calls to retrieveOption should reside in a try{} block. If one of the reserv
 - `version`
 is used, an exception of type std::string is thrown. This can be caught with a catch(string predefinedString) right after the try block, where the message can be sent to stdout and the program can be ended.
 
-Similarly, if help is invoked with the short option `-h` or long option `--help`, the main program is informed by the return value `false` of \ref retrieveOption (for any option). An example how to use Optionpk is shown in \ref pktestOption.cc
+Similarly, if help is invoked with the short option `-h` or long option `--help`, the main program is informed by the return value `false` of \ref retrieveOption (for any option). An example how to use Optionjl is shown in \ref pktestOption.cc
 **/
 
-template<class T> class Optionpk : public std::vector <T>
+template<class T> class Optionjl : public std::vector <T>
 {
 public:
   ///default constructor
-  Optionpk();
+  Optionjl();
   ///constructor for option without default value
-  Optionpk(const std::string& shortName, const std::string& longName, const std::string& helpInfo);
+  Optionjl(const std::string& shortName, const std::string& longName, const std::string& helpInfo);
   ///constructor for option with default value. Option can be hidden for help info
-  Optionpk(const std::string& shortName, const std::string& longName, const std::string& helpInfo,const T& defaultValue, short hide=0);
+  Optionjl(const std::string& shortName, const std::string& longName, const std::string& helpInfo,const T& defaultValue, short hide=0);
   ///default destructor
-  ~Optionpk();
+  ~Optionjl();
   ///set help information
   void setHelp(const std::string& helpInfo){m_help=helpInfo;};
   ///hide option from short help -h (1) or make invisible to short and long help --help (2)
@@ -97,7 +97,7 @@ public:
   bool retrieveOption(const app::AppFactory& app);
   bool retrieveOption(app::AppFactory& app);
   ///print values for this option
-  template<class T1> friend std::ostream& operator<<(std::ostream & os, const Optionpk<T1>& theOption);
+  template<class T1> friend std::ostream& operator<<(std::ostream & os, const Optionjl<T1>& theOption);
   ///set all attributes of the option, except default and hide
   void setAll(const std::string& shortName, const std::string& longName, const std::string& helpInfo);
   ///set all attributes of the option
@@ -168,7 +168,7 @@ public:
   short m_hide;
 };
 
-template<class T1> std::ostream& operator<<(std::ostream& os, const Optionpk<T1>& theOption)
+template<class T1> std::ostream& operator<<(std::ostream& os, const Optionjl<T1>& theOption)
 {
   os << theOption.getLongName() << ": ";
   for(int index=0;index<theOption.size();++index)
@@ -177,7 +177,7 @@ template<class T1> std::ostream& operator<<(std::ostream& os, const Optionpk<T1>
   return os;
 }
 
-template<class T> inline Optionpk<T>::Optionpk()
+template<class T> inline Optionjl<T>::Optionjl()
 : m_hasDefault(false)
 {
 }
@@ -188,7 +188,7 @@ shortName is option invoked with `-`\n
 longName is option invoked with `--`\n
 helpInfo is the help message that is shown when option -h or --help is invoked\n
 **/
-template<class T> inline Optionpk<T>::Optionpk(const std::string& shortName, const std::string& longName, const std::string& helpInfo)
+template<class T> inline Optionjl<T>::Optionjl(const std::string& shortName, const std::string& longName, const std::string& helpInfo)
 : m_hasDefault(false)
 {
   setAll(shortName,longName,helpInfo);
@@ -204,12 +204,12 @@ hide=0 : option is visible for in both short (`-h`). Typical use: mandatory opti
 hide=1 : option is only visible in long help (`--help`). Typical use: expert options\n
 hide=2 : option is hidden for user. Typical use: Easter eggs or options only known to author
 **/
-template<class T> inline Optionpk<T>::Optionpk(const std::string& shortName, const std::string& longName, const std::string& helpInfo,const T& defaultValue, short hide)
+template<class T> inline Optionjl<T>::Optionjl(const std::string& shortName, const std::string& longName, const std::string& helpInfo,const T& defaultValue, short hide)
 {
   setAll(shortName,longName,helpInfo,defaultValue, hide);
 }
 
-template<class T> inline std::string Optionpk<T>::usage() const
+template<class T> inline std::string Optionjl<T>::usage() const
 {
   std::ostringstream helpss;
   std::string shortOption=m_shortName;
@@ -234,7 +234,7 @@ template<class T> inline std::string Optionpk<T>::usage() const
   return helpss.str();
 }
 
-template<class T> inline std::string Optionpk<T>::usageDoxypar() const
+template<class T> inline std::string Optionjl<T>::usageDoxypar() const
 {
   std::ostringstream helpss;
   std::string shortOption=m_shortName;
@@ -252,7 +252,7 @@ template<class T> inline std::string Optionpk<T>::usageDoxypar() const
   return helpss.str();
 }
 
-template<class T> inline std::string Optionpk<T>::usageDict() const
+template<class T> inline std::string Optionjl<T>::usageDict() const
 {
   std::ostringstream helpss;
   std::string shortOption=m_shortName;
@@ -270,7 +270,7 @@ template<class T> inline std::string Optionpk<T>::usageDict() const
   return helpss.str();
 }
 
-template<class T> inline std::string Optionpk<T>::usageDoxygen() const
+template<class T> inline std::string Optionjl<T>::usageDoxygen() const
 {
   std::ostringstream helpss;
   std::string shortOption=m_shortName;
@@ -296,7 +296,7 @@ template<class T> inline std::string Optionpk<T>::usageDoxygen() const
   return helpss.str();
 }
 
-template<class T> inline void Optionpk<T>::setAll(const std::string& shortName, const std::string& longName, const std::string& helpInfo)
+template<class T> inline void Optionjl<T>::setAll(const std::string& shortName, const std::string& longName, const std::string& helpInfo)
 {
   m_shortName=shortName;
   m_longName=longName;
@@ -305,7 +305,7 @@ template<class T> inline void Optionpk<T>::setAll(const std::string& shortName, 
   m_hide=0;
 }
 
-template<class T> inline void Optionpk<T>::setAll(const std::string& shortName, const std::string& longName, const std::string& helpInfo,const T& defaultValue, short hide)
+template<class T> inline void Optionjl<T>::setAll(const std::string& shortName, const std::string& longName, const std::string& helpInfo,const T& defaultValue, short hide)
 {
   m_shortName=shortName;
   m_longName=longName;
@@ -317,15 +317,15 @@ template<class T> inline void Optionpk<T>::setAll(const std::string& shortName, 
 }
 
 
-template<class T> inline Optionpk<T>::~Optionpk()
+template<class T> inline Optionjl<T>::~Optionjl()
 {
 }
 
-template<class T> inline bool Optionpk<T>::retrieveOption(const app::AppFactory& app){
+template<class T> inline bool Optionjl<T>::retrieveOption(const app::AppFactory& app){
   return(retrieveOption(app.getArgc(),app.getArgv()));
 }
 
-template<class T> inline bool Optionpk<T>::retrieveOption(app::AppFactory& app){
+template<class T> inline bool Optionjl<T>::retrieveOption(app::AppFactory& app){
   if(getShortName()!="\0")
     app.registerShortOption(getShortName());
   if(getLongName()!="\0")
@@ -334,7 +334,7 @@ template<class T> inline bool Optionpk<T>::retrieveOption(app::AppFactory& app){
 }
 
 ///make sure to call this function first before using the option in main program (or segmentation fault will occur...)
-template<class T> inline bool Optionpk<T>::retrieveOption(int argc, const std::vector<std::string>& argv){
+template<class T> inline bool Optionjl<T>::retrieveOption(int argc, const std::vector<std::string>& argv){
   bool noHelp=true;//return value, alert main program that hard coded option (help, version, license, doxygen) was invoked
   std::string helpStringShort="-h";//short option for help (hard coded)
   std::string helpStringLong="--help";//long option for help (hard coded)
@@ -422,7 +422,7 @@ template<class T> inline bool Optionpk<T>::retrieveOption(int argc, const std::v
 /**
 make sure to call this function first before using the option in main program (or segmentation fault will occur...)
 **/
-template<class T> inline bool Optionpk<T>::retrieveOption(int argc, char **argv){
+template<class T> inline bool Optionjl<T>::retrieveOption(int argc, char **argv){
   bool noHelp=true;//return value, alert main program that hard coded option (help, version, license, doxygen) was invoked
   std::string helpStringShort="-h";//short option for help (hard coded)
   std::string helpStringLong="--help";//long option for help (hard coded)
@@ -504,10 +504,10 @@ template<class T> inline bool Optionpk<T>::retrieveOption(int argc, char **argv)
   return(noHelp);
 }
 
-//template<class T> typename std::vector<T>::const_iterator Optionpk<T>::findSubstring(const T& argument) const {std::string errorString="Error: findSubstring only defined for options of type std::string"; throw(errorString);}
+//template<class T> typename std::vector<T>::const_iterator Optionjl<T>::findSubstring(const T& argument) const {std::string errorString="Error: findSubstring only defined for options of type std::string"; throw(errorString);}
 
 ///specialization for bool
-template<> inline void Optionpk<bool>::setAll(const std::string& shortName, const std::string& longName, const std::string& helpInfo)
+template<> inline void Optionjl<bool>::setAll(const std::string& shortName, const std::string& longName, const std::string& helpInfo)
 {
   m_shortName=shortName;
   m_longName=longName;
@@ -517,7 +517,7 @@ template<> inline void Optionpk<bool>::setAll(const std::string& shortName, cons
 }
 
 ///specialization for bool
-template<> inline void Optionpk<bool>::setAll(const std::string& shortName, const std::string& longName, const std::string& helpInfo,const bool& defaultValue, short hide)
+template<> inline void Optionjl<bool>::setAll(const std::string& shortName, const std::string& longName, const std::string& helpInfo,const bool& defaultValue, short hide)
 {
   m_shortName=shortName;
   m_longName=longName;
@@ -529,20 +529,20 @@ template<> inline void Optionpk<bool>::setAll(const std::string& shortName, cons
 }
 
 ///specialization for bool
-template<> inline Optionpk<bool>::Optionpk(const std::string& shortName, const std::string& longName, const std::string& helpInfo)
+template<> inline Optionjl<bool>::Optionjl(const std::string& shortName, const std::string& longName, const std::string& helpInfo)
 {
   setAll(shortName,longName,helpInfo);
 }
 
 ///specialization for bool
-template<> inline Optionpk<bool>::Optionpk(const std::string& shortName, const std::string& longName, const std::string& helpInfo,const bool& defaultValue, short hide)
+template<> inline Optionjl<bool>::Optionjl(const std::string& shortName, const std::string& longName, const std::string& helpInfo,const bool& defaultValue, short hide)
 {
   setAll(shortName,longName,helpInfo,defaultValue, hide);
 }
 
 //specialization (only makes sense for T=std::string), generic function throws exception
 //find a substring in string option (e.g., option is of type -co INTERLEAVE=BAND)
-template<> inline std::vector<std::string>::const_iterator Optionpk<std::string>::findSubstring(const std::string& argument) const{
+template<> inline std::vector<std::string>::const_iterator Optionjl<std::string>::findSubstring(const std::string& argument) const{
   std::vector<std::string>::const_iterator opit=this->begin();
   while(opit!=this->end()){
     if(opit->find(argument)!=std::string::npos)
@@ -554,7 +554,7 @@ template<> inline std::vector<std::string>::const_iterator Optionpk<std::string>
 
 //specialization (only makes sense for T=std::string), generic function throws exception
 //find a substring in string option (e.g., option is of type -co INTERLEAVE=BAND)
-template<> inline int Optionpk<std::string>::countSubstring(const std::string& argument) const{
+template<> inline int Optionjl<std::string>::countSubstring(const std::string& argument) const{
   int count=0;
   std::vector<std::string>::const_iterator opit=this->begin();
   while(opit!=this->end()){
