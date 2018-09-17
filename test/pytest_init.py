@@ -21,14 +21,20 @@ dict={'ulx':ULX,'uly':ULY,'lrx':LRX,'lry':LRY,'a_srs':projection}
 dict.update({'otype':'GDT_Float32'})
 nrow=1098
 ncol=1098
+# dict.update({'nrow':args.nrow,'ncol':args.ncol,'mean':args.value})
 dict.update({'nrow':args.nrow,'ncol':args.ncol})
 jim0=jl.createJim(**dict)
+print("gds before pointOpBlank:{}".format(jim0.getDataset()))
 jim0=jim0.pointOpBlank(args.value)
+print("gds after pointOpBlank:{}".format(jim0.getDataset()))
 theStats=jim0.getStats({'function':['min','max']})
+print("gds:{}".format(jim0.getDataset()))
+print("statistics:{}".format(theStats))
 if theStats['max']!=args.value:
     print("Failed: max")
 if theStats['min']!=args.value:
     print("Failed: min")
 else:
     print("Success: create georeferenced image with initialized pixel values")
+print("gds:{}".format(jim0.getDataset()))
 jim0.close()

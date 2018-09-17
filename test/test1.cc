@@ -5,7 +5,7 @@ History
 Change log
 ***********************************************************************/
 #include <memory>
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "algorithms/Filter2d.h"
 #include "apps/AppFactory.h"
 #include "imageclasses/ImgCollection.h"
@@ -16,14 +16,14 @@ using namespace jiplib;
 
 int main(int argc, char *argv[])
 {
-Optionpk<string>  input_opt("i", "input", "Input image file(s). If input contains multiple images, a multi-band output is created");
-  Optionpk<string>  output_opt("o", "output", "Output image file");
-  Optionpk<string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
-  Optionpk<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-  Optionpk<string>  projection_opt("a_srs", "a_srs", "Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
-  Optionpk<double> scale_opt("scale", "scale", "output=scale*input+offset");
-  Optionpk<double> offset_opt("offset", "offset", "output=scale*input+offset");
-  Optionpk<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+Optionjl<string>  input_opt("i", "input", "Input image file(s). If input contains multiple images, a multi-band output is created");
+  Optionjl<string>  output_opt("o", "output", "Output image file");
+  Optionjl<string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
+  Optionjl<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the spatial reference for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
+  Optionjl<double> scale_opt("scale", "scale", "output=scale*input+offset");
+  Optionjl<double> offset_opt("offset", "offset", "output=scale*input+offset");
+  Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
 
   option_opt.setHide(1);
   scale_opt.setHide(1);

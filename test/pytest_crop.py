@@ -18,14 +18,19 @@ parser.add_argument("-cut_to_cutline","--cut_to_cutline",help="Crop the extent o
 parser.add_argument("-cut_in_cutline","--cut_in_cutline",help="Crop the extent of the target dataset to the extent of the cutline, setting the inner area to nodata",dest="cut_in_cutline",required=False,type=bool,default=False)
 args = parser.parse_args()
 
-try:
+# try:
+if True:
+    print("createJim")
     jim0=jl.createJim(args.input)
     rules=['centroid','min','max','mean','stdev']
+    print("createVector")
     jlv=jl.createVector(args.extent);
     if os.path.basename(args.extent)=='nuts_italy.sqlite':
         if args.cut_to_cutline:
             print("cut out")
+            print("milano")
             jim_milano=jim0.cropOgr(jlv,{'ln':'milano','crop_to_cutline':True,'nodata':args.nodata,'align':True})
+            print("lodi")
             jim_lodi=jim0.cropOgr(jlv,{'ln':'lodi','crop_to_cutline':True,'nodata':args.nodata,'align':True})
         elif args.cut_in_cutline:
             print("cut within")
@@ -43,6 +48,8 @@ try:
         jim0.cropOgr(jlv,{'align':True}).write({'filename':args.output}).close()
     jim0.close()
     jlv.close()
+try:
+    print("ok")
     print("Success: crop")
 except:
     print("Failed: crop")

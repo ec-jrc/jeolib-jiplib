@@ -29,6 +29,8 @@ try:
     #create a copy without copying pixel values
     jim1=jl.createJim(jim0,False)
     #images should have same geoTransform
+    print("jim0.getGeoTransform:{}".format(jim0.getGeoTransform()))
+    print("jim1.getGeoTransform:{}".format(jim1.getGeoTransform()))
     if jim0.getGeoTransform() != jim0.getGeoTransform():
         print("Failed: geoTransform")
         throw()

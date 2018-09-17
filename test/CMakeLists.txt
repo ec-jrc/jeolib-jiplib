@@ -14,18 +14,22 @@
 #                      )
 # add_definitions (-DBOOST_TEST_DYN_LINK)
 
+# INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
+set(SRC_INCLUDE_DIR "../src")
+INCLUDE_DIRECTORIES(${SRC_INCLUDE_DIR})
+message(STATUS "include_directores for test: ${SRC_INCLUDE_DIR}")
+
 find_package(PythonInterp)
 
 set(TESTAPPS
   testMemoryLeak
   testCreateImg
   test2
-  pktestexternal
+  jltestexternal
   )
 
 set(JIPLIBS
   ${JIPLIB_LIB_NAME}
-  ${PKTOOLS_LIBRARIES}
   ${GSL_LIBRARIES}
   ${BOOST_LIBRARIES}
   ${Boost_FILESYSTEM_LIBRARY}
@@ -55,12 +59,10 @@ endforeach()
 # add_executable(test2 ${PROJECT_TEST_DIR}/test2.cc)
 # target_link_libraries( testCreateImg
 #   ${JIPLIB_LIB_NAME}
-#   ${PKTOOLS_LIBRARIES}
 #   ${GSL_LIBRARIES}
 #   )
 # target_link_libraries( test2
 #   ${JIPLIB_LIB_NAME}
-#   ${PKTOOLS_LIBRARIES}
 #   ${GSL_LIBRARIES}
 #   )
 
@@ -95,9 +97,9 @@ if(PYTHONINTERP_FOUND)
   set_tests_properties (test13 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
   add_test(test14 ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/pytest_createtemplate.py)
   set_tests_properties (test14 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
-  add_test(test141 ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/pytest_crop.py --input ${CMAKE_CURRENT_SOURCE_DIR}/data/modis_ndvi_2010.tif --extent ${CMAKE_CURRENT_SOURCE_DIR}/data/nuts_italy.sqlite --output ${CMAKE_BINARY_DIR}/Testing/crop.tif --cut_to_cutline True --nodata 0)
+  add_test(test141 ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/pytest_crop.py --input ${CMAKE_CURRENT_SOURCE_DIR}/data/modis_ndvi_2010.tif --extent ${CMAKE_CURRENT_SOURCE_DIR}/data/nuts_italy.sqlite --cut_to_cutline True --nodata 0 --output ${CMAKE_BINARY_DIR}/Testing/crop.tif)
   set_tests_properties (test141 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
-  add_test(test142 ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/pytest_crop.py --input ${CMAKE_CURRENT_SOURCE_DIR}/data/modis_ndvi_2010.tif --extent ${CMAKE_CURRENT_SOURCE_DIR}/data/nuts_italy.sqlite --output ${CMAKE_BINARY_DIR}/Testing/crop.tif --cut_in_cutline True --nodata 255)
+  add_test(test142 ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/pytest_crop.py --input ${CMAKE_CURRENT_SOURCE_DIR}/data/modis_ndvi_2010.tif --extent ${CMAKE_CURRENT_SOURCE_DIR}/data/nuts_italy.sqlite --cut_in_cutline True --nodata 255 --output ${CMAKE_BINARY_DIR}/Testing/crop.tif)
   set_tests_properties (test142 PROPERTIES PASS_REGULAR_EXPRESSION "Success")
   add_test(test143 ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/pytest_crop.py --input ${CMAKE_CURRENT_SOURCE_DIR}/data/modis_ndvi_2010.tif --extent ${CMAKE_CURRENT_SOURCE_DIR}/data/modis_ndvi_training.sqlite --output ${CMAKE_BINARY_DIR}/Testing/crop.tif)
   set_tests_properties (test143 PROPERTIES PASS_REGULAR_EXPRESSION "Success")

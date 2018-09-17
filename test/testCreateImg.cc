@@ -6,20 +6,19 @@ Change log
 ***********************************************************************/
 #include <memory>
 #include <string>
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "algorithms/StatFactory.h"
-#include "jim.h"
+#include "imageclasses/Jim.h"
 
 using namespace std;
-using namespace jiplib;
 using namespace statfactory;
 
 int main(int argc, char *argv[])
 {
-  Optionpk<string> output_opt("o", "output", "Output image file");
-  Optionpk<string> oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
-  Optionpk<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-  Optionpk<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+  Optionjl<string> output_opt("o", "output", "Output image file");
+  Optionjl<string> oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
+  Optionjl<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
 
   memory_opt.setHide(1);
 
@@ -39,8 +38,8 @@ int main(int argc, char *argv[])
     }
     Jim imgRaster(app);
     imgRaster.setFile(output_opt[0],oformat_opt[0],memory_opt[0],option_opt);
-    // ImgRaster imgRaster(output_opt[0],oformat_opt[0],memory_opt[0],option_opt);
-    // ImgRaster::createImg(imgRaster,app);
+    // Jim imgRaster(output_opt[0],oformat_opt[0],memory_opt[0],option_opt);
+    // Jim::createImg(imgRaster,app);
     imgRaster.close();
   }
   catch(string helpString){

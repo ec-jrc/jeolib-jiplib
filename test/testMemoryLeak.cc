@@ -6,18 +6,17 @@ Change log
 ***********************************************************************/
 #include <memory>
 #include <string>
-#include "base/Optionpk.h"
+#include "base/Optionjl.h"
 #include "algorithms/StatFactory.h"
-#include "jim.h"
+#include "imageclasses/Jim.h"
 
 using namespace std;
-using namespace jiplib;
 using namespace statfactory;
 
 int main(int argc, char *argv[])
 {
-  Optionpk<int> number_opt("n", "number", "Number of images to create for memory test",10);
-  Optionpk<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+  Optionjl<int> number_opt("n", "number", "Number of images to create for memory test",10);
+  Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
 
   memory_opt.setHide(1);
   try{
@@ -31,9 +30,8 @@ int main(int argc, char *argv[])
     std::shared_ptr<Jim> imgRaster2;
     for(int i=0;i<number_opt[0];++i){
       std::cout << "Creating shared pointer to image " << i << std::endl;
-      // std::shared_ptr<Jim> imgRaster=jiplib::Jim::createImg(app);
-      imgRaster1=jiplib::Jim::createImg(app);
-      imgRaster2=jiplib::Jim::createImg(app);
+      imgRaster1=Jim::createImg(app);
+      imgRaster2=Jim::createImg(app);
       std::cout << "Number of rows, cols, bands: "  << imgRaster1->nrOfRow() << ", " << imgRaster1->nrOfCol() << ", " << imgRaster1->nrOfBand() << std::endl;
       // std::cout << "getMax(): "  << imgRaster->getMax() << std::endl;
       imgRaster1->close();

@@ -8,18 +8,17 @@ Change log
 #include <string>
 #include <fstream>
 #include <assert.h>
-#include "base/Optionpk.h"
-#include "jim.h"
+#include "base/Optionjl.h"
+#include "imageclasses/Jim.h"
 
 using namespace std;
-using namespace jiplib;
 
 int main(int argc, char *argv[])
 {
-  Optionpk<string> input_opt("i", "input", "Input shape file");
-  Optionpk<string> output_opt("o", "output", "Output vector dataset");
-  Optionpk<string> attribute_opt("af", "afilter", "attribute filter");
-  Optionpk<short> verbose_opt("v", "verbose", "verbose (Default: 0)", 0,2);
+  Optionjl<string> input_opt("i", "input", "Input shape file");
+  Optionjl<string> output_opt("o", "output", "Output vector dataset");
+  Optionjl<string> attribute_opt("af", "afilter", "attribute filter");
+  Optionjl<short> verbose_opt("v", "verbose", "verbose (Default: 0)", 0,2);
 
   verbose_opt.setHide(2);
 
