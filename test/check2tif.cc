@@ -11,7 +11,6 @@ Change log
 #include "jim.h"
 
 using namespace std;
-using namespace jiplib;
 
 int main(int argc, char *argv[])
 {

@@ -46,42 +46,48 @@
 /*   return PyArray_Return(npArray); */
 /* } */
 
-/* #if MIALIB == 1 */
-/* %inline %{ */
-/*   void RasterIOMIALib( IMAGE *im, PyArrayObject *psArray) { */
-/*     psArray->data = (char *)memcpy((void *)(psArray->data), (void *)GetImPtr(im), GetImNx(im)*GetImNy(im)*(GetImBitPerPixel(im)/8) ); */
-/*   } */
-/* #endif */
+%inline %{
+  void RasterIOMIALib( IMAGE *im, PyArrayObject *psArray) {
+#if MIALIB == 1
+    psArray->data = (char *)memcpy((void *)(psArray->data), (void *)GetImPtr(im), GetImNx(im)*GetImNy(im)*(GetImBitPerPixel(im)/8) );
+#else
+    std::ostringstream errorStream;
+    errorStream << "Error: mialib not installed" << std::endl;
+    throw(errorStream.str());
+#endif
+  }
 
-/* #if MIALIB == 1 */
-/*   void _ConvertNumPyArrayToMIALibIMAGE( PyArrayObject *psArray, IMAGE *im ) { */
-/*     im->p_im=memcpy( (void *)GetImPtr(im), (void *)(psArray->data), GetImNx(im)*GetImNy(im)*(GetImBitPerPixel(im)/8)); */
-/*     return NO_ERROR; */
-/*   } */
-/* #endif */
+  void _ConvertNumPyArrayToMIALibIMAGE( PyArrayObject *psArray, IMAGE *im ) {
+#if MIALIB == 1
+    im->p_im=memcpy( (void *)GetImPtr(im), (void *)(psArray->data), GetImNx(im)*GetImNy(im)*(GetImBitPerPixel(im)/8));
+#else
+    std::ostringstream errorStream;
+    errorStream << "Error: mialib not installed" << std::endl;
+    throw(errorStream.str());
+#endif
+  }
 
-/*   void _ConvertNumPyArrayToJim( PyArrayObject *psArray, std::shared_ptr< Jim > ajim){ */
-/* #if MIALIB == 1 */
-/*     IMAGE *im=ajim->getMIA(); */
-/*     im->p_im=memcpy( (void *)GetImPtr(im), (void *)(psArray->data), GetImNx(im)*GetImNy(im)*GetImNz(im)*(GetImBitPerPixel(im)/8)); */
-/*     ajim->setMIA(); */
-/* #else */
-/*     return 1; */
-/* #endif */
-/*   } */
+  void _ConvertNumPyArrayToJim( PyArrayObject *psArray, std::shared_ptr< Jim > ajim){
+#if MIALIB == 1
+    IMAGE *im=ajim->getMIA();
+    im->p_im=memcpy( (void *)GetImPtr(im), (void *)(psArray->data), GetImNx(im)*GetImNy(im)*GetImNz(im)*(GetImBitPerPixel(im)/8));
+    ajim->setMIA();
+#else
+    std::ostringstream errorStream;
+    errorStream << "Error: mialib not installed" << std::endl;
+    throw(errorStream.str());
+#endif
+  }
 
   /* ERROR_TYPE RasterIOJim( std::shared_ptr< jiplib::Jim > ajim, PyArrayObject *psArray) { */
   /* int RasterIOJim( std::shared_ptr< jiplib::Jim > ajim, PyArrayObject *psArray) { */
   /* int RasterIOJim( std::shared_ptr< jiplib::Jim > ajim ) { */
-%inline %{
   void RasterIOJim( std::shared_ptr< Jim > ajim, int typeSizeByte, PyArrayObject *psArray) {
     psArray->data = (char *)memcpy((void *)(psArray->data), ajim->getDataPointer(), ajim->nrOfCol()*ajim->nrOfRow()*ajim->nrOfPlane()*typeSizeByte );
   }
 %}
 
 %pythoncode %{
-
-import jiplib
 
 
 import numpy
@@ -107,55 +113,55 @@ GDT_Float64 = 7
 JDT_UInt64 = 24
 JDT_Int64 = 25
 
-/* def NumPyToImDataTypeCode(numeric_type): */
-/*     """Converts a given numpy array data type code into the correspondent */
-/*     MIALib image data type code.""" */
-/*     if not isinstance(numeric_type, (numpy.dtype,type)): */
-/*         raise TypeError("Input must be a valid numpy Array data type") */
-/*     if numeric_type == numpy.uint8: */
-/*         return t_UCHAR */
-/*     elif numeric_type == numpy.uint16: */
-/*         return t_USHORT */
-/*     elif numeric_type == numpy.int16: */
-/*         return t_SHORT */
-/*     elif numeric_type == numpy.uint32: */
-/*         return t_UINT32 */
-/*     elif numeric_type == numpy.int32: */
-/*         return t_INT32 */
-/*     elif numeric_type == numpy.uint64: */
-/*         return t_UINT64 */
-/*     elif numeric_type == numpy.int64: */
-/*         return t_INT64 */
-/*     elif numeric_type == numpy.float32: */
-/*         return t_FLOAT */
-/*     elif numeric_type == numpy.float64: */
-/*         return t_DOUBLE */
-/*     else: */
-/*         raise TypeError("provided numeric_type not compatible with available IMAGE data types") */
+def NumPyToImDataTypeCode(numeric_type):
+    """Converts a given numpy array data type code into the correspondent
+    MIALib image data type code."""
+    if not isinstance(numeric_type, (numpy.dtype,type)):
+        raise TypeError("Input must be a valid numpy Array data type")
+    if numeric_type == numpy.uint8:
+        return t_UCHAR
+    elif numeric_type == numpy.uint16:
+        return t_USHORT
+    elif numeric_type == numpy.int16:
+        return t_SHORT
+    elif numeric_type == numpy.uint32:
+        return t_UINT32
+    elif numeric_type == numpy.int32:
+        return t_INT32
+    elif numeric_type == numpy.uint64:
+        return t_UINT64
+    elif numeric_type == numpy.int64:
+        return t_INT64
+    elif numeric_type == numpy.float32:
+        return t_FLOAT
+    elif numeric_type == numpy.float64:
+        return t_DOUBLE
+    else:
+        raise TypeError("provided numeric_type not compatible with available IMAGE data types")
 
-/* def ImDataToNumPyTypeCode(ImDataType): */
-/*     if not isinstance(ImDataType, int): */
-/*         raise TypeError("Input must be an integer value") */
-/*     if ImDataType == t_UCHAR: */
-/*         return numpy.uint8 */
-/*     elif ImDataType == t_USHORT: */
-/*         return numpy.uint16 */
-/*     elif ImDataType == t_SHORT: */
-/*         return numpy.int16 */
-/*     elif ImDataType == t_UINT32: */
-/*         return numpy.uint32 */
-/*     elif ImDataType == t_INT32: */
-/*         return numpy.int32 */
-/*     elif ImDataType == t_UINT64: */
-/*         return numpy.uint64 */
-/*     elif ImDataType == t_INT64: */
-/*         return numpy.int64 */
-/*     elif ImDataType == t_FLOAT: */
-/*         return numpy.float32 */
-/*     elif ImDataType == t_DOUBLE: */
-/*         return numpy.float64 */
-/*     else: */
-/*         return None */
+def ImDataToNumPyTypeCode(ImDataType):
+    if not isinstance(ImDataType, int):
+        raise TypeError("Input must be an integer value")
+    if ImDataType == t_UCHAR:
+        return numpy.uint8
+    elif ImDataType == t_USHORT:
+        return numpy.uint16
+    elif ImDataType == t_SHORT:
+        return numpy.int16
+    elif ImDataType == t_UINT32:
+        return numpy.uint32
+    elif ImDataType == t_INT32:
+        return numpy.int32
+    elif ImDataType == t_UINT64:
+        return numpy.uint64
+    elif ImDataType == t_INT64:
+        return numpy.int64
+    elif ImDataType == t_FLOAT:
+        return numpy.float32
+    elif ImDataType == t_DOUBLE:
+        return numpy.float64
+    else:
+        return None
 
 def JimToNumPyTypeCode(JimDataType):
     if JimDataType == GDT_Byte:
@@ -223,30 +229,38 @@ def JimGetTypeSizeByte(JimDataType):
     elif JimDataType == GDT_Float64:
         return 8
 
-/* def ConvertToNumPyArray( im ): */
-/*     buf_obj = numpy.empty([im.ny,im.nx], dtype = ImDataToNumPyTypeCode(im.DataType)) */
-/*     if RasterIOMIALib(im, buf_obj) != NO_ERROR: */
-/*         return None */
-/*     return buf_obj */
+def ConvertToNumPyArray( im ):
+  try:
+    buf_obj = numpy.empty([im.ny,im.nx], dtype = ImDataToNumPyTypeCode(im.DataType))
+    RasterIOMIALib(im, buf_obj)
+    return buf_obj
+  except:
+    return None
 
-/* def ConvertNumPyArrayToMIALibImage( psArray ): */
-/*     im=_mialib.create_image(NumPyToImDataTypeCode(psArray.dtype),psArray.shape[0],psArray.shape[1],1) */
-/*     if _ConvertNumPyArrayToMIALibIMAGE(psArray, im) != NO_ERROR: */
-/*         return None */
-/*     return im */
+def ConvertNumPyArrayToMIALibImage( psArray ):
+  try:
+    im=_mialib.create_image(NumPyToImDataTypeCode(psArray.dtype),psArray.shape[0],psArray.shape[1],1)
+    _ConvertNumPyArrayToMIALibIMAGE(psArray, im)
+    return im
+  except:
+    return None
 
 def np2jim(psArray):
-  otype = NumPyToJimDataTypeCode(psArray.dtype)
-    /* jim=jiplib.createJim(nrow=psArray.shape[0],ncol=psArray.shape[1],otype=otype) */
-    /* _ConvertNumPyArrayToJim(psArray, jim) */
-  jim=createjim()
-  jim.open(dataPointer,ncol,nrow,otype);
-  return jim
+  try:
+    otype = NumPyToJimDataTypeCode(psArray.dtype)
+    jim=Jim.createImg({'nrow': psArray.shape[0], 'ncol': psArray.shape[1], 'otype': otype})
+    _ConvertNumPyArrayToJim(psArray, jim)
+    return jim
+  except:
+    return None
 
 def jim2np(jim):
+  try:
     buf_obj = numpy.zeros([jim.nrOfRow(),jim.nrOfCol(),jim.nrOfPlane()], dtype = JimToNumPyTypeCode(jim.getDataType()))
     typeSizeByte=JimGetTypeSizeByte(jim.getDataType())
     RasterIOJim(jim, typeSizeByte, buf_obj)
     return buf_obj
+  except:
+    return None
 
 %}

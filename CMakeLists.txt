@@ -96,7 +96,7 @@ if(PYTHONLIBS_FOUND)
   message(STATUS "Found Python library: ${PYTHON_LIBRARY}")
   message(STATUS "Found Python include dir: ${PYTHON_INCLUDE_DIR}")
 else(PYTHONLIBS_FOUND)
-  message(STATUS "Error: PYTHON exact version ${PYTHON_VERSION} not found, trying default")
+  message(STATUS "Warning: PYTHON exact version ${PYTHON_VERSION} not found, trying default")
   FIND_PACKAGE(PythonLibs REQUIRED)
 endif(PYTHONLIBS_FOUND)
 
@@ -163,6 +163,7 @@ include_directories("${PROJECT_BINARY_DIR}/src")#  this is where sources will go
 ###############################################################################
 # Instruct CMake to inspect the following subfolders (with CMakeLists.txt in each subfolder)
 # add_subdirectory ("${PROJECT_DOC_DIR}")
+#todo: add if condition with TEST?
 add_subdirectory ("${PROJECT_TEST_DIR}")
 
 if (BUILD_WITH_FANN)
@@ -219,9 +220,14 @@ set(ALGOR_H
   ${ALGOR_SRC_DIR}/Filter2d.h
   ${ALGOR_SRC_DIR}/ImgRegression.h
   ${ALGOR_SRC_DIR}/StatFactory.h
-  ${ALGOR_SRC_DIR}/myfann_cpp.h
   ${ALGOR_SRC_DIR}/svm.h
   )
+
+if(BUILD_WITH_FANN)
+  set(ALGOR_H ${ALGOR_H}
+    ${ALGOR_SRC_DIR}/myfann_cpp.h
+    )
+endif(BUILD_WITH_FANN)
 
 set(ALGOR_CC
   ${ALGOR_SRC_DIR}/ConfusionMatrix.cc
@@ -278,8 +284,6 @@ set(IMGCLASS_CC
   ${IMGCLASS_SRC_DIR}/jlclassify_lib.cc
   ${IMGCLASS_SRC_DIR}/jlsvm_lib.cc
   ${IMGCLASS_SRC_DIR}/jlsvmogr_lib.cc
-  ${IMGCLASS_SRC_DIR}/jlann_lib.cc
-  ${IMGCLASS_SRC_DIR}/jlannogr_lib.cc
   ${IMGCLASS_SRC_DIR}/jldiff_lib.cc
   ${IMGCLASS_SRC_DIR}/jlvalidate_lib.cc
   ${IMGCLASS_SRC_DIR}/jlstretch_lib.cc
@@ -290,6 +294,13 @@ set(IMGCLASS_CC
   ${IMGCLASS_SRC_DIR}/jlstat_lib.cc
   )
 
+if(BUILD_WITH_FANN)
+  set(IMGCLASS_CC ${IMGCLASS_CC}
+  ${IMGCLASS_SRC_DIR}/jlann_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlannogr_lib.cc
+  )
+endif(BUILD_WITH_FANN)
+
 if(BUILD_WITH_MIALIB)
   set(MIA_BOOL 1)
   message(STATUS "build with mialib: ${MIA_BOOL}")
@@ -299,7 +310,6 @@ if(BUILD_WITH_MIALIB)
 
   INCLUDE_DIRECTORIES(${MIA_INCLUDE_DIR})
   LINK_DIRECTORIES(${MIA_LIB_PATH})
-
 else(BUILD_WITH_MIALIB)
   set(MIA_BOOL 0)
   message(STATUS "build with mialib: ${MIA_BOOL}")
@@ -331,6 +341,9 @@ if(PYTHONINTERP_FOUND)
     file(GLOB MIA_HEADER_FILES ${MIA_INCLUDE_DIR}/mialib_*.h)
     MESSAGE(STATUS "MIA_INCLUDE_DIR: ${MIA_INCLUDE_DIR}")
     MESSAGE(STATUS "MIA_HEADER_FILES: ${MIA_HEADER_FILES}")
+    IF("${MIA_HEADER_FILES}" STREQUAL "")
+      MESSAGE(FATAL_ERROR "Error: no header files found for mialib")
+    ENDIF("${MIA_HEADER_FILES}" STREQUAL "")
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/mialib_imagetype)
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/mialib_imagelisttype)
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/mialib_errortype_nd)
@@ -420,39 +433,38 @@ SET_TARGET_PROPERTIES(${JIPLIB_LIB_NAME}
   VERSION ${JIPLIB_VERSION}
 )
 
+target_link_libraries(
+  ${JIPLIB_LIB_NAME}
+  ${BOOST_LIBRARIES}
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
+  ${Boost_SERIALIZATION_LIBRARY}
+  ${BOOST_ARCHIVE_LIBRARY}
+  )
+
 if(BUILD_WITH_MIALIB)
   target_link_libraries(
     ${JIPLIB_LIB_NAME}
-    ${BOOST_LIBRARIES}
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_SERIALIZATION_LIBRARY}
-    ${BOOST_ARCHIVE_LIBRARY}
     ${MIA_LIB_NAME}
-    ${PYTHON_LIBRARIES}
-    gomp
-    ${GDAL_LIBRARIES}
-    ${JSONCPP_LIBRARIES}
-    ${GDAL_LIBRARIES}
-    ${GSL_LIBRARIES}
-    ${FANN_LIBRARIES}
-    )
-else(BUILD_WITH_MIALIB)
-  target_link_libraries(
-    ${JIPLIB_LIB_NAME}
-    ${BOOST_LIBRARIES}
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_SERIALIZATION_LIBRARY}
-    ${BOOST_ARCHIVE_LIBRARY}
-    ${PYTHON_LIBRARIES}
-    gomp
-    ${JSONCPP_LIBRARIES}
-    ${GDAL_LIBRARIES}
-    ${GSL_LIBRARIES}
-    ${FANN_LIBRARIES}
     )
 endif(BUILD_WITH_MIALIB)
+
+target_link_libraries(
+  ${JIPLIB_LIB_NAME}
+  ${PYTHON_LIBRARIES}
+  gomp
+  ${JSONCPP_LIBRARIES}
+  ${GDAL_LIBRARIES}
+  ${GSL_LIBRARIES}
+  )
+
+if(BUILD_WITH_FANN)
+  target_link_libraries(
+    ${JIPLIB_LIB_NAME}
+    ${FANN_LIBRARIES}
+    )
+endif(BUILD_WITH_FANN)
+
 ########## SWIG #############
 set(PYTHON_SRC_DIR src/swig)
 # set(PYTHON_CC
