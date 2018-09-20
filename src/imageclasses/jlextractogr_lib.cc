@@ -749,7 +749,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       // readLayer->ResetReading();
       // while( (readFeature = readLayer->GetNextFeature()) != NULL ){
 
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
@@ -2937,7 +2937,7 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
     // readLayer->ResetReading();
     // while( (readFeature = readLayer->GetNextFeature()) != NULL ){
 
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif

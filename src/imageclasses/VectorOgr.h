@@ -29,12 +29,13 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include "apps/AppFactory.h"
 #include "ogr_feature.h"
 #include "ogrsf_frmts.h"
-#include "Jim.h"
+#include "imageclasses/Jim.h"
 #include "cpl_string.h"
 
 /* enum OGR_DATA_ACCESS { READ_ONLY = 0, UPDATE = 1, WRITE = 3}; */
 enum JOIN_METHOD { INNER = 0, OUTER_LEFT = 1, OUTER_RIGHT = 2, OUTER_FULL = 3};
 
+class Jim;
 class VectorOgr : public std::enable_shared_from_this<VectorOgr>
 {
  public:
@@ -208,6 +209,10 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   OGRErr pushLayer(const std::string& layername, const std::string& theProjection, const std::string& geometryType, char** papszOptions=NULL);
   ///clear all features, releasing memory from heap
   //OGRErr reset();
+  std::shared_ptr<VectorOgr> intersect(OGRPolygon *pGeom, app::AppFactory& app);
+  std::shared_ptr<VectorOgr> intersect(const Jim& aJim, app::AppFactory& app);
+  OGRErr intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFactory& app);
+  OGRErr intersect(const Jim& aJim, VectorOgr& ogrWriter, app::AppFactory& app);
   ///get access mode
   unsigned int getAccess(){return m_access;};
   ///set access mode

@@ -253,7 +253,7 @@ OGRErr VectorOgr::classifySVM(VectorOgr& ogrWriter, app::AppFactory& app){
         unsigned int nFeatures=getFeatureCount(ilayer);
         progress=0;
         pfnProgress(progress,pszMessage,pProgressArg);
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif

@@ -1129,6 +1129,30 @@ void Jim::getBoundingBox(std::vector<double> &bbvector, OGRCoordinateTransformat
   getBoundingBox(bbvector[0],bbvector[1],bbvector[2],bbvector[3],poCT);
 }
 
+void Jim::getBoundingBox(OGRPolygon *bbPolygon, OGRCoordinateTransformation *poCT) const{
+  OGRLinearRing bbRing;
+  std::vector<double> bbvector;
+  getBoundingBox(bbvector,poCT);
+  OGRPoint ul;
+  OGRPoint ur;
+  OGRPoint lr;
+  OGRPoint ll;
+  ul.setX(bbvector[0]);
+  ul.setY(bbvector[1]);
+  ur.setX(bbvector[2]);
+  ur.setY(bbvector[1]);
+  lr.setX(bbvector[2]);
+  lr.setY(bbvector[3]);
+  ll.setX(bbvector[0]);
+  ll.setY(bbvector[3]);
+  bbRing.addPoint(&ul);
+  bbRing.addPoint(&ur);
+  bbRing.addPoint(&lr);
+  bbRing.addPoint(&ll);
+  bbRing.addPoint(&ul);
+  bbPolygon->addRing(&bbRing);
+  bbPolygon->closeRings();
+}
 
 // ///get bounding box with coordinate transform based on EPSG code
 // bool Jim::getBoundingBox(std::vector<double> &bbvector, int targetEPSG) const
@@ -1415,7 +1439,7 @@ CPLErr Jim::registerDriver()
 
     // m_gds->SetMetadataItem( "TIFFTAG_DOCUMENTNAME", m_filename.c_str());
     // std::string versionString="pktools ";
-    // versionString+=PKTOOLS_VERSION;
+    // versionString+=JIPLIB_VERSION;
     // versionString+=" by Pieter Kempeneers";
     // m_gds->SetMetadataItem( "TIFFTAG_SOFTWARE", versionString.c_str());
     time_t rawtime;
@@ -1744,7 +1768,7 @@ CPLErr Jim::open(app::AppFactory &app){
     }
     else
       distribution="none";
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
@@ -2226,8 +2250,6 @@ CPLErr Jim::readNewBlockDS(int row, int iband, int ds_band){
     sExtraArg.dfXSize = dfXSize;
     sExtraArg.dfYSize = dfYSize;
   }
-  // //test
-  // std::cout << "nXOff: " << nXOff << std::endl;
   // std::cout << "nYOff: " << nYOff << std::endl;
   // std::cout << "dfXOff: " << dfXOff << std::endl;
   // std::cout << "dfYOff: " << dfYOff << std::endl;
@@ -3488,7 +3510,7 @@ CPLErr Jim::rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vect
   for(std::vector<std::string>::const_iterator optionIt=eoption.begin();optionIt!=eoption.end();++optionIt)
     coptions=CSLAddString(coptions,optionIt->c_str());
 
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
@@ -3549,7 +3571,7 @@ CPLErr Jim::setThreshold(Jim& imgWriter, double t1, double t2){
       std::string errorString="Error: no data value not set";
       throw(errorString);
     }
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
@@ -3593,7 +3615,7 @@ CPLErr Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2){
       std::string errorString="Error: no data value not set";
       throw(errorString);
     }
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
@@ -3672,7 +3694,7 @@ CPLErr Jim::setThreshold(Jim& imgWriter, double t1, double t2, double value){
       std::string errorString="Error: no data value not set";
       throw(errorString);
     }
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
@@ -3716,7 +3738,7 @@ CPLErr Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2, double value){
       std::string errorString="Error: no data value not set";
       throw(errorString);
     }
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif

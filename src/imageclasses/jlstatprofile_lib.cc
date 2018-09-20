@@ -178,7 +178,7 @@ CPLErr JimList::statProfile(Jim& imgWriter, app::AppFactory& app){
       }
       //todo: check if multiple thresholds can be handled in parallel
       // int ithreshold=0;//threshold to use for percentiles
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
@@ -405,7 +405,7 @@ CPLErr Jim::statProfile(Jim& imgWriter, app::AppFactory& app){
       }
       //todo: check if multiple thresholds can be handled in parallel
       // int ithreshold=0;//threshold to use for percentiles
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif

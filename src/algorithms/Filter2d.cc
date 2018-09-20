@@ -92,7 +92,7 @@ void filter2d::Filter2d::filter(Jim& input, Jim& output, bool absolute, bool nor
   GDALProgressFunc pfnProgress=GDALTermProgress;
   double progress=0;
   MyProgressFunc(progress,pszMessage,pProgressArg);
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
@@ -375,7 +375,7 @@ void filter2d::Filter2d::doit(Jim& input, Jim& output, const std::string& method
   assert(dimY);
 
   statfactory::StatFactory stat;
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
@@ -1008,7 +1008,7 @@ void filter2d::Filter2d::morphology(Jim& input, Jim& output, const std::string& 
   assert(dimY);
 
   statfactory::StatFactory stat;
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif

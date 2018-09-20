@@ -23,7 +23,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include "base/Optionjl.h"
 #include "algorithms/StatFactory.h"
 #include "algorithms/ImgRegression.h"
-#if PKTOOLS_BUILD_WITH_PYTHON==1
+#if JIPLIB_BUILD_WITH_PYTHON==1
 #include <Python.h>
 #endif
 /******************************************************************************/
@@ -1151,7 +1151,7 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
     //   outputFile << outputStream.str();
     // }
     // else{
-// #if(PKTOOLS_BUILD_WITH_PYTHON==1)
+// #if(JIPLIB_BUILD_WITH_PYTHON==1)
 //       PySys_WriteStdout("%s",outputStream.str().c_str());
 // #else
       // std::cout << outputStream.str();

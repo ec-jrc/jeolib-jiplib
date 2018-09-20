@@ -20,6 +20,7 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 #include <unordered_map>
 #include "VectorOgr.h"
 #include "base/Optionjl.h"
+#include "imageclasses/Jim.h"
 
 using namespace std;
 using namespace statfactory;
@@ -522,7 +523,105 @@ OGRErr VectorOgr::pushLayer(const std::string& layername, const std::string& the
   return(result);
 }
 
- OGRErr VectorOgr::createField(const std::string& fieldname, const OGRFieldType& fieldType, size_t ilayer){
+std::shared_ptr<VectorOgr> VectorOgr::intersect(OGRPolygon *pGeom, app::AppFactory& app){
+  shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
+  if(intersect(pGeom, *ogrWriter, app)!=OGRERR_NONE){
+    std::cerr << "Failed to intersect" << std::endl;
+  }
+  return(ogrWriter);
+}
+
+std::shared_ptr<VectorOgr> VectorOgr::intersect(const Jim& aJim, app::AppFactory& app){
+  shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
+  if(intersect(aJim, *ogrWriter, app)!=OGRERR_NONE){
+    std::cerr << "Failed to intersect" << std::endl;
+  }
+  return(ogrWriter);
+}
+
+OGRErr VectorOgr::intersect(const Jim& aJim, VectorOgr& ogrWriter, app::AppFactory& app){
+  OGRErr result=OGRERR_NONE;
+  OGRPolygon *pGeom = (OGRPolygon*) OGRGeometryFactory::createGeometry(wkbPolygon); 
+  OGRSpatialReference imgSpatialRef(aJim.getProjectionRef().c_str());
+  OGRSpatialReference *thisSpatialRef=getLayer()->GetSpatialRef();
+  OGRCoordinateTransformation *img2vector = OGRCreateCoordinateTransformation(&imgSpatialRef, thisSpatialRef);
+  aJim.getBoundingBox(pGeom,img2vector);
+  result=intersect(pGeom,ogrWriter,app);
+  OGRGeometryFactory::destroyGeometry(pGeom );
+  return(result);
+}
+
+OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFactory& app){
+  Optionjl<string> output_opt("o", "output", "Output sample dataset");
+  Optionjl<string> ogrformat_opt("f", "oformat", "Output vector dataset format","SQLite");
+  Optionjl<unsigned int> access_opt("access", "access", "Access (0: GDAL_OF_READ_ONLY, 1: GDAL_OF_UPDATE)",1);
+  Optionjl<std::string> options_opt("co", "co", "format dependent options controlling creation of the output file");
+  Optionjl<bool> allCovered_opt("ac", "all_covered", "Set this flag to include only those polygons that are entirely covered by the raster", false);
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
+
+  allCovered_opt.setHide(1);
+  options_opt.setHide(1);
+
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=output_opt.retrieveOption(app);
+    ogrformat_opt.retrieveOption(app);
+    access_opt.retrieveOption(app);
+    options_opt.retrieveOption(app);
+    allCovered_opt.retrieveOption(app);
+    verbose_opt.retrieveOption(app);
+    if(!doProcess){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+    char **papszOptions=NULL;
+    for(std::vector<std::string>::const_iterator optionIt=options_opt.begin();optionIt!=options_opt.end();++optionIt){
+      papszOptions=CSLAddString(papszOptions,optionIt->c_str());
+    }
+
+    ogrWriter.open(output_opt[0],ogrformat_opt[0]);
+    for(int ilayer=0;ilayer<getLayerCount();++ilayer){
+      ogrWriter.pushLayer(getLayerName(ilayer),getProjection(ilayer),getGeometryType(ilayer),papszOptions);
+      ogrWriter.copyFields(*this,std::vector<std::string>(),ilayer);
+      ogrWriter.resize(getFeatureCount(ilayer),ilayer);
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+      for(size_t ifeature=0;ifeature<getFeatureCount(ilayer);++ifeature){
+        if(verbose_opt[0]>1)
+          std::cout << "feature " << ifeature << endl;
+        OGRFeature *writeFeature=ogrWriter.createFeature(ilayer);
+        OGRFeature *readFeature=getFeatureRef(ifeature,ilayer);
+        if(readFeature){
+          if(readFeature->GetGeometryRef()->Intersects(pGeom)){
+            if(verbose_opt[0]>1)
+              std::cout << "write valid feature " << ifeature << endl;
+            writeFeature->SetFrom(readFeature);
+          }
+          //todo: not all features will be written. check if NULL features are a problem when writing
+          ogrWriter.setFeature(ifeature,writeFeature,ilayer);
+        }
+        else
+          std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+      }
+    }
+    return(OGRERR_NONE);
+  }
+  catch(std::string errorString){
+    std::cerr << "Error: " << errorString << std::endl;
+    return(OGRERR_FAILURE);
+  }
+  catch(...){
+    std::cerr << "Error: undefined" << std::endl;
+    return(OGRERR_FAILURE);
+  }
+}
+
+  OGRErr VectorOgr::createField(const std::string& fieldname, const OGRFieldType& fieldType, size_t ilayer){
   OGRFieldDefn oField( fieldname.c_str(), fieldType );
   if(fieldType==OFTString)
     oField.SetWidth(32);
@@ -590,7 +689,7 @@ OGRErr VectorOgr::copy(VectorOgr& other, app::AppFactory &app){
     destroyFeatures(ilayer);
     copyFields(other,std::vector<std::string>(),ilayer);
     m_features[ilayer].resize(other.getFeatureCount(ilayer));
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
@@ -612,7 +711,7 @@ OGRErr VectorOgr::copy(VectorOgr& other, app::AppFactory &app){
  //todo: handle multi-layers
 // OGRErr VectorOgr::merge(VectorOgr& theVector){
 //   //better not to parallellize here?
-//   // #if PKTOOLS_PROCESS_IN_PARALLEL == 1
+//   // #if JIPLIB_PROCESS_IN_PARALLEL == 1
 //   // #pragma omp parallel for
 //   // #else
 //   // #endif
@@ -2066,7 +2165,7 @@ std::ostream& operator<<(std::ostream& theOstream, VectorOgr& theVector){
     }
     theOstream << std::endl;
 
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif

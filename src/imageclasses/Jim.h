@@ -390,6 +390,8 @@ class Jim : public std::enable_shared_from_this<Jim>
   void getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT=NULL) const;
   ///Get the bounding box of this dataset in georeferenced coordinates with coordinate transform
   void getBoundingBox(std::vector<double> &bbvector, OGRCoordinateTransformation *poCT=NULL) const;
+  ///Get the bounding box of this dataset in georeferenced coordinates with coordinate transform
+  void getBoundingBox(OGRPolygon *bbPolygon, OGRCoordinateTransformation *poCT=NULL) const;
   /* ///Get the bounding box of this dataset in georeferenced coordinates with coordinate transform based on EPSG code */
   /* bool getBoundingBox(std::vector<double> &bbvector, int targetEPSG) const; */
   ///Get the center position of this dataset in georeferenced coordinates

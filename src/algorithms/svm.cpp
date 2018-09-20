@@ -1293,7 +1293,7 @@ public:
     int start, j;
     if((start = cache->get_data(i,&data,len)) < len)
     {
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for private(j) schedule(guided)
 #else
 #endif
@@ -1412,7 +1412,7 @@ public:
     int j, real_i = index[i];
     if(cache->get_data(real_i,&data,l) < l)
     {
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for private(j) schedule(guided)
 #else
 #endif
@@ -2491,7 +2491,7 @@ double svm_predict_values(const svm_model *model, const svm_node *x, double* dec
   {
     double *sv_coef = model->sv_coef[0];
     double sum = 0;
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for private(i) reduction(+:sum) schedule(guided)
 #else
 #endif
@@ -2511,7 +2511,7 @@ double svm_predict_values(const svm_model *model, const svm_node *x, double* dec
     int l = model->l;
 
     double *kvalue = Malloc(double,l);
-#if PKTOOLS_PROCESS_IN_PARALLEL == 1
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for private(i) schedule(guided)
 #else
 #endif
