@@ -556,10 +556,10 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
   Optionjl<string> ogrformat_opt("f", "oformat", "Output vector dataset format","SQLite");
   Optionjl<unsigned int> access_opt("access", "access", "Access (0: GDAL_OF_READ_ONLY, 1: GDAL_OF_UPDATE)",1);
   Optionjl<std::string> options_opt("co", "co", "format dependent options controlling creation of the output file");
-  Optionjl<bool> allCovered_opt("ac", "all_covered", "Set this flag to include only those polygons that are entirely covered by the raster", false);
+  // Optionjl<bool> allCovered_opt("ac", "all_covered", "Set this flag to include only those polygons that are entirely covered by the raster", false);
   Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
 
-  allCovered_opt.setHide(1);
+  // allCovered_opt.setHide(1);
   options_opt.setHide(1);
 
 
@@ -569,7 +569,7 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
     ogrformat_opt.retrieveOption(app);
     access_opt.retrieveOption(app);
     options_opt.retrieveOption(app);
-    allCovered_opt.retrieveOption(app);
+    // allCovered_opt.retrieveOption(app);
     verbose_opt.retrieveOption(app);
     if(!doProcess){
       cout << endl;
@@ -583,6 +583,7 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
     }
 
     ogrWriter.open(output_opt[0],ogrformat_opt[0]);
+
     for(int ilayer=0;ilayer<getLayerCount();++ilayer){
       ogrWriter.pushLayer(getLayerName(ilayer),getProjection(ilayer),getGeometryType(ilayer),papszOptions);
       ogrWriter.copyFields(*this,std::vector<std::string>(),ilayer);
