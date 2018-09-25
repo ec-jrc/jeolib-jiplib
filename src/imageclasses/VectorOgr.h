@@ -340,10 +340,8 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///Get geographical extent upper left and lower right corners
   /* void getExtent(std::vector<double> &bbvector, size_t ilayer=0, OGRCoordinateTransformation *poCT=0) const; */
   /* void getExtent(OGRPolygon *bbPolygon, size_t ilayer=0, OGRCoordinateTransformation *poCT=0) const; */
-  //test
-  void getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT=0) const{std::cout << "debug0" << std::endl;getExtent(ulx,uly,lrx,lry,poCT);};
-  //test
-  void getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, size_t ilayer, OGRCoordinateTransformation *poCT) const{std::cout << "debug1" << std::endl;getExtent(ulx,uly,lrx,lry,ilayer,poCT);};
+  void getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT=0) const{getExtent(ulx,uly,lrx,lry,poCT);};
+  void getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, size_t ilayer, OGRCoordinateTransformation *poCT) const{getExtent(ulx,uly,lrx,lry,ilayer,poCT);};
   /* void getBoundingBox(std::vector<double> &bbvector, size_t ilayer=0, OGRCoordinateTransformation *poCT=0) const{getExtent(bbvector,ilayer,poCT);}; */
   /* void getBoundingBox(OGRPolygon *bbPolygon, size_t ilayer=0, OGRCoordinateTransformation *poCT=0) const{getExtent(bbPolygon,ilayer,poCT);}; */
   ///Get Upper left corner in x over all layers

@@ -53,7 +53,7 @@ def fun2method(inputfile, outputfile_basename):
         MIATypes = ['uc_', 's_', 'us_', 'i32_', 'u32_', 'f_', 'd_']
         CTypes = ['unsigned char', 'short int', 'unsigned short int', 'int', 'unsigned int', 'float', 'double']
 
-        methodDeclaration='CPLErr Jim::d_'+old2newDic.get(a.get("name"))+'('
+        methodDeclaration='void Jim::d_'+old2newDic.get(a.get("name"))+'('
         print(methodDeclaration)
 
         cSeparator=', '
@@ -94,7 +94,6 @@ def fun2method(inputfile, outputfile_basename):
         methodDeclaration+=separator+'int iband)'
 
         f.write(methodDeclaration+'{')
-        f.write('\n\ttry{')
         f.write('\n\t\tif(nrOfBand()<=iband){')
         f.write('\n\t\t\tstd::string errorString=\"Error: band number exceeds number of bands in input image\";')
         f.write('\n\t\t\tthrow(errorString);')
@@ -132,7 +131,7 @@ def fun2method(inputfile, outputfile_basename):
         f.write('\n\t\t\tthis->setMIA(iband);')
         for i in imRasterArray:
            f.write('\n\t\t\t'+i+'.setMIA(iband);')
-           f.write('\n\t\t\treturn(CE_None);')
+           # f.write('\n\t\t\treturn(CE_None);')
         f.write('\n\t\t}')
 
         f.write('\n\t\telse{')
@@ -144,14 +143,6 @@ def fun2method(inputfile, outputfile_basename):
         f.write('\n\t\t}')
 
         f.write('''
-        }
-        catch(std::string errorString){
-        \tstd::cerr << errorString << std::endl;
-            \treturn(CE_Failure);
-        }
-        catch(...){
-            \treturn(CE_Failure);
-        }
 }\n''')
 
     ifp.close()
