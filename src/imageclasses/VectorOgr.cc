@@ -267,6 +267,10 @@ OGRErr VectorOgr::open(app::AppFactory& app){
   Optionjl<unsigned int> access_opt("access", "access", "Access (0: GDAL_OF_READ_ONLY, 1: GDAL_OF_UPDATE)",0);
   Optionjl<bool> noread_opt("noread", "noread", "do not read features when opening)",false);
   Optionjl<std::string> attributeFilter_opt("af", "attributeFilter", "attribute filter");
+  Optionjl<double> ulx_opt("ulx", "ulx", "Upper left x value bounding box");
+  Optionjl<double> uly_opt("uly", "uly", "Upper left y value bounding box");
+  Optionjl<double> lrx_opt("lrx", "lrx", "Lower right x value bounding box");
+  Optionjl<double> lry_opt("lry", "lry", "Lower right y value bounding box");
   Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
@@ -280,6 +284,10 @@ OGRErr VectorOgr::open(app::AppFactory& app){
     access_opt.retrieveOption(app);
     noread_opt.retrieveOption(app);
     attributeFilter_opt.retrieveOption(app);
+    ulx_opt.retrieveOption(app);
+    uly_opt.retrieveOption(app);
+    lrx_opt.retrieveOption(app);
+    lry_opt.retrieveOption(app);
     verbose_opt.retrieveOption(app);
   }
   catch(std::string predefinedString){
@@ -329,6 +337,8 @@ OGRErr VectorOgr::open(app::AppFactory& app){
         unsigned int nfeatures=0;
         if(attributeFilter_opt.size())
           setAttributeFilter(attributeFilter_opt[0],ilayer);
+        if(ulx_opt.size()&&uly_opt.size()&&lrx_opt.size()&&lry_opt.size())
+          setSpatialFilterRect(ulx_opt[0],uly_opt[0],lrx_opt[0],lry_opt[0],ilayer);
         if(!noread_opt[0])
           nfeatures=readFeatures(ilayer);
         if(verbose_opt[0])
@@ -536,12 +546,14 @@ std::shared_ptr<VectorOgr> VectorOgr::intersect(const Jim& aJim, app::AppFactory
   if(intersect(aJim, *ogrWriter, app)!=OGRERR_NONE){
     std::cerr << "Failed to intersect" << std::endl;
   }
+  //test
+  std::cout << "return ogrWriter" << std::endl;
   return(ogrWriter);
 }
 
 OGRErr VectorOgr::intersect(const Jim& aJim, VectorOgr& ogrWriter, app::AppFactory& app){
   OGRErr result=OGRERR_NONE;
-  OGRPolygon *pGeom = (OGRPolygon*) OGRGeometryFactory::createGeometry(wkbPolygon); 
+  OGRPolygon *pGeom = (OGRPolygon*) OGRGeometryFactory::createGeometry(wkbPolygon);
   OGRSpatialReference imgSpatialRef(aJim.getProjectionRef().c_str());
   OGRSpatialReference *thisSpatialRef=getLayer()->GetSpatialRef();
   OGRCoordinateTransformation *img2vector = OGRCreateCoordinateTransformation(&imgSpatialRef, thisSpatialRef);
@@ -580,6 +592,12 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
     char **papszOptions=NULL;
     for(std::vector<std::string>::const_iterator optionIt=options_opt.begin();optionIt!=options_opt.end();++optionIt){
       papszOptions=CSLAddString(papszOptions,optionIt->c_str());
+    }
+
+    if(output_opt.empty()){
+      std::ostringstream errorStream;
+      errorStream << "Error: no output file provided" << std::endl;
+      throw(errorStream.str());
     }
 
     ogrWriter.open(output_opt[0],ogrformat_opt[0]);
@@ -799,8 +817,9 @@ bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, OG
     double layer_uly=0;
     double layer_lrx=0;
     double layer_lry=0;
-    if(!getExtent(layer_ulx,layer_uly,layer_lrx,layer_lry, ilayer, poCT))
+    if(!getExtent(layer_ulx,layer_uly,layer_lrx,layer_lry, ilayer, poCT)){
       result=false;
+    }
     if(!ilayer){
       ulx=layer_ulx;
       uly=layer_uly;
@@ -819,42 +838,44 @@ bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, OG
 
 ///get extent of the layer
 bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, size_t ilayer, OGRCoordinateTransformation *poCT) const{
-  try{
+  // try{
     OGREnvelope oExt;
     OGRLayer* thisLayer=getLayer(ilayer);
     if(thisLayer){
-      if(thisLayer->GetExtent(&oExt,TRUE)==OGRERR_NONE){
-        ulx=oExt.MinX;
-        uly=oExt.MaxY;
-        lrx=oExt.MaxX;
-        lry=oExt.MinY;
+      int nGeomFieldCount = thisLayer->GetLayerDefn()->GetGeomFieldCount();
+      if(nGeomFieldCount<1){
+        std::ostringstream errorStream;
+        errorStream << "Error: layer does not contain geometry" << std::endl;
+        throw(errorStream.str());
+      }
+      else if(nGeomFieldCount>1){
+        for(int iGeom = 0;iGeom < nGeomFieldCount; ++iGeom){
+          OGRGeomFieldDefn* poGFldDefn = thisLayer->GetLayerDefn()->GetGeomFieldDefn(iGeom);
+          if (thisLayer->GetExtent(iGeom, &oExt, TRUE) == OGRERR_NONE){
+            ulx=oExt.MinX;
+            uly=oExt.MaxY;
+            lrx=oExt.MaxX;
+            lry=oExt.MinY;
+          }
+          else{
+            std::ostringstream errorStream;
+            errorStream << "Error: could not get extent from layer" << std::endl;
+            throw(errorStream.str());
+          }
+        }
+      }
+      else if (thisLayer->GetExtent(&oExt, true) == OGRERR_NONE){
+          ulx=oExt.MinX;
+          uly=oExt.MaxY;
+          lrx=oExt.MaxX;
+          lry=oExt.MinY;
+      }
+      else{
+        std::ostringstream errorStream;
+        errorStream << "Error: could not get extent from layer" << std::endl;
+        throw(errorStream.str());
       }
     }
-    else{
-      std::cerr << "Warning: could not get layer " << ilayer << " (" << getLayerCount() << ")"<< std::endl;
-      return(false);
-    }
-    // for(size_t ilayer=0;ilayer<getLayerCount();++ilayer){
-    //   OGREnvelope oExt;
-    //   if(!ilayer){
-    //     if(getLayer(ilayer)->GetExtent(&oExt,TRUE)==OGRERR_NONE){
-    //       ulx=oExt.MinX;
-    //       uly=oExt.MaxY;
-    //       lrx=oExt.MaxX;
-    //       lry=oExt.MinY;
-    //     }
-    //   }
-    //   else{
-    //     if(ulx>oExt.MinX)
-    //       ulx=oExt.MinX;
-    //     if(uly<oExt.MaxY)
-    //       uly=oExt.MaxY;
-    //     if(lrx<oExt.MaxX)
-    //       lrx=oExt.MaxX;
-    //     if(lry>oExt.MinY)
-    //       lry=oExt.MinY;
-    //   }
-    // }
     if(poCT){
       std::vector<double> xvector(4);//ulx,urx,llx,lrx
       std::vector<double> yvector(4);//uly,ury,lly,lry
@@ -881,12 +902,17 @@ bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, si
       lry=yvector[3];
     }
     return true;
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    return false;
-  }
+  // }
+  // catch(std::string errorString){
+  //   std::cerr << errorString << std::endl;
+  //   return false;
+  // }
 }
+
+// bool VectorOgr::getExtent(std::vector<double> &bbvector, size_t ilayer, OGRCoordinateTransformation *poCT) const{
+//   bbvector.resize(4);
+//   return getExtent(bbvector[0],bbvector[1],bbvector[2],bbvector[3],ilayer,poCT);
+// }
 
 ///set feature to the object
  OGRErr VectorOgr::setFeature(unsigned int index, OGRFeature *poFeature, size_t ilayer){

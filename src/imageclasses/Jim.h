@@ -387,11 +387,11 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///Set the projection for this dataset from user input (supports epsg:<number> format)
   CPLErr setProjectionProj4(const std::string& projection);
   ///Get the bounding box of this dataset in georeferenced coordinates with coordinate transform
-  void getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT=NULL) const;
+  void getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT=0) const;
   ///Get the bounding box of this dataset in georeferenced coordinates with coordinate transform
-  void getBoundingBox(std::vector<double> &bbvector, OGRCoordinateTransformation *poCT=NULL) const;
+  void getBoundingBox(std::vector<double> &bbvector, OGRCoordinateTransformation *poCT=0) const;
   ///Get the bounding box of this dataset in georeferenced coordinates with coordinate transform
-  void getBoundingBox(OGRPolygon *bbPolygon, OGRCoordinateTransformation *poCT=NULL) const;
+  void getBoundingBox(OGRPolygon *bbPolygon, OGRCoordinateTransformation *poCT=0) const;
   /* ///Get the bounding box of this dataset in georeferenced coordinates with coordinate transform based on EPSG code */
   /* bool getBoundingBox(std::vector<double> &bbvector, int targetEPSG) const; */
   ///Get the center position of this dataset in georeferenced coordinates

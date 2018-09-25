@@ -526,6 +526,11 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         if(verbose_opt[0])
           std::cerr << std::setprecision(12) << "--ulx " << getUlx() << " --uly " << getUly() << " --lrx " << getLrx()  << " --lry " << getLry() << std::endl;
       }
+      if(layer_ulx>this->getLrx()||layer_lrx<this->getUlx()||layer_lry>this->getUly()||layer_uly<this->getLry()){
+        std::cerr << "Warning: raster dataset does not full coverage of vector layer " << ilayer << endl;
+        string errorString="Error: no coverage for layer in raster dataset";
+        throw(errorString);
+      }
 
       //align bounding box to input image
       layer_ulx-=fmod(layer_ulx-this->getUlx(),this->getDeltaX());
@@ -750,6 +755,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       // while( (readFeature = readLayer->GetNextFeature()) != NULL ){
 
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
+      if(verbose_opt[0])
+        std::cout << "processing parallel" << std::endl;
 #pragma omp parallel for
 #else
 #endif

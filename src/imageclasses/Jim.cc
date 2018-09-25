@@ -464,8 +464,8 @@ void Jim::freeMem()
       if(m_externalData)
         m_data[iband]=0;
       else
-        delete(m_data[iband]);
-      // free(m_data[iband]);
+        free(m_data[iband]);
+        // delete(m_data[iband]);
       // CPLFree(m_data[iband]);
     }
   }
