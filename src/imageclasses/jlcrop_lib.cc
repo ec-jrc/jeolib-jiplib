@@ -78,6 +78,7 @@ CPLErr Jim::crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry)
   return(crop(imgWriter,app));
 }
 
+
 CPLErr Jim::convert(Jim& imgWriter, AppFactory& app){
   Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
   Optionjl<double> autoscale_opt("as", "autoscale", "scale output to min and max, e.g., --autoscale 0 --autoscale 255");
@@ -2183,6 +2184,128 @@ CPLErr Jim::cropDS(Jim& imgWriter, AppFactory& app){
   }
 }
 
+shared_ptr<Jim> Jim::createct(app::AppFactory& app){
+  shared_ptr<Jim> imgWriter=Jim::createImg();
+  createct(*imgWriter, app);
+  return(imgWriter);
+}
+
+CPLErr Jim::createct(Jim& imgWriter, app::AppFactory& app){
+  Optionjl<double> min_opt("min", "min", "minimum value", 0);
+  Optionjl<double> max_opt("max", "max", "maximum value", 100);
+  Optionjl<bool> grey_opt("g", "grey", "grey scale", false);
+  Optionjl<string> colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
+  Optionjl<bool> verbose_opt("v", "verbose", "verbose", false,2);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  doProcess=min_opt.retrieveOption(app);
+  max_opt.retrieveOption(app);
+  grey_opt.retrieveOption(app);
+  colorTable_opt.retrieveOption(app);
+  verbose_opt.retrieveOption(app);
+
+  if(!doProcess){
+    cout << endl;
+    std::ostringstream helpStream;
+    helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+    throw(helpStream.str());//help was invoked, stop processing
+  }
+
+  std::vector<std::string> badKeys;
+  app.badKeys(badKeys);
+  if(badKeys.size()){
+    std::ostringstream errorStream;
+    if(badKeys.size()>1)
+      errorStream << "Error: unknown keys: ";
+    else
+      errorStream << "Error: unknown key: ";
+    for(int ikey=0;ikey<badKeys.size();++ikey){
+      errorStream << badKeys[ikey] << " ";
+    }
+    errorStream << std::endl;
+    throw(errorStream.str());
+  }
+
+  GDALColorTable colorTable;
+  GDALColorEntry sEntry;
+  if(colorTable_opt.empty()){
+    sEntry.c4=255;
+    for(int i=min_opt[0];i<=max_opt[0];++i){
+      if(grey_opt[0]){
+        sEntry.c1=255*(i-min_opt[0])/(max_opt[0]-min_opt[0]);
+        sEntry.c2=255*(i-min_opt[0])/(max_opt[0]-min_opt[0]);
+        sEntry.c3=255*(i-min_opt[0])/(max_opt[0]-min_opt[0]);
+      }
+      else{//hot to cold colour ramp
+        sEntry.c1=255;
+        sEntry.c2=255;
+        sEntry.c3=255;
+        double delta=max_opt[0]-min_opt[0];
+        if(i<(min_opt[0]+0.25*delta)){
+          sEntry.c1=0;
+          sEntry.c2=255*4*(i-min_opt[0])/delta;
+        }
+        else if(i<(min_opt[0]+0.5*delta)){
+          sEntry.c1=0;
+          sEntry.c3=255*(1+4*(min_opt[0]+0.25*delta-i)/delta);
+        }
+        else if(i<(min_opt[0]+0.75*delta)){
+          sEntry.c1=255*4*(i-min_opt[0]-0.5*delta)/delta;
+          sEntry.c3=0;
+        }
+        else{
+          sEntry.c2=255*(1+4*(min_opt[0]+0.75*delta-i)/delta);
+          sEntry.c3=0;
+        }
+      }
+      colorTable.SetColorEntry(i,&sEntry);
+      // if(output_opt.empty())
+      //   cout << i << " " << sEntry.c1 << " " << sEntry.c2 << " " << sEntry.c3 << " " << sEntry.c4 << endl;
+    }
+  }
+  imgWriter.open(nrOfCol(),nrOfRow(),1,GDT_Byte);
+  std::vector<double> gt;
+  getGeoTransform(gt);
+  imgWriter.setGeoTransform(gt);
+  imgWriter.setProjection(getProjection());
+  if(colorTable_opt.size()){
+    if(colorTable_opt[0]!="none")
+      imgWriter.setColorTable(colorTable_opt[0]);
+  }
+  else
+    imgWriter.setColorTable(&colorTable);
+  switch(getDataType()){
+  case(GDT_Byte):{
+    vector<char> buffer;
+    for(unsigned int irow=0;irow<nrOfRow();++irow){
+      readData(buffer,irow);
+      imgWriter.writeData(buffer,irow);
+    }
+    break;
+  }
+  case(GDT_Int16):{
+    vector<short> buffer;
+    cout << "Warning: copying short to unsigned short without conversion, use convert with -scale if needed..." << endl;
+    for(unsigned int irow=0;irow<nrOfRow();++irow){
+      readData(buffer,irow);
+      imgWriter.writeData(buffer,irow);
+    }
+    break;
+  }
+  case(GDT_UInt16):{
+    vector<unsigned short> buffer;
+    for(unsigned int irow=0;irow<nrOfRow();++irow){
+      readData(buffer,irow);
+      imgWriter.writeData(buffer,irow);
+    }
+    break;
+  }
+  default:
+    cerr << "data type " << getDataType() << " not supported for adding a colortable" << endl;
+    break;
+  }
+  return(CE_None);
+}
 /**
  * @param app application specific option arguments
  * @return output image

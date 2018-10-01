@@ -1519,7 +1519,7 @@ CPLErr Jim::open(app::AppFactory &app){
   Optionjl<int> nsample_opt("ns", "ncol", "Number of columns");
   Optionjl<int> nline_opt("nl", "nrow", "Number of rows");
   Optionjl<int> nband_opt("nb", "nband", "Number of bands",1);
-  Optionjl<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64})","Byte");
+  Optionjl<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64/Int64/UInt64})","Byte");
   Optionjl<std::string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
   Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
   Optionjl<unsigned long int> seed_opt("seed", "seed", "seed value for random generator",0);
@@ -1701,7 +1701,11 @@ CPLErr Jim::open(app::AppFactory &app){
         throw(errorStream.str());
       }
     }
-    GDALDataType theType=string2GDAL(otype_opt[0]);
+    // GDALDataType theType=string2GDAL(otype_opt[0]);
+    int theType=0;
+    theType=string2GDAL(otype_opt[0]);
+    if(theType==GDT_Unknown)
+      theType=string2JDT(otype_opt[0]);
     // open(nsample_opt[0],nline_opt[0],nband_opt[0],theType);
     m_ncol = nsample_opt[0];
     m_nrow = nline_opt[0];
@@ -3143,6 +3147,8 @@ CPLErr Jim::setFile(app::AppFactory &app){
   Optionjl<std::string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
   Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
   Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.");
+  Optionjl<string> colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
+  Optionjl<string> description_opt("d", "description", "Set image description");
   Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
 
   option_opt.setHide(1);
@@ -3153,6 +3159,8 @@ CPLErr Jim::setFile(app::AppFactory &app){
   oformat_opt.retrieveOption(app);
   option_opt.retrieveOption(app);
   nodata_opt.retrieveOption(app);
+  colorTable_opt.retrieveOption(app);
+  description_opt.retrieveOption(app);
   memory_opt.retrieveOption(app);
   if(!doProcess){
     std::cout << std::endl;
@@ -3176,7 +3184,16 @@ CPLErr Jim::setFile(app::AppFactory &app){
   }
   if(nodata_opt.size())
     setNoData(nodata_opt);
-  return(setFile(input_opt[0],oformat_opt[0],memory_opt[0],option_opt));
+  CPLErr result=setFile(input_opt[0],oformat_opt[0],memory_opt[0],option_opt);
+  if(colorTable_opt.size()){
+    if(colorTable_opt[0]!="none"||colorTable_opt[0]!="None")
+      setColorTable(colorTable_opt[0]);
+  }
+  if(description_opt.size()){
+    if(description_opt[0]!="none"||description_opt[0]!="None")
+      setImageDescription(description_opt[0]);
+  }
+  return(result);
 }
 
 ///Copy data

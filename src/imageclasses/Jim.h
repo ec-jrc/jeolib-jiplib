@@ -71,6 +71,10 @@ namespace app{
   class AppFactory;
 }
 
+#if MIALIB
+enum JIPLIBDataType {JDT_Unknown=0, JDT_Int64=14, JDT_UInt64=15};
+#endif
+
 enum DATA_ACCESS { READ_ONLY = 0, UPDATE = 1, WRITE = 3};
 enum RESAMPLE { NEAR = 0, BILINEAR = 1, BICUBIC = 2 };
 /* enum   GDALDataType { */
@@ -132,9 +136,22 @@ static GDALDataType string2GDAL(const std::string &typeString){
     return(GDT_Unknown);
 }
 
+static JIPLIBDataType string2JDT(const std::string &typeString){
+  std::map<std::string,JIPLIBDataType> typeMap;
+  typeMap["UInt64"]=JDT_UInt64;
+  typeMap["Int64"]=JDT_Int64;
+  typeMap["JDT_UInt64"]=JDT_UInt64;
+  typeMap["JDT_Int64"]=JDT_Int64;
+  if(typeMap.count(typeString))
+    return(typeMap[typeString]);
+  else
+    return(JDT_Unknown);
+}
+
 static int getDataType(const std::string &typeString){
   //initialize selMap
-  std::map<std::string,GDALDataType> typeMap;
+  /* std::map<std::string,GDALDataType> typeMap; */
+  std::map<std::string,int> typeMap;
   typeMap["Byte"]=GDT_Byte;
   typeMap["UInt16"]=GDT_UInt16;
   typeMap["Int16"]=GDT_Int16;
@@ -149,6 +166,10 @@ static int getDataType(const std::string &typeString){
   typeMap["GDT_Int32"]=GDT_Int32;
   typeMap["GDT_Float32"]=GDT_Float32;
   typeMap["GDT_Float64"]=GDT_Float64;
+  typeMap["Int64"]=JDT_Int64;
+  typeMap["UInt64"]=JDT_UInt64;
+  typeMap["JDT_Int64"]=JDT_Int64;
+  typeMap["JDT_UInt64"]=JDT_UInt64;
   if(typeMap.count(typeString))
     return(typeMap[typeString]);
   else
@@ -184,9 +205,6 @@ class JimList;
 class VectorOgr;
 
 //todo: create name space jiplib?
-#if MIALIB
-enum JIPLIBDataType {JDT_Int64=14, JDT_UInt64=15};
-#endif
 /**
    Base class for raster dataset (read and write) in a format supported by GDAL. This general raster class is used to store e.g., filename, number of columns, rows and bands of the dataset.
 **/
@@ -706,6 +724,10 @@ class Jim : public std::enable_shared_from_this<Jim>
   bool isEqual(std::shared_ptr<Jim> refImg);
 #endif
   //lib functions
+  ///create color table
+  std::shared_ptr<Jim> createct(app::AppFactory& app);
+  ///create color table
+  CPLErr createct(Jim& imgWriter, app::AppFactory& app);
   ///convert image
   CPLErr convert(Jim& imgWriter, app::AppFactory& app);
   ///crop image

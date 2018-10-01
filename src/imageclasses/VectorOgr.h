@@ -459,8 +459,8 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   std::vector<std::vector<OGRFeature*> > m_features;
 };
 
-static std::shared_ptr<VectorOgr> createVector(){return VectorOgr::createVector();};
-static std::shared_ptr<VectorOgr> createVector(const std::string& filename){return(VectorOgr::createVector(filename));};
-static std::shared_ptr<VectorOgr> createVector(app::AppFactory &app){return(VectorOgr::createVector(app));};
-static std::shared_ptr<VectorOgr> createVector(VectorOgr& other,app::AppFactory &app){return(VectorOgr::createVector(other,app));};
+/* static std::shared_ptr<VectorOgr> createVector(){return VectorOgr::createVector();}; */
+/* static std::shared_ptr<VectorOgr> createVector(const std::string& filename){return(VectorOgr::createVector(filename));}; */
+/* static std::shared_ptr<VectorOgr> createVector(app::AppFactory &app){return(VectorOgr::createVector(app));}; */
+/* static std::shared_ptr<VectorOgr> createVector(VectorOgr& other,app::AppFactory &app){return(VectorOgr::createVector(other,app));}; */
 #endif // _VECTOROGR_H_

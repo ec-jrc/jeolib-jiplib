@@ -111,7 +111,6 @@
   }
  }
 
-
 /* %ignore createJim(); */
 /* %ignore createJim(const std::shared_ptr<Jim>, bool); */
 /* %ignore createJim(const std::string&, bool); */
@@ -149,6 +148,40 @@
         print("Error: bad argument type for createJim, arguments without names should be a path or of Jim type")
     except:
         print("Error: could not create Jim image")
+
+
+  def createVector(arg1=None,arg2=None,**kwargs):
+    try:
+        appDict={}
+        for key, value in kwargs.items():
+            appDict.update({key:value})
+        if arg1:
+            if isinstance(arg1,VectorOgr):
+                if appDict:
+                    return Jim_createImg(arg1,appDict)
+                else:
+                    return Jim_createImg(arg1)
+            elif isinstance(arg1,str):
+                if os.path.isfile(arg1):
+                    appDict.update({'filename':arg1})
+                else:
+                    raise(IOError)
+                if arg2:
+                    if isinstance(arg2,str):
+                       appDict.update({'ln':arg2})
+                    else:
+                       raise(TypeError)
+        if appDict:
+            # SWIG generates wrappers that try to work around calling static member functions, replaceing :: with _ (underscore)
+            return VectorOgr_createVector(appDict)
+        else:
+            return VectorOgr_createVector()
+    except IOError:
+        print("Error: {} is not a regular file".format(arg1))
+    except TypeError:
+        print("Error: bad argument type for createVector, arguments without names should be a path or of VectorOgr type")
+    except:
+        print("Error: could not create VectorOgr object")
     %}
 
 /* !!! from: http://svn.salilab.org/imp/branches/1.0/kernel/pyext/IMP_streams.i */
@@ -644,6 +677,7 @@
 %include "imageclasses/VectorOgr.h"
 %include "apps/AppFactory.h"
 %include "algorithms/Filter2d.h"
+
 
 /* %include "jiplib_python.i" */
 /* %include "../../build/src/imageclasses/Jim.h" */
