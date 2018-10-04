@@ -221,8 +221,8 @@ CPLErr Jim::convert(Jim& imgWriter, AppFactory& app){
     return(CE_None);
   }
   catch(string predefinedString){
-    std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    std::cerr << predefinedString << std::endl;
+    throw;
   }
 }
 
@@ -398,15 +398,10 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
             band_opt.push_back(iband);
         }
       }
-      //image must be georeferenced
-      if(!this->isGeoRef()){
-        string errorstring="Error: input image is not georeferenced";
-        throw(errorstring);
-      }
     }
     catch(string error){
       cerr << error << std::endl;
-      return(CE_Failure);
+      throw;
     }
 
 
@@ -449,6 +444,12 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
 
     OGRSpatialReference gdsSpatialRef(getProjectionRef().c_str());
     if(extent_opt.size()){
+      //image must be georeferenced
+      if(!this->isGeoRef()){
+        string errorstring="Warning: input image is not georeferenced using extent";
+        std::cerr << errorstring << std::endl;
+        throw(errorstring);
+      }
       statfactory::StatFactory stat;
       double e_ulx;
       double e_uly;
@@ -542,7 +543,7 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
       }
       catch(string error){
         cerr << error << std::endl;
-        return(CE_Failure);
+        throw;
       }
     }
     else if(mask_opt.size()==1){
@@ -551,12 +552,12 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
         maskReader.open(mask_opt[0]);
         if(mskband_opt[0]>=maskReader.nrOfBand()){
           string errorString="Error: illegal mask band";
-          throw(errorString);
+          throw;
         }
       }
       catch(string error){
         cerr << error << std::endl;
-        return(CE_Failure);
+        throw;
       }
     }
 
@@ -690,7 +691,7 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
       }
       catch(string errorstring){
         cout << errorstring << endl;
-        return(CE_Failure);
+        throw;
       }
       if(description_opt.size())
         imgWriter.setImageDescription(description_opt[0]);
@@ -833,11 +834,11 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
                       }
                       catch(string errorstring){
                         cerr << errorstring << endl;
-                        return(CE_Failure);
+                        throw;
                       }
                       catch(...){
                         cerr << "error caught" << std::endl;
-                        return(CE_Failure);
+                        throw;
                       }
                       oldRowMask=rowMask;
                     }
@@ -892,7 +893,7 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
           }
           catch(string errorstring){
             cout << errorstring << endl;
-            return(CE_Failure);
+            throw;
           }
         }
         if(writeBuffer.size()!=imgWriter.nrOfCol())
@@ -904,7 +905,7 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
         }
         catch(string errorstring){
           cout << errorstring << endl;
-          return(CE_Failure);
+          throw;
         }
         if(verbose_opt[0]){
           progress=(1.0+irow);
@@ -931,7 +932,7 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }
 
@@ -1078,13 +1079,14 @@ CPLErr Jim::crop(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
       }
       //image must be georeferenced
       if(!this->isGeoRef()){
-        string errorstring="Error: input image is not georeferenced";
-        throw(errorstring);
+        string errorstring="Warning: input image is not georeferenced using start and end band options";
+        std::cerr << errorstring << std::endl;
+        // throw(errorstring);
       }
     }
     catch(string error){
       cerr << error << std::endl;
-      return(CE_Failure);
+      throw;
     }
 
 
@@ -1234,7 +1236,7 @@ CPLErr Jim::crop(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
       }
       catch(string error){
         cerr << error << std::endl;
-        return(CE_Failure);
+        throw;
       }
     }
     //determine number of output bands
@@ -1369,7 +1371,7 @@ CPLErr Jim::crop(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
       }
       catch(string errorstring){
         cout << errorstring << endl;
-        return(CE_Failure);
+        throw;
       }
       if(description_opt.size())
         imgWriter.setImageDescription(description_opt[0]);
@@ -1512,11 +1514,11 @@ CPLErr Jim::crop(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
                       }
                       catch(string errorstring){
                         cerr << errorstring << endl;
-                        return(CE_Failure);
+                        throw;
                       }
                       catch(...){
                         cerr << "error caught" << std::endl;
-                        return(CE_Failure);
+                        throw;
                       }
                       oldRowMask=rowMask;
                     }
@@ -1571,7 +1573,7 @@ CPLErr Jim::crop(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
           }
           catch(string errorstring){
             cout << errorstring << endl;
-            return(CE_Failure);
+            throw;
           }
         }
         if(writeBuffer.size()!=imgWriter.nrOfCol())
@@ -1583,7 +1585,7 @@ CPLErr Jim::crop(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
         }
         catch(string errorstring){
           cout << errorstring << endl;
-          return(CE_Failure);
+          throw;
         }
         if(verbose_opt[0]){
           progress=(1.0+irow);
@@ -1607,7 +1609,7 @@ CPLErr Jim::crop(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }
 
@@ -1763,13 +1765,14 @@ CPLErr Jim::cropDS(Jim& imgWriter, AppFactory& app){
       }
       //image must be georeferenced
       if(!this->isGeoRef()){
-        string errorstring="Error: input image is not georeferenced";
-        throw(errorstring);
+        string errorstring="Warning: input image is not georeferenced in cropDS";
+        std::cerr << errorstring << std::endl;
+        // throw(errorstring);
       }
     }
     catch(string error){
       cerr << error << std::endl;
-      return(CE_Failure);
+      throw;
     }
 
 
@@ -1984,7 +1987,7 @@ CPLErr Jim::cropDS(Jim& imgWriter, AppFactory& app){
       }
       catch(string errorstring){
         cout << errorstring << endl;
-        return(CE_Failure);
+        throw;
       }
       if(description_opt.size())
         imgWriter.setImageDescription(description_opt[0]);
@@ -2180,7 +2183,7 @@ CPLErr Jim::cropDS(Jim& imgWriter, AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }
 
@@ -2503,7 +2506,7 @@ shared_ptr<Jim> JimList::crop(AppFactory& app){
        }
      }
      catch(string error){
-       throw(error);
+       throw;
        // return(CE_Failure);
      }
 
@@ -2517,8 +2520,9 @@ shared_ptr<Jim> JimList::crop(AppFactory& app){
      for(imit=begin();imit!=end();++imit){
        //image must be georeferenced
        if(!((*imit)->isGeoRef())){
-         string errorstring="Error: input image is not georeferenced";
-         throw(errorstring);
+         string errorstring="Warning: input image is not georeferenced in JimList";
+         std::cerr << errorstring << std::endl;
+         // throw(errorstring);
        }
        // while((imgReader=getNextImage())){
        // for(int iimg=0;iimg<imgReader.size();++iimg){
@@ -2536,8 +2540,10 @@ shared_ptr<Jim> JimList::crop(AppFactory& app){
          if(imit==begin()||(*imit)->getDeltaX()<dx)
            dx=(*imit)->getDeltaX();
          if(dx<=0){
-           string errorstring="Error: pixel size in x has not been defined in input image";
-           throw(errorstring);
+           string errorstring="Warning: pixel size in x has not been defined in input image";
+           std::cerr << errorstring << std::endl;
+           dx=1;
+           // throw(errorstring);
          }
        }
 
@@ -2545,8 +2551,10 @@ shared_ptr<Jim> JimList::crop(AppFactory& app){
          if(imit==begin()||(*imit)->getDeltaY()<dy)
            dy=(*imit)->getDeltaY();
          if(dy<=0){
-           string errorstring="Error: pixel size in y has not been defined in input image";
-           throw(errorstring);
+           string errorstring="Warning: pixel size in y has not been defined in input image";
+           std::cerr << errorstring << std::endl;
+           dy=1;
+           // throw(errorstring);
          }
        }
        if(band_opt.size())
@@ -2664,7 +2672,7 @@ shared_ptr<Jim> JimList::crop(AppFactory& app){
          //   maskReader.rasterizeBuf(extentReader);
        }
        catch(string error){
-         throw(error);
+         throw;
          // return(CE_Failure);
        }
      }
@@ -2678,7 +2686,7 @@ shared_ptr<Jim> JimList::crop(AppFactory& app){
          }
        }
        catch(string error){
-         throw(error);
+         throw;
          // return(CE_Failure);
        }
      }
@@ -2838,7 +2846,7 @@ shared_ptr<Jim> JimList::crop(AppFactory& app){
            // }
          }
          catch(string errorstring){
-           throw(errorstring);
+           throw;
            // cout << errorstring << endl;
            // return(CE_Failure);
          }
@@ -2982,13 +2990,13 @@ shared_ptr<Jim> JimList::crop(AppFactory& app){
                            maskReader.readData(lineMask,static_cast<unsigned int>(rowMask),mskband_opt[0]);
                          }
                          catch(string errorstring){
-                           throw(errorstring);
+                           throw;
                            // cerr << errorstring << endl;
                            // return(CE_Failure);
                          }
                          catch(...){
                            std::string errorString="error caught";
-                           throw(errorString);
+                           throw;
                            // cerr << "error caught" << std::endl;
                            // return(CE_Failure);
                          }
@@ -3044,7 +3052,7 @@ shared_ptr<Jim> JimList::crop(AppFactory& app){
                }
              }
              catch(string errorstring){
-               throw(errorstring);
+               throw;
                // cout << errorstring << endl;
                // return(CE_Failure);
              }
@@ -3057,7 +3065,7 @@ shared_ptr<Jim> JimList::crop(AppFactory& app){
              imgWriter.writeData(writeBuffer,irow,writeBand);
            }
            catch(string errorstring){
-             throw(errorstring);
+             throw;
              // cout << errorstring << endl;
              // return(CE_Failure);
            }
@@ -3088,6 +3096,7 @@ shared_ptr<Jim> JimList::crop(AppFactory& app){
    }
    catch(string predefinedString){
      std::cout << predefinedString << std::endl;
+     throw;
    }
    return(*this);
  }

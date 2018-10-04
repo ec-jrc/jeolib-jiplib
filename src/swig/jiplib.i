@@ -116,27 +116,23 @@
 /* %ignore createJim(const std::string&, bool); */
 %pythoncode %{
   import os.path
-  def createJim(arg1=None,arg2=True,**kwargs):
+  def createJim(arg1=None,**kwargs):
     try:
         appDict={}
+        for key, value in kwargs.items():
+            appDict.update({key:value})
         if arg1:
             if isinstance(arg1,Jim):
+                if appDict:
+                    return Jim_createImg(arg1,appDict)
                 if isinstance(arg2,bool):
-                    return Jim_createImg(arg1,arg2)
-                else:
-                    raise(TypeError)
+                    return Jim_createImg(arg1)
             elif isinstance(arg1,str):
                 if os.path.isfile(arg1):
                     appDict.update({'filename':arg1})
                 else:
                     raise(IOError)
-                if isinstance(arg2,bool):
-                    appDict.update({'readData':arg1})
-                else:
-                    raise(TypeError)
 
-        for key, value in kwargs.items():
-            appDict.update({key:value})
         if appDict:
             # SWIG generates wrappers that try to work around calling static member functions, replaceing :: with _ (underscore)
             return Jim_createImg(appDict)
@@ -144,13 +140,16 @@
             return Jim_createImg()
     except IOError:
         print("Error: {} is not a regular file".format(arg1))
+        raise(IOError)
     except TypeError:
         print("Error: bad argument type for createJim, arguments without names should be a path or of Jim type")
+        raise(TypeError)
     except:
         print("Error: could not create Jim image")
+        raise()
 
 
-  def createVector(arg1=None,arg2=None,**kwargs):
+  def createVector(arg1=None,**kwargs):
     try:
         appDict={}
         for key, value in kwargs.items():
@@ -158,19 +157,14 @@
         if arg1:
             if isinstance(arg1,VectorOgr):
                 if appDict:
-                    return Jim_createImg(arg1,appDict)
+                    return VectorOgr_createVector(arg1,appDict)
                 else:
-                    return Jim_createImg(arg1)
+                    return VectorOgr_createVector(arg1)
             elif isinstance(arg1,str):
                 if os.path.isfile(arg1):
                     appDict.update({'filename':arg1})
                 else:
                     raise(IOError)
-                if arg2:
-                    if isinstance(arg2,str):
-                       appDict.update({'ln':arg2})
-                    else:
-                       raise(TypeError)
         if appDict:
             # SWIG generates wrappers that try to work around calling static member functions, replaceing :: with _ (underscore)
             return VectorOgr_createVector(appDict)
@@ -178,10 +172,13 @@
             return VectorOgr_createVector()
     except IOError:
         print("Error: {} is not a regular file".format(arg1))
+        raise(IOError)
     except TypeError:
         print("Error: bad argument type for createVector, arguments without names should be a path or of VectorOgr type")
+        raise(TypeError)
     except:
         print("Error: could not create VectorOgr object")
+        raise()
     %}
 
 /* !!! from: http://svn.salilab.org/imp/branches/1.0/kernel/pyext/IMP_streams.i */

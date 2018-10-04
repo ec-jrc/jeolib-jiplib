@@ -1754,6 +1754,17 @@ CPLErr Jim::open(app::AppFactory &app){
       if(assignSRS_opt.size())
         setProjectionProj4(assignSRS_opt[0]);
     }
+    else{
+      //test
+      double gt[6];
+      gt[0]=0;
+      gt[1]=1;
+      gt[2]=0;
+      gt[3]=0;
+      gt[4]=0;
+      gt[5]=-1;
+      setGeoTransform(gt);
+    }
     gsl_rng* rndgen=stat.getRandomGenerator(seed_opt[0]);
     double value=mean_opt[0];
     std::vector<double> lineBuffer(nrOfCol(),value);
