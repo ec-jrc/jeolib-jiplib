@@ -23,22 +23,27 @@ dict.update({'nrow':args.nrow,'ncol':args.ncol})
 dict.update({'uniform':[args.min,args.max+1]})
 dict.update({'otype':'GDT_UInt16'})
 dict.update({'seed':10915})
-try:
+# try:
+if True:
     jim0=jl.createJim(**dict)
     jim0.d_pointOpBlank(500)
     #create a copy without copying pixel values
-    jim1=jl.createJim(jim0,False)
+    jim1=jl.createJim(jim0,copyData=False)
     #images should have same geoTransform
     print("jim0.getGeoTransform:{}".format(jim0.getGeoTransform()))
     print("jim1.getGeoTransform:{}".format(jim1.getGeoTransform()))
-    if jim0.getGeoTransform() != jim0.getGeoTransform():
+    if jim0.getGeoTransform() != jim1.getGeoTransform():
         print("Failed: geoTransform")
         throw()
+    print("stats jim0:{}".format(jim0.getStats({'function':['min','max','mean']})))
+    print("stats jim1:{}".format(jim1.getStats({'function':['min','max','mean']})))
     #images should not be identical in pixel values
     if jim0.isEqual(jim1):
         print("Failed: isEqual")
         throw()
     print("Success: create image using template")
+try:
+    print("ok")
 except:
     print("Failed: create image using template")
 jim1.close()

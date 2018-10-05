@@ -119,13 +119,13 @@
   def createJim(arg1=None,**kwargs):
     try:
         appDict={}
-        for key, value in kwargs.items():
-            appDict.update({key:value})
         if arg1:
             if isinstance(arg1,Jim):
-                if appDict:
-                    return Jim_createImg(arg1,appDict)
-                if isinstance(arg2,bool):
+                if 'copyData' in kwargs.items():
+                    print("copyData is: {}".format(kwargs['copyData']))
+                    return Jim_createImg(arg1,kwargs['copyData'])
+                else:
+                    print("copyData is not found")
                     return Jim_createImg(arg1)
             elif isinstance(arg1,str):
                 if os.path.isfile(arg1):
@@ -133,6 +133,8 @@
                 else:
                     raise(IOError)
 
+        for key, value in kwargs.items():
+            appDict.update({key:value})
         if appDict:
             # SWIG generates wrappers that try to work around calling static member functions, replaceing :: with _ (underscore)
             return Jim_createImg(appDict)
