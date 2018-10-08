@@ -72,11 +72,11 @@ CPLErr JimList::statProfile(Jim& imgWriter, app::AppFactory& app){
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
-    doProcess=function_opt.retrieveOption(app.getArgc(),app.getArgv());
-    percentile_opt.retrieveOption(app.getArgc(),app.getArgv());
-    nodata_opt.retrieveOption(app.getArgc(),app.getArgv());
-    otype_opt.retrieveOption(app.getArgc(),app.getArgv());
-    verbose_opt.retrieveOption(app.getArgc(),app.getArgv());
+    doProcess=function_opt.retrieveOption(app);
+    percentile_opt.retrieveOption(app);
+    nodata_opt.retrieveOption(app);
+    otype_opt.retrieveOption(app);
+    verbose_opt.retrieveOption(app);
     if(!doProcess){
       cout << endl;
       std::ostringstream helpStream;
