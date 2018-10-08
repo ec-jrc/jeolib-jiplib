@@ -256,7 +256,10 @@ def np2jim(psArray):
 
 def jim2np(jim):
   try:
-    buf_obj = numpy.zeros([jim.nrOfRow(),jim.nrOfCol(),jim.nrOfPlane()], dtype = JimToNumPyTypeCode(jim.getDataType()))
+    if jim.nrOfPlane()>1:
+      buf_obj = numpy.zeros([jim.nrOfRow(),jim.nrOfCol(),jim.nrOfPlane()], dtype = JimToNumPyTypeCode(jim.getDataType()))
+    else:
+      buf_obj = numpy.zeros([jim.nrOfRow(),jim.nrOfCol()], dtype = JimToNumPyTypeCode(jim.getDataType()))
     typeSizeByte=JimGetTypeSizeByte(jim.getDataType())
     RasterIOJim(jim, typeSizeByte, buf_obj)
     return buf_obj
