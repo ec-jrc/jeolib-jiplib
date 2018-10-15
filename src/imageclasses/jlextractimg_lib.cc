@@ -878,6 +878,6 @@ CPLErr Jim::extractImg(Jim& classReader, VectorOgr& ogrWriter, app::AppFactory& 
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }

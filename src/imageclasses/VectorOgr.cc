@@ -174,7 +174,7 @@ OGRErr VectorOgr::open(const std::string& ogrFilename, const std::vector<std::st
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(OGRERR_FAILURE);
+    throw;
   }
   return(OGRERR_NONE);
   // return(setProjection(m_gds->GetProjectionRef()));
@@ -195,7 +195,7 @@ OGRErr VectorOgr::open(const std::string& filename, const std::string& imageType
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(OGRERR_FAILURE);
+    throw;
   }
 }
 
@@ -214,7 +214,7 @@ OGRErr VectorOgr::open(const std::string& filename, const std::vector<std::strin
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(OGRERR_FAILURE);
+    throw;
   }
 }
 
@@ -233,7 +233,7 @@ OGRErr VectorOgr::open(const std::string& filename, const std::vector<std::strin
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(OGRERR_FAILURE);
+    throw;
   }
 }
 
@@ -252,7 +252,7 @@ OGRErr VectorOgr::open(const std::string& filename, const std::vector<std::strin
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(OGRERR_FAILURE);
+    throw;
   }
 }
 
@@ -632,11 +632,11 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
   }
   catch(std::string errorString){
     std::cerr << "Error: " << errorString << std::endl;
-    return(OGRERR_FAILURE);
+    throw;
   }
   catch(...){
     std::cerr << "Error: undefined" << std::endl;
-    return(OGRERR_FAILURE);
+    throw;
   }
 }
 
@@ -692,7 +692,7 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(OGRERR_FAILURE);
+    throw;
   }
 }
 
@@ -1564,7 +1564,7 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(OGRERR_FAILURE);
+    throw;
   }
 }
 
@@ -1648,7 +1648,7 @@ OGRErr VectorOgr::sortByLabel(std::map<std::string,Vector2d<float> > &mapPixels,
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(OGRERR_FAILURE);
+    throw;
   }
 }
 
@@ -1717,7 +1717,7 @@ bool VectorOgr::transform(OGREnvelope *pEnv, OGRCoordinateTransformation *poCT){
     }
     catch(std::string errorString){
       std::cerr << errorString << std::endl;
-      return false;
+      throw;
     }
   }
   else

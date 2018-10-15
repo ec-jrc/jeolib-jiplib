@@ -389,7 +389,7 @@ std::string VectorOgr::trainSVM(app::AppFactory& app){
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
     // return(OGRERR_FAILURE);
-    return(std::string());
+    throw;
   }
 }
 
@@ -405,7 +405,7 @@ shared_ptr<Jim> Jim::classifySVM(app::AppFactory& app){
   }
   catch(string helpString){
     cerr << helpString << endl;
-    return(0);
+    throw;
   }
 }
 
@@ -890,7 +890,7 @@ CPLErr Jim::classifySVM(Jim& imgWriter, app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }
 

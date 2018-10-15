@@ -22,7 +22,8 @@ parser.add_argument("-output","--output",help="Path of the output vector dataset
 parser.add_argument("-random","--random",help="Number of random pixels to select",dest="random",required=False,type=int,default=10)
 args = parser.parse_args()
 
-try:
+# try:
+if True:
     rules=['median']
     if args.output:
         output=args.output
@@ -43,8 +44,8 @@ try:
         refpath='/eos/jeodpp/data/base/Landcover/EUROPE/CorineLandCover/CLC2012/VER18-5/Data/GeoTIFF/250m/g250_clc12_V18_5.tif'
         openDict.update({'s_srs':'epsg:3035'})
 
-    openDict.update({'filename':refpath})
-    jim_ref=jl.createJim(**openDict)
+    # openDict.update({'filename':refpath})
+    jim_ref=jl.createJim(refpath,**openDict)
     # jim_ref=jim_ref.warp({'t_srs':'epsg:'+args.t_srs})
 
     classDict={}
@@ -76,8 +77,6 @@ try:
 
     labels=classDict.values()
     print(labels)
-    print("open vector file")
-    v=jl.createVector({'filename':output,'oformat':oformat})
     for classname in classDict:
         print("class: ",classname)
         label=classDict[classname]
@@ -86,9 +85,14 @@ try:
         srcnodata.append(255)
         print(srcnodata)
         print("extract")
-        jim_ref.extractSample({'ln':classname,'random':args.random,'rule':rules,'output':output,'oformat':oformat,'bandname':['label'],'mask':'/vsimem/reference.tif','msknodata':srcnodata,'buffer':1}).write()
+        v=jim_ref.extractSample({'ln':classname,'random':args.random,'rule':rules,'output':output,'oformat':oformat,'bandname':['label'],'mask':'/vsimem/reference.tif','msknodata':srcnodata,'buffer':1,'co':'OVERWRITE=YES'})
+        print("write")
+        v.write()
+        print("close")
     v.close()
     jim_ref.close()
     print("Success: extractogr")
+try:
+    print("debug0")
 except:
     print("Failed: extractogr")

@@ -235,6 +235,6 @@ CPLErr Jim::getMask(Jim& imgWriter, app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }

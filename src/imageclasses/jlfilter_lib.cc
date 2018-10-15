@@ -49,7 +49,7 @@ shared_ptr<Jim> Jim::filter2dFast(const app::AppFactory& app){
   }
   catch(string helpString){
     cerr << helpString << endl;
-    return(0);
+    throw;
   }
 }
 
@@ -65,7 +65,7 @@ shared_ptr<Jim> Jim::filter(app::AppFactory& app){
   }
   catch(string helpString){
     cerr << helpString << endl;
-    return(0);
+    throw;
   }
 }
 
@@ -889,7 +889,7 @@ CPLErr Jim::filter(Jim& imgWriter, app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }
 
@@ -993,7 +993,7 @@ CPLErr Jim::filter2dFast(Jim& imgWriter, const app::AppFactory& app)
     }
     catch(string errorstring){
       cout << errorstring << endl;
-      return(CE_Failure);
+      throw;
     }
 
     for(int iband=0;iband<band_opt.size();++iband){
@@ -1282,6 +1282,6 @@ CPLErr Jim::filter2dFast(Jim& imgWriter, const app::AppFactory& app)
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }

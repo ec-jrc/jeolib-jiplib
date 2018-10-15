@@ -1164,6 +1164,7 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
 // #else
     std::cerr << predefinedString << std::endl;
 // #endif
+    throw;
   }
   // return(*this);
   return(mapString);

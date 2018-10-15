@@ -400,7 +400,7 @@ std::string VectorOgr::trainANN(app::AppFactory& app){
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(std::string());
+    throw;
   }
 }
 
@@ -416,7 +416,7 @@ shared_ptr<Jim> Jim::classifyANN(app::AppFactory& app){
   }
   catch(string helpString){
     cerr << helpString << endl;
-    return(0);
+    throw;
   }
 }
 
@@ -849,11 +849,11 @@ CPLErr Jim::classifyANN(Jim& imgWriter, app::AppFactory& app){
   }
   catch(BadConversion conversionString){
     std::cerr << "Error: did you provide class pairs names (-c) and integer values (-r) for each class in training vector?" << std::endl;
-    return(CE_Failure);
+    throw;
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }
 

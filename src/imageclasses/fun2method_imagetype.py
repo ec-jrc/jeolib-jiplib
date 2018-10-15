@@ -151,10 +151,10 @@ def fun2method(inputfile, outputfile_basename):
         f.write('''
         catch(std::string errorString){
         \tstd::cerr << errorString << std::endl;
-            \treturn(0);
+        throw;
         }
         catch(...){
-            \treturn(0);
+        throw;
         }
  }\n''')
 

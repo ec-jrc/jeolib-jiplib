@@ -37,7 +37,7 @@ if True:
         if os.path.basename(args.vector)=='nuts_italy.sqlite':
             if args.noread:
                 print("createVector")
-                v0=jl.createVector({'filename':args.vector})
+                v0=jl.createVector(args.vector)
                 print("crop Milano")
                 jim_milano=jim0.cropOgr(v0,{'ln':'milano','align':True})
                 milanofn=os.path.join(os.path.dirname(args.output),'milano.tif')
@@ -52,7 +52,7 @@ if True:
                 jim_lodi.write({'filename':lodifn})
                 print("close Lodi")
                 jim_lodi.close()
-                jimlist=jl.JimList([jl.createJim(filename=milanofn,noread=True),jl.createJim(filename=lodifn,noread=True)])
+                jimlist=jl.JimList([jl.createJim(milanofn,noread=True),jl.createJim(lodifn,noread=True)])
                 print("extractOgr")
                 v2=jimlist.extractOgr(sample,{'rule':rules[3],'output':args.output,'oformat':'SQLite','co':'OVERWRITE=YES','all_covered':True})
                 print("write v2")

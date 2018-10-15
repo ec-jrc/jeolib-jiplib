@@ -1036,10 +1036,10 @@ template<typename T> CPLErr Jim::readData(T& value, int col, int row, int band)
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(CE_Failure);
+    throw;
   }
   catch(...){
-    return(CE_Failure);
+    throw;
   }
 }
 
@@ -1163,10 +1163,10 @@ template<typename T> CPLErr Jim::readData(std::vector<T>& buffer, int minCol, in
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(CE_Failure);
+    throw;
   }
   catch(...){
-    return(CE_Failure);
+    throw;
   }
 }
 
@@ -1338,10 +1338,10 @@ template<typename T> CPLErr Jim::readDataBlock(std::vector<T>& buffer, int minCo
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(CE_Failure);
+    throw;
   }
   catch(...){
-    return(CE_Failure);
+    throw;
   }
 }
 

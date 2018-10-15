@@ -150,10 +150,10 @@ def fun2method(inputfile, outputfile_basename):
         }
         catch(std::string errorString){
         \tstd::cerr << errorString << std::endl;
-            \treturn(CE_Failure);
+        throw;
         }
         catch(...){
-            \treturn(CE_Failure);
+        throw;
         }
 }\n''')
 

@@ -127,7 +127,7 @@ CPLErr Jim::setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app){
     }
     catch(string errorstring){
       cout << errorstring << endl;
-      return(CE_Failure);
+      throw;
     }
     // if(verbose_opt[0])
     //   cout << "opening output image file " << output_opt[0] << endl;
@@ -183,7 +183,7 @@ CPLErr Jim::setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app){
       }
       catch(string error){
         cerr << error << std::endl;
-        return(CE_Failure);
+        throw;
       }
     }
     // else{
@@ -229,7 +229,7 @@ CPLErr Jim::setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app){
         }
         catch(string errorstring){
           cerr << errorstring << endl;
-          exit(1);
+          throw;
         }
       }
       //todo: support projection difference in mask and input raster
@@ -251,7 +251,7 @@ CPLErr Jim::setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app){
                 }
                 catch(string errorstring){
                   cerr << errorstring << endl;
-                  exit(1);
+                  throw;
                 }
                 oldRowMask[imask]=rowMask;
               }
@@ -312,7 +312,7 @@ CPLErr Jim::setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app){
               }
               catch(string errorstring){
                 cerr << errorstring << endl;
-                exit(1);
+                throw;
               }
               oldRowMask[0]=rowMask;
             }
@@ -357,7 +357,7 @@ CPLErr Jim::setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app){
         }
         catch(string errorstring){
           cerr << errorstring << endl;
-          exit(1);
+          throw;
         }
       }
       //progress bar
@@ -370,7 +370,7 @@ CPLErr Jim::setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }
 
@@ -439,7 +439,7 @@ CPLErr Jim::setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app){
     }
     catch(string errorstring){
       cout << errorstring << endl;
-      return(CE_Failure);
+      throw;
     }
     if (getColorTable()!=NULL)//copy colorTable from input image
       imgWriter.setColorTable(getColorTable());
@@ -466,7 +466,7 @@ CPLErr Jim::setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app){
     }
     catch(string error){
       cerr << error << std::endl;
-      return(CE_Failure);
+      throw;
     }
 
     int nmask=maskReader.size();
@@ -499,7 +499,7 @@ CPLErr Jim::setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app){
         }
         catch(string errorstring){
           cerr << errorstring << endl;
-          exit(1);
+          throw;
         }
       }
       //todo: support projection difference in mask and input raster
@@ -520,7 +520,7 @@ CPLErr Jim::setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app){
               }
               catch(string errorstring){
                 cerr << errorstring << endl;
-                exit(1);
+                throw;
               }
               oldRowMask[imask]=rowMask;
             }
@@ -553,7 +553,7 @@ CPLErr Jim::setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app){
         }
         catch(string errorstring){
           cerr << errorstring << endl;
-          exit(1);
+          throw;
         }
       }
       //progress bar
@@ -565,6 +565,6 @@ CPLErr Jim::setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }

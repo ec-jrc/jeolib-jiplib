@@ -40,7 +40,7 @@ shared_ptr<Jim> Jim::stretch(app::AppFactory& app){
   }
   catch(string helpString){
     cerr << helpString << endl;
-    return(0);
+    throw;
   }
 }
 
@@ -214,6 +214,6 @@ CPLErr Jim::stretch(Jim& imgWriter, app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }

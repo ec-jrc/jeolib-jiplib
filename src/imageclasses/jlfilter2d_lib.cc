@@ -76,7 +76,7 @@ shared_ptr<Jim> Jim::filter2d(const app::AppFactory& app){
   }
   catch(string helpString){
     cerr << helpString << endl;
-    return(0);
+    throw;
   }
 }
 
@@ -547,7 +547,7 @@ CPLErr Jim::filter2d(Jim& imgWriter, const app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }
 

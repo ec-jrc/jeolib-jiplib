@@ -69,7 +69,7 @@ shared_ptr<Jim> Jim::filter1d(app::AppFactory& app){
   }
   catch(string helpString){
     cerr << helpString << endl;
-    return(0);
+    throw;
   }
 }
 
@@ -552,6 +552,6 @@ CPLErr Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }

@@ -234,7 +234,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       }
       catch(string error){
         cerr << error << std::endl;
-        return(CE_Failure);
+        throw;
       }
     }
     Vector2d<unsigned int> posdata;
@@ -251,7 +251,10 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
     bool initWriter=true;
     if(verbose_opt[0])
       std::cout << "Opening ogrWriter: " << output_opt[0] << " in format " << ogrformat_opt[0] << endl;
-    if(ogrWriter.open(output_opt[0],ogrformat_opt[0],access_opt[0])!=OGRERR_NONE){
+    try{
+      ogrWriter.open(output_opt[0],ogrformat_opt[0],access_opt[0]);
+    }
+    catch(std::string errorString){
       if(verbose_opt[0])
         std::cout << "initWriter is false" << endl;
       initWriter=false;
@@ -650,12 +653,11 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               std::cout << "create polygons" << std::endl;
             if(verbose_opt[0])
               std::cout << "open ogrWriter for polygons (1)" << std::endl;
-            if(ogrWriter.pushLayer(readLayer->GetName(),readLayer->GetSpatialRef(),wkbPolygon,papszOptions)!=OGRERR_NONE){
-              ostringstream fs;
-              fs << "push layer to ogrWriter with polygons failed ";
-              fs << "layer name: "<< readLayer->GetName() << std::endl;
-              throw(fs.str());
-            }
+            ogrWriter.pushLayer(readLayer->GetName(),readLayer->GetSpatialRef(),wkbPolygon,papszOptions);
+            // ostringstream fs;
+            // fs << "push layer to ogrWriter with polygons failed ";
+            // fs << "layer name: "<< readLayer->GetName() << std::endl;
+            // throw(fs.str());
             if(verbose_opt[0])
               std::cout << "pushed layer " << readLayer->GetName() << std::endl;
           }
@@ -664,12 +666,11 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               std::cout << "create points in layer " << readLayer->GetName() << std::endl;
             if(verbose_opt[0])
               std::cout << "open ogrWriter for points (1)" << std::endl;
-            if(ogrWriter.pushLayer(readLayer->GetName(),readLayer->GetSpatialRef(),wkbPoint,papszOptions)!=OGRERR_NONE){
-              ostringstream fs;
-              fs << "push layer to ogrWriter with points failed ";
-              fs << "layer name: "<< readLayer->GetName() << std::endl;
-              throw(fs.str());
-            }
+            ogrWriter.pushLayer(readLayer->GetName(),readLayer->GetSpatialRef(),wkbPoint,papszOptions);
+            // ostringstream fs;
+            // fs << "push layer to ogrWriter with points failed ";
+            // fs << "layer name: "<< readLayer->GetName() << std::endl;
+            // throw(fs.str());
           }
           if(verbose_opt[0]){
             std::cout << "ogrWriter opened" << std::endl;
@@ -737,8 +738,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         }
       }
       catch(std::string errorString){
-        std::cerr << "failed to initWriter" << std::endl;
-        return CE_Failure;
+        std::cerr << errorString << "failed to initWriter" << std::endl;
+        throw;
       }
       OGRFeature *readFeature;
       unsigned long int ifeature=0;
@@ -2255,7 +2256,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }
 
@@ -2414,7 +2415,7 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
       }
       catch(string error){
         cerr << error << std::endl;
-        return(CE_Failure);
+        throw;
       }
     }
     Vector2d<unsigned int> posdata;
@@ -2520,16 +2521,20 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
       if(random_opt[0]>0){
         if(verbose_opt[0])
           std::cout << "Opening " << vsifn << endl;
-        if(sampleWriterOgr.open(vsifn,"SQLite")!=OGRERR_NONE)
-          std::cerr << "Warning: could not open sampleWriterOgr" << endl;
-        else{
-          if(verbose_opt[0])
-            std::cout << "Pushing layer random in " << vsifn << endl;
-          if(sampleWriterOgr.pushLayer("random",this->getProjectionRef(),wkbPoint,vsiOptions)!=OGRERR_NONE)
-            std::cerr << "Warning: could not pushLayer random in " << vsifn << endl;
-          else if(verbose_opt[0])
-            std::cout << "Pushed layer random in " << vsifn << endl;
+        try{
+          sampleWriterOgr.open(vsifn,"SQLite");
         }
+        catch(std::string errorString){
+          std::cerr << errorString << endl;
+          std::cerr << "Warning: could not open sampleWriterOgr" << endl;
+          throw;
+          //todo: check if error handling is needed
+        }
+        if(verbose_opt[0])
+          std::cout << "Pushing layer random in " << vsifn << endl;
+        sampleWriterOgr.pushLayer("random",this->getProjectionRef(),wkbPoint,vsiOptions);
+        if(verbose_opt[0])
+          std::cout << "Pushed layer random in " << vsifn << endl;
         // sampleWriterOgr.open(vsifn,"random","ESRI Shapefile", "wkbPoint");
       }
       if(maskReader.isInit()){
@@ -2609,6 +2614,7 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
       // sample_opt.push_back(vsifn);
     }
     else if(grid_opt.size()){
+      bool initSample=true;
       //create systematic grid of points
       double ulx,uly,lrx,lry;
       this->getBoundingBox(ulx,uly,lrx,lry);
@@ -2620,16 +2626,22 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
       else if(grid_opt[0]>0){
         if(verbose_opt[0])
           std::cout << "Opening " << vsifn << endl;
-        if(sampleWriterOgr.open(vsifn,"SQLite")!=OGRERR_NONE)
-            std::cerr << "Warning: could not open sampleWriterOgr" << endl;
-        else{
-          if(verbose_opt[0])
-            std::cout << "Pushing layer grid in " << vsifn << endl;
-          if(sampleWriterOgr.pushLayer("grid",this->getProjectionRef(),wkbPoint,vsiOptions)!=OGRERR_NONE)
-            std::cerr << "Warning: could not pushLayer grid in " << vsifn << endl;
-          else if(verbose_opt[0])
-            std::cout << "Pushed layer grid in " << vsifn << endl;
+        try{
+          sampleWriterOgr.open(vsifn,"SQLite");
         }
+        catch(std::string errorString){
+          initSample=false;
+          std::cerr << errorString << endl;
+          std::cerr << "Warning: could not open sampleWriterOgr" << endl;
+          //todo: check if error handling is needed
+        }
+        if(verbose_opt[0])
+          std::cout << "Pushing layer grid in " << vsifn << endl;
+        if(initSample){
+          sampleWriterOgr.pushLayer("grid",this->getProjectionRef(),wkbPoint,vsiOptions);
+        }
+        if(verbose_opt[0])
+          std::cout << "Pushed layer grid in " << vsifn << endl;
         // sampleWriterOgr.open(vsifn,"grid","ESRI Shapefile", "wkbPoint");
         // sampleWriterOgr.createLayer("points", this->getProjection(), wkbPoint, papszOptions);
       }
@@ -2841,6 +2853,7 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
 
     // OGRLayer *writeLayer;
     std::string layername=(layer_opt.size())? layer_opt[0] : readLayer->GetName();
+    bool initWriter=true;
     if(createPolygon){
       //create polygon
       if(verbose_opt[0])
@@ -2848,16 +2861,16 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
       if(verbose_opt[0])
         std::cout << "open ogrWriter for polygons (2)" << std::endl;
 
-      if(ogrWriter.open(output_opt[0],ogrformat_opt[0])!=OGRERR_NONE)
+      try{
+        ogrWriter.open(output_opt[0],ogrformat_opt[0]);
+      }
+      catch(std::string errorString){
+        initWriter=false;
+        std::cerr << errorString << endl;
         std::cerr << "Warning: could not open " << output_opt[0] << endl;
-      else if(ogrWriter.pushLayer(layername,this->getProjectionRef(),wkbPolygon,papszOptions)!=OGRERR_NONE){
-        // if(ogrWriter.
-        ostringstream fs;
-        fs << "open ogrWriter with polygons failed ";
-        fs << "output name: " << output_opt[0] << ", ";
-        fs << "layer name: "<< readLayer->GetName() << ", ";
-        fs << "format: "<< ogrformat_opt[0] << std::endl;
-        throw(fs.str());
+      }
+      if(initWriter){
+        ogrWriter.pushLayer(layername,this->getProjectionRef(),wkbPolygon,papszOptions);
       }
     }
     else{
@@ -2865,15 +2878,16 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
         std::cout << "create points in layer " << readLayer->GetName() << std::endl;
       if(verbose_opt[0])
         std::cout << "open ogrWriter for points (2)" << std::endl;
-      if(ogrWriter.open(output_opt[0],ogrformat_opt[0])!=OGRERR_NONE)
+      try{
+        ogrWriter.open(output_opt[0],ogrformat_opt[0]);
+      }
+      catch(std::string errorString){
+        initWriter=false;
+        std::cerr << errorString << endl;
         std::cerr << "Warning: could not open " << output_opt[0] << endl;
-      else if(ogrWriter.pushLayer(layername,this->getProjectionRef(),wkbPoint,papszOptions)!=OGRERR_NONE){
-        ostringstream fs;
-        fs << "open ogrWriter with points failed ";
-        fs << "output name: " << output_opt[0] << ", ";
-        fs << "layer name: "<< readLayer->GetName() << ", ";
-        fs << "format: "<< ogrformat_opt[0] << std::endl;
-        throw(fs.str());
+      }
+      if(initWriter){
+        ogrWriter.pushLayer(layername,this->getProjectionRef(),wkbPoint,papszOptions);
       }
     }
     if(verbose_opt[0]){
@@ -4326,7 +4340,7 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }
 
@@ -4440,7 +4454,7 @@ CPLErr JimList::extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, AppFac
   }
   catch(string errorString){
     std::cout << errorString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }
 
@@ -4485,6 +4499,6 @@ size_t JimList::extractOgrMem(VectorOgr& sampleReader, vector<unsigned char> &vb
   }
   catch(string errorString){
     std::cout << errorString << std::endl;
-    return(0);
+    throw;
   }
 }

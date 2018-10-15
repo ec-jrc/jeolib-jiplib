@@ -205,7 +205,7 @@ CPLErr Jim::reclass(Jim& imgWriter, app::AppFactory& app){
           }
           catch(string errorstring){
             cerr << errorstring << endl;
-            exit(1);
+            throw;
           }
         }
         double x,y;//geo coordinates
@@ -223,7 +223,7 @@ CPLErr Jim::reclass(Jim& imgWriter, app::AppFactory& app){
                 }
                 catch(string errorstring){
                   cerr << errorstring << endl;
-                  exit(1);
+                  throw;
                 }
                 oldRowMask=rowMask;
               }
@@ -250,7 +250,7 @@ CPLErr Jim::reclass(Jim& imgWriter, app::AppFactory& app){
               }
               catch(string errorstring){
                 cerr << errorstring << endl;
-                exit(1);
+                throw;
               }
               oldRowMask=rowMask;
             }
@@ -281,7 +281,7 @@ CPLErr Jim::reclass(Jim& imgWriter, app::AppFactory& app){
         }
         catch(string errorstring){
           cerr << errorstring << endl;
-          exit(1);
+          throw;
         }
         //progress bar
         progress=static_cast<float>((irow+1.0)/imgWriter.nrOfRow());
@@ -292,6 +292,6 @@ CPLErr Jim::reclass(Jim& imgWriter, app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }

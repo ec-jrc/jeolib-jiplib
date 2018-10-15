@@ -160,10 +160,10 @@ CPLErr Jim::setMIA(int band){
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(CE_Failure);
+    throw;
   }
   catch(...){
-    return(CE_Failure);
+    throw;
   }
   return(CE_None);
 }
@@ -217,10 +217,10 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(CE_Failure);
+    throw;
   }
   catch(...){
-    return(CE_Failure);
+    throw;
   }
   return(CE_None);
 }
@@ -1105,6 +1105,7 @@ void Jim::getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, OGR
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
+    throw;
   }
 }
 
@@ -1231,7 +1232,7 @@ bool Jim::geo2image(double x, double y, double& i, double& j, OGRCoordinateTrans
   }
   catch(std::string errorstring){
     std::cerr << errorstring << std::endl;
-    return false;
+    throw;
   }
 }
 
@@ -1269,7 +1270,7 @@ bool Jim::image2geo(double i, double j, double& x, double& y, OGRCoordinateTrans
   }
   catch(std::string errorstring){
     std::cerr << errorstring << std::endl;
-    return false;
+    throw;
   }
 
 }
@@ -3619,10 +3620,10 @@ CPLErr Jim::setThreshold(Jim& imgWriter, double t1, double t2){
   }
   catch(std::string errorstring){
     std::cerr << errorstring << std::endl;
-    return(CE_Failure);
+    throw;
   }
   catch(...){
-    return(CE_Failure);
+    throw;
   }
   return(CE_None);
 }
@@ -3663,10 +3664,10 @@ CPLErr Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2){
   }
   catch(std::string errorstring){
     std::cerr << errorstring << std::endl;
-    return(CE_Failure);
+    throw;
   }
   catch(...){
-    return(CE_Failure);
+    throw;
   }
   return(CE_None);
 }
@@ -3742,10 +3743,10 @@ CPLErr Jim::setThreshold(Jim& imgWriter, double t1, double t2, double value){
   }
   catch(std::string errorstring){
     std::cerr << errorstring << std::endl;
-    return(CE_Failure);
+    throw;
   }
   catch(...){
-    return(CE_Failure);
+    throw;
   }
   return(CE_None);
 }
@@ -3786,10 +3787,10 @@ CPLErr Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2, double value){
   }
   catch(std::string errorstring){
     std::cerr << errorstring << std::endl;
-    return(CE_Failure);
+    throw;
   }
   catch(...){
-    return(CE_Failure);
+    throw;
   }
   return(CE_None);
 }

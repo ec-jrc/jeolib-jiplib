@@ -362,6 +362,7 @@
 #include "algorithms/Filter2d.h"
 #if MIALIB == 1
 #include "mialib_swig.h"
+#include "op.h"
 #endif
 #include <cpl_error.h>
   %}
@@ -652,6 +653,8 @@
 //Parse the header file
 //%include "swig/pktools.i"
 /* %include "swig/mialib_tmp.i" */
+
+%include "mialib/op.h"
 %include "swig/jiplib_python.i"
 %include "imageclasses/Jim.h"
 %include "imageclasses/JimList.h"

@@ -450,6 +450,6 @@ CPLErr Jim::diff(Jim& imgReference, app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }

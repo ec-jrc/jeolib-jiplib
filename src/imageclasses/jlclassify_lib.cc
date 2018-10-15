@@ -70,7 +70,7 @@ shared_ptr<Jim> Jim::classify(app::AppFactory& app){
   }
   catch(string helpString){
     cerr << helpString << endl;
-    return(0);
+    throw;
   }
 }
 
@@ -166,7 +166,7 @@ CPLErr Jim::classify(Jim& imgWriter, app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }
 
@@ -234,7 +234,7 @@ CPLErr Jim::train(JimList& referenceReader, app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cerr << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }
 
@@ -280,7 +280,7 @@ OGRErr VectorOgr::train(app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cerr << predefinedString << std::endl;
-    return(OGRERR_FAILURE);
+    throw;
   }
 }
 
@@ -328,7 +328,7 @@ std::string Jim::trainMem(JimList& referenceReader, app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cerr << predefinedString << std::endl;
-    return(std::string());
+    throw;
   }
 }
 
@@ -361,7 +361,7 @@ std::string VectorOgr::trainMem(app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cerr << predefinedString << std::endl;
-    return(std::string());
+    throw;
   }
 }
 
@@ -395,6 +395,6 @@ OGRErr VectorOgr::classify(VectorOgr& ogrWriter, app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }

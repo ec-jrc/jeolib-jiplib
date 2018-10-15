@@ -156,10 +156,10 @@ def fun2method(inputfile, outputfile_basename):
         f.write('''
         catch(std::string errorString){
         \tstd::cerr << errorString << std::endl;
-            \treturn(listout);
+        throw;
         }
         catch(...){
-            \treturn(listout);
+        throw;
         }
  }\n''')
 

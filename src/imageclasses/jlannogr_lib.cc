@@ -363,10 +363,10 @@ OGRErr VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
   }
   catch(BadConversion conversionString){
     std::cerr << "Error: did you provide class pairs names (-c) and integer values (-r) for each class in training vector?" << std::endl;
-    return(CE_Failure);
+    throw;
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }

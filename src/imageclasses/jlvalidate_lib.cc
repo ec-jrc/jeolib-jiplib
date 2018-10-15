@@ -218,7 +218,7 @@ JimList& JimList::validate(app::AppFactory& app){
           }
           catch(string error){
             cerr << error << endl;
-            exit(1);
+            throw;
           }
         }
         int nlayer=referenceReaderOgr.getLayerCount();
@@ -547,7 +547,7 @@ JimList& JimList::validate(app::AppFactory& app){
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
-    // return(CE_Failure);
+    throw;
   }
   return(*this);
 }

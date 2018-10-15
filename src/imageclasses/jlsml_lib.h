@@ -217,7 +217,7 @@ template<typename T> std::string Jim::trainSML(JimList& referenceReader, app::Ap
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(std::string());
+    throw;
     /* return(CE_Failure); */
   }
 }
@@ -463,7 +463,7 @@ template<typename T> CPLErr Jim::classifySML(Jim& imgWriter, app::AppFactory& ap
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
-    return(CE_Failure);
+    throw;
   }
 }
 
@@ -1034,6 +1034,6 @@ template<typename T> std::shared_ptr<Jim> Jim::classifySML(app::AppFactory& app)
   }
   catch(std::string helpString){
     std::cerr << helpString << std::endl;
-    return(0);
+    throw;
   }
 }

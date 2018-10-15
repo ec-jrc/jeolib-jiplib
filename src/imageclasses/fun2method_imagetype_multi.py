@@ -146,10 +146,10 @@ def fun2method(inputfile, outputfile_basename):
 
         f.write('\n\tcatch(std::string errorString){')
         f.write('\n\t\tstd::cerr << errorString << std::endl;')
-        f.write('\n\t\treturn(0);')
+        f.write('\n\t\tthrow;')
         f.write('\n\t}')
         f.write('\n\tcatch(...){')
-        f.write('\n\t\treturn(0);')
+        f.write('\n\t\tthrow;')
         f.write('\n\t}')
         f.write('\n}')
         f.write('\n')

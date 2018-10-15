@@ -51,7 +51,7 @@ Contact: Pierre.Soille@jrc.ec.europa.eu"
 #include "mialib/mialib_segment.h"
 #include "mialib/mialib_stats.h"
 #include "mialib/op.h"
-#include "jim.h"
+#include "imageclasses/Jim.h"
 %}
 
 
