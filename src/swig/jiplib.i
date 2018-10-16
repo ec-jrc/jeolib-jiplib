@@ -74,7 +74,7 @@
           rValue=PyList_GetItem(pValue,i);
           if(PyString_Check(rValue))
             theValue=PyString_AsString(rValue);
-          else
+          else if(rValue != Py_None)
             theValue=PyString_AsString(PyObject_Repr(rValue));
           $1->pushLongOption(theKey,theValue);
         }
@@ -92,7 +92,7 @@
             $1->pushLongOption(theKey);
         }
       }
-      else{
+      else if(pValue != Py_None){
         theValue=PyString_AsString(PyObject_Repr(pValue));
         $1->pushLongOption(theKey,theValue);
       }

@@ -123,12 +123,6 @@ CPLErr Jim::convert(Jim& imgWriter, AppFactory& app){
     }
 
     double nodataValue=nodata_opt.size()? nodata_opt[0] : 0;
-    const char* pszMessage;
-    void* pProgressArg=NULL;
-    GDALProgressFunc pfnProgress=GDALTermProgress;
-    double progress=0;
-    MyProgressFunc(progress,pszMessage,pProgressArg);
-
     GDALDataType theType=getGDALDataType();
     if(otype_opt.size()){
       theType=string2GDAL(otype_opt[0]);
@@ -168,6 +162,13 @@ CPLErr Jim::convert(Jim& imgWriter, AppFactory& app){
     vector<double> readBuffer(nrOfCol());
     vector<double> writeBuffer(nrOfCol());
     unsigned int nband=this->nrOfBand();
+
+    const char* pszMessage;
+    void* pProgressArg=NULL;
+    GDALProgressFunc pfnProgress=GDALTermProgress;
+    double progress=0;
+    MyProgressFunc(progress,pszMessage,pProgressArg);
+
     for(unsigned int iband=0;iband<nband;++iband){
       unsigned int readBand=iband;
       if(verbose_opt[0]){
@@ -365,11 +366,6 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
       return(CE_Failure);
     }
 
-    const char* pszMessage;
-    void* pProgressArg=NULL;
-    GDALProgressFunc pfnProgress=GDALTermProgress;
-    double progress=0;
-    MyProgressFunc(progress,pszMessage,pProgressArg);
     // ImgReaderGdal imgReader;
     // ImgWriterGdal imgWriter;
     //open input images to extract number of bands and spatial resolution
@@ -616,6 +612,7 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
       // ncroprow=abs(static_cast<unsigned int>(ceil((cropuly-croplry)/dy)));
       ncropcol=static_cast<unsigned int>(ceil((croplrx-cropulx)/dx));
       ncroprow=static_cast<unsigned int>(ceil((cropuly-croplry)/dy));
+      std::cerr << "Warning: unexpected bounding box, using defaults "<< "--ulx=" << cropulx << " --uly=" << cropuly << " --lrx=" << croplrx << " --lry=" << croplry << std::endl;
     }
     else{
       double magicX=1,magicY=1;
@@ -657,6 +654,9 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
       ulj=floor(ulj);
       lri=floor(lri);
       lrj=floor(lrj);
+
+      if(cropulx<getUlx() || cropuly>getUly() || croplrx>getLrx() || croplry<getLry())
+        std::cerr << "Warning: requested bounding box not within original bounding box, using "<< "--ulx=" << cropulx << " --uly=" << cropuly << " --lrx=" << croplrx << " --lry=" << croplry << std::endl;
     }
 
     // double deltaX=this->getDeltaX();
@@ -743,6 +743,11 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
 
     vector<double> readBuffer;
     unsigned int nband=(band_opt.size())?band_opt.size() : this->nrOfBand();
+    const char* pszMessage;
+    void* pProgressArg=NULL;
+    GDALProgressFunc pfnProgress=GDALTermProgress;
+    double progress=0;
+    MyProgressFunc(progress,pszMessage,pProgressArg);
     for(unsigned int iband=0;iband<nband;++iband){
       unsigned int readBand=(band_opt.size()>iband)?band_opt[iband]:iband;
       if(verbose_opt[0]){
