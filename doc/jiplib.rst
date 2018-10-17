@@ -429,7 +429,7 @@ END
 
 
 METHOD getRefPix()
-Calculate the reference pixel as the centre of gravity pixel (weighted average of all values not taking into account no data values) for a specific band (start counting from 0).
+Calculate the reference pixel as the center of gravity pixel (weighted average of all values not taking into account no data values) for a specific band (start counting from 0).
 
 Returns:
    The reference pixel as the centre of gravity pixel (weighted average of all values not taking into account no data values) for a specific band (start counting from 0).
@@ -758,7 +758,7 @@ Supported keys in the dict:
 +==================+=================================================================================+
 | s_srs            | Source spatial reference system (default is to read from input)                 |
 +------------------+---------------------------------------------------------------------------------+
-| t_srs            | Target spatial reference system (default is to read from input)                 |
+| t_srs            | Target spatial reference system                                                 |
 +------------------+---------------------------------------------------------------------------------+
 | resample         | Resample algorithm used for reading pixel data in case of interpolation         |
 |                  | (default: GRIORA_NearestNeighbour).                                             |

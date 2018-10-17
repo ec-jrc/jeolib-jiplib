@@ -941,6 +941,170 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
   }
 }
 
+void Jim::cropBand(AppFactory& app){
+  Optionjl<unsigned int> band_opt("b", "band", "band index to crop (leave empty to retain all bands)");
+  Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
+  Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
+  Optionjl<short> verbose_opt("v", "verbose", "verbose", 0,2);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=band_opt.retrieveOption(app);
+    bstart_opt.retrieveOption(app);
+    bend_opt.retrieveOption(app);
+    verbose_opt.retrieveOption(app);
+
+    if(!doProcess){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+
+    std::vector<std::string> badKeys;
+    app.badKeys(badKeys);
+    if(badKeys.size()){
+      std::ostringstream errorStream;
+      if(badKeys.size()>1)
+        errorStream << "Error: unknown keys: ";
+      else
+        errorStream << "Error: unknown key: ";
+      for(int ikey=0;ikey<badKeys.size();++ikey){
+        errorStream << badKeys[ikey] << " ";
+      }
+      errorStream << std::endl;
+      throw(errorStream.str());
+    }
+  }
+  catch(string predefinedString){
+    std::cerr << predefinedString << std::endl;
+    throw;
+  }
+  for(size_t ipair=0;ipair<bstart_opt.size();++ipair){
+    if(bend_opt[ipair]<=bstart_opt[ipair]){
+      string errorstring="Error: index for end band must be smaller then start band";
+      throw(errorstring);
+    }
+    for(size_t iband=bstart_opt[ipair];iband<=bend_opt[ipair];++iband)
+      band_opt.push_back(iband);
+  }
+  size_t nband=band_opt.size();
+  if(band_opt.empty()){
+    std::cerr << "Error: no bands selected" << std::endl;
+    throw;
+  }
+  for(size_t iband=0;iband<band_opt.size();++iband){
+    if(band_opt[iband]>nrOfBand()){
+      std::cerr << "Error: selected band " << band_opt[iband] << " is out of range:" << std::endl;
+      throw;
+    }
+  }
+  std::vector<double>::iterator scale_it=m_scale.begin();
+  std::vector<double>::iterator offset_it=m_offset.begin();
+  std::vector<int>::iterator begin_it=m_begin.begin();
+  std::vector<int>::iterator end_it=m_end.begin();
+  std::vector<void*>::iterator data_it=m_data.begin();
+  size_t iband=0;
+  while(scale_it!=m_scale.end()){
+    if(find(band_opt.begin(),band_opt.end(),iband)==band_opt.end()){
+      if(verbose_opt[0])
+        std::cout << "removing scale for band " << iband << std::endl;
+      if(m_scale.size()>1&&m_scale.size()>iband)
+        m_scale.erase(scale_it);
+      else
+        ++scale_it;
+    }
+    else
+      ++scale_it;
+    ++iband;
+  }
+  iband=0;
+  while(offset_it!=m_offset.end()){
+    if(find(band_opt.begin(),band_opt.end(),iband)==band_opt.end()){
+      if(verbose_opt[0])
+        std::cout << "removing offset for band " << iband << std::endl;
+      if(m_offset.size()>1&&m_offset.size()>iband)
+        m_offset.erase(offset_it);
+      else
+        ++offset_it;
+    }
+    else
+      ++offset_it;
+    ++iband;
+  }
+  iband=0;
+  while(begin_it!=m_begin.end()){
+    if(find(band_opt.begin(),band_opt.end(),iband)==band_opt.end()){
+      if(verbose_opt[0])
+        std::cout << "removing begin for band " << iband << std::endl;
+      if(m_begin.size()>1&&m_begin.size()>iband)
+        m_begin.erase(begin_it);
+      else
+        ++begin_it;
+    }
+    else
+      ++begin_it;
+    ++iband;
+  }
+  iband=0;
+  while(end_it!=m_end.end()){
+    if(find(band_opt.begin(),band_opt.end(),iband)==band_opt.end()){
+      if(verbose_opt[0])
+        std::cout << "removing end for band " << iband << std::endl;
+      if(m_end.size()>1&&m_end.size()>iband)
+        m_end.erase(end_it);
+      else
+        ++end_it;
+    }
+    else
+      ++end_it;
+    ++iband;
+  }
+  iband=0;
+  while(data_it!=m_data.end()){
+    if(find(band_opt.begin(),band_opt.end(),iband)==band_opt.end()){
+        if(verbose_opt[0])
+          std::cout << "removing data for band " << iband << std::endl;
+        m_data.erase(data_it);
+    }
+    else{
+      if(verbose_opt[0])
+        std::cout << "keeping data for band " << iband << std::endl;
+      ++data_it;
+    }
+    ++iband;
+  }
+  // for(size_t iband=nrOfBand()-1;iband>=0;--iband){
+  //   if(find(band_opt.begin(),band_opt.end(),iband)==band_opt.end()){
+  //     if(verbose_opt[0])
+  //       std::cout << "removing band " << iband << std::endl;
+  //     //remove band
+  //     if(m_scale.size()>1&&m_scale.size()>iband){
+  //       m_scale.erase(m_scale.begin()+iband);
+  //     }
+  //     if(m_offset.size()>1&&m_offset.size()>iband){
+  //       m_offset.erase(m_offset.begin()+iband);
+  //     }
+  //     if(m_begin.size()>1&&m_begin.size()>iband){
+  //       m_begin.erase(m_begin.begin()+iband);
+  //     }
+  //     if(m_end.size()>1&&m_end.size()>iband){
+  //       m_end.erase(m_end.begin()+iband);
+  //     }
+  //     if(m_data.size()>iband){
+  //       if(m_externalData)
+  //         m_data[iband]=0;
+  //       else
+  //         free(m_data[iband]);
+  //       m_data.erase(m_data.begin()+iband);
+  //     }
+  //   }
+  //   else if(verbose_opt[0])
+  //     std::cout << "keeping band " << iband << std::endl;
+  // }
+  m_nband=m_data.size();
+}
+
 CPLErr Jim::crop(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
   Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
   //todo: support layer names

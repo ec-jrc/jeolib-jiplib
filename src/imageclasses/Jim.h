@@ -738,6 +738,8 @@ class Jim : public std::enable_shared_from_this<Jim>
   CPLErr cropDS(Jim& imgWriter, app::AppFactory& app);
   ///crop image
   CPLErr crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry);
+  ///crop band(s) destructively
+  void cropBand(app::AppFactory& app);
   ///convert image only for in memory
   std::shared_ptr<Jim> convert(app::AppFactory& app);
   ///crop image only for in memory
