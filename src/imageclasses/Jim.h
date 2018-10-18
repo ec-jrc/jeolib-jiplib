@@ -731,9 +731,11 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///convert image
   CPLErr convert(Jim& imgWriter, app::AppFactory& app);
   ///crop image
+  CPLErr crop2d(Jim& imgWriter, app::AppFactory& app);
+  ///crop image
   CPLErr crop(Jim& imgWriter, app::AppFactory& app);
   ///crop image
-  CPLErr crop(VectorOgr& sampleReader, Jim& imgWriter, app::AppFactory& app);
+  CPLErr cropOgr(VectorOgr& sampleReader, Jim& imgWriter, app::AppFactory& app);
   ///crop image if it has not been read yet (typically used when Jim has been opened with argument noRead true)
   CPLErr cropDS(Jim& imgWriter, app::AppFactory& app);
   ///crop image
@@ -743,9 +745,9 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///convert image only for in memory
   std::shared_ptr<Jim> convert(app::AppFactory& app);
   ///crop image only for in memory
-  std::shared_ptr<Jim> crop(app::AppFactory& app);
+  std::shared_ptr<Jim> crop2d(app::AppFactory& app);
   ///crop image only for in memory
-  std::shared_ptr<Jim> crop(VectorOgr& sampleReader, app::AppFactory& app);
+  std::shared_ptr<Jim> crop(app::AppFactory& app);
   ///crop image only for in memory
   std::shared_ptr<Jim> crop(double ulx, double uly, double lrx, double lry);
   ///crop Jim image in memory based on VectorOgr returning Jim image

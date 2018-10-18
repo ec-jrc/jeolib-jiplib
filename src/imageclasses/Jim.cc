@@ -3844,17 +3844,6 @@ CPLErr Jim::setThreshold(Jim& imgWriter, app::AppFactory &theApp){
   }
 }
 
-
-///crop Jim image in memory returning Jim image
-std::shared_ptr<Jim> Jim::cropOgr(VectorOgr& sampleReader, app::AppFactory& app){
-  std::cout << "we are entering Jim::createImg" << std::endl;
-  std::shared_ptr<Jim> imgWriter=Jim::createImg();
-  std::cout << "we are entering Jim::crop" << std::endl;
-  std::cout << "imgWriter has m_gds: " << m_gds << std::endl;
-  crop(sampleReader, *imgWriter, app);
-  return(imgWriter);
-}
-
 ///convert Jim image in memory returning Jim image (alias for crop)
 std::shared_ptr<Jim> Jim::warp(app::AppFactory& theApp){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();

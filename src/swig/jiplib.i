@@ -121,10 +121,8 @@
       if arg1:
           if isinstance(arg1,Jim):
               if 'copyData' in kwargs.keys():
-                  print("copyData is: {}".format(kwargs['copyData']))
                   return Jim_createImg(arg1,kwargs['copyData'])
               else:
-                  print("copyData is not found")
                   return Jim_createImg(arg1)
           elif isinstance(arg1,str):
               if os.path.isfile(arg1):

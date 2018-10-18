@@ -39,10 +39,12 @@ shared_ptr<Jim> Jim::convert(AppFactory& app){
   return(imgWriter);
 }
 
-/**
- * @param app application specific option arguments
- * @return output image
- **/
+shared_ptr<Jim> Jim::crop2d(AppFactory& app){
+  shared_ptr<Jim> imgWriter=Jim::createImg();
+  crop2d(*imgWriter, app);
+  return(imgWriter);
+}
+
 shared_ptr<Jim> Jim::crop(AppFactory& app){
   shared_ptr<Jim> imgWriter=Jim::createImg();
   crop(*imgWriter, app);
@@ -53,9 +55,9 @@ shared_ptr<Jim> Jim::crop(AppFactory& app){
  * @param app application specific option arguments
  * @return output image
  **/
-shared_ptr<Jim> Jim::crop(VectorOgr& sampleReader, AppFactory& app){
+shared_ptr<Jim> Jim::cropOgr(VectorOgr& sampleReader, AppFactory& app){
   shared_ptr<Jim> imgWriter=Jim::createImg();
-  crop(sampleReader, *imgWriter, app);
+  cropOgr(sampleReader, *imgWriter, app);
   return(imgWriter);
 }
 
@@ -223,6 +225,331 @@ CPLErr Jim::convert(Jim& imgWriter, AppFactory& app){
   }
   catch(string predefinedString){
     std::cerr << predefinedString << std::endl;
+    throw;
+  }
+}
+
+CPLErr Jim::crop2d(Jim& imgWriter, AppFactory& app){
+  Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
+  //todo: support layer names
+  Optionjl<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box", 0.0);
+  Optionjl<double>  uly_opt("uly", "uly", "Upper left y value bounding box", 0.0);
+  Optionjl<double>  lrx_opt("lrx", "lrx", "Lower right x value bounding box", 0.0);
+  Optionjl<double>  lry_opt("lry", "lry", "Lower right y value bounding box", 0.0);
+  Optionjl<double> cx_opt("x", "x", "x-coordinate of image center to crop (in meter)");
+  Optionjl<double> cy_opt("y", "y", "y-coordinate of image center to crop (in meter)");
+  Optionjl<double> nx_opt("nx", "nx", "image size in x to crop (in meter)");
+  Optionjl<double> ny_opt("ny", "ny", "image size in y to crop (in meter)");
+  Optionjl<unsigned int> ns_opt("ns", "ns", "number of samples  to crop (in pixels)");
+  Optionjl<unsigned int> nl_opt("nl", "nl", "number of lines to crop (in pixels)");
+  Optionjl<double>  nodata_opt("nodata", "nodata", "Nodata value to put in image if out of bounds.");
+  Optionjl<bool>  align_opt("align", "align", "Align output bounding box to input image",false);
+  Optionjl<short>  verbose_opt("v", "verbose", "verbose", 0,2);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=projection_opt.retrieveOption(app);
+    ulx_opt.retrieveOption(app);
+    uly_opt.retrieveOption(app);
+    lrx_opt.retrieveOption(app);
+    lry_opt.retrieveOption(app);
+    cx_opt.retrieveOption(app);
+    cy_opt.retrieveOption(app);
+    nx_opt.retrieveOption(app);
+    ny_opt.retrieveOption(app);
+    ns_opt.retrieveOption(app);
+    nl_opt.retrieveOption(app);
+    nodata_opt.retrieveOption(app);
+    align_opt.retrieveOption(app);
+    verbose_opt.retrieveOption(app);
+
+    if(!doProcess){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+
+    std::vector<std::string> badKeys;
+    app.badKeys(badKeys);
+    if(badKeys.size()){
+      std::ostringstream errorStream;
+      if(badKeys.size()>1)
+        errorStream << "Error: unknown keys: ";
+      else
+        errorStream << "Error: unknown key: ";
+      for(int ikey=0;ikey<badKeys.size();++ikey){
+        errorStream << badKeys[ikey] << " ";
+      }
+      errorStream << std::endl;
+      throw(errorStream.str());
+    }
+
+    double nodataValue=nodata_opt.size()? nodata_opt[0] : 0;
+    bool isGeoRef=false;
+    string projectionString;
+    // for(int iimg=0;iimg<input_opt.size();++iimg){
+
+    if(!isGeoRef)
+      isGeoRef=this->isGeoRef();
+    GDALDataType theType=getGDALDataType();
+    if(verbose_opt[0])
+      cout << "Output pixel type:  " << GDALGetDataTypeName(theType) << endl;
+
+    //bounding box of cropped image
+    double cropulx=ulx_opt[0];
+    double cropuly=uly_opt[0];
+    double croplrx=lrx_opt[0];
+    double croplry=lry_opt[0];
+    double dx=getDeltaX();
+    double dy=getDeltaY();
+    // if(cx_opt.size()&&cy_opt.size()&&nx_opt.size()&&ny_opt.size()){
+    if(nx_opt.size()&&ny_opt.size()){
+      if(cx_opt.size()&&cy_opt.size()){
+          ulx_opt[0]=cx_opt[0]-nx_opt[0]/2.0;
+          uly_opt[0]=(isGeoRef) ? cy_opt[0]+ny_opt[0]/2.0 : cy_opt[0]-ny_opt[0]/2.0;
+          lrx_opt[0]=cx_opt[0]+nx_opt[0]/2.0;
+          lry_opt[0]=(isGeoRef) ? cy_opt[0]-ny_opt[0]/2.0 : cy_opt[0]+ny_opt[0]/2.0;
+      }
+      else if(ulx_opt.size()&&uly_opt.size()){
+        lrx_opt[0]=ulx_opt[0]+nx_opt[0];
+        lry_opt[0]=lry_opt[0]-ny_opt[0];
+      }
+    }
+    else if(ns_opt.size()&&nl_opt.size()){
+      if(cx_opt.size()&&cy_opt.size()){
+        ulx_opt[0]=cx_opt[0]-ns_opt[0]*dx/2.0;
+        uly_opt[0]=(isGeoRef) ? cy_opt[0]+nl_opt[0]*dy/2.0 : cy_opt[0]-nl_opt[0]*dy/2.0;
+        lrx_opt[0]=cx_opt[0]+ns_opt[0]*dx/2.0;
+        lry_opt[0]=(isGeoRef) ? cy_opt[0]-nl_opt[0]*dy/2.0 : cy_opt[0]+nl_opt[0]*dy/2.0;
+      }
+      else if(ulx_opt.size()&&uly_opt.size()){
+        lrx_opt[0]=ulx_opt[0]+ns_opt[0]*dx;
+        lry_opt[0]=uly_opt[0]-nl_opt[0]*dy;
+      }
+    }
+
+    if(verbose_opt[0])
+      cout << "--ulx=" << ulx_opt[0] << " --uly=" << uly_opt[0] << " --lrx=" << lrx_opt[0] << " --lry=" << lry_opt[0] << endl;
+
+    int ncropcol=0;
+    int ncroprow=0;
+
+    double uli,ulj,lri,lrj;//image coordinates
+    bool forceEUgrid=false;
+    if(projection_opt.size())
+      forceEUgrid=(!(projection_opt[0].compare("EPSG:3035"))||!(projection_opt[0].compare("EPSG:3035"))||projection_opt[0].find("ETRS-LAEA")!=string::npos);
+    if(ulx_opt[0]>=lrx_opt[0]){//default bounding box: no cropping
+      uli=0;
+      lri=this->nrOfCol()-1;
+      ulj=0;
+      lrj=this->nrOfRow()-1;
+      ncropcol=this->nrOfCol();
+      ncroprow=this->nrOfRow();
+      this->getBoundingBox(cropulx,cropuly,croplrx,croplry);
+      double magicX=1,magicY=1;
+      // this->getMagicPixel(magicX,magicY);
+      if(forceEUgrid){
+        //force to LAEA grid
+        Egcs egcs;
+        egcs.setLevel(egcs.res2level(dx));
+        egcs.force2grid(cropulx,cropuly,croplrx,croplry);
+        this->geo2image(cropulx+(magicX-1.0)*this->getDeltaX(),cropuly-(magicY-1.0)*this->getDeltaY(),uli,ulj);
+        this->geo2image(croplrx+(magicX-2.0)*this->getDeltaX(),croplry-(magicY-2.0)*this->getDeltaY(),lri,lrj);
+      }
+      this->geo2image(cropulx+(magicX-1.0)*this->getDeltaX(),cropuly-(magicY-1.0)*this->getDeltaY(),uli,ulj);
+      this->geo2image(croplrx+(magicX-2.0)*this->getDeltaX(),croplry-(magicY-2.0)*this->getDeltaY(),lri,lrj);
+      // ncropcol=abs(static_cast<unsigned int>(ceil((croplrx-cropulx)/dx)));
+      // ncroprow=abs(static_cast<unsigned int>(ceil((cropuly-croplry)/dy)));
+      ncropcol=static_cast<unsigned int>(ceil((croplrx-cropulx)/dx));
+      ncroprow=static_cast<unsigned int>(ceil((cropuly-croplry)/dy));
+      std::cerr << "Warning: unexpected bounding box, using defaults "<< "--ulx=" << cropulx << " --uly=" << cropuly << " --lrx=" << croplrx << " --lry=" << croplry << std::endl;
+    }
+    else{
+      double magicX=1,magicY=1;
+      // this->getMagicPixel(magicX,magicY);
+      cropulx=ulx_opt[0];
+      cropuly=uly_opt[0];
+      croplrx=lrx_opt[0];
+      croplry=lry_opt[0];
+      if(forceEUgrid){
+        //force to LAEA grid
+        Egcs egcs;
+        egcs.setLevel(egcs.res2level(dx));
+        egcs.force2grid(cropulx,cropuly,croplrx,croplry);
+      }
+      else if(align_opt[0]){
+        if(cropulx>this->getUlx())
+          cropulx-=fmod(cropulx-this->getUlx(),dx);
+        else if(cropulx<this->getUlx())
+          cropulx+=fmod(this->getUlx()-cropulx,dx)-dx;
+        if(croplrx<this->getLrx())
+          croplrx+=fmod(this->getLrx()-croplrx,dx);
+        else if(croplrx>this->getLrx())
+          croplrx-=fmod(croplrx-this->getLrx(),dx)+dx;
+        if(croplry>this->getLry())
+          croplry-=fmod(croplry-this->getLry(),dy);
+        else if(croplry<this->getLry())
+          croplry+=fmod(this->getLry()-croplry,dy)-dy;
+        if(cropuly<this->getUly())
+          cropuly+=fmod(this->getUly()-cropuly,dy);
+        else if(cropuly>this->getUly())
+          cropuly-=fmod(cropuly-this->getUly(),dy)+dy;
+      }
+      this->geo2image(cropulx+(magicX-1.0)*this->getDeltaX(),cropuly-(magicY-1.0)*this->getDeltaY(),uli,ulj);
+      this->geo2image(croplrx+(magicX-2.0)*this->getDeltaX(),croplry-(magicY-2.0)*this->getDeltaY(),lri,lrj);
+
+      ncropcol=static_cast<unsigned int>(ceil((croplrx-cropulx)/dx));
+      ncroprow=static_cast<unsigned int>(ceil((cropuly-croplry)/dy));
+      uli=floor(uli);
+      ulj=floor(ulj);
+      lri=floor(lri);
+      lrj=floor(lrj);
+
+      if(cropulx<getUlx() || cropuly>getUly() || croplrx>getLrx() || croplry<getLry()){
+        std::cerr << "Warning: requested bounding box not within original bounding box, using "<< "--ulx=" << cropulx << " --uly=" << cropuly << " --lrx=" << croplrx << " --lry=" << croplry << std::endl;
+      }
+    }
+
+    if(!imgWriter.nrOfBand()){//not opened yet
+      if(verbose_opt[0]){
+        cout << "cropulx: " << cropulx << endl;
+        cout << "cropuly: " << cropuly << endl;
+        cout << "croplrx: " << croplrx << endl;
+        cout << "croplry: " << croplry << endl;
+        cout << "ncropcol: " << ncropcol << endl;
+        cout << "ncroprow: " << ncroprow << endl;
+        cout << "cropulx+ncropcol*dx: " << cropulx+ncropcol*dx << endl;
+        cout << "cropuly-ncroprow*dy: " << cropuly-ncroprow*dy << endl;
+        cout << "upper left column of input image: " << uli << endl;
+        cout << "upper left row of input image: " << ulj << endl;
+        cout << "lower right column of input image: " << lri << endl;
+        cout << "lower right row of input image: " << lrj << endl;
+        cout << "new number of cols: " << ncropcol << endl;
+        cout << "new number of rows: " << ncroprow << endl;
+        cout << "new number of bands: " << nrOfBand()<< endl;
+      }
+      try{
+        imgWriter.open(ncropcol,ncroprow,nrOfBand(),theType);
+        imgWriter.setNoData(nodata_opt);
+      }
+      catch(string errorstring){
+        cout << errorstring << endl;
+        throw;
+      }
+      double gt[6];
+      gt[0]=cropulx;
+      gt[1]=getDeltaX();
+      gt[2]=0;
+      gt[3]=cropuly;
+      gt[4]=0;
+      gt[5]=-getDeltaY();
+      imgWriter.setGeoTransform(gt);
+      if(projection_opt.size()){
+        if(verbose_opt[0])
+          cout << "projection: " << projection_opt[0] << endl;
+        imgWriter.setProjectionProj4(projection_opt[0]);
+      }
+      else
+        imgWriter.setProjection(this->getProjection());
+    }
+
+    // if(!covers(cropulx,cropuly,croplrx,croplry,true)){
+    //   //todo: extend image in case of no full coverage
+    //   std::cerr << "Error: no full coverage" << std::endl;
+    //   throw;
+    // }
+    double startCol=uli;
+    double endCol=lri;
+    if(uli<0){
+      std::cerr << "Warning: upper left corner out of image boundaries, clipping to 0" << std::endl;
+      startCol=0;
+    }
+    else if(uli>=this->nrOfCol()){
+      std::cerr << "Warning: upper left corner out of image boundaries, clipping to " << this->nrOfCol()-1 << std::endl;
+      startCol=this->nrOfCol()-1;
+    }
+    if(lri<0){
+      std::cerr << "Warning: lower right corner out of image boundaries, clipping to " << 0 << std::endl;
+      endCol=0;
+    }
+    else if(lri>=this->nrOfCol()){
+      std::cerr << "Warning: lower right corner out of image boundaries, clipping to " << this->nrOfCol()-1 << std::endl;
+      endCol=this->nrOfCol()-1;
+    }
+    double startRow=ulj;
+    double endRow=lrj;
+    if(ulj<0){
+      std::cerr << "Warning: upper left corner out of image boundaries, clipping to 0" << std::endl;
+      startRow=0;
+    }
+    else if(ulj>=this->nrOfRow()){
+      std::cerr << "Warning: upper left corner out of image boundaries, clipping to " << this->nrOfRow()-1 << std::endl;
+      startRow=this->nrOfRow()-1;
+    }
+    if(lrj<0){
+      std::cerr << "Warning: lower right corner out of image boundaries, clipping to " << 0 << std::endl;
+      endRow=0;
+    }
+    else if(lrj>=this->nrOfRow()){
+      std::cerr << "Warning: lower right corner out of image boundaries, clipping to " << this->nrOfCol()-1 << std::endl;
+      endRow=this->nrOfRow()-1;
+    }
+
+    vector<double> readBuffer;
+    double readValue=nodataValue;
+    unsigned int nband=this->nrOfBand();
+    const char* pszMessage;
+    void* pProgressArg=NULL;
+    GDALProgressFunc pfnProgress=GDALTermProgress;
+    double progress=0;
+    MyProgressFunc(progress,pszMessage,pProgressArg);
+    for(size_t iband=0;iband<nband;++iband){
+      if(verbose_opt[0]){
+        cout << "extracting band " << iband << endl;
+        MyProgressFunc(progress,pszMessage,pProgressArg);
+      }
+      for(int irow=0;irow<imgWriter.nrOfRow();++irow){
+        double readRow=ulj+irow;
+        if(readRow<0||readRow>=this->nrOfRow()){
+          if(verbose_opt[0])
+            std::cout << "Warning: readRow is " << readRow << std::endl;
+          for(int icol=0;icol<imgWriter.nrOfCol();++icol)
+            imgWriter.writeData(nodataValue,icol,irow,iband);
+        }
+        else{
+          for(int icol=0;icol<imgWriter.nrOfCol();++icol){
+            double readCol=uli+icol;
+            if(readCol<0||readCol>=this->nrOfCol()){
+              if(verbose_opt[0])
+                std::cout << "Warning: readCol is " << readCol << std::endl;
+              imgWriter.writeData(nodataValue,icol,irow,iband);
+            }
+            else{
+              this->readData(readValue,readCol,readRow,iband);
+              imgWriter.writeData(readValue,icol,irow,iband);
+            }
+          }
+        }
+        if(verbose_opt[0]){
+          progress=(1.0+irow);
+          progress/=imgWriter.nrOfRow();
+          MyProgressFunc(progress,pszMessage,pProgressArg);
+        }
+        else{
+          progress=(1.0+irow);
+          progress+=(imgWriter.nrOfRow()*iband);
+          progress/=imgWriter.nrOfBand()*imgWriter.nrOfRow();
+          assert(progress>=0);
+          assert(progress<=1);
+          MyProgressFunc(progress,pszMessage,pProgressArg);
+        }
+      }
+    }
+    return(CE_None);
+  }
+  catch(string predefinedString){
+    std::cout << predefinedString << std::endl;
     throw;
   }
 }
@@ -1074,38 +1401,10 @@ void Jim::cropBand(AppFactory& app){
     }
     ++iband;
   }
-  // for(size_t iband=nrOfBand()-1;iband>=0;--iband){
-  //   if(find(band_opt.begin(),band_opt.end(),iband)==band_opt.end()){
-  //     if(verbose_opt[0])
-  //       std::cout << "removing band " << iband << std::endl;
-  //     //remove band
-  //     if(m_scale.size()>1&&m_scale.size()>iband){
-  //       m_scale.erase(m_scale.begin()+iband);
-  //     }
-  //     if(m_offset.size()>1&&m_offset.size()>iband){
-  //       m_offset.erase(m_offset.begin()+iband);
-  //     }
-  //     if(m_begin.size()>1&&m_begin.size()>iband){
-  //       m_begin.erase(m_begin.begin()+iband);
-  //     }
-  //     if(m_end.size()>1&&m_end.size()>iband){
-  //       m_end.erase(m_end.begin()+iband);
-  //     }
-  //     if(m_data.size()>iband){
-  //       if(m_externalData)
-  //         m_data[iband]=0;
-  //       else
-  //         free(m_data[iband]);
-  //       m_data.erase(m_data.begin()+iband);
-  //     }
-  //   }
-  //   else if(verbose_opt[0])
-  //     std::cout << "keeping band " << iband << std::endl;
-  // }
   m_nband=m_data.size();
 }
 
-CPLErr Jim::crop(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
+CPLErr Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
   Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
   //todo: support layer names
   Optionjl<string>  layer_opt("ln", "ln", "layer name of extent to crop");
