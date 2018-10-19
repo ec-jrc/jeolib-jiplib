@@ -650,7 +650,7 @@
 
 //Parse the header file
 //%include "swig/pktools.i"
-/* %include "swig/mialib_tmp.i" */
+%include "swig/mialib_tmp.i"
 
 %include "mialib/op.h"
 %include "swig/jiplib_python.i"
