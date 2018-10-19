@@ -756,6 +756,10 @@ class Jim : public std::enable_shared_from_this<Jim>
   std::shared_ptr<Jim> warp(app::AppFactory& theApp);
   ///warp image
   CPLErr warp(Jim& imgWriter, app::AppFactory &theApp);
+  ///polygonize image
+  std::shared_ptr<VectorOgr> polygonize(app::AppFactory& app, std::shared_ptr<Jim>mask=nullptr);
+  ///polygonize image
+  void polygonize(VectorOgr& ogrWriter, app::AppFactory& app, std::shared_ptr<Jim> mask=nullptr);
   ///extract pixel values from raster image from a vector sample
   CPLErr extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, app::AppFactory& app);
   ///extract pixel values from raster image from a vector sample
