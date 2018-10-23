@@ -214,17 +214,17 @@ public:
   ///composite image only for in memory
   std::shared_ptr<Jim> composite(app::AppFactory& app);
   ///crop image
-  JimList& crop(Jim& imgWriter, app::AppFactory& app);
+  /* JimList& crop(Jim& imgWriter, app::AppFactory& app); */
   ///crop image only for in memory
-  std::shared_ptr<Jim> crop(app::AppFactory& app);
-  ///stack image (alias for crop)
-  JimList& stack(Jim& imgWriter, app::AppFactory& app){return(crop(imgWriter,app));};
-  ///stack image (alias for crop)
-  JimList& stack(Jim& imgWriter){app::AppFactory app;return(crop(imgWriter,app));};
+  /* std::shared_ptr<Jim> crop(app::AppFactory& app); */
+  ///stack image
+  JimList& stackBand(Jim& imgWriter, app::AppFactory& app);
+  ///stack image
+  JimList& stackBand(Jim& imgWriter){app::AppFactory app;return stackBand(imgWriter,app);};
   ///stack image only for in memory (alias for crop)
-  std::shared_ptr<Jim> stack(app::AppFactory& app){return(crop(app));};
+  std::shared_ptr<Jim> stackBand(app::AppFactory& app);
   ///stack image only for in memory (alias for crop)
-  std::shared_ptr<Jim> stack(){app::AppFactory app;return(stack(app));};
+  std::shared_ptr<Jim> stackBand(){app::AppFactory app;return stackBand(app);};
   ///stat profile image
   CPLErr statProfile(Jim& imgWriter, app::AppFactory& app);
   ///stat profile image only for in memory

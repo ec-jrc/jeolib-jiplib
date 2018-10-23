@@ -422,8 +422,22 @@ class Jim : public std::enable_shared_from_this<Jim>
   double getLrx() const {double ulx, uly, lrx,lry;getBoundingBox(ulx,uly,lrx,lry);return(lrx);};
   ///Get the lower right corner y (georeferenced) coordinate of this dataset
   double getLry() const {double ulx, uly, lrx,lry;getBoundingBox(ulx,uly,lrx,lry);return(lry);};
+  ///Get the scale for specific band
+  double getScale(size_t band=0){
+    if(m_scale.size()<=band)
+      return(1.0);
+    else
+      return(m_scale[band]);
+  };
   ///Get the scale as a standard template library (stl) vector
   CPLErr getScale(std::vector<double>& scale) const {scale=m_scale;};
+  ///Get the scale for specific band
+  double getOffset(size_t band=0){
+    if(m_offset.size()<=band)
+      return(0.0);
+    else
+      return(m_offset[band]);
+  };
   ///Get the offset as a standard template library (stl) vector
   CPLErr getOffset(std::vector<double>& offset) const {offset=m_offset;};
   ///Get the no data values of this dataset as a standard template library (stl) vector
@@ -731,8 +745,6 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///convert image
   CPLErr convert(Jim& imgWriter, app::AppFactory& app);
   ///crop image
-  CPLErr crop2d(Jim& imgWriter, app::AppFactory& app);
-  ///crop image
   CPLErr crop(Jim& imgWriter, app::AppFactory& app);
   ///crop image
   CPLErr cropOgr(VectorOgr& sampleReader, Jim& imgWriter, app::AppFactory& app);
@@ -740,12 +752,22 @@ class Jim : public std::enable_shared_from_this<Jim>
   CPLErr cropDS(Jim& imgWriter, app::AppFactory& app);
   ///crop image
   CPLErr crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry);
-  ///crop band(s) destructively
-  void cropBand(app::AppFactory& app);
+  ///stack band(s) from another Jim
+  std::shared_ptr<Jim> stackBand(Jim& imgSrc, app::AppFactory& app);
+  std::shared_ptr<Jim> stackBand(Jim& imgSrc){app::AppFactory theApp;return stackBand(imgSrc,theApp);};
+  ///stack band(s) from another Jim
+  CPLErr stackBand(Jim& imgSrc, Jim& imgWriter, app::AppFactory& app);
+  CPLErr stackBand(Jim& imgSrc, Jim& imgWriter){app::AppFactory theApp;return stackBand(imgSrc,imgWriter,theApp);};
+  ///crop band(s)
+  std::shared_ptr<Jim> cropBand(app::AppFactory& app);
+  std::shared_ptr<Jim> cropBand(){app::AppFactory theApp;return cropBand(theApp);};
+  CPLErr cropBand(Jim& imgWriter, app::AppFactory& app);
+  CPLErr cropBand(Jim& imgWriter){app::AppFactory theApp;return cropBand(imgWriter,theApp);};
+  ///destructive version of cropBand
+  void d_cropBand(app::AppFactory& app);
+  void d_cropBand(){app::AppFactory theApp;d_cropBand(theApp);};
   ///convert image only for in memory
   std::shared_ptr<Jim> convert(app::AppFactory& app);
-  ///crop image only for in memory
-  std::shared_ptr<Jim> crop2d(app::AppFactory& app);
   ///crop image only for in memory
   std::shared_ptr<Jim> crop(app::AppFactory& app);
   ///crop image only for in memory

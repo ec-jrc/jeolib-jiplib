@@ -2949,10 +2949,6 @@ CPLErr Jim::open(const std::string& filename, const Jim& imgSrc, unsigned int me
   return(CE_None);
 }
 
-/**
- * @param imgSrc Use this source image as a template to copy image attributes
- * @param copyData Copy data from source image when true
- **/
 CPLErr Jim::open(Jim& imgSrc, bool copyData)
 {
   m_ncol=imgSrc.nrOfCol();

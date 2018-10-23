@@ -31,7 +31,7 @@ try:
         if args.nodata:
             jim_filtered=jim.filter1d({'filter':args.filter,'dz':args.dz,'threshold':args.threshold,'nodata':args.nodata,'interp':args.interp})
         else:
-            jim_filtered=jim.filter1d({'filter':args.filter,'dz':args.dz,'threshold':args.threshold,'otype':'Int16'}).pushNoDataValue(0).setThreshold({'min':0,'max':255}).crop({'otype':'Byte'})
+            jim_filtered=jim.filter1d({'filter':args.filter,'dz':args.dz,'threshold':args.threshold,'otype':'Int16'}).pushNoDataValue(0).setThreshold({'min':0,'max':255}).convert({'otype':'Byte'})
     if args.output:
         jim_filtered.write({'filename':args.output})
     jim_filtered.close()

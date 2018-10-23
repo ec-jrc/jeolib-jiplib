@@ -73,13 +73,13 @@ if True:
             for band in range(0,11):
                 print(band)
                 print("create jimlist")
-                jl0=jl.JimList([jim0.crop({'band':band})])
+                jl0=jl.JimList([jim0.cropBand({'band':band})])
                 bandname='B'+str(band)
                 print("bandname: ",bandname)
                 if not band:
                     print("first time")
                     print("extractOgr")
-                    v=jl0.extractOgr(sample,{'rule':'mean','output':args.output,'oformat':'SQLite','co':['OVERWRITE=YES'],'bandname':bandname,'fid':'fid'})
+                    v=jl0.extractOgr(sample,{'rule':'mean','output':args.output,'oformat':'SQLite','co':['OVERWRITE=YES'],'bandname':bandname,'fid':'fid','verbose':2})
                     v.write()
                     v.close()
                 else:

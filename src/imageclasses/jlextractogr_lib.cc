@@ -4390,8 +4390,9 @@ CPLErr JimList::extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, AppFac
         extractApp.setLongOption("bandname",bandNames_opt[iband]);
 
       if(!((*imit)->isGeoRef())){
-        string errorstring="Error: input image is not georeferenced";
-        throw(errorstring);
+        std::cerr << "Warning: input image is not georeferenced" << std::endl;
+        // string errorstring="Warning: input image is not georeferenced";
+        // throw(errorstring);
       }
       if((*imit)->extractOgr(sampleReader,ogrWriter,extractApp)!=CE_None){
         string errorstring="Error: could not extractOgr";
@@ -4409,8 +4410,9 @@ CPLErr JimList::extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, AppFac
       std::cout << "We are in append" << std::endl;
     while(imit!=end()){
       if(!((*imit)->isGeoRef())){
-        string errorstring="Error: input image is not georeferenced";
-        throw(errorstring);
+        std::cerr << "Warning: input image is not georeferenced" << std::endl;
+        // string errorstring="Warning: input image is not georeferenced";
+        // throw(errorstring);
       }
       if(append){
         if(verbose_opt[0])
@@ -4485,8 +4487,9 @@ size_t JimList::extractOgrMem(VectorOgr& sampleReader, vector<unsigned char> &vb
     std::list<std::shared_ptr<Jim> >::const_iterator imit=begin();
     for(imit=begin();imit!=end();++imit){
       if(!((*imit)->isGeoRef())){
-        string errorstring="Error: input image is not georeferenced";
-        throw(errorstring);
+        std::cerr << "Warning: input image is not georeferenced" << std::endl;
+        // string errorstring="Error: input image is not georeferenced";
+        // throw(errorstring);
       }
       if((*imit)->extractOgr(sampleReader,ogrWriter,app)!=CE_None){
         string errorstring="Error: extractOgr failed";
