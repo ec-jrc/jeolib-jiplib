@@ -2951,6 +2951,93 @@ CPLErr Jim::stackBand(Jim& imgSrc, Jim& imgWriter, AppFactory& app){
   return(CE_None);
 }
 
+//destructive version of stack image to current image
+void Jim::d_stackBand(Jim& imgSrc, AppFactory& app){
+  Optionjl<unsigned int> band_opt("b", "band", "band index to crop (leave empty to retain all bands)");
+  Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
+  Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
+  Optionjl<short> verbose_opt("v", "verbose", "verbose", 0,2);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=band_opt.retrieveOption(app);
+    bstart_opt.retrieveOption(app);
+    bend_opt.retrieveOption(app);
+    verbose_opt.retrieveOption(app);
+
+    if(!doProcess){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+
+    std::vector<std::string> badKeys;
+    app.badKeys(badKeys);
+    if(badKeys.size()){
+      std::ostringstream errorStream;
+      if(badKeys.size()>1)
+        errorStream << "Error: unknown keys: ";
+      else
+        errorStream << "Error: unknown key: ";
+      for(int ikey=0;ikey<badKeys.size();++ikey){
+        errorStream << badKeys[ikey] << " ";
+      }
+      errorStream << std::endl;
+      throw(errorStream.str());
+    }
+  }
+  catch(string predefinedString){
+    std::cerr << predefinedString << std::endl;
+    throw;
+  }
+  if(bstart_opt.size()!=bend_opt.size()){
+    std::cerr << "Error: size of start band is not equal to size of end band" << std::endl;
+    throw;
+  }
+  std::vector<unsigned int> vband=band_opt;
+  for(size_t ipair=0;ipair<bstart_opt.size();++ipair){
+    if(bend_opt[ipair]<=bstart_opt[ipair]){
+      string errorstring="Error: index for end band must be smaller then start band";
+      throw(errorstring);
+    }
+    for(size_t iband=bstart_opt[ipair];iband<=bend_opt[ipair];++iband)
+      vband.push_back(iband);
+  }
+  if(vband.empty()){
+    for(size_t iband=0;iband<imgSrc.nrOfBand();++iband)
+      vband.push_back(iband);
+  }
+  if(vband.empty()){
+    std::cerr << "Error: no bands selected" << std::endl;
+    throw;
+  }
+  if(m_ncol!=imgSrc.nrOfCol()){
+    std::string errorString="Error: number of columns do not match";
+    throw(errorString);
+  }
+  if(m_nrow!=imgSrc.nrOfRow()){
+    std::string errorString="Error: number of rows do not match";
+    throw(errorString);
+  }
+  if(m_nplane!=imgSrc.nrOfPlane()){
+    std::string errorString="Error: number of planes do not match";
+    throw(errorString);
+  }
+  if(m_dataType!=imgSrc.getDataType()){
+    std::string errorString="Error: data types do not match";
+    throw(errorString);
+  }
+  size_t oldnband=nrOfBand();
+  m_data.resize(oldnband+vband.size());
+  m_begin.resize(oldnband+vband.size());
+  m_end.resize(oldnband+vband.size());
+  for(size_t iband=0;iband<vband.size();++iband){
+    m_data[oldnband+iband]=(void *) calloc(static_cast<size_t>(imgSrc.nrOfPlane()*imgSrc.nrOfCol()*imgSrc.getBlockSize()),imgSrc.getDataTypeSizeBytes());
+    imgSrc.copyData(getDataPointer(oldnband+iband),vband[iband]);
+  }
+}
+
 shared_ptr<Jim> JimList::stackBand(AppFactory& app){
   shared_ptr<Jim> imgWriter=Jim::createImg();
   stackBand(*imgWriter, app);

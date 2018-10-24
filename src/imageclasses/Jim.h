@@ -758,6 +758,9 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///stack band(s) from another Jim
   CPLErr stackBand(Jim& imgSrc, Jim& imgWriter, app::AppFactory& app);
   CPLErr stackBand(Jim& imgSrc, Jim& imgWriter){app::AppFactory theApp;return stackBand(imgSrc,imgWriter,theApp);};
+  ///destructive version of stack band(s) from another Jim
+  void d_stackBand(Jim& imgSrc, app::AppFactory& app);
+  void d_stackBand(Jim& imgSrc){app::AppFactory theApp; d_stackBand(imgSrc,theApp);};
   ///crop band(s)
   std::shared_ptr<Jim> cropBand(app::AppFactory& app);
   std::shared_ptr<Jim> cropBand(){app::AppFactory theApp;return cropBand(theApp);};

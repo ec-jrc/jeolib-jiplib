@@ -91,28 +91,39 @@ CPLErr Jim::band2plane(){
 
 #if MIALIB == 1
 IMAGE* Jim::getMIA(int band){
-  if(getBlockSize()!=nrOfRow()){
-    std::ostringstream s;
-    s << "Error: increase memory to support MIA library functions (now at " << 100.0*getBlockSize()/nrOfRow() << "%)";
-    throw(s.str());
+  try{
+    if(getBlockSize()!=nrOfRow()){
+      std::ostringstream s;
+      s << "Error: increase memory to support MIA library functions (now at " << 100.0*getBlockSize()/nrOfRow() << "%)";
+      throw(s.str());
+    }
+    if(nrOfBand()<=band){
+      std::ostringstream s;
+      s << "Error: illegal band number in getMIA";
+      throw(s.str());
+    }
+    if(m_mia.size()<band+1)
+      m_mia.resize(band+1);
+    if(m_mia[band])
+      delete(m_mia[band]);
+    m_mia[band]=new(IMAGE);
+    m_mia[band]->p_im=m_data[band];/* Pointer to image data */
+    m_mia[band]->DataType=getMIADataType();
+    m_mia[band]->nx=nrOfCol();
+    m_mia[band]->ny=nrOfRow();
+    m_mia[band]->nz=nrOfPlane();
+    m_mia[band]->NByte=m_mia[band]->nx * m_mia[band]->ny * m_mia[band]->nz * getDataTypeSizeBytes();//assumes image data type is not of bit type!!!
+    //todo: remove m_mia[band]->vol and only rely on the getVolume function
+    m_mia[band]->vol=0;//use getVolume() function
+    m_mia[band]->lut=0;
+    //USHORT *lut;   /* Pointer to colour map */
+    //mia->g=getgetDataType();//not used
+    return m_mia[band];
   }
-  if(m_mia.size()<band+1)
-    m_mia.resize(band+1);
-  if(m_mia[band])
-    delete(m_mia[band]);
-  m_mia[band]=new(IMAGE);
-  m_mia[band]->p_im=m_data[band];/* Pointer to image data */
-  m_mia[band]->DataType=getMIADataType();
-  m_mia[band]->nx=nrOfCol();
-  m_mia[band]->ny=nrOfRow();
-  m_mia[band]->nz=nrOfPlane();
-  m_mia[band]->NByte=m_mia[band]->nx * m_mia[band]->ny * m_mia[band]->nz * getDataTypeSizeBytes();//assumes image data type is not of bit type!!!
-  //todo: remove m_mia[band]->vol and only rely on the getVolume function
-  m_mia[band]->vol=0;//use getVolume() function
-  m_mia[band]->lut=0;
-  //USHORT *lut;   /* Pointer to colour map */
-  //mia->g=getgetDataType();//not used
-  return m_mia[band];
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    throw;
+  }
 }
 
 /**
@@ -124,24 +135,22 @@ IMAGE* Jim::getMIA(int band){
  */
 CPLErr Jim::setMIA(int band){
   try{
-    // if(m_mia->nz>1){
-    //   std::string errorString="Error: MIA image with nz>1 not supported";
-    //   throw(errorString);
-    // }
     if(m_mia.size()<band+1){
       std::ostringstream s;
-      s << "Error: illegal band number when setting MIA in Jim";
+      std::cerr << "Error: illegal band number when setting MIA in Jim";
       throw(s.str());
     }
     if(m_ncol!=m_mia[band]->nx){
-      std::ostringstream s;
-      s << "Error: x dimension of image (" << m_ncol << ") does not match MIA (" << m_mia[band]->nx << ")";
-      throw(s.str());
+      std::cerr << "Warning: x dimension of image (" << m_ncol << ") does not match MIA (" << m_mia[band]->nx << "), adapting m_ncol" << std::endl;
+      m_ncol=m_mia[band]->nx;
     }
     if(m_nrow!=m_mia[band]->ny){
-      std::ostringstream s;
-      s << "Error: y dimension of image (" << m_nrow << ") does not match MIA (" << m_mia[band]->ny << ")";
-      throw(s.str());
+      std::cerr << "Warning: x dimension of image (" << m_ncol << ") does not match MIA (" << m_mia[band]->nx << "), adapting m_ncol" << std::endl;
+      m_nrow=m_mia[band]->ny;
+    }
+    if(m_mia[band]->nz!=m_nplane){
+      std::cerr << "Warning: z dimension of image (" << m_nplane << ") does not match MIA (" << m_mia[band]->nz << "), adapting m_nplane" << std::endl;
+      m_nplane=m_mia[band]->nx;
     }
     if(m_nband<=band){
       std::ostringstream s;
@@ -3839,4 +3848,3 @@ CPLErr Jim::setThreshold(Jim& imgWriter, app::AppFactory &theApp){
       setThreshold(imgWriter,min_opt[0],max_opt[0]);
   }
 }
-

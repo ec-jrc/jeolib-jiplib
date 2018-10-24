@@ -55,7 +55,7 @@ CPLErr Jim::extractImg(Jim& classReader, VectorOgr& ogrWriter, app::AppFactory& 
   Optionjl<string> output_opt("o", "output", "Output sample dataset");
   Optionjl<std::string> layer_opt("ln", "ln", "output layer name","sample");
   Optionjl<int> class_opt("c", "class", "Class(es) to extract from input sample image. Leave empty to extract all valid data pixels from sample dataset");
-  Optionjl<float> threshold_opt("t", "threshold", "Probability threshold for selecting samples (randomly). Provide probability in percentage (>0) or absolute (<0). Use a single threshold per vector sample layer. If using raster land cover maps as a sample dataset, you can provide a threshold value for each class (e.g. -t 80 -t 60). Use value 100 to select all pixels for selected class(es)", 100);
+  Optionjl<float> threshold_opt("t", "threshold", "Probability threshold for selecting samples (randomly). Provide probability in percentage (>0) or absolute (<0). If using raster land cover maps as a sample dataset, you can provide a threshold value for each class (e.g. -t 80 -t 60). Use value 100 to select all pixels for selected class(es)", 100);
   Optionjl<string> ogrformat_opt("f", "oformat", "Output sample dataset format","SQLite");
   Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
   Optionjl<string> ftype_opt("ft", "ftype", "Field type (only Real or Integer)", "Real");
