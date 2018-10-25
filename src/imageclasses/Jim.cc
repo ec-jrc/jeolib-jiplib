@@ -751,6 +751,8 @@ CPLErr Jim::setProjectionProj4(const std::string& projection)
  **/
 GDALDataType Jim::getDataTypeDS(int band) const
 {
+  if(!nrOfBand())
+    return(GDT_Unknown);
   if(nrOfBand()<=band){
     std::string errorString="Error: band number exceeds available bands in getDataType";
     throw(errorString);
@@ -768,6 +770,8 @@ GDALDataType Jim::getDataTypeDS(int band) const
 int Jim::getDataType(int band) const
 //GDALDataType Jim::getDataType(int band) const
 {
+  if(!nrOfBand())
+    return(0);
   if(nrOfBand()<=band){
     std::string errorString="Error: band number exceeds available bands in getDataType";
     throw(errorString);
@@ -784,6 +788,8 @@ int Jim::getDataType(int band) const
  **/
 GDALDataType Jim::getGDALDataType(int band) const
 {
+  if(!nrOfBand())
+    return(GDT_Unknown);
   if(nrOfBand()<=band){
     std::string errorString="Error: band number exceeds available bands in getDataType";
     throw(errorString);
