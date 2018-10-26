@@ -129,8 +129,6 @@
                   appDict.update({'filename':arg1})
               else:
                 raise IOError("Error: {} is not a regular file".format(arg1))
-          else:
-            raise TypeError("Error: bad argument type for createJim, arguments without names should be a path or of Jim type")
       for key, value in kwargs.items():
           appDict.update({key:value})
       if appDict:
@@ -259,6 +257,10 @@
  /*  $result = pyList; */
  /* } */
 
+%typemap(argout) unsigned long int* ofs{
+  %append_output(PyInt_FromLong(*$1));
+ }
+
 %typemap(in) double* gt(double temp[6]){
   std::cout << "we are in typemap(in) setGeoTransform" << std::endl;
   int i;
@@ -368,150 +370,140 @@
 /* namespace jiplib{ */
   //    NPY_INT8, NPY_INT16, NPY_INT32, NPY_INT64, NPY_UINT8, NPY_UINT16, NPY_UINT32, NPY_UINT64, NPY_FLOAT32, NPY_FLOAT64, NPY_COMPLEX64, NPY_COMPLEX128.
 
-  %extend Jim {
-    /* std::shared_ptr<jiplib::Jim> np2jim(PyObject* npArray) { */
-    std::shared_ptr<Jim> np2jim(PyObject* npArray) {
-      if(PyArray_Check(npArray)){
-        PyArrayObject *obj=(PyArrayObject *)npArray;
-        GDALDataType jDataType;
-        int typ=PyArray_TYPE((PyArrayObject *)npArray);
+  /* %extend Jim { */
+  /*   std::shared_ptr<Jim> np2jim(PyObject* npArray) { */
+  /*     if(PyArray_Check(npArray)){ */
+  /*       PyArrayObject *obj=(PyArrayObject *)npArray; */
+  /*       GDALDataType jDataType; */
+  /*       int typ=PyArray_TYPE((PyArrayObject *)npArray); */
 
-        switch(PyArray_TYPE((PyArrayObject*)npArray)){
-        case NPY_UINT8:
-          jDataType=GDT_Byte;
-          break;
-        case NPY_UINT16:
-          jDataType=GDT_UInt16;
-          break;
-        case NPY_INT16:
-          jDataType=GDT_Int16;
-          break;
-        case NPY_UINT32:
-          jDataType=GDT_UInt32;
-          break;
-        case NPY_INT32:
-          jDataType=GDT_Int16;
-          break;
-        case NPY_FLOAT32:
-          jDataType=GDT_Float32;
-          break;
-        case NPY_FLOAT64:
-          jDataType=GDT_Float64;
-          break;
-          // case NPY_UINT64:
-          //   jDataType=;
-          // break;
-          // case NPY_INT64:
-          //   jDataType=;
-          // break;
-        default:
-          std::string errorString="Error: Unknown data type";
-          throw(errorString);
-        }
-        int dim=(PyArray_NDIM((PyArrayObject*)npArray))? 3 : 2;
-        int nplane=(PyArray_NDIM((PyArrayObject*)npArray)==3) ? PyArray_DIM((PyArrayObject*)npArray,2): 1;//todo: check if nth dim starts from 0
-        int nrow=PyArray_DIM((PyArrayObject*)npArray,0);
-        int ncol=PyArray_DIM((PyArrayObject*)npArray,1);
-        int nband=1;//only single band supported for now
-        /* std::vector<double> gt(6); */
-        /* std::string theProjection=$self->getProjection(); */
-        /* $self->getGeoTransform(gt); */
-        /* /\* $self->close(); *\/ */
-        /* std::shared_ptr<jiplib::Jim> imgWriter=std::make_shared<jiplib::Jim>(ncol,nrow,nplane,jDataType); */
-        /* memcpy(imgWriter->getDataPointer(),(void*)(((PyArrayObject*)npArray)->data),imgWriter->getDataTypeSizeBytes()*imgWriter->nrOfCol()*imgWriter->nrOfRow()*imgWriter->nrOfPlane()); */
-        /* imgWriter->setGeoTransform(gt); */
-        /* imgWriter->setProjection(theProjection); */
-        /* return(imgWriter); */
-        std::vector<double> gt(6);
-        std::string theProjection=$self->getProjection();
-        $self->getGeoTransform(gt);
-        $self->close();
-        $self->open(ncol,nrow,nplane,jDataType);
-        memcpy($self->getDataPointer(),(void*)(((PyArrayObject*)npArray)->data),$self->getDataTypeSizeBytes()*$self->nrOfCol()*$self->nrOfRow()*$self->nrOfPlane());
-        $self->setGeoTransform(gt);
-        $self->setProjection(theProjection);
-        return($self->getShared());
-      }
-      else{
-        std::cerr << "Error: expected a numpy array as input, returning empty Jim image" << std::endl;
-        /* return create; */
-        return $self->getShared();
-      }
-    }
+  /*       switch(PyArray_TYPE((PyArrayObject*)npArray)){ */
+  /*       case NPY_UINT8: */
+  /*         jDataType=GDT_Byte; */
+  /*         break; */
+  /*       case NPY_UINT16: */
+  /*         jDataType=GDT_UInt16; */
+  /*         break; */
+  /*       case NPY_INT16: */
+  /*         jDataType=GDT_Int16; */
+  /*         break; */
+  /*       case NPY_UINT32: */
+  /*         jDataType=GDT_UInt32; */
+  /*         break; */
+  /*       case NPY_INT32: */
+  /*         jDataType=GDT_Int16; */
+  /*         break; */
+  /*       case NPY_FLOAT32: */
+  /*         jDataType=GDT_Float32; */
+  /*         break; */
+  /*       case NPY_FLOAT64: */
+  /*         jDataType=GDT_Float64; */
+  /*         break; */
+  /*         // case NPY_UINT64: */
+  /*         //   jDataType=; */
+  /*         // break; */
+  /*         // case NPY_INT64: */
+  /*         //   jDataType=; */
+  /*         // break; */
+  /*       default: */
+  /*         std::string errorString="Error: Unknown data type"; */
+  /*         throw(errorString); */
+  /*       } */
+  /*       int dim=(PyArray_NDIM((PyArrayObject*)npArray))? 3 : 2; */
+  /*       int nplane=(PyArray_NDIM((PyArrayObject*)npArray)==3) ? PyArray_DIM((PyArrayObject*)npArray,2): 1;//todo: check if nth dim starts from 0 */
+  /*       int nrow=PyArray_DIM((PyArrayObject*)npArray,0); */
+  /*       int ncol=PyArray_DIM((PyArrayObject*)npArray,1); */
+  /*       int nband=1;//only single band supported for now */
+  /*       std::vector<double> gt(6); */
+  /*       std::string theProjection=$self->getProjection(); */
+  /*       $self->getGeoTransform(gt); */
+  /*       $self->close(); */
+  /*       $self->open(ncol,nrow,nplane,jDataType); */
+  /*       memcpy($self->getDataPointer(),(void*)(((PyArrayObject*)npArray)->data),$self->getDataTypeSizeBytes()*$self->nrOfCol()*$self->nrOfRow()*$self->nrOfPlane()); */
+  /*       $self->setGeoTransform(gt); */
+  /*       $self->setProjection(theProjection); */
+  /*       return($self->getShared()); */
+  /*     } */
+  /*     else{ */
+  /*       std::cerr << "Error: expected a numpy array as input, returning empty Jim image" << std::endl; */
+  /*       /\* return create; *\/ */
+  /*       return $self->getShared(); */
+  /*     } */
+  /*   } */
 
-    PyObject* jim2np(int band=0, bool copyData=true) {
-      if(band>=$self->nrOfBand()){
-        std::string errorString="Error: band out of range";
-        throw(errorString);
-      }
-      int npDataType;
-      switch ($self->getDataType()){
-      case GDT_Byte:
-        npDataType=NPY_UINT8;
-        break;
-      case GDT_UInt16:
-        npDataType=NPY_UINT16;
-        break;
-      case GDT_Int16:
-        npDataType=NPY_INT16;
-        break;
-      case GDT_UInt32:
-        npDataType=NPY_UINT32;
-        break;
-      case GDT_Int32:
-        npDataType=NPY_INT32;
-        break;
-      case GDT_Float32:
-        npDataType=NPY_FLOAT32;
-        break;
-      case GDT_Float64:
-        npDataType=NPY_FLOAT64;
-        break;
-        // case JDT_UInt64:
-        //   npDataType=NPY_UINT64;
-        // break;
-        // case JDT_Int64:
-        //   npDataType=NPY_INT64;
-        // break;
-      case GDT_Unknown:
-      default:
-        std::string errorString="Error: Unknown data type";
-        throw(errorString);
-      }
-      void *npdata=0;
-      if(copyData){
-        //alllocate memory for npdata
-        npdata=(void *) calloc(static_cast<size_t>($self->nrOfPlane()*$self->nrOfCol()*$self->nrOfRow()),$self->getDataTypeSizeBytes());
-        //copy data from jim to npdata
-        $self->copyData(npdata,band);
-      }
-      else
-        npdata=(void*)($self->getDataPointer(band));
-      int dim=($self->nrOfPlane()>1)? 3 : 2;
-      if($self->nrOfPlane()>1){
-        npy_intp dims[3];
-        dims[0]=$self->nrOfRow();
-        dims[1]=$self->nrOfCol();
-        dims[2]=$self->nrOfPlane();
-        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,npdata);
-        if(npArray)
-          return(PyArray_Return(npArray));
-        else
-          return(0);
-      }
-      else{
-        npy_intp dims[2];
-        dims[0]=$self->nrOfRow();
-        dims[1]=$self->nrOfCol();
-        /* PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,(void*)$self->getDataPointer(band)); */
-        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,npdata);
-        if(npArray)
-          return(PyArray_Return(npArray));
-        else
-          return(0);
-      }
-    }
-  }
+  /*   PyObject* jim2np(int band=0, bool copyData=true) { */
+  /*     if(band>=$self->nrOfBand()){ */
+  /*       std::string errorString="Error: band out of range"; */
+  /*       throw(errorString); */
+  /*     } */
+  /*     int npDataType; */
+  /*     switch ($self->getDataType()){ */
+  /*     case GDT_Byte: */
+  /*       npDataType=NPY_UINT8; */
+  /*       break; */
+  /*     case GDT_UInt16: */
+  /*       npDataType=NPY_UINT16; */
+  /*       break; */
+  /*     case GDT_Int16: */
+  /*       npDataType=NPY_INT16; */
+  /*       break; */
+  /*     case GDT_UInt32: */
+  /*       npDataType=NPY_UINT32; */
+  /*       break; */
+  /*     case GDT_Int32: */
+  /*       npDataType=NPY_INT32; */
+  /*       break; */
+  /*     case GDT_Float32: */
+  /*       npDataType=NPY_FLOAT32; */
+  /*       break; */
+  /*     case GDT_Float64: */
+  /*       npDataType=NPY_FLOAT64; */
+  /*       break; */
+  /*       // case JDT_UInt64: */
+  /*       //   npDataType=NPY_UINT64; */
+  /*       // break; */
+  /*       // case JDT_Int64: */
+  /*       //   npDataType=NPY_INT64; */
+  /*       // break; */
+  /*     case GDT_Unknown: */
+  /*     default: */
+  /*       std::string errorString="Error: Unknown data type"; */
+  /*       throw(errorString); */
+  /*     } */
+  /*     void *npdata=0; */
+  /*     if(copyData){ */
+  /*       //alllocate memory for npdata */
+  /*       npdata=(void *) calloc(static_cast<size_t>($self->nrOfPlane()*$self->nrOfCol()*$self->nrOfRow()),$self->getDataTypeSizeBytes()); */
+  /*       //copy data from jim to npdata */
+  /*       $self->copyData(npdata,band); */
+  /*     } */
+  /*     else */
+  /*       npdata=(void*)($self->getDataPointer(band)); */
+  /*     int dim=($self->nrOfPlane()>1)? 3 : 2; */
+  /*     if($self->nrOfPlane()>1){ */
+  /*       npy_intp dims[3]; */
+  /*       dims[0]=$self->nrOfRow(); */
+  /*       dims[1]=$self->nrOfCol(); */
+  /*       dims[2]=$self->nrOfPlane(); */
+  /*       PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,npdata); */
+  /*       if(npArray) */
+  /*         return(PyArray_Return(npArray)); */
+  /*       else */
+  /*         return(0); */
+  /*     } */
+  /*     else{ */
+  /*       npy_intp dims[2]; */
+  /*       dims[0]=$self->nrOfRow(); */
+  /*       dims[1]=$self->nrOfCol(); */
+  /*       /\* PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,(void*)$self->getDataPointer(band)); *\/ */
+  /*       PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,npdata); */
+  /*       if(npArray) */
+  /*         return(PyArray_Return(npArray)); */
+  /*       else */
+  /*         return(0); */
+  /*     } */
+  /*   } */
+  /* } */
 
   //return the object itself for all functions returning CPLErr
   %typemap(out) CPLErr {

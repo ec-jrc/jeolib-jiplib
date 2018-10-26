@@ -727,6 +727,7 @@ CPLErr Jim::setProjectionProj4(const std::string& projection)
       return(CE_Warning);
   }
   else
+    std::cerr << "Warning: empty projection" << std::endl;
     return(CE_Failure);
 }
 
