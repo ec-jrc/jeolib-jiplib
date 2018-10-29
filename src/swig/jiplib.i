@@ -320,6 +320,38 @@
   $result = pyList;
  }
 
+%typemap(in, numinputs=0) (double& i, double& j) (double i, double j){
+  $1 = &i;
+  $2 = &j;
+ }
+
+%typemap(argout) (double& i, double& j){
+  PyObject *pyList;
+
+  pyList=PyList_New(2);
+  double theValue1=*$1;
+  double theValue2=*$2;
+  PyList_SET_ITEM(pyList, 0, PyFloat_FromDouble(theValue1));
+  PyList_SET_ITEM(pyList, 1, PyFloat_FromDouble(theValue2));
+  $result = pyList;
+ }
+
+%typemap(in, numinputs=0) (double& x, double& y) (double x, double y){
+  $1 = &x;
+  $2 = &y;
+ }
+
+%typemap(argout) (double& x, double& y){
+  PyObject *pyList;
+
+  pyList=PyList_New(2);
+  double theValue1=*$1;
+  double theValue2=*$2;
+  PyList_SET_ITEM(pyList, 0, PyFloat_FromDouble(theValue1));
+  PyList_SET_ITEM(pyList, 1, PyFloat_FromDouble(theValue2));
+  $result = pyList;
+ }
+
 /* %typemap(typecheck) (std::vector<double>&) = PyObject *; */
 /* %apply std::vector<double> & OUTPUT { std::vector<double>& dVector }; */
 /* %typemap(argout) const std::vector<double>& dVector ""; */
