@@ -2870,16 +2870,111 @@ CPLErr Jim::write(){
 }
 
 ///write to file without reset (keep data in memory)
-/**
- * @param filename Filename of the output raster dataset
- * @param oformat Image type. Currently only those formats where the drivers support the Create method can be written
- * @param co Creation option for output file. Multiple options can be specified.
- * @param nodata Nodata value to put in image.
- * @return CE_None if successful, else CE_Failure
- **/
 CPLErr Jim::write(app::AppFactory &app){
-  setFile(app);
-  write();
+  Optionjl<std::string> input_opt("fn", "filename", "filename");
+  Optionjl<std::string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
+  Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.");
+  Optionjl<string> colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
+  Optionjl<string> description_opt("d", "description", "Set image description");
+  Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+
+  option_opt.setHide(1);
+  memory_opt.setHide(1);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  doProcess=input_opt.retrieveOption(app);
+  oformat_opt.retrieveOption(app);
+  option_opt.retrieveOption(app);
+  nodata_opt.retrieveOption(app);
+  colorTable_opt.retrieveOption(app);
+  description_opt.retrieveOption(app);
+  memory_opt.retrieveOption(app);
+  if(!doProcess){
+    std::cout << std::endl;
+    std::ostringstream helpStream;
+    helpStream << "help info: ";
+    throw(helpStream.str());//help was invoked, stop processing
+  }
+  std::vector<std::string> badKeys;
+  app.badKeys(badKeys);
+  if(badKeys.size()){
+    std::ostringstream errorStream;
+    if(badKeys.size()>1)
+      errorStream << "Error: unknown keys: ";
+    else
+      errorStream << "Error: unknown key: ";
+    for(int ikey=0;ikey<badKeys.size();++ikey){
+      errorStream << badKeys[ikey] << " ";
+    }
+    errorStream << std::endl;
+    throw(errorStream.str());
+  }
+  if(nodata_opt.size())
+    setNoData(nodata_opt);
+  if(input_opt.size()){
+    CPLErr result=setFile(input_opt[0],oformat_opt[0],memory_opt[0],option_opt);
+    if(colorTable_opt.size()){
+      if(colorTable_opt[0]!="none"||colorTable_opt[0]!="None")
+        setColorTable(colorTable_opt[0]);
+    }
+    if(description_opt.size()){
+      if(description_opt[0]!="none"||description_opt[0]!="None")
+        setImageDescription(description_opt[0]);
+    }
+    write();
+    return(result);
+  }
+  else{
+    std::ostringstream helpStream;
+    helpStream << "Warning: filename not set";
+    std::cerr << helpStream.str() << std::endl;
+    throw(helpStream.str());//help was invoked, stop processing
+  }
+}
+
+CPLErr Jim::setData(double value, int band){
+  if(m_data.empty()){
+    std::ostringstream s;
+    s << "Error: Jim not initialized, m_data is empty";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  for(int irow=0;irow<nrOfRow();++irow){
+    int index=irow*nrOfCol();
+    int minindex=index;
+    int maxindex=index+nrOfCol();
+    for(index=minindex;index<=maxindex;++index){
+      double dvalue=value;
+      switch(getDataType()){
+      case(GDT_Byte):
+        static_cast<unsigned char*>(m_data[band])[index]=static_cast<unsigned char>(dvalue);
+        break;
+      case(GDT_Int16):
+        static_cast<short*>(m_data[band])[index]=static_cast<short>(dvalue);
+        break;
+      case(GDT_UInt16):
+        static_cast<unsigned short*>(m_data[band])[index]=static_cast<unsigned short>(dvalue);
+        break;
+      case(GDT_Int32):
+        static_cast<int*>(m_data[band])[index]=static_cast<int>(dvalue);
+        break;
+      case(GDT_UInt32):
+        static_cast<unsigned int*>(m_data[band])[index]=static_cast<unsigned int>(dvalue);
+        break;
+      case(GDT_Float32):
+        static_cast<float*>(m_data[band])[index]=static_cast<float>(dvalue);
+        break;
+      case(GDT_Float64):
+        static_cast<double*>(m_data[band])[index]=static_cast<double>(dvalue);
+        break;
+      default:
+        std::string errorString="Error: data type not supported";
+        throw(errorString);
+        break;
+      }
+    }
+  }
 }
 
 ///Create a JSON string from a Jim image
@@ -3157,67 +3252,6 @@ CPLErr Jim::setFile(const std::string& filename, const std::string& imageType, u
     }
   }
   return(returnValue);
-}
-
-///set file attributes for writing
-/**
- * @param filename Filename of the output raster dataset
- * @param oformat Image type. Currently only those formats where the drivers support the Create method can be written
- * @param co Creation option for output file. Multiple options can be specified.
- * @param nodata Nodata value to put in image.
- **/
-CPLErr Jim::setFile(app::AppFactory &app){
-  Optionjl<std::string> input_opt("fn", "filename", "filename");
-  Optionjl<std::string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
-  Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
-  Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.");
-  Optionjl<string> colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
-  Optionjl<string> description_opt("d", "description", "Set image description");
-  Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
-
-  option_opt.setHide(1);
-  memory_opt.setHide(1);
-
-  bool doProcess;//stop process when program was invoked with help option (-h --help)
-  doProcess=input_opt.retrieveOption(app);
-  oformat_opt.retrieveOption(app);
-  option_opt.retrieveOption(app);
-  nodata_opt.retrieveOption(app);
-  colorTable_opt.retrieveOption(app);
-  description_opt.retrieveOption(app);
-  memory_opt.retrieveOption(app);
-  if(!doProcess){
-    std::cout << std::endl;
-    std::ostringstream helpStream;
-    helpStream << "help info: ";
-    throw(helpStream.str());//help was invoked, stop processing
-  }
-  std::vector<std::string> badKeys;
-  app.badKeys(badKeys);
-  if(badKeys.size()){
-    std::ostringstream errorStream;
-    if(badKeys.size()>1)
-      errorStream << "Error: unknown keys: ";
-    else
-      errorStream << "Error: unknown key: ";
-    for(int ikey=0;ikey<badKeys.size();++ikey){
-      errorStream << badKeys[ikey] << " ";
-    }
-    errorStream << std::endl;
-    throw(errorStream.str());
-  }
-  if(nodata_opt.size())
-    setNoData(nodata_opt);
-  CPLErr result=setFile(input_opt[0],oformat_opt[0],memory_opt[0],option_opt);
-  if(colorTable_opt.size()){
-    if(colorTable_opt[0]!="none"||colorTable_opt[0]!="None")
-      setColorTable(colorTable_opt[0]);
-  }
-  if(description_opt.size()){
-    if(description_opt[0]!="none"||description_opt[0]!="None")
-      setImageDescription(description_opt[0]);
-  }
-  return(result);
 }
 
 ///Copy data

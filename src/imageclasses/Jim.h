@@ -473,6 +473,7 @@ class Jim : public std::enable_shared_from_this<Jim>
       return(CE_None);
     else return(CE_Failure);
   };
+  CPLErr setData(double value, int band=0);
   ///Clear all no data values, including the one in GDAL dataset if it is set
   CPLErr clearNoData(int band=0){m_noDataValues.clear();if(m_access!=READ_ONLY&&getRasterBand(band)) getRasterBand(band)->DeleteNoDataValue();return(CE_None);}
   ///Set the GDAL (internal) no data value for this data set. Only a single no data value per band is supported.
@@ -694,10 +695,9 @@ class Jim : public std::enable_shared_from_this<Jim>
   // CPLErr writeData(void* pdata, const GDALDataType& dataType, int band=0);
   ///Write pixel cell values for a range of columns and rows for a specific band (all indices start counting from 0). The buffer is a two dimensional vector (stl vector of stl vector) representing [row][col].
   template<typename T> CPLErr writeDataBlock(Vector2d<T>& buffer2d, int minCol, int maxCol, int minRow, int maxRow, int band=0);
+  template<typename T> CPLErr writeDataBlock(T value, int minCol, int maxCol, int minRow, int maxRow, int band=0);
   ///Prepare image writer to write to file
   CPLErr setFile(const std::string& filename, const std::string& imageType, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>());
-  ///Prepare image writer to write to file
-  CPLErr setFile(app::AppFactory &app);
   ///Prepare image writer to write to file
   // void setFile(const std::string& filename, const Jim& imgSrc, unsigned int memory=0, const std::vector<std::string>& options=std::vector<std::string>());
   ///Set the color table using an (ASCII) file with 5 columns (value R G B alpha)
@@ -1744,4 +1744,113 @@ template<typename T> CPLErr Jim::writeDataBlock(Vector2d<T>& buffer2d, int minCo
   return(returnValue);
 }
 
+template<typename T> CPLErr Jim::writeDataBlock(T value, int minCol, int maxCol, int minRow, int maxRow, int band){
+  CPLErr returnValue=CE_None;
+  double theScale=1;
+  double theOffset=0;
+  if(m_scale.size()>band)
+    theScale=m_scale[band];
+  if(m_offset.size()>band)
+    theOffset=m_offset[band];
+  if(band>=nrOfBand()+1){
+    std::ostringstream s;
+    s << "band (" << band << ") exceeds nrOfBand (" << nrOfBand() << ")";
+    throw(s.str());
+  }
+  if(minCol>=nrOfCol()){
+    std::ostringstream s;
+    s << "minCol (" << minCol << ") exceeds nrOfCol (" << nrOfCol() << ")";
+    throw(s.str());
+  }
+  if(minCol<0){
+    std::ostringstream s;
+    s << "mincol (" << minCol << ") is negative";
+    throw(s.str());
+  }
+  if(minCol>0){
+    std::ostringstream s;
+    s << "Error: increase memory to support random access writing (now at " << 100.0*m_blockSize/nrOfRow() << "%)";
+    throw(s.str());
+  }
+  if(maxCol>=nrOfCol()){
+    std::ostringstream s;
+    s << "maxCol (" << maxCol << ") exceeds nrOfCol (" << nrOfCol() << ")";
+    throw(s.str());
+  }
+  if(maxCol<minCol){
+    std::ostringstream s;
+    s << "maxCol (" << maxCol << ") is less than minCol (" << minCol << ")";
+    throw(s.str());
+  }
+  if(m_data.size()){
+    for(int irow=minRow;irow<=maxRow;++irow){
+      if(irow>=nrOfRow()){
+        std::ostringstream s;
+        s << "row (" << irow << ") exceeds nrOfRow (" << nrOfRow() << ")";
+        throw(s.str());
+      }
+      if(irow<0){
+        std::ostringstream s;
+        s << "row (" << irow << ") is negative";
+        throw(s.str());
+      }
+      if(irow<m_begin[band]){
+        std::ostringstream s;
+        s << "Error: increase memory to support random access writing (now at " << 100.0*m_blockSize/nrOfRow() << "%)";
+        throw(s.str());
+      }
+      if(irow>=m_end[band]){
+        if(irow>=m_end[band]+m_blockSize){
+          std::ostringstream s;
+          s << "Error: increase memory to support random access writing (now at " << 100.0*m_blockSize/nrOfRow() << "%)";
+          throw(s.str());
+        }
+        else if(m_filename.size())
+          returnValue=writeNewBlock(irow,band);
+      }
+      int index=(irow-m_begin[band])*nrOfCol();
+      int minindex=index+minCol;
+      int maxindex=index+maxCol;
+      for(index=minindex;index<=maxindex;++index){
+        double dvalue=value;
+        switch(getDataType()){
+        case(GDT_Byte):
+          static_cast<unsigned char*>(m_data[band])[index]=static_cast<unsigned char>(dvalue);
+          break;
+        case(GDT_Int16):
+          static_cast<short*>(m_data[band])[index]=static_cast<short>(dvalue);
+          break;
+        case(GDT_UInt16):
+          static_cast<unsigned short*>(m_data[band])[index]=static_cast<unsigned short>(dvalue);
+          break;
+        case(GDT_Int32):
+          static_cast<int*>(m_data[band])[index]=static_cast<int>(dvalue);
+          break;
+        case(GDT_UInt32):
+          static_cast<unsigned int*>(m_data[band])[index]=static_cast<unsigned int>(dvalue);
+          break;
+        case(GDT_Float32):
+          static_cast<float*>(m_data[band])[index]=static_cast<float>(dvalue);
+          break;
+        case(GDT_Float64):
+          static_cast<double*>(m_data[band])[index]=static_cast<double>(dvalue);
+          break;
+        default:
+          std::string errorString="Error: data type not supported";
+          throw(errorString);
+          break;
+        }
+      }
+    }
+  }
+  else{
+    //todo: apply scaling and offset!
+    typename std::vector<T> buffer((maxRow-minRow+1)*(maxCol-minCol+1),value);
+    //fetch raster band
+    GDALRasterBand  *poBand;
+    poBand = m_gds->GetRasterBand(band+1);//GDAL uses 1 based index
+    returnValue=poBand->RasterIO(GF_Write,minCol,minRow,maxCol-minCol+1,maxRow-minRow+1,&(buffer[0]),(maxCol-minCol+1),(maxRow-minRow+1),type2GDAL<T>(),0,0);
+  }
+  return(returnValue);
+}
 #endif // _JIM_H_
