@@ -473,7 +473,8 @@ class Jim : public std::enable_shared_from_this<Jim>
       return(CE_None);
     else return(CE_Failure);
   };
-  CPLErr setData(double value, int band=0);
+  void setData(double value, int band=0);
+  void setData(double value, double ulx, double uly, double lrx, double lry, int band=0, double dx=0, double dy=0, bool geo=true);
   ///Clear all no data values, including the one in GDAL dataset if it is set
   CPLErr clearNoData(int band=0){m_noDataValues.clear();if(m_access!=READ_ONLY&&getRasterBand(band)) getRasterBand(band)->DeleteNoDataValue();return(CE_None);}
   ///Set the GDAL (internal) no data value for this data set. Only a single no data value per band is supported.
@@ -751,7 +752,8 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///crop image if it has not been read yet (typically used when Jim has been opened with argument noRead true)
   CPLErr cropDS(Jim& imgWriter, app::AppFactory& app);
   ///crop image
-  CPLErr crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry);
+  /* CPLErr crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry); */
+  CPLErr crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry, double dx=0, double dy=0, bool geo=true);
   ///stack band(s) from another Jim
   std::shared_ptr<Jim> stackBand(Jim& imgSrc, app::AppFactory& app);
   std::shared_ptr<Jim> stackBand(Jim& imgSrc){app::AppFactory theApp;return stackBand(imgSrc,theApp);};
@@ -774,7 +776,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///crop image only for in memory
   std::shared_ptr<Jim> crop(app::AppFactory& app);
   ///crop image only for in memory
-  std::shared_ptr<Jim> crop(double ulx, double uly, double lrx, double lry);
+  std::shared_ptr<Jim> crop(double ulx, double uly, double lrx, double lry, double dx=0, double dy=0, bool geo=true);
   ///crop Jim image in memory based on VectorOgr returning Jim image
   std::shared_ptr<Jim> cropOgr(VectorOgr& sampleReader, app::AppFactory& app);
   ///warp Jim image in memory

@@ -145,7 +145,7 @@ CPLErr Jim::setMIA(int band){
       m_ncol=m_mia[band]->nx;
     }
     if(m_nrow!=m_mia[band]->ny){
-      std::cerr << "Warning: x dimension of image (" << m_ncol << ") does not match MIA (" << m_mia[band]->nx << "), adapting m_ncol" << std::endl;
+      std::cerr << "Warning: y dimension of image (" << m_ncol << ") does not match MIA (" << m_mia[band]->ny << "), adapting m_nrow" << std::endl;
       m_nrow=m_mia[band]->ny;
     }
     if(m_mia[band]->nz!=m_nplane){
@@ -2933,7 +2933,7 @@ CPLErr Jim::write(app::AppFactory &app){
   }
 }
 
-CPLErr Jim::setData(double value, int band){
+void Jim::setData(double value, int band){
   if(m_data.empty()){
     std::ostringstream s;
     s << "Error: Jim not initialized, m_data is empty";
@@ -2945,6 +2945,132 @@ CPLErr Jim::setData(double value, int band){
     int minindex=index;
     int maxindex=index+nrOfCol();
     for(index=minindex;index<=maxindex;++index){
+      double dvalue=value;
+      switch(getDataType()){
+      case(GDT_Byte):
+        static_cast<unsigned char*>(m_data[band])[index]=static_cast<unsigned char>(dvalue);
+        break;
+      case(GDT_Int16):
+        static_cast<short*>(m_data[band])[index]=static_cast<short>(dvalue);
+        break;
+      case(GDT_UInt16):
+        static_cast<unsigned short*>(m_data[band])[index]=static_cast<unsigned short>(dvalue);
+        break;
+      case(GDT_Int32):
+        static_cast<int*>(m_data[band])[index]=static_cast<int>(dvalue);
+        break;
+      case(GDT_UInt32):
+        static_cast<unsigned int*>(m_data[band])[index]=static_cast<unsigned int>(dvalue);
+        break;
+      case(GDT_Float32):
+        static_cast<float*>(m_data[band])[index]=static_cast<float>(dvalue);
+        break;
+      case(GDT_Float64):
+        static_cast<double*>(m_data[band])[index]=static_cast<double>(dvalue);
+        break;
+      default:
+        std::string errorString="Error: data type not supported";
+        throw(errorString);
+        break;
+      }
+    }
+  }
+}
+
+void Jim::setData(double value, double ulx, double uly, double lrx, double lry, int band, double dx, double dy, bool geo){
+  if(m_data.empty()){
+    std::ostringstream s;
+    s << "Error: Jim not initialized, m_data is empty";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  size_t stride=1;
+
+  double uli=0;
+  double ulj=0;
+  double lri=0;
+  double lrj=0;
+  double stridei=1;
+  double stridej=1;
+  if(geo){
+    if(dx<=0)
+      dx=getDeltaX();
+    if(dy<=0)
+      dx=getDeltaY();
+    //do align
+    if(ulx>this->getUlx())
+      ulx-=fmod(ulx-this->getUlx(),dx);
+    else if(ulx<this->getUlx())
+      ulx+=fmod(this->getUlx()-ulx,dx)-dx;
+    if(lrx<this->getLrx())
+      lrx+=fmod(this->getLrx()-lrx,dx);
+    else if(lrx>this->getLrx())
+      lrx-=fmod(lrx-this->getLrx(),dx)+dx;
+    if(lry>this->getLry())
+      lry-=fmod(lry-this->getLry(),dy);
+    else if(lry<this->getLry())
+      lry+=fmod(this->getLry()-lry,dy)-dy;
+    if(uly<this->getUly())
+      uly+=fmod(this->getUly()-uly,dy);
+    else if(uly>this->getUly())
+      uly-=fmod(uly-this->getUly(),dy)+dy;
+    this->geo2image(ulx-0.5*this->getDeltaX(),uly+0.5*this->getDeltaY(),uli,ulj);
+    this->geo2image(lrx-1.5*this->getDeltaX(),lry+1.5*this->getDeltaY(),lri,lrj);
+
+    uli=floor(uli);
+    ulj=floor(ulj);
+    lri=floor(lri);
+    lrj=floor(lrj);
+
+    if(dx>0)
+      stridei=dx/getDeltaX();
+    else
+      stridei=1;
+    if(dy>0)
+      stridej=dy/getDeltaY();
+    else
+      stridej=1;
+  }
+  else{
+    uli=ulx;
+    ulj=uly;
+    lri=lrx;
+    lrj=lry;
+    if(dx>0)
+      stridei=dx;
+    else
+      stridei=1;
+    if(dy>0)
+      stridej=dy;
+    else
+      stridej=1;
+  }
+  std::ostringstream errorStream;
+  if(uli<0||uli>=nrOfCol()){
+    errorStream << "Error: columns requested out of bounding box" << std::endl;
+    std::cerr << errorStream << std::endl;
+    throw(errorStream.str());
+  }
+  if(lri<0||lri>=nrOfCol()){
+    errorStream << "Error: columns requested out of bounding box" << std::endl;
+    std::cerr << errorStream << std::endl;
+    throw(errorStream.str());
+  }
+  if(ulj<0||ulj>=nrOfRow()){
+    errorStream << "Error: rows requested out of bounding box" << std::endl;
+    std::cerr << errorStream << std::endl;
+    throw(errorStream.str());
+  }
+  if(lrj<0||lrj>=nrOfRow()){
+    errorStream << "Error: rows requested out of bounding box" << std::endl;
+    std::cerr << errorStream << std::endl;
+    throw(errorStream.str());
+  }
+  for(int irow=ulj;irow<=lrj;irow+=stridej){
+    int index=irow*nrOfCol();
+    int minindex=index+uli;
+    int maxindex=index+lri;
+    for(index=minindex;index<=maxindex;index+=stridei){
       double dvalue=value;
       switch(getDataType()){
       case(GDT_Byte):
