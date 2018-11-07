@@ -33,6 +33,9 @@ try:
             bb=jim_milano.getBoundingBox()
             jim1=jim0.crop({'ulx':bb[0],'uly':bb[1],'lrx':bb[2],'lry':bb[3]})
             if jim1.getBoundingBox() != jim_milano.getBoundingBox():
+                #test
+                jim_milano.write({'filename':'/tmp/jim_milano.tif'})
+                jim1.write({'filename':'/tmp/jim1.tif'})
                 print(jim1.getBoundingBox())
                 print(jim_milano.getBoundingBox())
                 raise ValueError("Error: Bounding box lodi not equal with crop and cropOgr")

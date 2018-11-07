@@ -381,7 +381,8 @@ Jim::Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory, co
 ///constructor input image
 Jim::Jim(IMAGE *mia) : m_nplane(1){
   reset();
-  setMIA(mia,0);
+  if(mia)
+    setMIA(mia,0);
 }
 #endif
 
@@ -394,7 +395,8 @@ Jim::Jim(const std::string& filename, bool readData, unsigned int memory){
 ///constructor output image
 Jim::Jim(Jim& imgSrc, bool copyData){
   reset();
-  open(imgSrc,copyData);
+  if(imgSrc.isInit())
+    open(imgSrc,copyData);
 }
 ///constructor output image
 Jim::Jim(const std::string& filename, int ncol, int nrow, int nband, const GDALDataType& dataType, const std::string& imageType, unsigned int memory, const std::vector<std::string>& options){

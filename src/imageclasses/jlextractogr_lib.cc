@@ -349,7 +349,13 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         // sampleMask->setProjection(this->getProjection());
         sampleMask.setGeoTransform(gt);
         sampleMask.setProjection(this->getProjection());
-        sampleMask.crop(sampleMask,layer_ulx,layer_uly,layer_lrx,layer_lry);
+        AppFactory anApp;
+        anApp.pushLongOption("ulx",layer_ulx);
+        anApp.pushLongOption("uly",layer_uly);
+        anApp.pushLongOption("lrx",layer_lrx);
+        anApp.pushLongOption("lry",layer_lry);
+        sampleMask.crop(sampleMask,anApp);
+        // sampleMask.crop(sampleMask,layer_ulx,layer_uly,layer_lrx,layer_lry);
         // vector<double> burnValues(1,1);//burn value is 1 (single band)
         // sampleMask.rasterizeBuf(sampleReader,burnValues,eoption_opt);
         double burnValue=1;

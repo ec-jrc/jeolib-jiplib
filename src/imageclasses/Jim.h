@@ -753,7 +753,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   CPLErr cropDS(Jim& imgWriter, app::AppFactory& app);
   ///crop image
   /* CPLErr crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry); */
-  CPLErr crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry, double dx=0, double dy=0, bool geo=true);
+  /* CPLErr crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry, double dx=0, double dy=0, bool geo=true); */
   ///stack band(s) from another Jim
   std::shared_ptr<Jim> stackBand(Jim& imgSrc, app::AppFactory& app);
   std::shared_ptr<Jim> stackBand(Jim& imgSrc){app::AppFactory theApp;return stackBand(imgSrc,theApp);};
@@ -776,7 +776,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///crop image only for in memory
   std::shared_ptr<Jim> crop(app::AppFactory& app);
   ///crop image only for in memory
-  std::shared_ptr<Jim> crop(double ulx, double uly, double lrx, double lry, double dx=0, double dy=0, bool geo=true);
+  /* std::shared_ptr<Jim> crop(double ulx, double uly, double lrx, double lry, double dx=0, double dy=0, bool geo=true); */
   ///crop Jim image in memory based on VectorOgr returning Jim image
   std::shared_ptr<Jim> cropOgr(VectorOgr& sampleReader, app::AppFactory& app);
   ///warp Jim image in memory
