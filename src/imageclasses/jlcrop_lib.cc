@@ -1527,7 +1527,7 @@ CPLErr Jim::cropBand(Jim& imgWriter, AppFactory& app){
     if(vband[iband]>=nrOfBand()){
       std::ostringstream errorStream;
       errorStream << "Error: selected band " << vband[iband] << " is out of range";
-      std::cerr << errorStream << std::endl;
+      std::cerr << errorStream.str() << std::endl;
       throw(errorStream.str());
     }
   }
@@ -1605,7 +1605,7 @@ void Jim::d_cropBand(AppFactory& app){
     if(vband[iband]>=nrOfBand()){
       std::ostringstream errorStream;
       errorStream << "Error: selected band " << vband[iband] << " is out of range";
-      std::cerr << errorStream << std::endl;
+      std::cerr << errorStream.str() << std::endl;
       throw(errorStream.str());
     }
   }
