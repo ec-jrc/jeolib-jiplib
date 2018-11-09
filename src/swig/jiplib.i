@@ -286,6 +286,24 @@
 
 /* From: http://biomol.bme.utexas.edu/~mh43854/openmm/archive/openmm-master/wrappers/python/src/swig_doxygen/swig_lib/python/typemaps.i */
 /* The following two typemaps cause a non-const vector<string>& named fields to become a return list of values. */
+
+%typemap(in, numinputs=0) std::vector<double>& noDataValues (std::vector<double> temp) {
+  $1 = &temp;
+ }
+
+%typemap(argout) std::vector<double>& noDataValues{
+  int i, n;
+  PyObject *pyList;
+
+  n=(*$1).size();
+  pyList=PyList_New(n);
+  for (i=0; i<n; i++) {
+    double theValue=(*$1).at(i);
+    PyList_SET_ITEM(pyList, i, PyFloat_FromDouble(theValue));
+  }
+  $result = pyList;
+ }
+
 %typemap(in, numinputs=0) std::vector<std::string>& fields (std::vector<std::string> temp) {
   $1 = &temp;
  }
@@ -585,6 +603,8 @@
   }
 
   %typemap(out) std::vector<double> {
+    //test
+    std::cout << "We are in typemap(out) std::vector<double>" << std::endl;
     PyObject *l = PyList_New($1.size());
     for(int index=0;index<$1.size();++index)
       PyList_SetItem(l,index,PyFloat_FromDouble($1.at(index)));

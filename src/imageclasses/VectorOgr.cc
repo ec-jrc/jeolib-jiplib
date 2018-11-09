@@ -163,8 +163,9 @@ OGRErr VectorOgr::open(const std::string& ogrFilename, const std::vector<std::st
       string currentLayername=readLayer->GetName();
       if(layernames.size()){
         vector<string>::const_iterator it=find(layernames.begin(),layernames.end(),currentLayername);
-        if(it==layernames.end())
+        if(it==layernames.end()){
           continue;
+        }
       }
       m_layer.push_back(readLayer);
       m_features.resize(m_layer.size());
@@ -319,21 +320,25 @@ OGRErr VectorOgr::open(app::AppFactory& app){
     if(verbose_opt[0])
       std::cout << "open in read access mode" << std::endl;
     bool noread=true;
+    //do not read features yet, only initialize layers
     open(filename_opt[0],layer_opt,noread);
     if(m_gds){
-      for(size_t ilayer=0;ilayer<getGDSLayerCount();++ilayer){
-        OGRLayer *readLayer=m_gds->GetLayer(ilayer);
-        string currentLayername=readLayer->GetName();
-        if(layer_opt.size()){
-          vector<string>::const_iterator it=find(layer_opt.begin(),layer_opt.end(),currentLayername);
-          if(it==layer_opt.end())
-            continue;
-        }
-        if(ilayer<getLayerCount())
-          m_layer[ilayer]=readLayer;
-        else
-          m_layer.push_back(readLayer);
-        m_features.resize(m_layer.size());
+      // for(size_t ilayer=0;ilayer<getGDSLayerCount();++ilayer){
+      for(size_t ilayer=0;ilayer<getLayerCount();++ilayer){
+        // OGRLayer *readLayer=m_gds->GetLayer(ilayer);
+        OGRLayer *readLayer=getLayer(ilayer);
+        // string currentLayername=readLayer->GetName();
+        // if(layer_opt.size()){
+        //   vector<string>::const_iterator it=find(layer_opt.begin(),layer_opt.end(),currentLayername);
+        //   if(it==layer_opt.end())
+        //     continue;
+        // }
+        //we already initialized the layers in the open above
+        // if(ilayer<getLayerCount())
+        //   m_layer[ilayer]=readLayer;
+        // else
+        //   m_layer.push_back(readLayer);
+        // m_features.resize(m_layer.size());
         unsigned int nfeatures=0;
         if(attributeFilter_opt.size())
           setAttributeFilter(attributeFilter_opt[0],ilayer);
@@ -342,7 +347,7 @@ OGRErr VectorOgr::open(app::AppFactory& app){
         if(!noread_opt[0])
           nfeatures=readFeatures(ilayer);
         if(verbose_opt[0])
-          std::cout << "read " << nfeatures << " features in layer " << currentLayername << std::endl;
+          std::cout << "read " << nfeatures << " features in layer " << getLayerName(ilayer) << std::endl;
         // unsigned int nfeatures=0;
         // if(attributeFilter_opt.size())
         //   setAttributeFilter(attributeFilter_opt[0],ilayer);
@@ -546,8 +551,6 @@ std::shared_ptr<VectorOgr> VectorOgr::intersect(const Jim& aJim, app::AppFactory
   if(intersect(aJim, *ogrWriter, app)!=OGRERR_NONE){
     std::cerr << "Failed to intersect" << std::endl;
   }
-  //test
-  std::cout << "return ogrWriter" << std::endl;
   return(ogrWriter);
 }
 

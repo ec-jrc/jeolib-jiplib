@@ -988,7 +988,7 @@ char** Jim::getMetadata() const
 /**
  * @return the metadata of this data set in standard template library (stl) string format
  **/
-CPLErr Jim::getMetadata(std::list<std::string>& metadata) const
+void Jim::getMetadata(std::list<std::string>& metadata) const
 {
   if(m_gds){
     char** cmetadata=m_gds->GetMetadata();
@@ -996,10 +996,7 @@ CPLErr Jim::getMetadata(std::list<std::string>& metadata) const
       metadata.push_back(*(cmetadata));
       ++cmetadata;
     }
-    return(CE_None);
   }
-  else
-    return(CE_Warning);
 }
 
 /**
@@ -1376,14 +1373,11 @@ bool Jim::covers(double ulx, double  uly, double lrx, double lry, bool all, OGRC
  * @param noDataValues standard template library (stl) vector containing no data values
  * @return number of no data values in this dataset
  **/
-CPLErr Jim::getNoDataValues(std::vector<double>& noDataValues) const
+void Jim::getNoDataValues(std::vector<double>& noDataValues) const
 {
   if(m_noDataValues.size()){
     noDataValues=m_noDataValues;
-    return(CE_None);
   }
-  else
-    return(CE_Warning);
 }
 
 /**
@@ -2511,7 +2505,7 @@ double Jim::getMax(int& x, int& y, int band){
  * @param minValue Reported minimum value within searched region
  * @param maxValue Reported maximum value within searched region
  **/
-CPLErr Jim::getMinMax(int startCol, int endCol, int startRow, int endRow, int band, double& minValue, double& maxValue)
+void Jim::getMinMax(int startCol, int endCol, int startRow, int endRow, int band, double& minValue, double& maxValue)
 {
   bool isConstraint=(maxValue>minValue);
   double minConstraint=minValue;
@@ -2552,7 +2546,6 @@ CPLErr Jim::getMinMax(int startCol, int endCol, int startRow, int endRow, int ba
   }
   if(!isValid)
     throw(static_cast<std::string>("Warning: not initialized"));
-  return(CE_None);
 }
 
 /**
@@ -2560,7 +2553,7 @@ CPLErr Jim::getMinMax(int startCol, int endCol, int startRow, int endRow, int ba
  * @param maxValue Reported maximum value in image
  * @param band Search extreme value in image for this band
  **/
-CPLErr Jim::getMinMax(double& minValue, double& maxValue, int band)
+void Jim::getMinMax(double& minValue, double& maxValue, int band)
 {
   bool isConstraint=(maxValue>minValue);
   double minConstraint=minValue;
@@ -2599,7 +2592,6 @@ CPLErr Jim::getMinMax(double& minValue, double& maxValue, int band)
   }
   if(!isValid)
     throw(static_cast<std::string>("Warning: not initialized"));
-  return(CE_None);
 }
 
 
@@ -2710,7 +2702,7 @@ double Jim::getHistogram(std::vector<double>& histvector, double& min, double& m
  * @param range Sorted vector containing the range of image values
  * @param band The band for which to calculate the range
  **/
-CPLErr Jim::getRange(std::vector<short>& range, int band)
+void Jim::getRange(std::vector<short>& range, int band)
 {
   std::vector<short> lineBuffer(nrOfCol());
   range.clear();
@@ -2722,7 +2714,6 @@ CPLErr Jim::getRange(std::vector<short>& range, int band)
     }
   }
   sort(range.begin(),range.end());
-  return(CE_None);
 }
 
 /**

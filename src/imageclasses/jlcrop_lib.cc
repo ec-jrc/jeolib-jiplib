@@ -1955,6 +1955,20 @@ CPLErr Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
     if(verbose_opt[0])
       cout << "--ulx=" << ulx_opt[0] << " --uly=" << uly_opt[0] << " --lrx=" << lrx_opt[0] << " --lry=" << lry_opt[0] << endl;
 
+    if(doInit){//should have been set to false
+      std::ostringstream errorStream;
+      if(layer_opt.size())
+        errorStream << "Error: no layer found with specified name" << std::endl;
+      else
+        errorStream << "Error: no layer found" << std::endl;
+      throw(errorStream.str());//help was invoked, stop processing
+    }
+    if(ulx_opt[0]>=lrx_opt[0] || uly_opt[0] <= lry_opt[0]){
+      std::ostringstream errorStream;
+      errorStream << "Error: bounding box not properly defined" << std::endl;
+      throw(errorStream.str());//help was invoked, stop processing
+    }
+
     int ncropcol=0;
     int ncroprow=0;
 

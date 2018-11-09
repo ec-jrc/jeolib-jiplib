@@ -430,7 +430,7 @@ class Jim : public std::enable_shared_from_this<Jim>
       return(m_scale[band]);
   };
   ///Get the scale as a standard template library (stl) vector
-  CPLErr getScale(std::vector<double>& scale) const {scale=m_scale;};
+  void getScale(std::vector<double>& scale) const {scale=m_scale;};
   ///Get the scale for specific band
   double getOffset(size_t band=0){
     if(m_offset.size()<=band)
@@ -439,11 +439,11 @@ class Jim : public std::enable_shared_from_this<Jim>
       return(m_offset[band]);
   };
   ///Get the offset as a standard template library (stl) vector
-  CPLErr getOffset(std::vector<double>& offset) const {offset=m_offset;};
+  void getOffset(std::vector<double>& offset) const {offset=m_offset;};
   ///Get the no data values of this dataset as a standard template library (stl) vector
-  std::vector<double> getNoDataValues() const{return m_noDataValues;};
+  /* std::vector<double> getNoDataValues() const{std::cout << "calling with out" << std::endl; return m_noDataValues;}; */
   ///Get the no data values of this dataset as a standard template library (stl) vector
-  CPLErr getNoDataValues(std::vector<double>& noDataValues) const;
+  void getNoDataValues(std::vector<double>& noDataValues) const;
   ///Print the no data values of this dataset as a standard template library (stl) vector
   CPLErr printNoDataValues() const{
     if(m_noDataValues.size()){
@@ -460,18 +460,18 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///Push a no data value for this dataset
   CPLErr pushNoDataValue(double noDataValue);
   ///Set the single no data values of this dataset
-  CPLErr setNoDataValue(double nodata){clearNoData(); pushNoDataValue(nodata);if(m_noDataValues.size()) return(CE_None);else return(CE_Failure);};
+  CPLErr setNoDataValue(double nodata){clearNoData(); pushNoDataValue(nodata);if(m_noDataValues.empty()) return(CE_Failure);else return(CE_None);};
   ///Set the no data values of this dataset using a standard template library (stl) vector as input
-  CPLErr setNoData(const std::vector<double>& nodata){m_noDataValues=nodata; if(m_noDataValues.size()) return(CE_None);else return(CE_Failure);};
+  CPLErr setNoData(const std::vector<double>& nodata){m_noDataValues=nodata; if(nodata.size() != m_noDataValues.size()) return(CE_Failure);else return(CE_None);};
   ///Set the no data values of this dataset using a standard template library (stl) vector as input
   CPLErr setNoData(const std::list<double>& nodata){
     clearNoData();
     std::list<double>::const_iterator lit=nodata.begin();
     while(lit!=nodata.end())
       pushNoDataValue(*(lit++));
-    if(m_noDataValues.size())
-      return(CE_None);
-    else return(CE_Failure);
+    if(nodata.size() != m_noDataValues.size())
+      return(CE_Failure);
+    else return(CE_None);
   };
   void setData(double value, int band=0);
   void setData(double value, double ulx, double uly, double lrx, double lry, int band=0, double dx=0, double dy=0, bool geo=true);
@@ -545,7 +545,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///Get the metadata of this dataset
   char** getMetadata() const;
   // Get the metadata of this dataset in the form of a list of strings (const version)
-  CPLErr getMetadata(std::list<std::string>& metadata) const;
+  void getMetadata(std::list<std::string>& metadata) const;
   ///Get the image description from the driver of this dataset
   std::string getDescription() const;
   ///Get metadata item of this dataset
@@ -629,9 +629,9 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///Read pixel cell values for an entire row for a specific band (all indices start counting from 0). The row counter can be floating, in which case a resampling is applied at the row level. You still must apply the resampling at column level. This function will be deprecated, as the GDAL API now supports rasterIO resampling (see http://www.gdal.org/structGDALRasterIOExtraArg.html)
   template<typename T> CPLErr readData(std::vector<T>& buffer, double row, int band, RESAMPLE resample);
   ///Get the minimum and maximum cell values for a specific band in a region of interest defined by startCol, endCol, startRow and endRow (all indices start counting from 0).
-  CPLErr getMinMax(int startCol, int endCol, int startRow, int endRow, int band, double& minValue, double& maxValue);
+  void getMinMax(int startCol, int endCol, int startRow, int endRow, int band, double& minValue, double& maxValue);
   ///Get the minimum and maximum cell values for a specific band (all indices start counting from 0).
-  CPLErr getMinMax(double& minValue, double& maxValue, int band=0);
+  void getMinMax(double& minValue, double& maxValue, int band=0);
   ///Get the minimum cell values for a specific band and report the column and row in which the minimum value was found (all indices start counting from 0).
   double getMin(int& col, int& row, int band=0);
   ///Get the minimum cell values for a specific band.
@@ -645,7 +645,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///Calculate the reference pixel as the centre of gravity pixel (weighted average of all values not taking into account no data values) for a specific band (start counting from 0).
   void getRefPix(double& refX, double &refY, int band=0);
   ///Calculate the range of cell values in the image for a specific band (start counting from 0).
-  CPLErr getRange(std::vector<short>& range, int band=0);
+  void getRange(std::vector<short>& range, int band=0);
   ///Calculate the number of valid pixels (with a value not defined as no data).
   unsigned long int getNvalid(int band=0);
   ///Calculate the number of invalid pixels (with a value defined as no data).
