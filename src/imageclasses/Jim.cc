@@ -150,7 +150,7 @@ CPLErr Jim::setMIA(int band){
     }
     if(m_mia[band]->nz!=m_nplane){
       std::cerr << "Warning: z dimension of image (" << m_nplane << ") does not match MIA (" << m_mia[band]->nz << "), adapting m_nplane" << std::endl;
-      m_nplane=m_mia[band]->nx;
+      m_nplane=m_mia[band]->nz;
     }
     if(m_nband<=band){
       std::ostringstream s;
@@ -1532,6 +1532,7 @@ CPLErr Jim::open(app::AppFactory &app){
   Optionjl<int> nsample_opt("ns", "ncol", "Number of columns");
   Optionjl<int> nline_opt("nl", "nrow", "Number of rows");
   Optionjl<int> nband_opt("nb", "nband", "Number of bands",1);
+  Optionjl<int> nplane_opt("nplane", "nplane", "Number of planes",1);
   Optionjl<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64/Int64/UInt64})","Byte");
   Optionjl<std::string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
   Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
@@ -1578,6 +1579,7 @@ CPLErr Jim::open(app::AppFactory &app){
     nsample_opt.retrieveOption(app);
     nline_opt.retrieveOption(app);
     nband_opt.retrieveOption(app);
+    nplane_opt.retrieveOption(app);
     otype_opt.retrieveOption(app);
     oformat_opt.retrieveOption(app);
     option_opt.retrieveOption(app);
@@ -1723,7 +1725,7 @@ CPLErr Jim::open(app::AppFactory &app){
     m_ncol = nsample_opt[0];
     m_nrow = nline_opt[0];
     m_nband = nband_opt[0];
-    m_nplane = 1;//todo: support planes
+    m_nplane = nplane_opt[0];
     m_dataType = theType;
     initMem(0);
     for(int iband=0;iband<m_nband;++iband){
@@ -1796,24 +1798,36 @@ CPLErr Jim::open(app::AppFactory &app){
     }
     else
       distribution="none";
+
+    if(stat.getDistributionType(distribution)==statfactory::StatFactory::none){
+      for(size_t iband=0;iband<nrOfBand();++iband)
+        setData(mean_opt[0],iband);
+    }
+    else{
+      if(nrOfPlane()>1){
+        std::string errorString;
+        std::cerr << "Error: operation not supported for multi-plane objects" << std::endl;
+        throw(errorString);
+      }
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
-    for(unsigned int iband=0;iband<nrOfBand();++iband){
-      std::vector<double> lineBuffer(nrOfCol(),mean_opt[0]);
-      for(unsigned int irow=0;irow<nrOfRow();++irow){
-        for(unsigned int icol=0;icol<nrOfCol();++icol){
-          if(stat.getDistributionType(distribution)==statfactory::StatFactory::none)
-            break;
-          else
-            value=stat.getRandomValue(rndgen,distribution,a,b);
-          lineBuffer[icol]=value;
+      for(unsigned int iband=0;iband<nrOfBand();++iband){
+        std::vector<double> lineBuffer(nrOfCol(),mean_opt[0]);
+        for(unsigned int irow=0;irow<nrOfRow();++irow){
+          for(unsigned int icol=0;icol<nrOfCol();++icol){
+            if(stat.getDistributionType(distribution)==statfactory::StatFactory::none)
+              break;
+            else
+              value=stat.getRandomValue(rndgen,distribution,a,b);
+            lineBuffer[icol]=value;
+          }
+          writeData(lineBuffer,irow,iband);
         }
-        writeData(lineBuffer,irow,iband);
       }
+      stat.freeRandomGenerator(rndgen);
     }
-    stat.freeRandomGenerator(rndgen);
   }
   else if(input_opt.size()){
     setAccess(access_opt[0]);
@@ -2933,6 +2947,10 @@ void Jim::setData(double value, int band){
     std::cerr << s.str() << std::endl;
     throw(s.str());
   }
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
   for(int irow=0;irow<nrOfRow();++irow){
     int index=irow*nrOfCol();
     int minindex=index;
@@ -2968,6 +2986,8 @@ void Jim::setData(double value, int band){
       }
     }
   }
+  for(size_t iplane=1;iplane<nrOfPlane();++iplane)
+    memcpy(static_cast<char*>(m_data[band])+iplane*nrOfCol()*nrOfRow(),static_cast<char*>(m_data[band]),getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
 }
 
 void Jim::setData(double value, double ulx, double uly, double lrx, double lry, int band, double dx, double dy, bool geo){
