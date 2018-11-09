@@ -3041,22 +3041,22 @@ void Jim::setData(double value, double ulx, double uly, double lrx, double lry, 
   std::ostringstream errorStream;
   if(uli<0||uli>=nrOfCol()){
     errorStream << "Error: columns requested out of bounding box" << std::endl;
-    std::cerr << errorStream << std::endl;
+    std::cerr << errorStream.str() << std::endl;
     throw(errorStream.str());
   }
   if(lri<0||lri>=nrOfCol()){
     errorStream << "Error: columns requested out of bounding box" << std::endl;
-    std::cerr << errorStream << std::endl;
+    std::cerr << errorStream.str() << std::endl;
     throw(errorStream.str());
   }
   if(ulj<0||ulj>=nrOfRow()){
     errorStream << "Error: rows requested out of bounding box" << std::endl;
-    std::cerr << errorStream << std::endl;
+    std::cerr << errorStream.str() << std::endl;
     throw(errorStream.str());
   }
   if(lrj<0||lrj>=nrOfRow()){
     errorStream << "Error: rows requested out of bounding box" << std::endl;
-    std::cerr << errorStream << std::endl;
+    std::cerr << errorStream.str() << std::endl;
     throw(errorStream.str());
   }
   for(int irow=ulj;irow<=lrj;irow+=stridej){
