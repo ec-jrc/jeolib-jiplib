@@ -318,7 +318,15 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
     return(nfeatures);
   };
   ///get number of features
-  size_t getFeatureCount(size_t ilayer) const {return(m_features[ilayer].size());};
+  size_t getFeatureCount(size_t ilayer) const {
+    if(m_features.size()<=ilayer){
+      std::ostringstream errorStream;
+      errorStream << "Error: m_features not initialized for layer " << ilayer << std::endl;
+      std::cerr << errorStream.str() << std::endl;
+      throw(errorStream.str());
+    }
+    return(m_features[ilayer].size());
+  };
   ///create field
   OGRErr createField(const std::string& fieldname, const OGRFieldType& fieldType,size_t ilayer=0);
     ///create field

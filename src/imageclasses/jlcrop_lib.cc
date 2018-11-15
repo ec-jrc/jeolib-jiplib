@@ -3245,6 +3245,7 @@ void Jim::d_stackBand(Jim& imgSrc, AppFactory& app){
   }
   size_t oldnband=nrOfBand();
   m_data.resize(oldnband+vband.size());
+  m_nband+=vband.size();
   m_begin.resize(oldnband+vband.size());
   m_end.resize(oldnband+vband.size());
   for(size_t iband=0;iband<vband.size();++iband){

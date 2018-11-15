@@ -92,75 +92,94 @@ def fun2method(inputfile, outputfile_basename):
             separator=', '
 
         # fh.write(re.sub(r'Jim::','',methodDeclaration+separator+'int iband=0'+cSeparator+'bool destructive=false);\n'))
-        fh.write(re.sub(r'Jim::','',methodDeclaration+separator+'int iband=0);\n'))
+        fh.write(re.sub(r'Jim::','',methodDeclaration+separator+'int band=-1);\n'))
 
         # methodDeclaration+=separator+'int iband'+cSeparator+'bool destructive)'
-        methodDeclaration+=separator+'int iband)'
+        methodDeclaration+=separator+'int band)'
 
         f.write(methodDeclaration+'{')
         f.write('\n\ttry{')
-        f.write('\n\t\tif(nrOfBand()<=iband){')
+        f.write('\n\t\tif(nrOfBand()<=band){')
         f.write('\n\t\t\tstd::string errorString=\"Error: band number exceeds number of bands in input image\";')
         f.write('\n\t\t\tthrow(errorString);')
         f.write('\n\t\t}')
         for i in imRasterArray:
-            f.write('\n\t\tif('+i+'.nrOfBand()<=iband){')
+            f.write('\n\t\tif('+i+'.nrOfBand()<=band){')
             f.write('\n\t\t\tstd::string errorString=\"Error: band number exceeds number of bands in input image\";')
             f.write('\n\t\t\tthrow(errorString);')
             f.write('\n\t\t}')
-        f.write('\n\t\t'+a.get("arguments")[0][0]+' '+a.get("arguments")[0][1]+' = 0;') # assigned later depending on destructive or not
-        llen=len(imDeclare)
-        for i in range(1,llen):  # skip first argument since it depends on whether destructive or not
-            f.write('\n\t\t'+imDeclare[i])
-        for i in GTDeclare:
-            f.write('\n\t\t'+i)
-
-        if len(GTDeclare)>0:
-            f.write('\n\t\tswitch(getDataType()){')
-            for idx, GDType in enumerate(GDTypes):
-                f.write('\n\t\tcase('+GDType+'):')
-                for var_idx, GTVar in enumerate(GTVars):
-                    f.write('\n\t\t\t'+GTVar+'.'+MIATypes[idx]+'val=static_cast<'+CTypes[idx]+'>(d_'+GTVars[var_idx]+');')
-                    if (GDType=='GDT_Byte'):
-                        f.write('\n\t\t\t'+GTVar+'.'+'generic_'+'val=static_cast<'+CTypes[idx]+'>(d_'+GTVars[var_idx]+');')
-                f.write('\n\t\t\tbreak;')
-            f.write('''
-    \t\tdefault:
-    \t\t\tstd::string errorString="Error: data type not supported";
-    \t\t\tthrow(errorString);
-    \t\t\tbreak;
-            \t\t}''')
 
         f.write('\n\t\t//make a copy of this')
         f.write('\n\t\tstd::shared_ptr<Jim> copyImg=this->clone();')
-        f.write('\n\t\t'+a.get("arguments")[0][1]+'=copyImg->getMIA(iband);')
-
-        f.write('\n\t\tif(::'+a.get("name")+'('+cCall+') == NO_ERROR){')
-        f.write('\n\t\t\tcopyImg->setMIA(iband);')
-        for i in imRasterArray:
-          f.write('\n\t\t\t'+i+'.setMIA(iband);')
-        f.write('\n\t\t\treturn(copyImg);')
+        f.write('\n\t\tstd::vector<unsigned int> bands;')
+        f.write('\n\t\tif(band<0){')
+        f.write('\n\t\t\tfor(unsigned int iband=0;iband<nrOfBand();++iband)')
+        f.write('\n\t\t\t\tbands.push_back(iband);')
         f.write('\n\t\t}')
+        f.write('\n\t\telse')
+        f.write('\n\t\t\tbands.push_back(band);')
+        f.write('\n\t\tfor(std::vector<unsigned int>::const_iterator bit=bands.begin();bit!=bands.end();++bit){')
+        f.write('\n\t\t\tunsigned int iband=*bit;')
 
-        f.write('\n\t\telse{')
-        f.write('\n\t\t\tcopyImg->setMIA(iband);')
+        f.write('\n\t\t\t'+a.get("arguments")[0][0]+' '+a.get("arguments")[0][1]+' = 0;') # assigned later depending on destructive or not
+        llen=len(imDeclare)
+        for i in range(1,llen):  # skip first argument since it depends on whether destructive or not
+            f.write('\n\t\t\t'+imDeclare[i])
+        for i in GTDeclare:
+            f.write('\n\t\t\t'+i)
+
+        if len(GTDeclare)>0:
+            f.write('\n\t\t\tswitch(getDataType()){')
+            for idx, GDType in enumerate(GDTypes):
+                f.write('\n\t\t\tcase('+GDType+'):')
+                for var_idx, GTVar in enumerate(GTVars):
+                    f.write('\n\t\t\t\t'+GTVar+'.'+MIATypes[idx]+'val=static_cast<'+CTypes[idx]+'>(d_'+GTVars[var_idx]+');')
+                    if (GDType=='GDT_Byte'):
+                        f.write('\n\t\t\t\t'+GTVar+'.'+'generic_'+'val=static_cast<'+CTypes[idx]+'>(d_'+GTVars[var_idx]+');')
+                f.write('\n\t\t\t\tbreak;')
+            f.write('''
+    \t\t\tdefault:
+    \t\t\t\tstd::string errorString="Error: data type not supported";
+    \t\t\t\tthrow(errorString);
+    \t\t\t\tbreak;
+            \t\t\t}''')
+        f.write('\n\t\t\t'+a.get("arguments")[0][1]+'=copyImg->getMIA(iband);')
+
+        f.write('\n\t\t\tif(::'+a.get("name")+'('+cCall+') == NO_ERROR){')
+        f.write('\n\t\t\t\tcopyImg->setMIA(iband);')
         for i in imRasterArray:
-           f.write('\n\t\t\t'+i+'.setMIA(iband);')
-        f.write('\n\t\t\tstd::string errorString="Error: '+a.get("name")+'() function in MIA failed, returning NULL pointer";')
-        f.write('\n\t\t\tthrow(errorString);')
-        f.write('\n\t\t}')
+          f.write('\n\t\t\t\t'+i+'.setMIA(iband);')
+        f.write('\n\t\t\t\treturn(copyImg);')
+        f.write('\n\t\t\t}')
 
+        f.write('\n\t\t\telse{')
+        f.write('\n\t\t\t\tcopyImg->setMIA(iband);')
+        for i in imRasterArray:
+           f.write('\n\t\t\t\t'+i+'.setMIA(iband);')
+        f.write('\n\t\t\t\tstd::string errorString="Error: '+a.get("name")+'() function in MIA failed, returning NULL pointer";')
+        f.write('\n\t\t\t\tthrow(errorString);')
+        f.write('\n\t\t\t}')
+
+        f.write('\n\t\t}')
         f.write('\n\t}')
 
-        f.write('''
-        catch(std::string errorString){
-        \tstd::cerr << errorString << std::endl;
-        throw;
-        }
-        catch(...){
-        throw;
-        }
-}\n''')
+        f.write('\n\tcatch(std::string errorString){')
+        f.write('\n\t\tstd::cerr << errorString << std::endl;')
+        f.write('\n\tthrow;')
+        f.write('\n\t}')
+        f.write('\n\tcatch(...){')
+        f.write('\n\t\tthrow;')
+        f.write('\t\t\n}')
+        f.write('\n}\n')
+#         f.write('''
+#         catch(std::string errorString){
+#         \tstd::cerr << errorString << std::endl;
+#         throw;
+#         }
+#         catch(...){
+#         throw;
+#         }
+# }\n''')
 
     ifp.close()
 

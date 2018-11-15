@@ -82,8 +82,8 @@
   /* ERROR_TYPE RasterIOJim( std::shared_ptr< jiplib::Jim > ajim, PyArrayObject *psArray) { */
   /* int RasterIOJim( std::shared_ptr< jiplib::Jim > ajim, PyArrayObject *psArray) { */
   /* int RasterIOJim( std::shared_ptr< jiplib::Jim > ajim ) { */
-  void RasterIOJim( std::shared_ptr< Jim > ajim, int typeSizeByte, PyArrayObject *psArray) {
-    psArray->data = (char *)memcpy((void *)(psArray->data), ajim->getDataPointer(), ajim->nrOfCol()*ajim->nrOfRow()*ajim->nrOfPlane()*typeSizeByte );
+  void RasterIOJim( std::shared_ptr< Jim > ajim, int typeSizeByte, PyArrayObject *psArray, unsigned int band) {
+    psArray->data = (char *)memcpy((void *)(psArray->data), ajim->getDataPointer(band), ajim->nrOfCol()*ajim->nrOfRow()*ajim->nrOfPlane()*typeSizeByte );
   }
 %}
 
@@ -254,16 +254,17 @@ def np2jim(psArray):
   except:
     return None
 
-def jim2np(jim):
+def jim2np(jim,band=0):
   try:
     if jim.nrOfPlane()>1:
       buf_obj = numpy.zeros([jim.nrOfRow(),jim.nrOfCol(),jim.nrOfPlane()], dtype = JimToNumPyTypeCode(jim.getDataType()))
     else:
       buf_obj = numpy.zeros([jim.nrOfRow(),jim.nrOfCol()], dtype = JimToNumPyTypeCode(jim.getDataType()))
     typeSizeByte=JimGetTypeSizeByte(jim.getDataType())
-    RasterIOJim(jim, typeSizeByte, buf_obj)
+    RasterIOJim(jim, typeSizeByte, buf_obj, band)
     return buf_obj
   except:
+    print("Error: could not create numpy array")
     return None
 
 %}

@@ -608,27 +608,29 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
     for(int ilayer=0;ilayer<getLayerCount();++ilayer){
       ogrWriter.pushLayer(getLayerName(ilayer),getProjection(ilayer),getGeometryType(ilayer),papszOptions);
       ogrWriter.copyFields(*this,std::vector<std::string>(),ilayer);
-      ogrWriter.resize(getFeatureCount(ilayer),ilayer);
-#if JIPLIB_PROCESS_IN_PARALLEL == 1
-#pragma omp parallel for
-#else
-#endif
+      // ogrWriter.resize(getFeatureCount(ilayer),ilayer);
+// #if JIPLIB_PROCESS_IN_PARALLEL == 1
+// #pragma omp parallel for
+// #else
+// #endif
       for(size_t ifeature=0;ifeature<getFeatureCount(ilayer);++ifeature){
         if(verbose_opt[0]>1)
           std::cout << "feature " << ifeature << endl;
-        OGRFeature *writeFeature=ogrWriter.createFeature(ilayer);
         OGRFeature *readFeature=getFeatureRef(ifeature,ilayer);
         if(readFeature){
           if(readFeature->GetGeometryRef()->Intersects(pGeom)){
             if(verbose_opt[0]>1)
               std::cout << "write valid feature " << ifeature << endl;
+            OGRFeature *writeFeature=ogrWriter.createFeature(ilayer);
             writeFeature->SetFrom(readFeature);
+            //todo: only set intersected features. check if NULL features are a problem when writing
+            ogrWriter.pushFeature(writeFeature,ilayer);
           }
-          //todo: not all features will be written. check if NULL features are a problem when writing
-          ogrWriter.setFeature(ifeature,writeFeature,ilayer);
+          else{
+            if(verbose_opt[0]>1)
+              std::cerr << "Warning: " << ifeature << " is not intersecting" << std::endl;
+          }
         }
-        else
-          std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
       }
     }
     return(OGRERR_NONE);
@@ -862,21 +864,23 @@ bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, si
           }
           else{
             std::ostringstream errorStream;
-            errorStream << "Error: could not get extent from layer" << std::endl;
+            errorStream << "Error: could not get extent from layer with multiple geometry field count" << std::endl;
             throw(errorStream.str());
           }
         }
       }
-      else if (thisLayer->GetExtent(&oExt, true) == OGRERR_NONE){
+      else{
+        if(thisLayer->GetExtent(&oExt, true) == OGRERR_NONE){
           ulx=oExt.MinX;
           uly=oExt.MaxY;
           lrx=oExt.MaxX;
           lry=oExt.MinY;
-      }
-      else{
-        std::ostringstream errorStream;
-        errorStream << "Error: could not get extent from layer" << std::endl;
-        throw(errorStream.str());
+        }
+        else{
+          std::ostringstream errorStream;
+          errorStream << "Error: could not get extent from layer with 1 geometry field count" << std::endl;
+          throw(errorStream.str());
+        }
       }
     }
     if(poCT){
@@ -905,11 +909,6 @@ bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, si
       lry=yvector[3];
     }
     return true;
-  // }
-  // catch(std::string errorString){
-  //   std::cerr << errorString << std::endl;
-  //   return false;
-  // }
 }
 
 // bool VectorOgr::getExtent(std::vector<double> &bbvector, size_t ilayer, OGRCoordinateTransformation *poCT) const{
@@ -983,6 +982,12 @@ unsigned int VectorOgr::readFeatures(size_t ilayer){
 ///get feature reference (feature should not be deleted)
  OGRFeature* VectorOgr::getFeatureRef(unsigned int index, size_t ilayer){
   OGRFeature* poFeature=NULL;
+  if(m_features.size()<=ilayer){
+    std::ostringstream errorStream;
+    errorStream << "Error: m_features not initialized for layer " << ilayer << std::endl;
+    std::cerr << errorStream.str() << std::endl;
+    throw(errorStream.str());
+  }
   if(index>=0&&index<m_features[ilayer].size()){
     poFeature=m_features[ilayer][index];
   }

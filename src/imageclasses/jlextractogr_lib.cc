@@ -763,7 +763,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
       if(verbose_opt[0])
-        std::cout << "processing parallel" << std::endl;
+        std::cout << "process in parallel" << std::endl;
 #pragma omp parallel for
 #else
 #endif
