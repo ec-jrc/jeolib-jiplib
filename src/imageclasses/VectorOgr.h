@@ -175,7 +175,7 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   }
   ///destroy all features in object
   void destroyAll();
-  /* void destroyEmptyFeatures(size_t ilayer=0); */
+  void destroyEmptyFeatures(size_t ilayer=0);
   void destroyFeatures(size_t ilayer=0);
   ///open using a copy
   //OGRErr open(const VectorOgr& vectorOgr, const std::string& layername=std::string());
@@ -335,8 +335,8 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   OGRErr copyFields(const VectorOgr& vectorOgr,const std::vector<std::string>& fieldnames=std::vector<std::string>(),size_t ilayer=0);
   ///merge another vector
   /* OGRErr merge(VectorOgr& vectorOgr); */
-  ///write all features
-  OGRErr write();
+  ///write all features (default to m_gds dataset already defined when opened, but optionally to another filename
+  OGRErr write(const std::string& filename=std::string());
   ///write all features to a new vector dataset
   //void write(const std::string& filename, const std::string& layername, const::std::string& imageType="SQLite", char** papszOptions=NULL);
     ///copy all features from existing VectorOgr and write to vector dataset
@@ -392,12 +392,13 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///Get field definitions in vector
   OGRErr getFields(std::vector<OGRFieldDefn*>& fields, size_t ilayer=0) const;
   ///Get field names in vector
-  OGRErr getFieldNames(std::vector<std::string>& fields, size_t layer=0) const;
+  void getFieldNames(std::vector<std::string>& fields, size_t layer=0) const;
   ///prepare dataset for writing, e.g., register driver
   //OGRErr createDS(const std::string& filename, const std::string& imageType, DATA_ACCESS theAccess=WRITE);
   OGRErr addPoint(double x, double y, const std::map<std::string,double>& pointAttributes, std::string fieldName, int theId, size_t ilayer=0);
   OGRErr addPoint(double x, double y, const std::map<std::string,double>& pointAttributes, size_t ilayer=0);
   size_t serialize(std::vector<unsigned char> &vbytes);
+  void dumpOgr(app::AppFactory& app);
   ///joins two VectorOgr based on key value
   std::shared_ptr<VectorOgr> join(VectorOgr &ogrReader, app::AppFactory& app);
   ///joins two VectorOgr based on key value

@@ -149,7 +149,8 @@
               if os.path.isfile(arg1):
                   appDict.update({'filename':arg1})
               else:
-                raise IOError("Error: {} is not a regular file".format(arg1))
+                  print("Warning: {} is not a regular file".format(arg1))
+                  appDict.update({'filename':arg1})
           else:
               raise TypeError("Error: bad argument type for createVector, arguments without names should be a path or of VectorOgr type")
       if appDict:

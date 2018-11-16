@@ -92,19 +92,19 @@ void VectorOgr::destroyAll(){
   m_layer.clear();
 }
 
-// void VectorOgr::destroyEmptyFeatures(size_t ilayer){
-//   if(m_features.size()>ilayer){
-//     std::vector<OGRFeature*>::iterator fit=m_features[ilayer].begin();
-//     while(fit!=m_features[ilayer].end()){
-//       if(*fit){
-//         ++fit;
-//         continue;
-//       }
-//       else
-//         m_features[ilayer].erase(fit);
-//     }
-//   }
-// }
+void VectorOgr::destroyEmptyFeatures(size_t ilayer){
+  if(m_features.size()>ilayer){
+    std::vector<OGRFeature*>::iterator fit=m_features[ilayer].begin();
+    while(fit!=m_features[ilayer].end()){
+      if(*fit){
+        ++fit;
+        continue;
+      }
+      else
+        m_features[ilayer].erase(fit);
+    }
+  }
+}
 
 void VectorOgr::destroyFeatures(size_t ilayer){
   if(m_features.size()>ilayer){
@@ -608,11 +608,11 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
     for(int ilayer=0;ilayer<getLayerCount();++ilayer){
       ogrWriter.pushLayer(getLayerName(ilayer),getProjection(ilayer),getGeometryType(ilayer),papszOptions);
       ogrWriter.copyFields(*this,std::vector<std::string>(),ilayer);
-      // ogrWriter.resize(getFeatureCount(ilayer),ilayer);
-// #if JIPLIB_PROCESS_IN_PARALLEL == 1
-// #pragma omp parallel for
-// #else
-// #endif
+      ogrWriter.resize(getFeatureCount(ilayer),ilayer);
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
       for(size_t ifeature=0;ifeature<getFeatureCount(ilayer);++ifeature){
         if(verbose_opt[0]>1)
           std::cout << "feature " << ifeature << endl;
@@ -624,7 +624,8 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
             OGRFeature *writeFeature=ogrWriter.createFeature(ilayer);
             writeFeature->SetFrom(readFeature);
             //todo: only set intersected features. check if NULL features are a problem when writing
-            ogrWriter.pushFeature(writeFeature,ilayer);
+            // ogrWriter.pushFeature(writeFeature,ilayer);
+            ogrWriter.setFeature(ifeature,writeFeature,ilayer);
           }
           else{
             if(verbose_opt[0]>1)
@@ -632,6 +633,8 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
           }
         }
       }
+      //test
+      destroyEmptyFeatures(ilayer);
     }
     return(OGRERR_NONE);
   }
@@ -747,8 +750,20 @@ OGRErr VectorOgr::copy(VectorOgr& other, app::AppFactory &app){
 // }
 
  ///write features to the vector dataset
-OGRErr VectorOgr::write(){
-  if(m_gds){
+OGRErr VectorOgr::write(const std::string& filename){
+  if(filename.size()){
+    vector<unsigned char> vbytes;
+    size_t nbytes=serialize(vbytes);
+    std::ofstream outputStream(filename, std::ios::out|std::ios::binary);
+    outputStream.write(nbytes ? (char*)&vbytes[0] : 0, std::streamsize(nbytes));
+    outputStream.close();
+    // FILE *file = fopen(filename.c_str(),"wb");
+    // if(file){
+    //   fwrite(vbytes.data(),vbytes.size(),1,file);
+    //   fclose(file);
+    // }
+  }
+  else if(m_gds){
     for(size_t ilayer=0;ilayer<getLayerCount();++ilayer){
       auto fit=m_features[ilayer].begin();
       size_t ifeature=0;
@@ -761,8 +776,8 @@ OGRErr VectorOgr::write(){
           ++fit;
         }
         else{
-          std::string errorString="Warning: NULL feature in m_feature";
-          std::cout << errorString << std::endl;
+          // std::string errorString="Warning: NULL feature in m_feature";
+          // std::cout << errorString << std::endl;
           m_features[ilayer].erase(fit);
         }
       }
@@ -1003,13 +1018,12 @@ unsigned int VectorOgr::readFeatures(size_t ilayer){
   return(OGRERR_NONE);
 }
 
-OGRErr VectorOgr::getFieldNames(std::vector<std::string>& fieldnames, size_t ilayer) const{
+void VectorOgr::getFieldNames(std::vector<std::string>& fieldnames, size_t ilayer) const{
   OGRFeatureDefn *poFeatureDefn = getLayer(ilayer)->GetLayerDefn();
   fieldnames.clear();
   fieldnames.resize(poFeatureDefn->GetFieldCount());
   for(int iField=0;iField<poFeatureDefn->GetFieldCount();++iField)
     fieldnames[iField]=poFeatureDefn->GetFieldDefn(iField)->GetNameRef();
-  return(OGRERR_NONE);
 }
 
 OGRErr VectorOgr::addPoint(double x, double y, const std::map<std::string,double>& pointAttributes, std::string fieldName, int theId, size_t ilayer){
@@ -1079,6 +1093,69 @@ size_t VectorOgr::serialize(vector<unsigned char> &vbytes){
   else{
     std::cerr << "Error: VSIStatL failed" << std::endl;
     return(0);
+  }
+}
+
+void VectorOgr::dumpOgr(app::AppFactory& app){
+  Optionjl<std::string> fname_opt("n", "name", "the field name to dump");
+  Optionjl<string> output_opt("o", "output", "Output ascii file (Default is empty: dump to standard output)");
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=fname_opt.retrieveOption(app);
+    output_opt.retrieveOption(app);
+    verbose_opt.retrieveOption(app);
+
+    if(!doProcess){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+
+    ofstream outputStream;
+    if(output_opt.size())
+      outputStream.open(output_opt[0].c_str());
+
+    for(size_t ilayer=0;ilayer<getLayerCount();++ilayer){
+      std::vector<OGRFieldDefn*> fields;
+      std::vector<size_t> fieldindexes;
+      getFields(fields,ilayer);
+      for(unsigned int ifield=0;ifield<fields.size();++ifield){
+        if(fname_opt.size()){
+          if(std::find(fname_opt.begin(),fname_opt.end(),fields[ifield]->GetNameRef())!=fname_opt.end())
+            fieldindexes.push_back(ifield);
+        }
+        else
+          fieldindexes.push_back(ifield);
+      }
+      if(verbose_opt[0])
+        std::cout << "ilayer is: " << ilayer << std::endl;
+      for(size_t ifeature = 0; ifeature < getFeatureCount(ilayer); ++ifeature) {
+        OGRFeature *thisFeature=getFeatureRef(ifeature,ilayer);
+        if(!thisFeature){
+          std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+          continue;
+        }
+        for(std::vector<size_t>::const_iterator fit=fieldindexes.begin();fit!=fieldindexes.end();++fit){
+          if(output_opt.empty())
+            std::cout << thisFeature->GetFieldAsString(*fit) << " ";
+          else
+            outputStream << thisFeature->GetFieldAsString(*fit) << " ";
+        }
+        if(output_opt.empty())
+          std::cout << std::endl;
+        else
+          outputStream << std::endl;
+      }
+    }
+    if(!output_opt.empty())
+      outputStream.close();
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    throw;
   }
 }
 

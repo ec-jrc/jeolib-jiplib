@@ -531,7 +531,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         std::cout<< std::setprecision(12) << "--ulx " << layer_ulx << " --uly " << layer_uly<< " --lrx " << layer_lrx   << " --lry " << layer_lry << std::endl;
       bool hasCoverage=((layer_ulx >= this->getUlx())&&(layer_lrx <= this->getLrx())&&(layer_uly <= this->getUly())&&(layer_lry >= this->getLry()));
       if(!hasCoverage){
-        std::cerr << "Warning: raster dataset does not full coverage of vector layer " << ilayer << endl;
+        std::cerr << "Warning: raster dataset does not fully cover vector layer " << ilayer << endl;
         if(verbose_opt[0])
           std::cerr << std::setprecision(12) << "--ulx " << getUlx() << " --uly " << getUly() << " --lrx " << getLrx()  << " --lry " << getLry() << std::endl;
       }
