@@ -221,6 +221,7 @@ mialib_pointop.h:extern ERROR_TYPE power2p(IMAGE *im); pointOpPower2
 mialib_pointop.h:extern ERROR_TYPE blank(IMAGE *im, G_TYPE gval); pointOpBlank
 mialib_pointop.h:extern ERROR_TYPE shift(IMAGE *im, int val); pointOpBitShift
 mialib_pointop.h:extern ERROR_TYPE setrange(IMAGE *im, G_TYPE gt1, G_TYPE gt2); pointOpSetRange
+mialib_pointop.h:extern IMAGE *ndi(IMAGE *im1, IMAGE *im2; pointOpNDI
 
 mialib_proj.h:extern IMAGE *grid(IMAGE *im, IMAGE *roi, IMAGE *imx, IMAGE *imy, float alpha); gridding
 mialib_proj.h:extern IMAGE **cs2cs(double ulc_e, double ulc_n, int nx, int ny, double res, char *parmsi[], int ni, char *parmso[], int no); cs2cs
