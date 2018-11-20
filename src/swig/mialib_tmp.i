@@ -200,9 +200,6 @@
   delete $1;
 }
 
-
-
-
 // Addtional code for IMAGE<->NumPy array conversions [20160729]
 // adapted from gdal_array.i
 

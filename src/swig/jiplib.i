@@ -113,6 +113,27 @@
 /* %ignore createJim(const std::shared_ptr<Jim>, bool); */
 /* %ignore createJim(const std::string&, bool); */
 %pythoncode %{
+
+  t_UCHAR    =  3
+  t_SHORT    =  4
+  t_USHORT   =  5
+  t_INT32    =  6
+  t_UINT32   =  7
+  t_INT64    =  8
+  t_UINT64   =  9
+  t_FLOAT    = 10
+  _MIAFLOAT = 10
+  t_DOUBLE   = 11
+  GDT_Byte = 1
+  GDT_UInt16 = 2
+  GDT_Int16 = 3
+  GDT_UInt32 = 4
+  GDT_Int32 = 5
+  GDT_Float32 = 6
+  GDT_Float64 = 7
+  JDT_UInt64 = 24
+  _Int64 = 25
+
   import os.path
   def createJim(arg1=None,**kwargs):
       appDict={}
