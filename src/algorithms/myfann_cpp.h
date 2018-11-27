@@ -1976,13 +1976,13 @@ public:
           outputStream << "cascade_candidate_change_fraction=" << ann->cascade_candidate_change_fraction << std::endl;
           outputStream << "cascade_candidate_stagnation_epochs=" << ann->cascade_candidate_stagnation_epochs << std::endl;
           outputStream << "cascade_max_out_epochs=" << ann->cascade_max_out_epochs << std::endl;
-#if FANN_VERSION_MINOR > 1
+/* #if FANN_VERSION_MINOR > 1 */
           outputStream << "cascade_min_out_epochs=" << ann->cascade_min_out_epochs << std::endl;
-#endif
+/* #endif */
           outputStream << "cascade_max_cand_epochs=" << ann->cascade_max_cand_epochs << std::endl;
-#if FANN_VERSION_MINOR > 1
+/* #if FANN_VERSION_MINOR > 1 */
           outputStream << "cascade_min_cand_epochs=" << ann->cascade_min_cand_epochs << std::endl;
-#endif
+/* #endif */
           outputStream << "cascade_num_candidate_groups=" << ann->cascade_num_candidate_groups << std::endl;
 
 #ifndef FIXEDFANN

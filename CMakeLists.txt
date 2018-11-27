@@ -114,6 +114,12 @@ endif()
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP jsoncpp)
+if(JSONCPP_FOUND)
+  message(STATUS "JSONCPP package found: OK")
+else(JSONCPP_FOUND)
+  message(STATUS "Warning: JSONCPP package not found!")
+endif(JSONCPP_FOUND)
+
 # link_libraries(${JSONCPP_LIBRARIES})
 include_directories(${JSONCPP_INCLUDE_DIRS})
 
@@ -167,15 +173,12 @@ include_directories("${PROJECT_BINARY_DIR}/src")#  this is where sources will go
 add_subdirectory ("${PROJECT_TEST_DIR}")
 
 if (BUILD_WITH_FANN)
-  set(FANN_VERSION_MINOR 2 CACHE STRING "LIBFANN version")
-  FIND_PACKAGE(FANN 2.${FANN_VERSION_MINOR} EXACT)
+  FIND_PACKAGE(FANN 2.2 REQUIRED)
   if(FANN_FOUND)
-    message(STATUS "Found FANN exact version 2.${FANN_VERSION_MINOR}")
     include_directories(${FANN_INCLUDE_DIRS})
     add_definitions(-DFANN_DLL)
   else(FANN_FOUND)
-    message(STATUS "Error: FANN exact version 2.${FANN_VERSION_MINOR} not found, trying default")
-    find_package(FANN)
+    message(STATUS "Error: could not find FANN packagei version >= 2.2")
   endif()
 endif(BUILD_WITH_FANN)
 
@@ -478,6 +481,10 @@ INCLUDE(${SWIG_USE_FILE})
 INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/src)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
+#test
+INCLUDE_DIRECTORIES(/usr/local/include)
+
 SET(CMAKE_SWIG_FLAGS "-keyword")
 SET(CMAKE_SWIG_FLAGS "-DMIALIB=${MIA_BOOL}")
 SET_PROPERTY(SOURCE ${JIPLIB_I} PROPERTY CPLUSPLUS ON)

@@ -229,16 +229,16 @@ CPLErr Jim::convert(Jim& imgWriter, AppFactory& app){
 
 // CPLErr Jim::crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry, double dx, double dy, bool geo){
 CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
-  Optionjl<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box", 0.0);
-  Optionjl<double>  uly_opt("uly", "uly", "Upper left y value bounding box", 0.0);
-  Optionjl<double>  lrx_opt("lrx", "lrx", "Lower right x value bounding box", 0.0);
-  Optionjl<double>  lry_opt("lry", "lry", "Lower right y value bounding box", 0.0);
-  Optionjl<double> dx_opt("dx", "dx", "spatial resolution in x (in spatial reference system or pixels if nogeo is set)",false);
-  Optionjl<double> dy_opt("dy", "dy", "spatial resolution in y (in spatial reference system or piyels if nogeo is set)",false);
-  Optionjl<double>  nodata_opt("nodata", "nodata", "Nodata value to put in image if out of bounds.", 0);
-  Optionjl<bool>  align_opt("align", "align", "Align output bounding box to input image",false);
-  Optionjl<bool>  nogeo_opt("nogeo", "nogeo", "use image coordinates instead of spatial reference system",false);
-  Optionjl<short>  verbose_opt("v", "verbose", "verbose", 0,2);
+  Optionjl<double> ulx_opt("ulx", "ulx", "Upper left x value bounding box", 0.0);
+  Optionjl<double> uly_opt("uly", "uly", "Upper left y value bounding box", 0.0);
+  Optionjl<double> lrx_opt("lrx", "lrx", "Lower right x value bounding box", 0.0);
+  Optionjl<double> lry_opt("lry", "lry", "Lower right y value bounding box", 0.0);
+  Optionjl<double> dx_opt("dx", "dx", "spatial resolution in x (in spatial reference system or pixels if nogeo is set)",0);
+  Optionjl<double> dy_opt("dy", "dy", "spatial resolution in y (in spatial reference system or piyels if nogeo is set)",0);
+  Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put in image if out of bounds.", 0);
+  Optionjl<bool> align_opt("align", "align", "Align output bounding box to input image",false);
+  Optionjl<bool> nogeo_opt("nogeo", "nogeo", "use image coordinates instead of spatial reference system",false);
+  Optionjl<short> verbose_opt("v", "verbose", "verbose", 0,2);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
@@ -293,6 +293,16 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
     double dx=dx_opt[0];
     double dy=dy_opt[0];
     if(nogeo_opt[0]){
+      if(verbose_opt[0])
+        std::cout << "crop in nogeo mode" << std::endl;
+      if(cropulx>=croplrx){
+        cropulx=0;
+        croplrx=nrOfCol();
+      }
+      if(cropuly>=croplry){
+        cropuly=0;
+        croplry=nrOfRow();
+      }
       cropuli=cropulx;
       cropulj=cropuly;
       croplri=croplrx;
@@ -314,11 +324,35 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
       cropulx-=getDeltaX()/2;
       cropuly+=getDeltaY()/2;
 
-      croplrx+=this->getDeltaX()/2.0;
-      croplry-=this->getDeltaY()/2.0;
+      croplrx-=this->getDeltaX()/2.0;
+      croplry+=this->getDeltaY()/2.0;
     }
     else{
+      if(verbose_opt[0])
+        std::cout << "crop in geo mode" << std::endl;
+      if(cropulx>=croplrx){
+        cropulx=getUlx();
+        croplrx=getLrx();
+      }
+      if(cropuly<=croplry){
+        cropuly=getUly();
+        croplry=getLry();
+      }
+      if(dx>0)
+        stridei=dx/getDeltaX();
+      else{
+        stridei=1;
+        dx=getDeltaX();
+      }
+      if(dy>0)
+        stridej=dy/getDeltaY();
+      else{
+        stridej=1;
+        dy=getDeltaY();
+      }
       if(align_opt[0]){
+        if(verbose_opt[0])
+          std::cout << "using align option" << std::endl;
         //do align
         if(dx>0){
           if(cropulx>this->getUlx())
@@ -346,24 +380,19 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
 
       cropuli=floor(cropuli);
       cropulj=floor(cropulj);
-      croplri=floor(croplri);
-      croplrj=floor(croplrj);
-
-      if(dx>0)
-        stridei=dx/getDeltaX();
-      else{
-        stridei=1;
-        dx=getDeltaX();
-      }
-      if(dy>0)
-        stridej=dy/getDeltaY();
-      else{
-        stridej=1;
-        dy=getDeltaY();
-      }
+      croplri=floor(croplri)+1;
+      croplrj=floor(croplrj)+1;
     }
-    size_t ncropcol=(croplri-cropuli+1)/stridei;
-    size_t ncroprow=(croplrj-cropulj+1)/stridej;
+    size_t ncropcol=(croplri-cropuli)/stridei;
+    size_t ncroprow=(croplrj-cropulj)/stridej;
+    if(verbose_opt[0]){
+      std::cout << "ncropcol: " << ncropcol << std::endl;
+      std::cout << "ncroprow: " << ncroprow << std::endl;
+      std::cout << "dx: " << dx << std::endl;
+      std::cout << "dy: " << dy << std::endl;
+      std::cout << "stridei: " << stridei << std::endl;
+      std::cout << "stridej: " << stridej << std::endl;
+    }
     try{
       imgWriter.open(ncropcol,ncroprow,nrOfBand(),this->getGDALDataType());
     }
@@ -383,13 +412,23 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
     // double nodataValue=m_noDataValues.size() ? m_noDataValues[0] : 0;
     std::ostringstream errorStream;
 
+    if(verbose_opt[0]){
+      std::cout << "cropuli: " << cropuli << std::endl;
+      std::cout << "cropulj: " << cropulj << std::endl;
+      std::cout << "stridei: " << stridei << std::endl;
+      std::cout << "stridej: " << stridej << std::endl;
+    }
     if(cropuli+stridei/2 < 0 || cropuli+(ncropcol-1)*stridei+stridei/2 >= nrOfRow()){
       errorStream << "Warning: columns requested out of bounding box" << std::endl;
+      errorStream << "cropuli+stridei/2: " << cropuli+stridei/2 << std::endl;
+      errorStream << "cropuli+(ncropcol-1)*stridei+stridei/2: " << cropuli+(ncropcol-1)*stridei+stridei/2 << std::endl;
       std::cerr << errorStream.str() << std::endl;
       imgWriter.setNoDataValue(nodata_opt[0]);
     }
     if(cropulj+stridej/2<0 || cropulj+(ncroprow-1)*stridej+stridej/2 >= nrOfRow()){
       errorStream << "Warning: rows requested out of bounding box" << std::endl;
+      errorStream << "cropulj+stridej/2: " << cropulj+stridej/2 << std::endl;
+      errorStream << "cropulj+(ncroprow-1)*stridej+stridej/2: " << cropulj+(ncroprow-1)*stridej+stridej/2 << std::endl;
       std::cerr << errorStream.str() << std::endl;
       imgWriter.setNoDataValue(nodata_opt[0]);
     }
@@ -421,6 +460,16 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
   catch(string errorstring){
     std::cerr << errorstring << std::endl;
     throw;
+  }
+  catch(BadConversion conversion){
+    std::string errorString="Bad conversion in arguments";
+    std::cerr << errorString << std::endl;
+    app.showOptions();
+    throw(errorString);
+  }
+  catch(...){
+    std::string errorString="Unknown error";
+    throw(errorString);
   }
 }
 
