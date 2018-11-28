@@ -74,11 +74,14 @@ public:
   ///default constructor
   JimList(){};// : std::vector<Jim*>() {};
   ///copy constructor
-  JimList(const JimList &coll){
-    /* std::vector<std::shared_ptr<Jim> >::const_iterator pimit=coll.begin(); */
-    std::list<std::shared_ptr<Jim> >::const_iterator pimit=coll.begin();
-    for(pimit=coll.begin();pimit!=coll.end();++pimit)
+  JimList(const JimList &jimlist){
+    /* std::vector<std::shared_ptr<Jim> >::const_iterator pimit=jimlist.begin(); */
+    std::list<std::shared_ptr<Jim> >::const_iterator pimit=jimlist.begin();
+    for(pimit=jimlist.begin();pimit!=jimlist.end();++pimit)
       pushImage(*pimit);
+    std::vector<double> nodata;
+    jimlist.getNoDataValues(nodata);
+    setNoData(nodata);
   }
   /* JimList(const std::vector<std::shared_ptr<Jim> > &coll){ */
   /*   std::vector<std::shared_ptr<Jim> >::const_iterator pimit=coll.begin(); */
@@ -199,7 +202,7 @@ public:
   JimList& clear(){std::list<std::shared_ptr<Jim> >::clear();return(*this);};
   JimList& close();
   ///Get the no data values of this dataset as a standard template library (stl) vector
-  JimList& getNoDataValues(std::vector<double>& noDataValues);
+  void getNoDataValues(std::vector<double>& noDataValues) const;
   ///Check if value is nodata in this dataset
   bool isNoData(double value) const{if(m_noDataValues.empty()) return false;else return find(m_noDataValues.begin(),m_noDataValues.end(),value)!=m_noDataValues.end();};
   ///Push a no data value for this dataset

@@ -25,27 +25,6 @@
 
 //    NPY_INT8, NPY_INT16, NPY_INT32, NPY_INT64, NPY_UINT8, NPY_UINT16, NPY_UINT32, NPY_UINT64, NPY_FLOAT32, NPY_FLOAT64, NPY_COMPLEX64, NPY_COMPLEX128.
 
-/* %extend Jim { */
-/*   void jim2np() { */
-/*     /\* PyObject *PyArray_SimpleNewFromData(int nd, npy_intp* dims, int typenum, void* data); *\/ */
-/*     npy_intp dims[2]; */
-/*     dims[0]=$self->nrOfRow(); */
-/*     dims[1]=$self->nrOfCol(); */
-/*     std::cout << "dim: " << dims[0] << ", " << dims[1] << std::endl; */
-/*     /\* PyObject *npArray=PyArray_SimpleNewFromData(2,dims,NPY_UINT16,$self->getDataPointer()); *\/ */
-/*     /\* PyObject *npArray=PyArray_SimpleNew(2,dims,NPY_UINT16); *\/ */
-/*     /\* return PyArray_Return(npArray); *\/ */
-/*   } */
-/* PyArrayObject jim2np() { */
-/*   /\* PyObject *PyArray_SimpleNewFromData(int nd, npy_intp* dims, int typenum, void* data); *\/ */
-/*   npy_intp dims[2]; */
-/*   dims[0]=$self->nrOfRow(); */
-/*   dims[1]=$self->nrOfCol(); */
-/*   /\* PyObject *npArray=PyArray_SimpleNewFromData(2,dims,NPY_UINT16,$self->getDataPointer()); *\/ */
-/*   PyObject *npArray=PyArray_SimpleNew(2,dims,NPY_UINT16); */
-/*   return PyArray_Return(npArray); */
-/* } */
-
 %inline %{
   void RasterIOMIALib( IMAGE *im, PyArrayObject *psArray) {
 #if MIALIB == 1

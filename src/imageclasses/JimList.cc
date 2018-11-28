@@ -287,12 +287,11 @@ bool JimList::covers(const Jim& imgRaster, bool all) const{
  * @param noDataValues standard template library (stl) vector containing no data values
  * @return number of no data values in this dataset
  **/
-JimList& JimList::getNoDataValues(std::vector<double>& noDataValues)
+void JimList::getNoDataValues(std::vector<double>& noDataValues) const
 {
   if(m_noDataValues.size()){
     noDataValues=m_noDataValues;
   }
-  return(*this);
 }
 
 /**
