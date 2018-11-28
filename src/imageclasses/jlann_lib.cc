@@ -441,7 +441,7 @@ shared_ptr<Jim> Jim::classifyANN(app::AppFactory& app){
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr Jim::classifyANN(Jim& imgWriter, app::AppFactory& app){
+void Jim::classifyANN(Jim& imgWriter, app::AppFactory& app){
   vector<double> priors;
 
   //--------------------------- command line options ------------------------------------
@@ -845,7 +845,6 @@ CPLErr Jim::classifyANN(Jim& imgWriter, app::AppFactory& app){
       if(entropy_opt.size())
         entropyImage.close();
     }
-    return(CE_None);
   }
   catch(BadConversion conversionString){
     std::cerr << "Error: did you provide class pairs names (-c) and integer values (-r) for each class in training vector?" << std::endl;

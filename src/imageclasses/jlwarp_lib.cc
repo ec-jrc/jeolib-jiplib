@@ -17,15 +17,13 @@ std::shared_ptr<Jim> Jim::warp(app::AppFactory& theApp){
 }
 
 ///convert Jim image in memory returning Jim image (alias for crop)
-CPLErr Jim::warp(Jim& imgWriter, app::AppFactory &theApp){
+void Jim::warp(Jim& imgWriter, app::AppFactory &theApp){
   Optionjl<std::string> sourceSRS_opt("s_srs", "s_srs", "Source spatial reference for the input file, e.g., epsg:3035 to use European projection and force to European grid");
   Optionjl<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference for the output file, e.g., epsg:3035 to use European projection and force to European grid");
   Optionjl<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
   Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.",0);
   Optionjl<std::string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
   Optionjl<short> verbose_opt("verbose", "verbose", "verbose output",0,2);
-
-  CPLErr res=CE_None;
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
@@ -81,7 +79,6 @@ CPLErr Jim::warp(Jim& imgWriter, app::AppFactory &theApp){
     convertApp.clearOption("t_srs");
     convertApp.clearOption("resample");
     Jim::convert(imgWriter,convertApp);
-    return res;
   }
   // char *sourceWKT=getProjectionRef().c_str();
   char *targetWKT=0;
@@ -150,7 +147,9 @@ CPLErr Jim::warp(Jim& imgWriter, app::AppFactory &theApp){
                       imgWriter.setNoData(nodata_opt);
                     }
                     if( poBandOut->RasterIO(GF_Read, 0, 0, imgWriter.nrOfCol(), imgWriter.nrOfRow(), imgWriter.getDataPointer(iband), imgWriter.nrOfCol(), imgWriter.nrOfRow(), imgWriter.getGDALDataType(), 0, 0, NULL) != CE_None ){
-                      res = CE_Failure;
+                      std::string errorString="Error: could not read band from RasterIO";
+                      std::cerr << errorString << std::endl;
+                      throw(errorString);
                     }
                   }
                   GDALClose(poDatasetOut);
@@ -166,5 +165,4 @@ CPLErr Jim::warp(Jim& imgWriter, app::AppFactory &theApp){
       }
     }
   }
-  return res;
 }

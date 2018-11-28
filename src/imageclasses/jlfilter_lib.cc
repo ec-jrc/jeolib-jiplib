@@ -72,9 +72,8 @@ shared_ptr<Jim> Jim::filter(app::AppFactory& app){
 /**
  * @param imgWriter output filtered raster dataset
  * @param app application specific option arguments
- * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr Jim::filter(Jim& imgWriter, app::AppFactory& app){
+void Jim::filter(Jim& imgWriter, app::AppFactory& app){
   Optionjl<bool> disc_opt("circ", "circular", "circular disc kernel for dilation and erosion", false);
   // Optionjl<double> angle_opt("a", "angle", "angle used for directional filtering in dilation (North=0, East=90, South=180, West=270).");
   Optionjl<std::string> method_opt("f", "filter", "filter function (nvalid, median, var, min, max, sum, mean, dilate, erode, close, open, homog (central pixel must be identical to all other pixels within window), heterog (central pixel must be different than all other pixels within window), sauvola, sobelx (horizontal edge detection), sobely (vertical edge detection), sobelxy (diagonal edge detection NE-SW),sobelyx (diagonal edge detection NW-SE), density, countid, mode (majority voting), only for classes), smooth, smoothnodata (smooth nodata values only) values, ismin, ismax, order (rank pixels in order), stdev, mrf, dwt, dwti, dwt_cut, dwt_cut_from, scramble, shift, savgolay, percentile, proportion)");
@@ -885,7 +884,6 @@ CPLErr Jim::filter(Jim& imgWriter, app::AppFactory& app){
     }
     // this->close();
     // imgWriter.close();
-    return(CE_None);
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
@@ -894,7 +892,7 @@ CPLErr Jim::filter(Jim& imgWriter, app::AppFactory& app){
 }
 
 ///Fast implementation of filter2d, not taking care of boundary effects (values at the boundary will be initialized as 0 as they will be cut of by caller)
-CPLErr Jim::filter2dFast(Jim& imgWriter, const app::AppFactory& app)
+void Jim::filter2dFast(Jim& imgWriter, const app::AppFactory& app)
 {
   Optionjl<unsigned int>  band_opt("b", "band", "band index to crop (leave empty to retain all bands)");
   Optionjl<bool> disc_opt("circ", "circular", "circular disc kernel for dilation and erosion", false);
@@ -1278,7 +1276,6 @@ CPLErr Jim::filter2dFast(Jim& imgWriter, const app::AppFactory& app)
         pfnProgress(progress,pszMessage,pProgressArg);
       }
     }
-    return(CE_None);
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;

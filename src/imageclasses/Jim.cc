@@ -3780,7 +3780,7 @@ std::shared_ptr<Jim> Jim::setAbsThreshold(double t1, double t2){
  *
  * @return CE_None if success, CE_Failure if failed
  */
-CPLErr Jim::setThreshold(Jim& imgWriter, double t1, double t2){
+void Jim::setThreshold(Jim& imgWriter, double t1, double t2){
   try{
     imgWriter.open(*this,false);
     if(m_noDataValues.empty()){
@@ -3812,7 +3812,6 @@ CPLErr Jim::setThreshold(Jim& imgWriter, double t1, double t2){
   catch(...){
     throw;
   }
-  return(CE_None);
 }
 
 /**
@@ -3824,7 +3823,7 @@ CPLErr Jim::setThreshold(Jim& imgWriter, double t1, double t2){
  *
  * @return CE_None if success, CE_Failure if failed
  */
-CPLErr Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2){
+void Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2){
   try{
     imgWriter.open(*this,false);
     if(m_noDataValues.empty()){
@@ -3856,7 +3855,6 @@ CPLErr Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2){
   catch(...){
     throw;
   }
-  return(CE_None);
 }
 
 /**
@@ -3903,7 +3901,7 @@ std::shared_ptr<Jim> Jim::setThreshold(app::AppFactory &theApp){
  *
  * @return CE_None if success, CE_Failure if failed
  */
-CPLErr Jim::setThreshold(Jim& imgWriter, double t1, double t2, double value){
+void Jim::setThreshold(Jim& imgWriter, double t1, double t2, double value){
   try{
     imgWriter.open(*this,false);
     if(m_noDataValues.empty()){
@@ -3935,7 +3933,6 @@ CPLErr Jim::setThreshold(Jim& imgWriter, double t1, double t2, double value){
   catch(...){
     throw;
   }
-  return(CE_None);
 }
 
 /**
@@ -3947,7 +3944,7 @@ CPLErr Jim::setThreshold(Jim& imgWriter, double t1, double t2, double value){
  *
  * @return CE_None if success, CE_Failure if failed
  */
-CPLErr Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2, double value){
+void Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2, double value){
   try{
     imgWriter.open(*this,false);
     if(m_noDataValues.empty()){
@@ -3979,10 +3976,9 @@ CPLErr Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2, double value){
   catch(...){
     throw;
   }
-  return(CE_None);
 }
 
-CPLErr Jim::setThreshold(Jim& imgWriter, app::AppFactory &theApp){
+void Jim::setThreshold(Jim& imgWriter, app::AppFactory &theApp){
   Optionjl<double> min_opt("min", "min", "minimum value to be valid");
   Optionjl<double> max_opt("max", "max", "maximum value to be valid");
   Optionjl<double> value_opt("value", "value", "value to be set if within min and max (if not set, valid pixels will remain their input value)");

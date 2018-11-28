@@ -51,7 +51,6 @@ along with pktools.  If not, see <http://www.gnu.org/licenses/>.
 
 
 ///train SML
-/* template<typename T> CPLErr Jim::trainSML(JimList& referenceReader, app::AppFactory& app){ */
 template<typename T> std::string Jim::trainSML(JimList& referenceReader, app::AppFactory& app){
   /* Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier."); */
   Optionjl<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
@@ -218,13 +217,12 @@ template<typename T> std::string Jim::trainSML(JimList& referenceReader, app::Ap
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
     throw;
-    /* return(CE_Failure); */
   }
 }
 
 
 ///classify raster dataset with SML
-template<typename T> CPLErr Jim::classifySML(Jim& imgWriter, app::AppFactory& app){
+template<typename T> void Jim::classifySML(Jim& imgWriter, app::AppFactory& app){
   Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
   Optionjl<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
   Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");

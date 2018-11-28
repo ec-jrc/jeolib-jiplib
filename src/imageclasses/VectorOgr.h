@@ -415,7 +415,7 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///classify
   std::shared_ptr<VectorOgr> classify(app::AppFactory& app);
   ///classify
-  OGRErr classify(VectorOgr& ogrWriter, app::AppFactory& app);
+  void classify(VectorOgr& ogrWriter, app::AppFactory& app);
   //getShared from this
   std::shared_ptr<VectorOgr> getShared(){return(std::dynamic_pointer_cast<VectorOgr>(shared_from_this()));};
   ///overload output stream operator
@@ -443,13 +443,13 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///classify SVM
   std::shared_ptr<VectorOgr> classifySVM(app::AppFactory& app);
   ///classify SVM
-  OGRErr classifySVM(VectorOgr& ogrWriter, app::AppFactory& app);
+  void classifySVM(VectorOgr& ogrWriter, app::AppFactory& app);
   ///train ANN classifier
   std::string trainANN(app::AppFactory& app);
   ///classify ANN
   std::shared_ptr<VectorOgr> classifyANN(app::AppFactory& app);
   ///classify ANN
-  OGRErr classifyANN(VectorOgr& ogrWriter, app::AppFactory& app);
+  void classifyANN(VectorOgr& ogrWriter, app::AppFactory& app);
   ///read all features from an OGR dataset, attribute filter and spatial filter optionally
   unsigned int readFeatures();
   unsigned int readFeatures(size_t ilayer);

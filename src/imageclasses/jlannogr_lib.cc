@@ -38,18 +38,15 @@ using namespace app;
  **/
 shared_ptr<VectorOgr> VectorOgr::classifyANN(app::AppFactory& app){
   std::shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
-  if(classifyANN(*ogrWriter, app)!=OGRERR_NONE){
-    std::cerr << "Failed to extract" << std::endl;
-  }
+  classifyANN(*ogrWriter, app);
   return(ogrWriter);
 }
 
 /**
  * @param imgWriter output classified raster dataset
  * @param app application specific option arguments
- * @return CE_None if successful, CE_Failure if failed
  **/
-OGRErr VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
+void VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
   //--------------------------- command line options ------------------------------------
   Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
   Optionjl<unsigned int> band_opt("b", "band", "band index (starting from 0, either use band option or use start to end)");
@@ -359,7 +356,6 @@ OGRErr VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
     //   doa=cm.oa_pct(&se95_oa);
     //   std::cout << "Overall Accuracy: " << doa << " (" << se95_oa << ")"  << std::endl;
     // }
-    return(CE_None);
   }
   catch(BadConversion conversionString){
     std::cerr << "Error: did you provide class pairs names (-c) and integer values (-r) for each class in training vector?" << std::endl;

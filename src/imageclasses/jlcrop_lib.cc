@@ -79,7 +79,7 @@ shared_ptr<Jim> Jim::stackBand(Jim& srcImg, AppFactory& app){
 }
 
 
-CPLErr Jim::convert(Jim& imgWriter, AppFactory& app){
+void Jim::convert(Jim& imgWriter, AppFactory& app){
   Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
   Optionjl<double> autoscale_opt("as", "autoscale", "scale output to min and max, e.g., --autoscale 0 --autoscale 255");
   Optionjl<double> scale_opt("scale", "scale", "output=scale*input+offset");
@@ -219,7 +219,6 @@ CPLErr Jim::convert(Jim& imgWriter, AppFactory& app){
         // MyProgressFunc(progress,pszMessage,pProgressArg);
       }
     }
-    return(CE_None);
   }
   catch(string predefinedString){
     std::cerr << predefinedString << std::endl;
@@ -228,7 +227,7 @@ CPLErr Jim::convert(Jim& imgWriter, AppFactory& app){
 }
 
 // CPLErr Jim::crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry, double dx, double dy, bool geo){
-CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
+void Jim::crop(Jim& imgWriter, AppFactory& app){
   Optionjl<double> ulx_opt("ulx", "ulx", "Upper left x value bounding box", 0.0);
   Optionjl<double> uly_opt("uly", "uly", "Upper left y value bounding box", 0.0);
   Optionjl<double> lrx_opt("lrx", "lrx", "Lower right x value bounding box", 0.0);
@@ -455,7 +454,6 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
         }
       }
     }
-    return(CE_None);
   }
   catch(string errorstring){
     std::cerr << errorstring << std::endl;
@@ -1512,7 +1510,7 @@ CPLErr Jim::crop(Jim& imgWriter, AppFactory& app){
 //   }
 // }
 
-CPLErr Jim::cropBand(Jim& imgWriter, AppFactory& app){
+void Jim::cropBand(Jim& imgWriter, AppFactory& app){
   Optionjl<unsigned int> band_opt("b", "band", "band index to crop (leave empty to retain all bands)");
   Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
   Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
@@ -1586,7 +1584,6 @@ CPLErr Jim::cropBand(Jim& imgWriter, AppFactory& app){
   for(size_t iband=0;iband<vband.size();++iband){
     copyData(imgWriter.getDataPointer(iband),vband[iband]);
   }
-  return(CE_None);
 }
 
 ///destructive version of cropBand
@@ -1736,7 +1733,7 @@ void Jim::d_cropBand(AppFactory& app){
   m_nband=m_data.size();
 }
 
-CPLErr Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
+void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
   Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
   //todo: support layer names
   Optionjl<string>  layer_opt("ln", "ln", "layer name of extent to crop");
@@ -1840,8 +1837,9 @@ CPLErr Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
         cout << "resampling: bilinear interpolation" << endl;
     }
     else{
-      std::cout << "Error: resampling method " << resample_opt[0] << " not supported" << std::endl;
-      return(CE_Failure);
+      std::ostringstream errorStream;
+      errorStream << "Error: resampling method " << resample_opt[0] << " not supported";
+      throw(errorStream.str());
     }
 
     const char* pszMessage;
@@ -2420,7 +2418,6 @@ CPLErr Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
     }
     if(maskReader.isInit())
       maskReader.close();
-    return(CE_None);
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
@@ -2432,7 +2429,7 @@ CPLErr Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
  * read the data of the current raster dataset assuming it has not been read yet (otherwise use crop instead). Typically used when current dataset was opened with argument noRead true.
  * @param app application options
  **/
-CPLErr Jim::cropDS(Jim& imgWriter, AppFactory& app){
+void Jim::cropDS(Jim& imgWriter, AppFactory& app){
   Optionjl<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
   Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
   //todo: support layer names
@@ -2541,8 +2538,9 @@ CPLErr Jim::cropDS(Jim& imgWriter, AppFactory& app){
         cout << "resampling: bilinear interpolation" << endl;
     }
     else{
-      std::cout << "Error: resampling method " << resample_opt[0] << " not supported" << std::endl;
-      return(CE_Failure);
+      std::ostringstream errorStream;
+      errorStream << "Error: resampling method " << resample_opt[0] << " not supported";
+      throw(errorStream.str());
     }
 
     const char* pszMessage;
@@ -2854,7 +2852,6 @@ CPLErr Jim::cropDS(Jim& imgWriter, AppFactory& app){
     //   endRow=this->nrOfRow()-1;
 
     //todo: readDS here
-    CPLErr returnValue=CE_None;
     if(m_gds == NULL){
       std::string errorString="Error in readNewBlock";
       throw(errorString);
@@ -2994,7 +2991,11 @@ CPLErr Jim::cropDS(Jim& imgWriter, AppFactory& app){
       // nLineSpace	The byte offset from the start of one scanline in pData to the start of the next. If defaulted (0) the size of the datatype eBufType * nBufXSize is used.
       // psExtraArg	(new in GDAL 2.0) pointer to a GDALRasterIOExtraArg structure with additional arguments to specify resampling and progress callback, or NULL for default behaviour. The GDAL_RASTERIO_RESAMPLING configuration option can also be defined to override the default resampling to one of BILINEAR, CUBIC, CUBICSPLINE, LANCZOS, AVERAGE or MODE.
 
-      return(poBand->RasterIO(GF_Read,nXOff,nYOff+m_begin[iband],nXSize,nYSize,imgWriter.getDataPointer(iband),imgWriter.nrOfCol(),imgWriter.nrOfRow(),imgWriter.getGDALDataType(),0,0,&sExtraArg));
+      if((poBand->RasterIO(GF_Read,nXOff,nYOff+m_begin[iband],nXSize,nYSize,imgWriter.getDataPointer(iband),imgWriter.nrOfCol(),imgWriter.nrOfRow(),imgWriter.getGDALDataType(),0,0,&sExtraArg) != CE_None)){
+        std::ostringstream errorStream;
+        errorStream << "Error: could not read raster band using RasterIO";
+        throw(errorStream);
+      }
     }
   }
   catch(string predefinedString){
@@ -3009,7 +3010,7 @@ shared_ptr<Jim> Jim::createct(app::AppFactory& app){
   return(imgWriter);
 }
 
-CPLErr Jim::createct(Jim& imgWriter, app::AppFactory& app){
+void Jim::createct(Jim& imgWriter, app::AppFactory& app){
   Optionjl<double> min_opt("min", "min", "minimum value", 0);
   Optionjl<double> max_opt("max", "max", "maximum value", 100);
   Optionjl<bool> grey_opt("g", "grey", "grey scale", false);
@@ -3123,11 +3124,10 @@ CPLErr Jim::createct(Jim& imgWriter, app::AppFactory& app){
     cerr << "data type " << getDataType() << " not supported for adding a colortable" << endl;
     break;
   }
-  return(CE_None);
 }
 
 //stack image to current image
-CPLErr Jim::stackBand(Jim& imgSrc, Jim& imgWriter, AppFactory& app){
+void Jim::stackBand(Jim& imgSrc, Jim& imgWriter, AppFactory& app){
   Optionjl<unsigned int> band_opt("b", "band", "band index to crop (leave empty to retain all bands)");
   Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
   Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
@@ -3212,7 +3212,6 @@ CPLErr Jim::stackBand(Jim& imgSrc, Jim& imgWriter, AppFactory& app){
   for(size_t iband=0;iband<vband.size();++iband){
     imgSrc.copyData(imgWriter.getDataPointer(nrOfBand()+iband),vband[iband]);
   }
-  return(CE_None);
 }
 
 //destructive version of stack image to current image
@@ -3309,7 +3308,7 @@ shared_ptr<Jim> JimList::stackBand(AppFactory& app){
   return(imgWriter);
 }
 
-JimList& JimList::stackBand(Jim& imgWriter, AppFactory& app){
+void JimList::stackBand(Jim& imgWriter, AppFactory& app){
   Optionjl<unsigned int> band_opt("b", "band", "band index to crop (leave empty to retain all bands)");
   Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
   Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
@@ -3413,7 +3412,6 @@ JimList& JimList::stackBand(Jim& imgWriter, AppFactory& app){
     std::cout << predefinedString << std::endl;
     throw;
   }
-  return(*this);
 }
 
 // shared_ptr<Jim> JimList::crop(AppFactory& app){

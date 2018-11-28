@@ -45,9 +45,7 @@ using namespace app;
  **/
 shared_ptr<VectorOgr> VectorOgr::classifySVM(app::AppFactory& app){
   std::shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
-  if(classifySVM(*ogrWriter, app)!=OGRERR_NONE){
-    std::cerr << "Failed to extract" << std::endl;
-  }
+  classifySVM(*ogrWriter, app);
   return(ogrWriter);
 }
 
@@ -56,7 +54,7 @@ shared_ptr<VectorOgr> VectorOgr::classifySVM(app::AppFactory& app){
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-OGRErr VectorOgr::classifySVM(VectorOgr& ogrWriter, app::AppFactory& app){
+void VectorOgr::classifySVM(VectorOgr& ogrWriter, app::AppFactory& app){
   //--------------------------- command line options ------------------------------------
   Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
   Optionjl<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
@@ -392,7 +390,6 @@ OGRErr VectorOgr::classifySVM(VectorOgr& ogrWriter, app::AppFactory& app){
     // }
 
     svm_free_and_destroy_model(&(theModel));
-    return(CE_None);
   }
   catch(BadConversion conversionString){
     std::cerr << "Error: did you provide class pairs names (-c) and integer values (-r) for each class in training vector?" << std::endl;

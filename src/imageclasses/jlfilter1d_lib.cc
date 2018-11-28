@@ -95,9 +95,8 @@ shared_ptr<Jim> Jim::filter1d(app::AppFactory& app){
  * @param interp (type: std::string) (default: akima) type of interpolation for spectral filtering (see http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html)
  * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
  * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid). Use none to ommit color table
- * @return CE_None if successful, CE_Failure if failed
 **/
-CPLErr Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
+void Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
   Optionjl<std::string> method_opt("f", "filter", "filter function (nvalid, median, var, min, max, sum, mean, dilate, erode, close, open, mode (majority voting), only for classes), smoothnodata (smooth nodata values only) values, ismin, ismax, order (rank pixels in order), stdev, mrf, dwt, dwti, dwt_cut, dwt_cut_from, savgolay, percentile, proportion)");
   Optionjl<int> dimZ_opt("dz", "dz", "filter kernel size in z (spectral/temporal dimension), must be odd (example: 3).",3);
   Optionjl<std::string> wavelet_type_opt("wt", "wavelet", "wavelet type: daubechies,daubechies_centered, haar, haar_centered, bspline, bspline_centered", "daubechies");
@@ -548,7 +547,6 @@ CPLErr Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
       }
       }
     }
-    return(CE_None);
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;

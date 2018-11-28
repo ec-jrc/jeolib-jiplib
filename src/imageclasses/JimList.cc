@@ -189,7 +189,7 @@ JimList& JimList::close(){
  * @param lrx lower left coordinate in x
  * @param lry lower left coordinate in y
  **/
-const JimList& JimList::getBoundingBox(double& ulx, double& uly, double& lrx, double& lry) const{
+void JimList::getBoundingBox(double& ulx, double& uly, double& lrx, double& lry) const{
   // std::vector<std::shared_ptr<Jim> >::const_iterator it=begin();
   std::list<std::shared_ptr<Jim> >::const_iterator it=begin();
   if(it!=end())
@@ -202,7 +202,6 @@ const JimList& JimList::getBoundingBox(double& ulx, double& uly, double& lrx, do
     lrx=(lrx<imglrx)? imglrx : lrx;
     lry=(lry>imglry)? imglry : lry;
   }
-  return(*this);
 }
 
 /**
@@ -298,10 +297,9 @@ void JimList::getNoDataValues(std::vector<double>& noDataValues) const
  * @param noDataValue no data value to be pushed for this dataset
  * @return number of no data values in this dataset
  **/
-JimList& JimList::pushNoDataValue(double noDataValue)
+void JimList::pushNoDataValue(double noDataValue)
 {
   if(find(m_noDataValues.begin(),m_noDataValues.end(),noDataValue)==m_noDataValues.end())
     m_noDataValues.push_back(noDataValue);
-  return(*this);
 }
 

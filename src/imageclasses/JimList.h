@@ -106,7 +106,7 @@ public:
   // JimList& operator=(const JimList&) = default;
 
   ///get bounding box of image list
-  const JimList& getBoundingBox(double& ulx, double& uly, double& lrx, double& lry) const;
+  void getBoundingBox(double& ulx, double& uly, double& lrx, double& lry) const;
   ///get upper left x coordinate of image list
   double getUlx() const {double ulx, uly, lrx, lry;getBoundingBox(ulx,uly,lrx,lry);return(ulx);};
   ///get upper left y coordinate of image list
@@ -206,14 +206,14 @@ public:
   ///Check if value is nodata in this dataset
   bool isNoData(double value) const{if(m_noDataValues.empty()) return false;else return find(m_noDataValues.begin(),m_noDataValues.end(),value)!=m_noDataValues.end();};
   ///Push a no data value for this dataset
-  JimList& pushNoDataValue(double noDataValue);
+  void pushNoDataValue(double noDataValue);
   ///Set the no data values of this dataset using a standard template library (stl) vector as input
-  JimList& setNoData(const std::vector<double>& nodata){m_noDataValues=nodata; return(*this);};
+  void setNoData(const std::vector<double>& nodata){m_noDataValues=nodata;};
   ///Clear the no data values
-  JimList& clearNoData(){m_noDataValues.clear();return(*this);}
+  void clearNoData(){m_noDataValues.clear();}
 
   ///composite image
-  CPLErr composite(Jim& imgWriter, app::AppFactory& app);
+  void composite(Jim& imgWriter, app::AppFactory& app);
   ///composite image only for in memory
   std::shared_ptr<Jim> composite(app::AppFactory& app);
   ///crop image
@@ -221,15 +221,15 @@ public:
   ///crop image only for in memory
   /* std::shared_ptr<Jim> crop(app::AppFactory& app); */
   ///stack image
-  JimList& stackBand(Jim& imgWriter, app::AppFactory& app);
+  void stackBand(Jim& imgWriter, app::AppFactory& app);
   ///stack image
-  JimList& stackBand(Jim& imgWriter){app::AppFactory app;return stackBand(imgWriter,app);};
+  void stackBand(Jim& imgWriter){app::AppFactory app;return stackBand(imgWriter,app);};
   ///stack image only for in memory (alias for crop)
   std::shared_ptr<Jim> stackBand(app::AppFactory& app);
   ///stack image only for in memory (alias for crop)
   std::shared_ptr<Jim> stackBand(){app::AppFactory app;return stackBand(app);};
   ///stat profile image
-  CPLErr statProfile(Jim& imgWriter, app::AppFactory& app);
+  void statProfile(Jim& imgWriter, app::AppFactory& app);
   ///stat profile image only for in memory
   std::shared_ptr<Jim> statProfile(app::AppFactory& app);
   ///get statistics

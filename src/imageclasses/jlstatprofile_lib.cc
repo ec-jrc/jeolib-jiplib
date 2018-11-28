@@ -57,7 +57,7 @@ shared_ptr<Jim> JimList::statProfile(app::AppFactory& app){
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr JimList::statProfile(Jim& imgWriter, app::AppFactory& app){
+void JimList::statProfile(Jim& imgWriter, app::AppFactory& app){
   Optionjl<std::string> function_opt("f", "function", "Statistics function (mean, median, var, stdev, min, max, sum, mode (provide classes), minindex, maxindex, proportion (provide classes), percentile, nvalid");
   Optionjl<double> percentile_opt("perc","perc","Percentile value(s) used for rule percentile",90);
   // Optionjl<short> class_opt("class", "class", "class value(s) to use for mode, proportion");
@@ -260,7 +260,6 @@ CPLErr JimList::statProfile(Jim& imgWriter, app::AppFactory& app){
       progress=(1.0+y)/imgWriter.nrOfRow();
       MyProgressFunc(progress,pszMessage,pProgressArg);
     }
-    return(CE_None);
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
@@ -294,7 +293,7 @@ shared_ptr<Jim> Jim::statProfile(app::AppFactory& app){
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr Jim::statProfile(Jim& imgWriter, app::AppFactory& app){
+void Jim::statProfile(Jim& imgWriter, app::AppFactory& app){
   Optionjl<std::string> function_opt("f", "function", "Statistics function (mean, median, var, stdev, min, max, sum, mode, minindex, maxindex, proportion (provide classes), percentile, nvalid");
   Optionjl<double> percentile_opt("perc","perc","Percentile value(s) used for rule percentile",90);
   // Optionjl<short> class_opt("class", "class", "class value(s) to use for mode, proportion");
@@ -481,7 +480,6 @@ CPLErr Jim::statProfile(Jim& imgWriter, app::AppFactory& app){
       progress=(1.0+y)/imgWriter.nrOfRow();
       MyProgressFunc(progress,pszMessage,pProgressArg);
     }
-    return(CE_None);
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;

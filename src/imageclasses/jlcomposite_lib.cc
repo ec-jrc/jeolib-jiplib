@@ -47,9 +47,8 @@ shared_ptr<Jim> JimList::composite(AppFactory& app){
 /**
  * @param imgWriter output raster composite dataset
  * @param app application specific option arguments
- * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr JimList::composite(Jim& imgWriter, AppFactory& app){
+void JimList::composite(Jim& imgWriter, AppFactory& app){
   Optionjl<unsigned int>  band_opt("b", "band", "band index(es) to crop (leave empty if all bands must be retained)");
   Optionjl<double>  dx_opt("dx", "dx", "Output resolution in x (in meter) (empty: keep original resolution)");
   Optionjl<double>  dy_opt("dy", "dy", "Output resolution in y (in meter) (empty: keep original resolution)");
@@ -206,8 +205,9 @@ CPLErr JimList::composite(Jim& imgWriter, AppFactory& app){
         cout << "resampling: bilinear interpolation" << endl;
     }
     else{
-      std::cout << "Error: resampling method " << resample_opt[0] << " not supported" << std::endl;
-      return(CE_Failure);
+      std::ostringstream errorStream;
+      errorStream << "Error: resampling method " << resample_opt[0] << " not supported";
+      throw(errorStream.str());
     }
 
     int nband=0;
@@ -305,8 +305,9 @@ CPLErr JimList::composite(Jim& imgWriter, AppFactory& app){
       double theULX, theULY, theLRX, theLRY;
       (*imit)->getBoundingBox(theULX,theULY,theLRX,theLRY);
       if(theLRY>theULY){
-        cerr << "Error: input is not georeferenced or wrong bounding box, only referenced images are supported for composite " << endl;
-        return(CE_Failure);
+        std::ostringstream errorStream;
+        errorStream << "Error: input is not georeferenced or wrong bounding box, only referenced images are supported for composite ";
+        throw(errorStream.str());
       }
       if(verbose_opt[0])
         cout << "Bounding Box (ULX ULY LRX LRY): " << fixed << setprecision(6) << theULX << " " << theULY << " " << theLRX << " " << theLRY << endl;
@@ -1146,7 +1147,6 @@ CPLErr JimList::composite(Jim& imgWriter, AppFactory& app){
     }
     if(maskReader.isInit())
       maskReader.close();
-    return(CE_None);
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;

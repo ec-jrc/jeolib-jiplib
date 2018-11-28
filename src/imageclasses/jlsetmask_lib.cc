@@ -49,9 +49,8 @@ shared_ptr<Jim> Jim::setMask(VectorOgr& ogrReader, app::AppFactory& app){
 
 /**
  * @param imgWriter output raster setmask dataset
- * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr Jim::setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app){
+void Jim::setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app){
   //command line options
   // Optionjl<string> mask_opt("m", "mask", "Mask image(s)");
   Optionjl<string> vectorMask_opt("vm", "vectormask", "Vector mask dataset(s)");
@@ -366,7 +365,6 @@ CPLErr Jim::setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app){
     }
     // for(int imask=0;imask<nmask;++imask)
     //   maskReader[imask].close();
-    return(CE_None);
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
@@ -378,7 +376,7 @@ CPLErr Jim::setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app){
  * @param imgWriter output raster setmask dataset
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr Jim::setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app){
+void Jim::setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app){
   //command line options
   Optionjl<string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
   Optionjl<double> nodata_opt("nodata", "nodata", "nodata value to put in image if not valid", 0);
@@ -561,7 +559,6 @@ CPLErr Jim::setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app){
       MyProgressFunc(progress,pszMessage,pProgressArg);
     }
     maskReader.close();
-    return(CE_None);
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;

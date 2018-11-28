@@ -713,23 +713,23 @@ class Jim : public std::enable_shared_from_this<Jim>
   /* CPLErr rasterizeLayersBuf(std::vector<OGRLayer*>& layers, double burnValue=1.0); */
   /* CPLErr rasterizeLayersBuf(OGRLayer* layer, double burnValue=1.0){std::vector<OGRLayer*> layers;layers.push_back(layer);rasterizeLayersBuf(layers,burnValue);}; */
   ///Apply thresholds: set to no data if not within thresholds t1 and t2
-  CPLErr setThreshold(Jim& imgWriter, double t1, double t2);
+  void setThreshold(Jim& imgWriter, double t1, double t2);
   ///Apply absolute thresholds: set to no data if not within thresholds t1 and t2
-  CPLErr setAbsThreshold(Jim& imgWriter, double t1, double t2);
+  void setAbsThreshold(Jim& imgWriter, double t1, double t2);
   ///Apply thresholds for in memory: set to no data if not within thresholds t1 and t2
   std::shared_ptr<Jim> setThreshold(double t1, double t2);
   ///Apply absolute thresholds for in memory: set to no data if not within thresholds t1 and t2
   std::shared_ptr<Jim> setAbsThreshold(double t1, double t2);
   ///Apply thresholds: set to no data if not within thresholds t1 and t2, else set to value
-  CPLErr setThreshold(Jim& imgWriter, double t1, double t2, double value);
+  void setThreshold(Jim& imgWriter, double t1, double t2, double value);
   ///Apply absolute thresholds: set to no data if not within thresholds t1 and t2, else set to value
-  CPLErr setAbsThreshold(Jim& imgWriter, double t1, double t2, double value);
+  void setAbsThreshold(Jim& imgWriter, double t1, double t2, double value);
   ///Apply thresholds for in memory: set to no data if not within thresholds t1 and t2, else set to value
   std::shared_ptr<Jim> setThreshold(double t1, double t2, double value);
   ///Apply absolute thresholds for in memory: set to no data if not within thresholds t1 and t2, else set to value
   std::shared_ptr<Jim> setAbsThreshold(double t1, double t2, double value);
   ///Apply thresholds with theApp
-  CPLErr setThreshold(Jim& imgWriter, app::AppFactory &theApp);
+  void setThreshold(Jim& imgWriter, app::AppFactory &theApp);
   ///Apply thresholds for in memory with theApp
   std::shared_ptr<Jim> setThreshold(app::AppFactory &theApp);
 
@@ -742,15 +742,15 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///create color table
   std::shared_ptr<Jim> createct(app::AppFactory& app);
   ///create color table
-  CPLErr createct(Jim& imgWriter, app::AppFactory& app);
+  void createct(Jim& imgWriter, app::AppFactory& app);
   ///convert image
-  CPLErr convert(Jim& imgWriter, app::AppFactory& app);
+  void convert(Jim& imgWriter, app::AppFactory& app);
   ///crop image
-  CPLErr crop(Jim& imgWriter, app::AppFactory& app);
+  void crop(Jim& imgWriter, app::AppFactory& app);
   ///crop image
-  CPLErr cropOgr(VectorOgr& sampleReader, Jim& imgWriter, app::AppFactory& app);
+  void cropOgr(VectorOgr& sampleReader, Jim& imgWriter, app::AppFactory& app);
   ///crop image if it has not been read yet (typically used when Jim has been opened with argument noRead true)
-  CPLErr cropDS(Jim& imgWriter, app::AppFactory& app);
+  void cropDS(Jim& imgWriter, app::AppFactory& app);
   ///crop image
   /* CPLErr crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry); */
   /* CPLErr crop(Jim& imgWriter, double ulx, double uly, double lrx, double lry, double dx=0, double dy=0, bool geo=true); */
@@ -758,16 +758,16 @@ class Jim : public std::enable_shared_from_this<Jim>
   std::shared_ptr<Jim> stackBand(Jim& imgSrc, app::AppFactory& app);
   std::shared_ptr<Jim> stackBand(Jim& imgSrc){app::AppFactory theApp;return stackBand(imgSrc,theApp);};
   ///stack band(s) from another Jim
-  CPLErr stackBand(Jim& imgSrc, Jim& imgWriter, app::AppFactory& app);
-  CPLErr stackBand(Jim& imgSrc, Jim& imgWriter){app::AppFactory theApp;return stackBand(imgSrc,imgWriter,theApp);};
+  void stackBand(Jim& imgSrc, Jim& imgWriter, app::AppFactory& app);
+  void stackBand(Jim& imgSrc, Jim& imgWriter){app::AppFactory theApp;return stackBand(imgSrc,imgWriter,theApp);};
   ///destructive version of stack band(s) from another Jim
   void d_stackBand(Jim& imgSrc, app::AppFactory& app);
   void d_stackBand(Jim& imgSrc){app::AppFactory theApp; d_stackBand(imgSrc,theApp);};
   ///crop band(s)
   std::shared_ptr<Jim> cropBand(app::AppFactory& app);
   std::shared_ptr<Jim> cropBand(){app::AppFactory theApp;return cropBand(theApp);};
-  CPLErr cropBand(Jim& imgWriter, app::AppFactory& app);
-  CPLErr cropBand(Jim& imgWriter){app::AppFactory theApp;return cropBand(imgWriter,theApp);};
+  void cropBand(Jim& imgWriter, app::AppFactory& app);
+  void cropBand(Jim& imgWriter){app::AppFactory theApp;return cropBand(imgWriter,theApp);};
   ///destructive version of cropBand
   void d_cropBand(app::AppFactory& app);
   void d_cropBand(){app::AppFactory theApp;d_cropBand(theApp);};
@@ -782,7 +782,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///warp Jim image in memory
   std::shared_ptr<Jim> warp(app::AppFactory& theApp);
   ///warp image
-  CPLErr warp(Jim& imgWriter, app::AppFactory &theApp);
+  void warp(Jim& imgWriter, app::AppFactory &theApp);
   ///polygonize image
   std::shared_ptr<VectorOgr> polygonize(app::AppFactory& app, std::shared_ptr<Jim>mask=nullptr);
   ///polygonize image
@@ -800,15 +800,15 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///extract pixel values from raster image from a raster sample
   std::shared_ptr<VectorOgr> extractImg(Jim& classReader, app::AppFactory& app);
   ///calculate statistics profile based on multiband raster dataset
-  CPLErr statProfile(Jim& imgWriter, app::AppFactory& app);
+  void statProfile(Jim& imgWriter, app::AppFactory& app);
   ///calculate statistics profile based on multiband raster dataset only for in memory
   std::shared_ptr<Jim> statProfile(app::AppFactory& app);
   ///filter raster dataset
   /* CPLErr filter(Jim& imgWriter, app::AppFactory& app); */
   ///filter raster dataset in spectral/temporal domain
-  CPLErr filter1d(Jim& imgWriter, app::AppFactory& app);
+  void filter1d(Jim& imgWriter, app::AppFactory& app);
   ///filter raster dataset in spatial domain
-  CPLErr filter2d(Jim& imgWriter, const app::AppFactory& app);
+  void filter2d(Jim& imgWriter, const app::AppFactory& app);
   ///filter raster dataset only for in memory
   /* std::shared_ptr<Jim> filter(app::AppFactory& app); */
   ///filter raster dataset in spectral/temporal domain only for in memory
@@ -822,11 +822,11 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///train raster dataset
   CPLErr train(JimList& referenceReader, app::AppFactory& app);
   ///classify raster dataset
-  CPLErr classify(Jim& imgWriter, app::AppFactory& app);
+  void classify(Jim& imgWriter, app::AppFactory& app);
   ///classify raster dataset only for in memory
   std::shared_ptr<Jim> classify(app::AppFactory& app);
   ///svm raster dataset
-  CPLErr classifySVM(Jim& imgWriter, app::AppFactory& app);
+  void classifySVM(Jim& imgWriter, app::AppFactory& app);
   ///svm raster dataset only for in memory
   std::shared_ptr<Jim> classifySVM(app::AppFactory& app);
   ///svm raster dataset
@@ -834,7 +834,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///svm raster dataset only for in memory
   /* std::shared_ptr<Jim> svm(app::AppFactory& app); */
   ///artificial neural network raster dataset
-  CPLErr classifyANN(Jim& imgWriter, app::AppFactory& app);
+  void classifyANN(Jim& imgWriter, app::AppFactory& app);
   ///artificial neural network raster dataset only for in memory
   std::shared_ptr<Jim> classifyANN(app::AppFactory& app);
   ///artificial neural network raster dataset
@@ -846,23 +846,23 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///train sml raster dataset in memory
   std::string trainMem(JimList& referenceReader, app::AppFactory& app);
   ///classify raster dataset using SML
-  template<typename T> CPLErr classifySML(Jim& imgWriter, app::AppFactory& app);
+  template<typename T> void classifySML(Jim& imgWriter, app::AppFactory& app);
   ///sml raster dataset only for in memory
   template<typename T> std::shared_ptr<Jim> classifySML(app::AppFactory& app);
   ///sml raster dataset
   /* template<typename T> CPLErr classifySML(Jim& imgWriter, app::AppFactory& app); */
   ///stretch raster dataset
-  CPLErr stretch(Jim& imgWriter, app::AppFactory& app);
+  void stretch(Jim& imgWriter, app::AppFactory& app);
   ///stretch raster dataset only for in memory
   std::shared_ptr<Jim> stretch(app::AppFactory& app);
   ///reclass raster dataset
-  CPLErr reclass(Jim& imgWriter, app::AppFactory& app);
+  void reclass(Jim& imgWriter, app::AppFactory& app);
   ///reclass raster dataset only for in memory
   std::shared_ptr<Jim> reclass(app::AppFactory& app);
   ///set mask to raster dataset
-  CPLErr setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app);
+  void setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app);
   ///set mask to raster dataset
-  CPLErr setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app);
+  void setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app);
   /* CPLErr setMask(Jim& imgWriter, app::AppFactory& app); */
   ///setmask raster dataset only for in memory
   std::shared_ptr<Jim> setMask(VectorOgr& ogrReader, app::AppFactory& app);
@@ -870,7 +870,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   std::shared_ptr<Jim> setMask(JimList& maskReader, app::AppFactory& app);
   /* std::shared_ptr<Jim> setMask(app::AppFactory& app); */
   ///get mask to raster dataset
-  CPLErr getMask(Jim& imgWriter, app::AppFactory& app);
+  void getMask(Jim& imgWriter, app::AppFactory& app);
   ///getmask raster dataset only for in memory
   std::shared_ptr<Jim> getMask(app::AppFactory& app);
   ///dump raster dataset

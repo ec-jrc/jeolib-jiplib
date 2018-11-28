@@ -80,9 +80,7 @@ shared_ptr<Jim> Jim::classify(app::AppFactory& app){
  **/
 shared_ptr<VectorOgr> VectorOgr::classify(app::AppFactory& app){
   std::shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
-  if(classify(*ogrWriter, app)!=OGRERR_NONE){
-    std::cerr << "Failed to extract" << std::endl;
-  }
+  classify(*ogrWriter, app);
   return(ogrWriter);
 }
 
@@ -117,7 +115,7 @@ shared_ptr<VectorOgr> VectorOgr::classify(app::AppFactory& app){
  * @param random (type: bool) (default: 1) Randomize training data for balancing and bagging
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr Jim::classify(Jim& imgWriter, app::AppFactory& app){
+void Jim::classify(Jim& imgWriter, app::AppFactory& app){
   vector<double> priors;
 
   //--------------------------- command line options ------------------------------------
@@ -365,7 +363,7 @@ std::string VectorOgr::trainMem(app::AppFactory& app){
   }
 }
 
-OGRErr VectorOgr::classify(VectorOgr& ogrWriter, app::AppFactory& app){
+void VectorOgr::classify(VectorOgr& ogrWriter, app::AppFactory& app){
   vector<double> priors;
 
   //--------------------------- command line options ------------------------------------
@@ -382,10 +380,10 @@ OGRErr VectorOgr::classify(VectorOgr& ogrWriter, app::AppFactory& app){
     }
     switch(getClassifier(method_opt[0])){
     case(SVM):
-      return(classifySVM(ogrWriter,app));
+      classifySVM(ogrWriter,app);
       break;
     case(ANN):
-      return(classifyANN(ogrWriter,app));
+      classifyANN(ogrWriter,app);
       break;
     default:
       std::ostringstream errorStream;

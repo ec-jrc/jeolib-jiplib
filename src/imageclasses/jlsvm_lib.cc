@@ -431,7 +431,7 @@ shared_ptr<Jim> Jim::classifySVM(app::AppFactory& app){
  * @param app application specific option arguments
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr Jim::classifySVM(Jim& imgWriter, app::AppFactory& app){
+void Jim::classifySVM(Jim& imgWriter, app::AppFactory& app){
   vector<double> priors;
 
   //--------------------------- command line options ------------------------------------
@@ -886,7 +886,6 @@ CPLErr Jim::classifySVM(Jim& imgWriter, app::AppFactory& app){
         std::cout << iclass << ": " << ntotalClass[iclass];
       std::cout << std::endl;
     }
-    return(CE_None);
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;

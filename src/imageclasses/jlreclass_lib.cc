@@ -38,9 +38,8 @@ shared_ptr<Jim> Jim::reclass(app::AppFactory& app){
 
 /**
  * @param imgWriter output raster crop dataset
- * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr Jim::reclass(Jim& imgWriter, app::AppFactory& app){
+void Jim::reclass(Jim& imgWriter, app::AppFactory& app){
   Optionjl<string> mask_opt("m", "mask", "Mask image(s)");
   Optionjl<unsigned short> masknodata_opt("msknodata", "msknodata", "Mask value(s) where image has nodata. Use one value for each mask, or multiple values for a single mask.", 1);
   Optionjl<int> nodata_opt("nodata", "nodata", "nodata value to put in image if not valid (0)", 0);
@@ -288,7 +287,6 @@ CPLErr Jim::reclass(Jim& imgWriter, app::AppFactory& app){
         MyProgressFunc(progress,pszMessage,pProgressArg);
       }
     }
-    return(CE_Failure);
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;

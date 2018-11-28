@@ -40,7 +40,7 @@ shared_ptr<Jim> Jim::getMask(app::AppFactory& app){
  * @param imgWriter output raster getmask dataset
  * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr Jim::getMask(Jim& imgWriter, app::AppFactory& app){
+void Jim::getMask(Jim& imgWriter, app::AppFactory& app){
   Optionjl<short> band_opt("b", "band", "band(s) used for mask", 0);
   Optionjl<double> min_opt("min", "min", "Values smaller than min threshold(s) are masked as invalid. Use one threshold for each band");
   Optionjl<double> max_opt("max", "max", "Values greater than max threshold(s) are masked as invalid. Use one threshold for each band");
@@ -231,7 +231,6 @@ CPLErr Jim::getMask(Jim& imgWriter, app::AppFactory& app){
       progress=(1.0+irow)/imgWriter.nrOfRow();
       MyProgressFunc(progress,pszMessage,pProgressArg);
     }
-    return(CE_None);
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;

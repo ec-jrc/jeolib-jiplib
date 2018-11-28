@@ -47,9 +47,8 @@ shared_ptr<Jim> Jim::stretch(app::AppFactory& app){
 /**
  * @param imgWriter output stretched raster dataset
  * @param app application specific option arguments
- * @return CE_None if successful, CE_Failure if failed
  **/
-CPLErr Jim::stretch(Jim& imgWriter, app::AppFactory& app){
+void Jim::stretch(Jim& imgWriter, app::AppFactory& app){
   Optionjl<double> nodata_opt("nodata", "nodata", "nodata value(s) (first value will be put in output image)");
   Optionjl<double> src_min_opt("src_min","src_min","clip source below this minimum value");
   Optionjl<double> src_max_opt("src_max","src_max","clip source above this maximum value");
