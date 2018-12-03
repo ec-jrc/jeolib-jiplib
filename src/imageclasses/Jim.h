@@ -366,10 +366,7 @@ class Jim : public std::enable_shared_from_this<Jim>
    * @return CE_None if successful, CE_Failure if not.
    * @param nodata Nodata value to put in image.
    **/
-#ifdef SWIG
-  %pythonprepend write(app::AppFactory&)  "\"\"\"HELP.METHOD.Jim.write(dict)\"\"\""
-#endif
-     CPLErr write(app::AppFactory &theApp);
+  CPLErr write(app::AppFactory &theApp);
   ///Get the filename of this dataset
   std::string getFileName() const {return m_filename;};
   ///Get the number of columns of this dataset
@@ -474,7 +471,7 @@ class Jim : public std::enable_shared_from_this<Jim>
     else return(CE_None);
   };
   void setData(double value, int band=0);
-  void setData(double value, double ulx, double uly, double lrx, double lry, int band=0, double dx=0, double dy=0, bool geo=true);
+  void setData(double value, double ulx, double uly, double lrx, double lry, int band=0, double dx=0, double dy=0, bool nogeo=false);
   ///Clear all no data values, including the one in GDAL dataset if it is set
   CPLErr clearNoData(int band=0){m_noDataValues.clear();if(m_access!=READ_ONLY&&getRasterBand(band)) getRasterBand(band)->DeleteNoDataValue();return(CE_None);}
   ///Set the GDAL (internal) no data value for this data set. Only a single no data value per band is supported.

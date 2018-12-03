@@ -1811,13 +1811,13 @@ CPLErr Jim::open(app::AppFactory &app){
         std::cerr << "Error: operation not supported for multi-plane objects" << std::endl;
         throw(errorString);
       }
+      for(unsigned int iband=0;iband<nrOfBand();++iband){
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
-      for(unsigned int iband=0;iband<nrOfBand();++iband){
-        std::vector<double> lineBuffer(nrOfCol(),mean_opt[0]);
         for(unsigned int irow=0;irow<nrOfRow();++irow){
+          std::vector<double> lineBuffer(nrOfCol(),mean_opt[0]);
           for(unsigned int icol=0;icol<nrOfCol();++icol){
             if(stat.getDistributionType(distribution)==statfactory::StatFactory::none)
               break;
@@ -2850,7 +2850,13 @@ CPLErr Jim::writeNewBlock(int row, int band)
     throw(errorString);
   }
   poBand = m_gds->GetRasterBand(band+1);//GDAL uses 1 based index
-  returnValue=poBand->RasterIO(GF_Write,0,m_begin[band],nrOfCol(),m_end[band]-m_begin[band],m_data[band],nrOfCol(),m_end[band]-m_begin[band],getGDALDataType(),0,0);
+  try{
+    returnValue=poBand->RasterIO(GF_Write,0,m_begin[band],nrOfCol(),m_end[band]-m_begin[band],m_data[band],nrOfCol(),m_end[band]-m_begin[band],getGDALDataType(),0,0);
+  }
+  catch(...){
+    std::string errorString="Error: RasterIO failed in writeNewBlock";
+    throw(errorString);
+  }
   if(m_begin[band]+m_blockSize<nrOfRow()){
     m_begin[band]+=m_blockSize;//m_begin points to first line in block that will be written next
     m_end[band]=m_begin[band]+m_blockSize;//m_end points to last line in block that will be written next
@@ -2957,7 +2963,7 @@ void Jim::setData(double value, int band){
     int index=irow*nrOfCol();
     int minindex=index;
     int maxindex=index+nrOfCol();
-    for(index=minindex;index<=maxindex;++index){
+    for(index=minindex;index<maxindex;++index){
       double dvalue=value;
       switch(getDataType()){
       case(GDT_Byte):
@@ -2992,7 +2998,7 @@ void Jim::setData(double value, int band){
     memcpy(static_cast<char*>(m_data[band])+iplane*nrOfCol()*nrOfRow(),static_cast<char*>(m_data[band]),getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
 }
 
-void Jim::setData(double value, double ulx, double uly, double lrx, double lry, int band, double dx, double dy, bool geo){
+void Jim::setData(double value, double ulx, double uly, double lrx, double lry, int band, double dx, double dy, bool nogeo){
   if(m_data.empty()){
     std::ostringstream s;
     s << "Error: Jim not initialized, m_data is empty";
@@ -3007,11 +3013,25 @@ void Jim::setData(double value, double ulx, double uly, double lrx, double lry, 
   double lrj=0;
   double stridei=1;
   double stridej=1;
-  if(geo){
+  if(nogeo){
+    uli=ulx;
+    ulj=uly;
+    lri=lrx;
+    lrj=lry;
+    if(dx>0)
+      stridei=dx;
+    else
+      stridei=1;
+    if(dy>0)
+      stridej=dy;
+    else
+      stridej=1;
+  }
+  else{
     if(dx<=0)
       dx=getDeltaX();
     if(dy<=0)
-      dx=getDeltaY();
+      dy=getDeltaY();
     //do align
     if(ulx>this->getUlx())
       ulx-=fmod(ulx-this->getUlx(),dx);
@@ -3029,13 +3049,21 @@ void Jim::setData(double value, double ulx, double uly, double lrx, double lry, 
       uly+=fmod(this->getUly()-uly,dy);
     else if(uly>this->getUly())
       uly-=fmod(uly-this->getUly(),dy)+dy;
-    this->geo2image(ulx-0.5*this->getDeltaX(),uly+0.5*this->getDeltaY(),uli,ulj);
-    this->geo2image(lrx-1.5*this->getDeltaX(),lry+1.5*this->getDeltaY(),lri,lrj);
+    // this->geo2image(ulx-0.5*this->getDeltaX(),uly+0.5*this->getDeltaY(),uli,ulj);
+    // this->geo2image(lrx-1.5*this->getDeltaX(),lry+1.5*this->getDeltaY(),lri,lrj);
+
+    // uli=floor(uli);
+    // ulj=floor(ulj);
+    // lri=floor(lri);
+    // lrj=floor(lrj);
+
+    this->geo2image(ulx,uly,uli,ulj);
+    this->geo2image(lrx-this->getDeltaX(),lry+this->getDeltaY(),lri,lrj);
 
     uli=floor(uli);
     ulj=floor(ulj);
-    lri=floor(lri);
-    lrj=floor(lrj);
+    lri=floor(lri)+1;
+    lrj=floor(lrj)+1;
 
     if(dx>0)
       stridei=dx/getDeltaX();
@@ -3046,20 +3074,15 @@ void Jim::setData(double value, double ulx, double uly, double lrx, double lry, 
     else
       stridej=1;
   }
-  else{
-    uli=ulx;
-    ulj=uly;
-    lri=lrx;
-    lrj=lry;
-    if(dx>0)
-      stridei=dx;
-    else
-      stridei=1;
-    if(dy>0)
-      stridej=dy;
-    else
-      stridej=1;
-  }
+  std::cout << "dx: " << dx << std::endl;
+  std::cout << "dy: " << dy << std::endl;
+  std::cout << "stridei: " << stridei << std::endl;
+  std::cout << "stridej: " << stridej << std::endl;
+  std::cout << "uli: " << uli << std::endl;
+  std::cout << "lri: " << lri << std::endl;
+  std::cout << "ulj: " << ulj << std::endl;
+  std::cout << "lrj: " << lrj << std::endl;
+  //todo: we are working with lower right corner of pixels for lri lrj -> adapt code below
   std::ostringstream errorStream;
   if(uli<0||uli>=nrOfCol()){
     errorStream << "Error: columns requested out of bounding box" << std::endl;
@@ -3787,13 +3810,13 @@ void Jim::setThreshold(Jim& imgWriter, double t1, double t2){
       std::string errorString="Error: no data value not set";
       throw(errorString);
     }
+    for(int iband=0;iband<nrOfBand();++iband){
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
-    for(int iband=0;iband<nrOfBand();++iband){
-      std::vector<double> lineInput(nrOfCol());
       for(int irow=0;irow<nrOfRow();++irow){
+        std::vector<double> lineInput(nrOfCol());
         readData(lineInput,irow,iband);
         for(int icol=0;icol<nrOfCol();++icol){
           if(lineInput[icol]>=t1&&lineInput[icol]<=t2)
@@ -3830,13 +3853,13 @@ void Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2){
       std::string errorString="Error: no data value not set";
       throw(errorString);
     }
+    for(int iband=0;iband<nrOfBand();++iband){
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
-    for(int iband=0;iband<nrOfBand();++iband){
-      std::vector<double> lineInput(nrOfCol());
       for(int irow=0;irow<nrOfRow();++irow){
+        std::vector<double> lineInput(nrOfCol());
         readData(lineInput,irow,iband);
         for(int icol=0;icol<nrOfCol();++icol){
           if(fabs(lineInput[icol])>=t1&&fabs(lineInput[icol])<=t2)
@@ -3908,13 +3931,13 @@ void Jim::setThreshold(Jim& imgWriter, double t1, double t2, double value){
       std::string errorString="Error: no data value not set";
       throw(errorString);
     }
+    for(int iband=0;iband<nrOfBand();++iband){
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
-    for(int iband=0;iband<nrOfBand();++iband){
-      std::vector<double> lineInput(nrOfCol());
       for(int irow=0;irow<nrOfRow();++irow){
+        std::vector<double> lineInput(nrOfCol());
         readData(lineInput,irow,iband);
         for(int icol=0;icol<nrOfCol();++icol){
           if((lineInput[icol]>=t1)&&(lineInput[icol]<=t2))
@@ -3951,13 +3974,13 @@ void Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2, double value){
       std::string errorString="Error: no data value not set";
       throw(errorString);
     }
+    for(int iband=0;iband<nrOfBand();++iband){
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
-    for(int iband=0;iband<nrOfBand();++iband){
-      std::vector<double> lineInput(nrOfCol());
       for(int irow=0;irow<nrOfRow();++irow){
+        std::vector<double> lineInput(nrOfCol());
         readData(lineInput,irow,iband);
         for(int icol=0;icol<nrOfCol();++icol){
           if((fabs(lineInput[icol])>=t1)&&(fabs(lineInput[icol])<=t2))
