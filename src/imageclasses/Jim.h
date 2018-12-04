@@ -711,16 +711,24 @@ class Jim : public std::enable_shared_from_this<Jim>
   /* CPLErr rasterizeLayersBuf(OGRLayer* layer, double burnValue=1.0){std::vector<OGRLayer*> layers;layers.push_back(layer);rasterizeLayersBuf(layers,burnValue);}; */
   ///Apply thresholds: set to no data if not within thresholds t1 and t2
   void setThreshold(Jim& imgWriter, double t1, double t2);
+  void setThresholdMin(Jim& imgWriter, double minThreshold);
+  void setThresholdMax(Jim& imgWriter, double maxThreshold);
   ///Apply absolute thresholds: set to no data if not within thresholds t1 and t2
   void setAbsThreshold(Jim& imgWriter, double t1, double t2);
+  void setAbsThresholdMin(Jim& imgWriter, double minThreshold);
+  void setAbsThresholdMax(Jim& imgWriter, double maxThreshold);
   ///Apply thresholds for in memory: set to no data if not within thresholds t1 and t2
   std::shared_ptr<Jim> setThreshold(double t1, double t2);
   ///Apply absolute thresholds for in memory: set to no data if not within thresholds t1 and t2
   std::shared_ptr<Jim> setAbsThreshold(double t1, double t2);
   ///Apply thresholds: set to no data if not within thresholds t1 and t2, else set to value
   void setThreshold(Jim& imgWriter, double t1, double t2, double value);
+  void setThresholdMin(Jim& imgWriter, double minThreshold, double value);
+  void setThresholdMax(Jim& imgWriter, double maxThreshold, double value);
   ///Apply absolute thresholds: set to no data if not within thresholds t1 and t2, else set to value
   void setAbsThreshold(Jim& imgWriter, double t1, double t2, double value);
+  void setAbsThresholdMin(Jim& imgWriter, double minThreshold, double value);
+  void setAbsThresholdMax(Jim& imgWriter, double maxThreshold, double value);
   ///Apply thresholds for in memory: set to no data if not within thresholds t1 and t2, else set to value
   std::shared_ptr<Jim> setThreshold(double t1, double t2, double value);
   ///Apply absolute thresholds for in memory: set to no data if not within thresholds t1 and t2, else set to value

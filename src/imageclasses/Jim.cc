@@ -3084,31 +3084,31 @@ void Jim::setData(double value, double ulx, double uly, double lrx, double lry, 
   std::cout << "lrj: " << lrj << std::endl;
   //todo: we are working with lower right corner of pixels for lri lrj -> adapt code below
   std::ostringstream errorStream;
-  if(uli<0||uli>=nrOfCol()){
+  if(uli<0||uli>nrOfCol()){
     errorStream << "Error: columns requested out of bounding box" << std::endl;
     std::cerr << errorStream.str() << std::endl;
     throw(errorStream.str());
   }
-  if(lri<0||lri>=nrOfCol()){
+  if(lri<0||lri>nrOfCol()){
     errorStream << "Error: columns requested out of bounding box" << std::endl;
     std::cerr << errorStream.str() << std::endl;
     throw(errorStream.str());
   }
-  if(ulj<0||ulj>=nrOfRow()){
+  if(ulj<0||ulj>nrOfRow()){
     errorStream << "Error: rows requested out of bounding box" << std::endl;
     std::cerr << errorStream.str() << std::endl;
     throw(errorStream.str());
   }
-  if(lrj<0||lrj>=nrOfRow()){
+  if(lrj<0||lrj>nrOfRow()){
     errorStream << "Error: rows requested out of bounding box" << std::endl;
     std::cerr << errorStream.str() << std::endl;
     throw(errorStream.str());
   }
-  for(int irow=ulj;irow<=lrj;irow+=stridej){
+  for(int irow=ulj;irow<lrj;irow+=stridej){
     int index=irow*nrOfCol();
     int minindex=index+uli;
     int maxindex=index+lri;
-    for(index=minindex;index<=maxindex;index+=stridei){
+    for(index=minindex;index<maxindex;index+=stridei){
       double dvalue=value;
       switch(getDataType()){
       case(GDT_Byte):
@@ -3794,15 +3794,6 @@ std::shared_ptr<Jim> Jim::setAbsThreshold(double t1, double t2){
   return(imgWriter);
 }
 
-/**
- *
- *
- * @param t1 minimum threshold
- * @param t2 maximum threshold
- * @param bg value if outside thresholds
- *
- * @return CE_None if success, CE_Failure if failed
- */
 void Jim::setThreshold(Jim& imgWriter, double t1, double t2){
   try{
     imgWriter.open(*this,false);
@@ -3837,15 +3828,74 @@ void Jim::setThreshold(Jim& imgWriter, double t1, double t2){
   }
 }
 
-/**
- *
- *
- * @param t1 minimum threshold
- * @param t2 maximum threshold
- * @param bg value if outside thresholds
- *
- * @return CE_None if success, CE_Failure if failed
- */
+void Jim::setThresholdMin(Jim& imgWriter, double minThreshold){
+  try{
+    imgWriter.open(*this,false);
+    if(m_noDataValues.empty()){
+      std::string errorString="Error: no data value not set";
+      throw(errorString);
+    }
+    for(int iband=0;iband<nrOfBand();++iband){
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+      for(int irow=0;irow<nrOfRow();++irow){
+        std::vector<double> lineInput(nrOfCol());
+        readData(lineInput,irow,iband);
+        for(int icol=0;icol<nrOfCol();++icol){
+          if(lineInput[icol]>=minThreshold)
+            continue;
+          else
+            lineInput[icol]=m_noDataValues[0];
+        }
+        imgWriter.writeData(lineInput,irow,iband);
+      }
+    }
+  }
+  catch(std::string errorstring){
+    std::cerr << errorstring << std::endl;
+    throw;
+  }
+  catch(...){
+    throw;
+  }
+}
+
+void Jim::setThresholdMax(Jim& imgWriter, double maxThreshold){
+  try{
+    imgWriter.open(*this,false);
+    if(m_noDataValues.empty()){
+      std::string errorString="Error: no data value not set";
+      throw(errorString);
+    }
+    for(int iband=0;iband<nrOfBand();++iband){
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+      for(int irow=0;irow<nrOfRow();++irow){
+        std::vector<double> lineInput(nrOfCol());
+        readData(lineInput,irow,iband);
+        for(int icol=0;icol<nrOfCol();++icol){
+          if(lineInput[icol]<=maxThreshold)
+            continue;
+          else
+            lineInput[icol]=m_noDataValues[0];
+        }
+        imgWriter.writeData(lineInput,irow,iband);
+      }
+    }
+  }
+  catch(std::string errorstring){
+    std::cerr << errorstring << std::endl;
+    throw;
+  }
+  catch(...){
+    throw;
+  }
+}
+
 void Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2){
   try{
     imgWriter.open(*this,false);
@@ -3880,30 +3930,80 @@ void Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2){
   }
 }
 
-/**
- *
- *
- * @param t1 minimum threshold
- * @param t2 maximum threshold
- * @param value if within thresholds (else set to no data value)
- *
- * @return output image
- */
+void Jim::setAbsThresholdMin(Jim& imgWriter, double minThreshold){
+  try{
+    imgWriter.open(*this,false);
+    if(m_noDataValues.empty()){
+      std::string errorString="Error: no data value not set";
+      throw(errorString);
+    }
+    for(int iband=0;iband<nrOfBand();++iband){
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+      for(int irow=0;irow<nrOfRow();++irow){
+        std::vector<double> lineInput(nrOfCol());
+        readData(lineInput,irow,iband);
+        for(int icol=0;icol<nrOfCol();++icol){
+          if(fabs(lineInput[icol])>=minThreshold)
+            continue;
+          else
+            lineInput[icol]=m_noDataValues[0];
+        }
+        imgWriter.writeData(lineInput,irow,iband);
+      }
+    }
+  }
+  catch(std::string errorstring){
+    std::cerr << errorstring << std::endl;
+    throw;
+  }
+  catch(...){
+    throw;
+  }
+}
+
+void Jim::setAbsThresholdMax(Jim& imgWriter, double maxThreshold){
+  try{
+    imgWriter.open(*this,false);
+    if(m_noDataValues.empty()){
+      std::string errorString="Error: no data value not set";
+      throw(errorString);
+    }
+    for(int iband=0;iband<nrOfBand();++iband){
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+      for(int irow=0;irow<nrOfRow();++irow){
+        std::vector<double> lineInput(nrOfCol());
+        readData(lineInput,irow,iband);
+        for(int icol=0;icol<nrOfCol();++icol){
+          if(fabs(lineInput[icol])<=maxThreshold)
+            continue;
+          else
+            lineInput[icol]=m_noDataValues[0];
+        }
+        imgWriter.writeData(lineInput,irow,iband);
+      }
+    }
+  }
+  catch(std::string errorstring){
+    std::cerr << errorstring << std::endl;
+    throw;
+  }
+  catch(...){
+    throw;
+  }
+}
+
 std::shared_ptr<Jim> Jim::setThreshold(double t1, double t2, double value){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
   setThreshold(*imgWriter, t1, t2, value);
   return(imgWriter);
 }
 
-/**
- *
- *
- * @param t1 minimum threshold
- * @param t2 maximum threshold
- * @param value if within thresholds (else set to no data value)
- *
- * @return output image
- */
 std::shared_ptr<Jim> Jim::setAbsThreshold(double t1, double t2, double value){
   std::shared_ptr<Jim> imgWriter=Jim::createImg();
   setAbsThreshold(*imgWriter, t1, t2, value);
@@ -3915,15 +4015,75 @@ std::shared_ptr<Jim> Jim::setThreshold(app::AppFactory &theApp){
   setThreshold(*imgWriter, theApp);
   return(imgWriter);
 }
-/**
- *
- *
- * @param t1 minimum threshold
- * @param t2 maximum threshold
- * @param value if within thresholds (else set to no data value)
- *
- * @return CE_None if success, CE_Failure if failed
- */
+
+void Jim::setThresholdMin(Jim& imgWriter, double minThreshold, double value){
+  try{
+    imgWriter.open(*this,false);
+    if(m_noDataValues.empty()){
+      std::string errorString="Error: no data value not set";
+      throw(errorString);
+    }
+    for(int iband=0;iband<nrOfBand();++iband){
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+      for(int irow=0;irow<nrOfRow();++irow){
+        std::vector<double> lineInput(nrOfCol());
+        readData(lineInput,irow,iband);
+        for(int icol=0;icol<nrOfCol();++icol){
+          if((lineInput[icol]>=minThreshold))
+            lineInput[icol]=value;
+          else
+            lineInput[icol]=m_noDataValues[0];
+        }
+        imgWriter.writeData(lineInput,irow,iband);
+      }
+    }
+  }
+  catch(std::string errorstring){
+    std::cerr << errorstring << std::endl;
+    throw;
+  }
+  catch(...){
+    throw;
+  }
+}
+
+void Jim::setThresholdMax(Jim& imgWriter, double maxThreshold, double value){
+  try{
+    imgWriter.open(*this,false);
+    if(m_noDataValues.empty()){
+      std::string errorString="Error: no data value not set";
+      throw(errorString);
+    }
+    for(int iband=0;iband<nrOfBand();++iband){
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+      for(int irow=0;irow<nrOfRow();++irow){
+        std::vector<double> lineInput(nrOfCol());
+        readData(lineInput,irow,iband);
+        for(int icol=0;icol<nrOfCol();++icol){
+          if((lineInput[icol]>=maxThreshold))
+            lineInput[icol]=value;
+          else
+            lineInput[icol]=m_noDataValues[0];
+        }
+        imgWriter.writeData(lineInput,irow,iband);
+      }
+    }
+  }
+  catch(std::string errorstring){
+    std::cerr << errorstring << std::endl;
+    throw;
+  }
+  catch(...){
+    throw;
+  }
+}
+
 void Jim::setThreshold(Jim& imgWriter, double t1, double t2, double value){
   try{
     imgWriter.open(*this,false);
@@ -3958,15 +4118,74 @@ void Jim::setThreshold(Jim& imgWriter, double t1, double t2, double value){
   }
 }
 
-/**
- *
- *
- * @param t1 minimum threshold
- * @param t2 maximum threshold
- * @param value if within thresholds (else set to no data value)
- *
- * @return CE_None if success, CE_Failure if failed
- */
+void Jim::setAbsThresholdMin(Jim& imgWriter, double minThreshold, double value){
+  try{
+    imgWriter.open(*this,false);
+    if(m_noDataValues.empty()){
+      std::string errorString="Error: no data value not set";
+      throw(errorString);
+    }
+    for(int iband=0;iband<nrOfBand();++iband){
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+      for(int irow=0;irow<nrOfRow();++irow){
+        std::vector<double> lineInput(nrOfCol());
+        readData(lineInput,irow,iband);
+        for(int icol=0;icol<nrOfCol();++icol){
+          if(fabs(lineInput[icol])>=minThreshold)
+            lineInput[icol]=value;
+          else
+            lineInput[icol]=m_noDataValues[0];
+        }
+        imgWriter.writeData(lineInput,irow,iband);
+      }
+    }
+  }
+  catch(std::string errorstring){
+    std::cerr << errorstring << std::endl;
+    throw;
+  }
+  catch(...){
+    throw;
+  }
+}
+
+void Jim::setAbsThresholdMax(Jim& imgWriter, double maxThreshold, double value){
+  try{
+    imgWriter.open(*this,false);
+    if(m_noDataValues.empty()){
+      std::string errorString="Error: no data value not set";
+      throw(errorString);
+    }
+    for(int iband=0;iband<nrOfBand();++iband){
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+      for(int irow=0;irow<nrOfRow();++irow){
+        std::vector<double> lineInput(nrOfCol());
+        readData(lineInput,irow,iband);
+        for(int icol=0;icol<nrOfCol();++icol){
+          if(fabs(lineInput[icol])<=maxThreshold)
+            lineInput[icol]=value;
+          else
+            lineInput[icol]=m_noDataValues[0];
+        }
+        imgWriter.writeData(lineInput,irow,iband);
+      }
+    }
+  }
+  catch(std::string errorstring){
+    std::cerr << errorstring << std::endl;
+    throw;
+  }
+  catch(...){
+    throw;
+  }
+}
+
 void Jim::setAbsThreshold(Jim& imgWriter, double t1, double t2, double value){
   try{
     imgWriter.open(*this,false);
@@ -4037,15 +4256,59 @@ void Jim::setThreshold(Jim& imgWriter, app::AppFactory &theApp){
   if(nodata_opt.size())
     setNoData(nodata_opt);
   if(abs_opt[0]){
-    if(value_opt.size())
-      setAbsThreshold(imgWriter,min_opt[0],max_opt[0],value_opt[0]);
-    else
-      setAbsThreshold(imgWriter,min_opt[0],max_opt[0]);
+    if(value_opt.size()){
+      if(min_opt.size()&&max_opt.size())
+        setAbsThreshold(imgWriter,min_opt[0],max_opt[0],value_opt[0]);
+      else if(min_opt.size())
+        setAbsThresholdMin(imgWriter,min_opt[0],value_opt[0]);
+      else if(max_opt.size())
+        setAbsThresholdMax(imgWriter,max_opt[0],value_opt[0]);
+      else{
+        std::ostringstream errorStream;
+        errorStream << "Error: missing min or max threshold";
+        throw(errorStream.str());
+      }
+    }
+    else{
+      if(min_opt.size()&&max_opt.size())
+        setAbsThreshold(imgWriter,min_opt[0],max_opt[0]);
+      else if(min_opt.size())
+        setAbsThresholdMin(imgWriter,min_opt[0]);
+      else if(max_opt.size())
+        setAbsThresholdMax(imgWriter,max_opt[0]);
+      else{
+        std::ostringstream errorStream;
+        errorStream << "Error: missing min or max threshold";
+        throw(errorStream.str());
+      }
+    }
   }
   else{
-    if(value_opt.size())
-      setThreshold(imgWriter,min_opt[0],max_opt[0],value_opt[0]);
-    else
-      setThreshold(imgWriter,min_opt[0],max_opt[0]);
+    if(value_opt.size()){
+      if(min_opt.size()&&max_opt.size())
+        setThreshold(imgWriter,min_opt[0],max_opt[0],value_opt[0]);
+      else if(min_opt.size())
+        setThresholdMin(imgWriter,min_opt[0],value_opt[0]);
+      else if(max_opt.size())
+        setThresholdMax(imgWriter,max_opt[0],value_opt[0]);
+      else{
+        std::ostringstream errorStream;
+        errorStream << "Error: missing min or max threshold";
+        throw(errorStream.str());
+      }
+    }
+    else{
+      if(min_opt.size()&&max_opt.size())
+        setThreshold(imgWriter,min_opt[0],max_opt[0]);
+      else if(min_opt.size())
+        setThresholdMin(imgWriter,min_opt[0]);
+      else if(max_opt.size())
+        setThresholdMax(imgWriter,max_opt[0]);
+      else{
+        std::ostringstream errorStream;
+        errorStream << "Error: missing min or max threshold";
+        throw(errorStream.str());
+      }
+    }
   }
 }
