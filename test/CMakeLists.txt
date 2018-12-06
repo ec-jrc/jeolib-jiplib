@@ -1,12 +1,10 @@
 ###############################################################################
-#
-# CMake build scripts for JIPLIB
-#
-#
-# History
-# 2016/06/24 - Created by Pieter Kempeneers
-# Change log
-#
+# CMakeLists build script for cmake
+# Author(s): Pieter.Kempeneers@ec.europa.eu
+# Copyright (c) 2016-2018 European Union (Joint Research Centre)
+# License EUPLv1.2
+
+# This file is part of jiplib
 ###############################################################################
 # find_package (Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
 # include_directories (${TEST_SOURCE_DIR}/src

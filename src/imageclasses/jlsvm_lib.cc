@@ -1,5 +1,6 @@
 /**********************************************************************
 jlsvm_lib.cc: classify raster image using Support Vector Machine
+Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2018 European Union (Joint Research Centre)
 License EUPLv1.2
 
@@ -423,13 +424,13 @@ void Jim::classifySVM(Jim& imgWriter, app::AppFactory& app){
   vector<double> priors;
 
   //--------------------------- command line options ------------------------------------
-  Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
+  Optionjl<std::string> model_opt("model", "model", "Model filename for trained classifier.");
   Optionjl<unsigned int> band_opt("b", "band", "Band index (starting from 0). The band order must correspond to the band names defined in the model. Leave empty to use all bands");
   // Optionjl<std::string> bandNames_opt("bn", "bandname", "Band name(s) to use. Leave empty to use all bands");
   Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
   Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
-  Optionjl<double> offset_opt("offset", "offset", "Offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
-  Optionjl<double> scale_opt("scale", "scale", "Scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
+  // Optionjl<double> offset_opt("offset", "offset", "Offset value for each spectral band input features: refl[band]=(DN[band]-offset[band])/scale[band]", 0.0);
+  // Optionjl<double> scale_opt("scale", "scale", "Scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
   Optionjl<double> priors_opt("prior", "prior", "Prior probabilities for each class (e.g., -p 0.3 -p 0.3 -p 0.2 ). Used for input only", 0.0);
   Optionjl<string> priorimg_opt("pim", "priorimg", "Prior probability image (multi-band img with band for each class","",2);
   Optionjl<string> extent_opt("e", "extent", "Only classify within extent from polygons in vector file");
@@ -453,8 +454,8 @@ void Jim::classifySVM(Jim& imgWriter, app::AppFactory& app){
   bend_opt.setHide(1);
   prob_opt.setHide(1);
   priorimg_opt.setHide(1);
-  offset_opt.setHide(1);
-  scale_opt.setHide(1);
+  // offset_opt.setHide(1);
+  // scale_opt.setHide(1);
   verbose_opt.setHide(2);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
@@ -475,8 +476,8 @@ void Jim::classifySVM(Jim& imgWriter, app::AppFactory& app){
     bend_opt.retrieveOption(app);
     prob_opt.retrieveOption(app);
     priorimg_opt.retrieveOption(app);
-    offset_opt.retrieveOption(app);
-    scale_opt.retrieveOption(app);
+    // offset_opt.retrieveOption(app);
+    // scale_opt.retrieveOption(app);
     priors_opt.retrieveOption(app);
     entropy_opt.retrieveOption(app);
     // classname_opt.retrieveOption(app);

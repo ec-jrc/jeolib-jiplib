@@ -1,5 +1,6 @@
 /**********************************************************************
 FileReaderAscii.h: class to read ASCII files using (colum based)
+Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2018 European Union (Joint Research Centre)
 License EUPLv1.2
 

@@ -1,5 +1,6 @@
 /**********************************************************************
 Optionjl.h: class to handle command line options (inherits from stl vector class)
+Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2018 European Union (Joint Research Centre)
 License EUPLv1.2
 

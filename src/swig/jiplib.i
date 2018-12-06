@@ -1,3 +1,11 @@
+/**********************************************************************
+Interface file for SWIG
+Author(s): Pieter.Kempeneers@ec.europa.eu, Pierre.Soille@ec.europa.eu
+Copyright (c) 2016-2018 European Union (Joint Research Centre)
+License EUPLv1.2
+
+This file is part of jiplib
+***********************************************************************/
 //SWIG interface for jiplib
 %include <std_string.i>
 %include <std_vector.i>

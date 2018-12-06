@@ -1,5 +1,6 @@
 /**********************************************************************
 jlsml_lib.h: classify raster image using SML
+Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2018 European Union (Joint Research Centre)
 License EUPLv1.2
 
@@ -223,7 +224,7 @@ template<typename T> void Jim::classifySML(Jim& imgWriter, app::AppFactory& app)
   Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0);
   Optionjl<double> dstnodata_opt("dstnodata", "dstnodata", "Nodata value to put where image is masked as nodata", 0);
   /* Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put where image is masked as nodata", 0); */
-  Optionjl<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image","GDT_Byte");
+  /* Optionjl<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image","GDT_Byte"); */
   Optionjl<short> verbose_opt("v", "verbose", "Verbose level",0,2);
 
   extent_opt.setHide(1);
@@ -243,7 +244,7 @@ template<typename T> void Jim::classifySML(Jim& imgWriter, app::AppFactory& app)
     msknodata_opt.retrieveOption(app);
     srcnodata_opt.retrieveOption(app);
     dstnodata_opt.retrieveOption(app);
-    otype_opt.retrieveOption(app);
+    /* otype_opt.retrieveOption(app); */
     verbose_opt.retrieveOption(app);
     // memory_opt.retrieveOption(app);
 
@@ -355,9 +356,9 @@ template<typename T> void Jim::classifySML(Jim& imgWriter, app::AppFactory& app)
     if(this->isInit()){
       if(verbose_opt[0]>=1)
         std::cout << "We are in initialize" << std::endl;
-      GDALDataType theType=string2GDAL(otype_opt[0]);
-      if(theType==GDT_Unknown)
-        std::cout << "Warning: unknown output pixel type: " << otype_opt[0] << ", using input type as default" << std::endl;
+      /* GDALDataType theType=string2GDAL(otype_opt[0]); */
+      /* if(theType==GDT_Unknown) */
+      /*   std::cout << "Warning: unknown output pixel type: " << otype_opt[0] << ", using input type as default" << std::endl; */
       imgWriter.open(ncol,nrow,nclass,GDT_Byte);
       imgWriter.GDALSetNoDataValue(dstnodata_opt[0]);
       imgWriter.setNoData(dstnodata_opt);

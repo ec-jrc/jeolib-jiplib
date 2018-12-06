@@ -4,6 +4,7 @@
 /*
  *
  *  Fast Artificial Neural Network (fann) C++ Wrapper
+Author(s): Pieter.Kempeneers@ec.europa.eu
  *  Copyright (C) 2004-2006 created by freegoldbar (at) yahoo dot com
  *
  *  This wrapper is free software; you can redistribute it and/or
@@ -31,6 +32,7 @@
  *  and <training_data>. To use the wrapper include
  *  doublefann.h, floatfann.h or fixedfann.h before the
  *  fann_cpp.h header file. To get started see xor_sample.cpp
+Author(s): Pieter.Kempeneers@ec.europa.eu
  *  in the examples directory. The license is LGPL. Copyright (C)
  *  2004-2006 created by <freegoldbar@yahoo.com>.
  *

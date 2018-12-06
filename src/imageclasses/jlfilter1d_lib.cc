@@ -1,5 +1,6 @@
 /**********************************************************************
 jlfilter1d_lib.cc: program to filter raster images: median, min/max, morphological, filtering
+Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2018 European Union (Joint Research Centre)
 License EUPLv1.2
 

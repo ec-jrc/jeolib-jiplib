@@ -1,5 +1,6 @@
 /**********************************************************************
 jlvalidate_lib.cc: program to validate classified raster image based on reference vector dataset
+Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2018 European Union (Joint Research Centre)
 License EUPLv1.2
 

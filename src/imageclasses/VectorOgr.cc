@@ -713,8 +713,8 @@ OGRErr VectorOgr::copy(VectorOgr& other, app::AppFactory &app){
       OGRFeature *otherFeature=other.getFeatureRef(ifeature,ilayer);
       if(otherFeature)
         writeFeature->SetFrom(otherFeature);
-      else
-        std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+      // else
+      //   std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
       m_features[ilayer][ifeature]=writeFeature;
     }
   }
@@ -1123,7 +1123,7 @@ void VectorOgr::dumpOgr(app::AppFactory& app){
       for(size_t ifeature = 0; ifeature < getFeatureCount(ilayer); ++ifeature) {
         OGRFeature *thisFeature=getFeatureRef(ifeature,ilayer);
         if(!thisFeature){
-          std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+          // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
           continue;
         }
         for(std::vector<size_t>::const_iterator fit=fieldindexes.begin();fit!=fieldindexes.end();++fit){
@@ -1289,7 +1289,7 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
         for(size_t ifeature = 0; ifeature < ogrReader.getFeatureCount(ilayer); ++ifeature) {
           OGRFeature *thatFeature=ogrReader.getFeatureRef(ifeature,ilayer);
           if(!thatFeature){
-            std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+            // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
             continue;
           }
           int iField=thatFeature->GetFieldIndex(theKey2.c_str());
@@ -1315,7 +1315,7 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
         for(size_t ifeature = 0; ifeature < getFeatureCount(ilayer); ++ifeature) {
           OGRFeature *thisFeature=getFeatureRef(ifeature,ilayer);
           if(!thisFeature){
-            std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+            // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
             continue;
           }
           OGRFeature *writeFeature=ogrWriter.createFeature(ilayer);
@@ -1359,7 +1359,7 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
 
           OGRFeature *thatFeature=ogrReader.getFeatureRef(ifeature,ilayer);
           if(!thatFeature){
-            std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+            // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
             continue;
           }
           int iField=thatFeature->GetFieldIndex(theKey2.c_str());
@@ -1406,7 +1406,7 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
             std::cout << "hash ifeature: " << ifeature << std::endl;
           OGRFeature *thatFeature=ogrReader.getFeatureRef(ifeature,ilayer);
           if(!thatFeature){
-            std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+            // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
             continue;
           }
           int iField=thatFeature->GetFieldIndex(theKey2.c_str());
@@ -1430,7 +1430,7 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
           OGRFeature *writeFeature=ogrWriter.createFeature(ilayer);
           OGRFeature *thisFeature=getFeatureRef(ifeature,ilayer);
           if(!thisFeature){
-            std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+            // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
             continue;
           }
           if(verbose_opt[0]>1)
@@ -1472,7 +1472,7 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
             std::cout << "hash ifeature: " << ifeature << std::endl;
           OGRFeature *thisFeature=getFeatureRef(ifeature,ilayer);
           if(!thisFeature){
-            std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+            // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
             continue;
           }
           int iField=thisFeature->GetFieldIndex(theKey1.c_str());
@@ -1496,7 +1496,7 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
           OGRFeature *writeFeature=ogrWriter.createFeature(ilayer);
           OGRFeature *thatFeature=ogrReader.getFeatureRef(ifeature,ilayer);
           if(!thatFeature){
-            std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+            // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
             continue;
           }
           if(verbose_opt[0]>1)
@@ -1538,7 +1538,7 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
             std::cout << "hash ifeature: " << ifeature << std::endl;
           OGRFeature *thisFeature=getFeatureRef(ifeature,ilayer);
           if(!thisFeature){
-            std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+            // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
             continue;
           }
           int iField=thisFeature->GetFieldIndex(theKey1.c_str());
@@ -1576,7 +1576,7 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
             std::cout << "map ifeature: " << ifeature << std::endl;
           OGRFeature *thatFeature=ogrReader.getFeatureRef(ifeature,ilayer);
           if(!thatFeature){
-            std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+            // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
             continue;
           }
           int iField=thatFeature->GetFieldIndex(theKey2.c_str());

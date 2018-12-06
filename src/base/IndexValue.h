@@ -1,5 +1,6 @@
 /**********************************************************************
 IndexValue.h: class to work with structs containing an index and a value
+Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2018 European Union (Joint Research Centre)
 License EUPLv1.2
 

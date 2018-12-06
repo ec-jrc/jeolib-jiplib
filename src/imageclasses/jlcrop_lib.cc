@@ -1,5 +1,6 @@
 /**********************************************************************
 jlcrop_lib.cc: perform raster data operations on image such as crop, extract and stack bands
+Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2018 European Union (Joint Research Centre)
 License EUPLv1.2
 

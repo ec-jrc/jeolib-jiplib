@@ -1,5 +1,6 @@
 /**********************************************************************
 jldiff_lib.cc: program to compare two raster image files
+Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2018 European Union (Joint Research Centre)
 License EUPLv1.2
 

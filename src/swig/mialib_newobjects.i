@@ -1,3 +1,11 @@
+/**********************************************************************
+Interface file for SWIG
+Author(s): Pierre.Soille@ec.europa.eu
+Copyright (c) 2016-2018 European Union (Joint Research Centre)
+License EUPLv1.2
+
+This file is part of jiplib
+***********************************************************************/
 %newobject create_image;
 %newobject copy_image;
 %newobject imtoarray;

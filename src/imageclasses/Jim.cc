@@ -1,5 +1,6 @@
 /**********************************************************************
 Jim.cc: class to read raster files using GDAL API library
+Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2018 European Union (Joint Research Centre)
 License EUPLv1.2
 
@@ -92,8 +93,11 @@ IMAGE* Jim::getMIA(int band){
     }
     if(m_mia.size()<band+1)
       m_mia.resize(band+1);
-    if(m_mia[band])
+    if(m_mia[band]){
+      //test
+      std::cout << "Warning: deleting m_mia[" << band << "]" << std::endl;
       delete(m_mia[band]);
+    }
     m_mia[band]=new(IMAGE);
     m_mia[band]->p_im=m_data[band];/* Pointer to image data */
     m_mia[band]->DataType=getMIADataType();
@@ -3062,14 +3066,6 @@ void Jim::setData(double value, double ulx, double uly, double lrx, double lry, 
     else
       stridej=1;
   }
-  std::cout << "dx: " << dx << std::endl;
-  std::cout << "dy: " << dy << std::endl;
-  std::cout << "stridei: " << stridei << std::endl;
-  std::cout << "stridej: " << stridej << std::endl;
-  std::cout << "uli: " << uli << std::endl;
-  std::cout << "lri: " << lri << std::endl;
-  std::cout << "ulj: " << ulj << std::endl;
-  std::cout << "lrj: " << lrj << std::endl;
   //todo: we are working with lower right corner of pixels for lri lrj -> adapt code below
   std::ostringstream errorStream;
   if(uli<0||uli>nrOfCol()){

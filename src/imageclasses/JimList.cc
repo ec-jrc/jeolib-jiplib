@@ -1,5 +1,6 @@
 /**********************************************************************
 JimList.cc: class to read raster files using GDAL API library
+Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2018 European Union (Joint Research Centre)
 License EUPLv1.2
 

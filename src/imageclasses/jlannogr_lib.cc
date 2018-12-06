@@ -1,5 +1,6 @@
 /**********************************************************************
 jlann_lib.cc: classify raster image using Artificial Neural Network
+Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2018 European Union (Joint Research Centre)
 License EUPLv1.2
 
@@ -36,7 +37,7 @@ shared_ptr<VectorOgr> VectorOgr::classifyANN(app::AppFactory& app){
  **/
 void VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
   //--------------------------- command line options ------------------------------------
-  Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
+  Optionjl<std::string> model_opt("model", "model", "Model filename for trained classifier.");
   Optionjl<unsigned int> band_opt("b", "band", "band index (starting from 0, either use band option or use start to end)");
   Optionjl<std::string> bandNames_opt("bn", "bandname", "Band name(s) to use. Leave empty to use all bands");
   Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
@@ -45,7 +46,7 @@ void VectorOgr::classifyANN(VectorOgr& ogrWriter, app::AppFactory& app){
   Optionjl<double> scale_opt("scale", "scale", "scale value for each spectral band input features: refl=(DN[band]-offset[band])/scale[band] (use 0 if scale min and max in each band to -1.0 and 1.0)", 0.0);
   Optionjl<double> priors_opt("prior", "prior", "prior probabilities for each class (e.g., -p 0.3 -p 0.3 -p 0.2 )");
   Optionjl<string> output_opt("o", "output", "Filename of classified vector dataset");
-  Optionjl<string> ogrformat_opt("f", "f", "Output ogr format for active training sample","SQLite");
+  Optionjl<string> ogrformat_opt("f", "f", "Output ogr format","SQLite");
   Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
   Optionjl<string> copyFields_opt("copy", "copy", "copy these fields from input to output vector dataset");
   Optionjl<short> verbose_opt("v", "verbose", "set to: 0 (results only), 1 (confusion matrix), 2 (debug)",0,2);

@@ -1,5 +1,6 @@
 /**********************************************************************
 jlreclass_lib.cc: program to replace categorical pixel values in raster dataset
+Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2018 European Union (Joint Research Centre)
 License EUPLv1.2
 

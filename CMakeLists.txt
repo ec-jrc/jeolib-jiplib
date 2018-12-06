@@ -1,15 +1,10 @@
 ###############################################################################
-#
-# CMake build scripts for JIPLIB
-#
-#
-# History
-# 2016/06/24 - Created by Pieter Kempeneers
-# Change log
-#
-###############################################################################
-cmake_minimum_required(VERSION 2.8)
-# cmake_minimum_required(VERSION 2.6.0)
+# CMakeLists build script for cmake
+# Author(s): Pieter.Kempeneers@ec.europa.eu
+# Copyright (c) 2016-2018 European Union (Joint Research Centre)
+# License EUPLv1.2
+
+# This file is part of jiplib
 ###############################################################################
 
 # The project's name and version

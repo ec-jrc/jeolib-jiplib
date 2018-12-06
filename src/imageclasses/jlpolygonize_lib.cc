@@ -1,5 +1,6 @@
 /**********************************************************************
 jlpolygonize_lib.cc: program to make vector file from raster image
+Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2018 European Union (Joint Research Centre)
 License EUPLv1.2
 

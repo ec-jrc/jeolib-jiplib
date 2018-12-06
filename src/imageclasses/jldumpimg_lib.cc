@@ -1,5 +1,6 @@
 /**********************************************************************
 jldumpimg_lib.cc: dump image on screen or ASCII file
+Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2018 European Union (Joint Research Centre)
 License EUPLv1.2
 
