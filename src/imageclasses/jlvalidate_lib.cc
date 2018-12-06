@@ -86,7 +86,7 @@ JimList& JimList::validate(app::AppFactory& app){
   Optionjl<string> classname_opt("c", "class", "List of class names.");
   Optionjl<short> classvalue_opt("r", "reclass", "List of class values (use same order as in classname option).");
   Optionjl<string> output_opt("o", "output", "Output dataset (optional)");
-  Optionjl<string> ogrformat_opt("f", "f", "OGR format for output vector","SQLite");
+  Optionjl<string> ogrformat_opt("f", "oformat", "OGR format for output vector","SQLite");
   Optionjl<string> labelclass_opt("lc", "lclass", "Attribute name of the classified label", "class");
   Optionjl<short> boundary_opt("bnd", "boundary", "Boundary for selecting the sample", 1,1);
   Optionjl<bool> homogeneous_opt("hom", "homogeneous", "Only take regions with homogeneous boundary into account (for reference datasets only)", false,1);

@@ -1150,7 +1150,7 @@ void VectorOgr::dumpOgr(app::AppFactory& app){
 ///joins two VectorOgr based on key value
 OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFactory& app){
   Optionjl<string> output_opt("o", "output", "Filename of joined vector dataset");
-  Optionjl<string> ogrformat_opt("f", "f", "Output ogr format for joined vector dataset","SQLite");
+  Optionjl<string> ogrformat_opt("f", "oformat", "Output ogr format for joined vector dataset","SQLite");
   Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
   Optionjl<unsigned int> access_opt("access", "access", "Access (0: GDAL_OF_READ_ONLY, 1: GDAL_OF_UPDATE)",1);
   Optionjl<std::string> key_opt("key", "key", "Key(s) used to join", "fid");

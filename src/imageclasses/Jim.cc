@@ -95,7 +95,7 @@ IMAGE* Jim::getMIA(int band){
       m_mia.resize(band+1);
     if(m_mia[band]){
       //test
-      std::cout << "Warning: deleting m_mia[" << band << "]" << std::endl;
+      // std::cout << "Warning: deleting m_mia[" << band << "]" << std::endl;
       delete(m_mia[band]);
     }
     m_mia[band]=new(IMAGE);

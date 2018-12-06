@@ -30,7 +30,7 @@ shared_ptr<VectorOgr> Jim::polygonize(app::AppFactory& app, std::shared_ptr<Jim>
 void Jim::polygonize(VectorOgr&ogrWriter, app::AppFactory &theApp, std::shared_ptr<Jim> mask){
   Optionjl<string> output_opt("o", "output", "Output vector file");
   Optionjl<string> layername_opt("ln", "ln", "Output layer name","polygonize");
-  Optionjl<string> ogrformat_opt("f", "f", "Output OGR file format","SQLite");
+  Optionjl<string> ogrformat_opt("f", "oformat", "Output OGR file format","SQLite");
   Optionjl<string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
   Optionjl<string> fname_opt("n", "name", "the field name of the output layer", "DN");
   Optionjl<double> nodata_opt("nodata", "nodata", "Disgard this nodata value when creating polygons.");
