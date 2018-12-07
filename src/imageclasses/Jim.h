@@ -459,7 +459,8 @@ class Jim : public std::enable_shared_from_this<Jim>
       return(CE_Failure);
     else return(CE_None);
   };
-  void setData(double value, int band=0);
+  void setData(double value);
+  void setData(double value, int band);
   void setData(double value, double ulx, double uly, double lrx, double lry, int band=0, double dx=0, double dy=0, bool nogeo=false);
   ///Clear all no data values, including the one in GDAL dataset if it is set
   CPLErr clearNoData(int band=0){m_noDataValues.clear();if(m_access!=READ_ONLY&&getRasterBand(band)) getRasterBand(band)->DeleteNoDataValue();return(CE_None);}
@@ -732,6 +733,36 @@ class Jim : public std::enable_shared_from_this<Jim>
 #if MIALIB == 1
   bool isEqual(std::shared_ptr<Jim> refImg);
 #endif
+  ///equal operator
+  std::shared_ptr<Jim> eq(std::shared_ptr<Jim> refJim);
+  std::shared_ptr<Jim> eq(double value);
+  void eq(Jim& refJim, Jim& imgWriter);
+  void eq(double value, Jim& imgWriter);
+  ///not equal operator
+  std::shared_ptr<Jim> ne(std::shared_ptr<Jim> refJim);
+  std::shared_ptr<Jim> ne(double value);
+  void ne(Jim& refJim, Jim& imgWriter);
+  void ne(double value, Jim& imgWriter);
+  ///less than operator
+  std::shared_ptr<Jim> lt(std::shared_ptr<Jim> refJim);
+  std::shared_ptr<Jim> lt(double value);
+  void lt(Jim& refJim, Jim& imgWriter);
+  void lt(double value, Jim& imgWriter);
+  ///less than or equal operator
+  std::shared_ptr<Jim> le(std::shared_ptr<Jim> refJim);
+  std::shared_ptr<Jim> le(double value);
+  void le(Jim& refJim, Jim& imgWriter);
+  void le(double value, Jim& imgWriter);
+  ///greater than operator
+  std::shared_ptr<Jim> gt(std::shared_ptr<Jim> refJim);
+  std::shared_ptr<Jim> gt(double value);
+  void gt(Jim& refJim, Jim& imgWriter);
+  void gt(double value, Jim& imgWriter);
+  ///greater than or equal operator
+  std::shared_ptr<Jim> ge(std::shared_ptr<Jim> refJim);
+  std::shared_ptr<Jim> ge(double value);
+  void ge(Jim& refJim, Jim& imgWriter);
+  void ge(double value, Jim& imgWriter);
   //lib functions
   ///create color table
   std::shared_ptr<Jim> createct(app::AppFactory& app);

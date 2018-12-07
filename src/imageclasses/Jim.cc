@@ -477,48 +477,6 @@ void Jim::freeMem()
   m_data.clear();
 }
 
-// Jim& Jim::operator=(Jim& imgSrc)
-// {
-//   bool copyData=true;
-//   //check for assignment to self (of the form v=v)
-//   if(this==&imgSrc)
-//     return *this;
-//   else{
-//     Jim::open(imgSrc,copyData);
-//     return *this;
-//   }
-// }
-
-///relational == operator
-/**
- * @param refImg Use this as the reference image
- * @return true if image is equal to reference image
- **/
-#if MIALIB == 1
-bool Jim::isEqual(std::shared_ptr<Jim> refImg){
-  bool isEqual=true;
-  if(nrOfBand()!=refImg->nrOfBand())
-    return(false);
-  if(nrOfRow()!=refImg->nrOfRow())
-    return(false);
-  if(nrOfCol()!=refImg->nrOfCol())
-    return(false);
-
-  for(int iband=0;iband<nrOfBand();++iband){
-    if(getDataType(iband)!=refImg->getDataType(iband)){
-      isEqual=false;
-      break;
-    }
-    IMAGE* refMIA=refImg->getMIA(iband);
-    IMAGE* thisMIA=this->getMIA(iband);
-    if(::imequalp(thisMIA,refMIA)){
-      isEqual=false;
-      break;
-    }
-  }
-  return(isEqual);
-}
-#endif
 /**
  * @param imgSrc Use this source image as a template to copy image attributes
  **/
@@ -2938,6 +2896,12 @@ CPLErr Jim::write(app::AppFactory &app){
     std::cerr << helpStream.str() << std::endl;
     throw(helpStream.str());//help was invoked, stop processing
   }
+}
+
+void Jim::setData(double value){
+  setData(value,0);
+  for(size_t iband=1;iband<nrOfBand();++iband)
+    memcpy(static_cast<char*>(m_data[iband]),static_cast<char*>(m_data[0]),getDataTypeSizeBytes()*nrOfCol()*m_blockSize*nrOfPlane());
 }
 
 void Jim::setData(double value, int band){

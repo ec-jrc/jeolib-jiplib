@@ -291,6 +291,7 @@ set(IMGCLASS_CC
   ${IMGCLASS_SRC_DIR}/jlstat_lib.cc
   ${IMGCLASS_SRC_DIR}/jlpolygonize_lib.cc
   ${IMGCLASS_SRC_DIR}/jlwarp_lib.cc
+  ${IMGCLASS_SRC_DIR}/jloperators_lib.cc
   )
 
 if(BUILD_WITH_FANN)
