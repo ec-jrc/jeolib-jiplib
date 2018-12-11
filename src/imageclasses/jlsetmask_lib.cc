@@ -554,3 +554,91 @@ void Jim::setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app){
     throw;
   }
 }
+
+void Jim::d_setMask(Jim& mask, Jim& other){
+  if(m_data.empty()){
+    std::ostringstream s;
+    s << "Error: Jim not initialized, m_data is empty";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(nrOfRow()!=mask.nrOfRow()){
+    std::ostringstream s;
+    s << "Error: number of rows do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(nrOfCol()!=mask.nrOfCol()){
+    std::ostringstream s;
+    s << "Error: number of cols do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(nrOfBand()!=other.nrOfBand()){
+    std::ostringstream s;
+    s << "Error: mask must have single band";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(nrOfRow()!=other.nrOfRow()){
+    std::ostringstream s;
+    s << "Error: number of rows do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(nrOfCol()!=other.nrOfCol()){
+    std::ostringstream s;
+    s << "Error: number of cols do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  for(size_t iband=0;iband<nrOfBand();++iband){
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+    for(int irow=0;irow<nrOfRow();++irow){
+      for(int icol=0;icol<nrOfCol();++icol){
+        if(mask.readData(icol,irow)>0)
+          writeData(other.readData(icol,irow,iband),icol,irow,iband);
+        else
+          continue;
+      }
+    }
+  }
+}
+
+void Jim::d_setMask(Jim& mask, double value){
+  if(m_data.empty()){
+    std::ostringstream s;
+    s << "Error: Jim not initialized, m_data is empty";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(nrOfRow()!=mask.nrOfRow()){
+    std::ostringstream s;
+    s << "Error: number of rows do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(nrOfCol()!=mask.nrOfCol()){
+    std::ostringstream s;
+    s << "Error: number of cols do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  for(size_t iband=0;iband<nrOfBand();++iband){
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+    for(int irow=0;irow<nrOfRow();++irow){
+      for(int icol=0;icol<nrOfCol();++icol){
+        if(mask.readData(icol,irow)>0)
+          writeData(value,icol,irow,iband);
+        else
+          continue;
+      }
+    }
+  }
+}

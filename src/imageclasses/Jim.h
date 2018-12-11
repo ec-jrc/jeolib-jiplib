@@ -894,6 +894,10 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///setmask raster dataset only for in memory
   std::shared_ptr<Jim> setMask(JimList& maskReader, app::AppFactory& app);
   /* std::shared_ptr<Jim> setMask(app::AppFactory& app); */
+  ///setMask destructive version
+  /* template<typename T> void d_setMask(Jim& mask, T value); */
+  void d_setMask(Jim& mask, double value);
+  void d_setMask(Jim& mask, Jim& other);
   ///get mask to raster dataset
   void getMask(Jim& imgWriter, app::AppFactory& app);
   ///getmask raster dataset only for in memory
@@ -1880,4 +1884,40 @@ template<typename T> CPLErr Jim::writeDataBlock(T value, int minCol, int maxCol,
   }
   return(returnValue);
 }
+
+/* template<typename T> void Jim::d_setMask(Jim& mask, T value){ */
+/*   if(m_data.empty()){ */
+/*     std::ostringstream s; */
+/*     s << "Error: Jim not initialized, m_data is empty"; */
+/*     std::cerr << s.str() << std::endl; */
+/*     throw(s.str()); */
+/*   } */
+/*   if(nrOfRow()!=mask.nrOfRow()){ */
+/*     std::ostringstream s; */
+/*     s << "Error: number of rows do not match"; */
+/*     std::cerr << s.str() << std::endl; */
+/*     throw(s.str()); */
+/*   } */
+/*   if(nrOfCol()!=mask.nrOfCol()){ */
+/*     std::ostringstream s; */
+/*     s << "Error: number of cols do not match"; */
+/*     std::cerr << s.str() << std::endl; */
+/*     throw(s.str()); */
+/*   } */
+/*   for(size_t iband=0;iband<nrOfBand();++iband){ */
+/* #if JIPLIB_PROCESS_IN_PARALLEL == 1 */
+/* #pragma omp parallel for */
+/* #else */
+/* #endif */
+/*     for(int irow=0;irow<nrOfRow();++irow){ */
+/*       for(int icol=0;icol<nrOfCol();++icol){ */
+/*         if(mask.readData(icol,irow)>1) */
+/*           writeData(value,icol,irow,iband); */
+/*         else */
+/*           continue; */
+/*       } */
+/*     } */
+/*   } */
+/* } */
+
 #endif // _JIM_H_
