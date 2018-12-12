@@ -15,19 +15,12 @@ This file is part of jiplib
 using namespace std;
 using namespace app;
 
-/**
- * @param app application specific option arguments
- * @return output image
- **/
 shared_ptr<Jim> Jim::reclass(app::AppFactory& app){
   shared_ptr<Jim> imgWriter=createImg();
   reclass(*imgWriter, app);
   return(imgWriter);
 }
 
-/**
- * @param imgWriter output raster crop dataset
- **/
 void Jim::reclass(Jim& imgWriter, app::AppFactory& app){
   Optionjl<string> mask_opt("m", "mask", "Mask image(s)");
   Optionjl<unsigned short> masknodata_opt("msknodata", "msknodata", "Mask value(s) where image has nodata. Use one value for each mask, or multiple values for a single mask.", 1);
@@ -274,6 +267,78 @@ void Jim::reclass(Jim& imgWriter, app::AppFactory& app){
         //progress bar
         progress=static_cast<float>((irow+1.0)/imgWriter.nrOfRow());
         MyProgressFunc(progress,pszMessage,pProgressArg);
+      }
+    }
+  }
+  catch(string predefinedString){
+    std::cout << predefinedString << std::endl;
+    throw;
+  }
+}
+
+void Jim::d_reclass(app::AppFactory& app){
+  Optionjl<string> class_opt("c", "class", "list of classes to reclass (in combination with reclass option)");
+  Optionjl<string> reclass_opt("r", "reclass", "list of recoded classes (in combination with class option)");
+  Optionjl<short> verbose_opt("v", "verbose", "verbose", 0);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=class_opt.retrieveOption(app);
+    reclass_opt.retrieveOption(app);
+    verbose_opt.retrieveOption(app);
+
+    if(!doProcess){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+
+    std::vector<std::string> badKeys;
+    app.badKeys(badKeys);
+    if(badKeys.size()){
+      std::ostringstream errorStream;
+      if(badKeys.size()>1)
+        errorStream << "Error: unknown keys: ";
+      else
+        errorStream << "Error: unknown key: ";
+      for(int ikey=0;ikey<badKeys.size();++ikey){
+        errorStream << badKeys[ikey] << " ";
+      }
+      errorStream << std::endl;
+      throw(errorStream.str());
+    }
+
+    if(class_opt.size()!=reclass_opt.size()){
+      std::ostringstream errorStream;
+      errorStream << "Error: size of class and reclass arguments are not equal" << std::endl;
+      throw(errorStream.str());
+    }
+    map<string,string> codemapString;//map with codes: codemapString[theKey(from)]=theValue(to)
+    map<double,double> codemap;//map with codes: codemap[theKey(from)]=theValue(to)
+    for(int iclass=0;iclass<class_opt.size();++iclass){
+      codemapString[class_opt[iclass]]=reclass_opt[iclass];
+      codemap[string2type<double>(class_opt[iclass])]=string2type<double>(reclass_opt[iclass]);
+    }
+    //if verbose true, print the codes to screen
+    if(verbose_opt[0]){
+      map<string,string>::iterator mit;
+      cout << codemapString.size() << " codes used: " << endl;
+      for(mit=codemapString.begin();mit!=codemapString.end();++mit)
+        cout << (*mit).first << " " << (*mit).second << endl;
+    }
+    for(int iband=0;iband<nrOfBand();++iband){
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+      for(int irow=0;irow<nrOfRow();++irow){
+        for(int icol=0;icol<nrOfCol();++icol){
+          double value=readData(icol,irow,iband);
+          if(codemap.find(value)!=codemap.end())
+              value=codemap[value];
+          writeData(value,icol,irow,iband);
+        }
       }
     }
   }

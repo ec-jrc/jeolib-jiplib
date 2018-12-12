@@ -596,11 +596,17 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///Read data using the arguments from AppFactory
   /* CPLErr readData(app::AppFactory &app); */
   ///Read a single pixel cell value at a specific column and row for a specific band (all indices start counting from 0)
-  template<typename T> CPLErr readData(T& value, int col, int row, int band=0);
+  template<typename T> void readData(T& value, int col, int row, int band=0);
+  template<typename T> void readData3D(T& value, int col, int row, int plane, int band=0);
   ///Return a single pixel cell value at a specific column and row for a specific band (all indices start counting from 0)
   double readData(int col, int row, int band=0){
     double value;
     readData(value, col, row, band);
+    return(value);
+  };
+  double readData3D(int col, int row, int plane, int band=0){
+    double value;
+    readData3D(value, col, row, plane, band);
     return(value);
   };
   ///Read pixel cell values for a range of columns for a specific row and band (all indices start counting from 0)
@@ -884,6 +890,8 @@ class Jim : public std::enable_shared_from_this<Jim>
   void reclass(Jim& imgWriter, app::AppFactory& app);
   ///reclass raster dataset only for in memory
   std::shared_ptr<Jim> reclass(app::AppFactory& app);
+  //simplified destructive version of reclass
+  void d_reclass(app::AppFactory& app);
   ///set mask to raster dataset
   void setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app);
   ///set mask to raster dataset
@@ -1016,13 +1024,7 @@ class Jim : public std::enable_shared_from_this<Jim>
 #endif
 };
 
-/**
- * @param[out] value The cell value that was read
- * @param[in] col The column number to read (counting starts from 0)
- * @param[in] row The row number to read (counting starts from 0)
- * @param[in] band The band number to read (counting starts from 0)
- **/
-template<typename T> CPLErr Jim::readData(T& value, int col, int row, int band)
+template<typename T> void Jim::readData(T& value, int col, int row, int band)
 {
   try{
     if(nrOfBand()<=band){
@@ -1037,7 +1039,6 @@ template<typename T> CPLErr Jim::readData(T& value, int col, int row, int band)
       std::string errorString="Error: row number exceeds number of rows in input image";
       throw(errorString);
     }
-    CPLErr returnValue=CE_None;
     double dvalue=0;
     double theScale=1;
     double theOffset=0;
@@ -1092,11 +1093,10 @@ template<typename T> CPLErr Jim::readData(T& value, int col, int row, int band)
       //fetch raster band
       GDALRasterBand  *poBand;
       poBand = m_gds->GetRasterBand(band+1);//GDAL uses 1 based index
-      returnValue=poBand->RasterIO(GF_Read,col,row,1,1,&value,1,1,type2GDAL<T>(),0,0);
+      poBand->RasterIO(GF_Read,col,row,1,1,&value,1,1,type2GDAL<T>(),0,0);
       dvalue=theScale*value+theOffset;
       value=static_cast<T>(dvalue);
     }
-    return(returnValue);
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
@@ -1107,6 +1107,89 @@ template<typename T> CPLErr Jim::readData(T& value, int col, int row, int band)
   }
 }
 
+template<typename T> void Jim::readData3D(T& value, int col, int row, int plane, int band)
+{
+  try{
+    if(nrOfBand()<=band){
+      std::string errorString="Error: band number exceeds number of bands in input image";
+      throw(errorString);
+    }
+    if(nrOfCol()<=col){
+      std::string errorString="Error: col number exceeds number of cols in input image";
+      throw(errorString);
+    }
+    if(nrOfRow()<=row){
+      std::string errorString="Error: row number exceeds number of rows in input image";
+      throw(errorString);
+    }
+    if(nrOfPlane()<=plane){
+      std::string errorString="Error: plane number exceeds number of planes in input image";
+      throw(errorString);
+    }
+    double dvalue=0;
+    double theScale=1;
+    double theOffset=0;
+    if(m_scale.size()>band||m_offset.size()>band){
+      if(m_scale.size()>band)
+        theScale=m_scale[band];
+      if(m_offset.size()>band)
+        theOffset=m_offset[band];
+    }
+    if(m_data.size()){
+      //only support random access reading if entire image is in memory for performance reasons
+      if(m_blockSize!=nrOfRow()){
+        std::ostringstream s;
+        s << "Error: increase memory to support random access reading (now at " << 100.0*m_blockSize/nrOfRow() << "%)";
+        throw(s.str());
+      }
+      if(row<m_begin[band]||row>=m_end[band]){
+        if(m_filename.size())
+          readNewBlock(row,band);
+      }
+      int index=(plane*nrOfRow()*nrOfCol())+(row-m_begin[band])*nrOfCol()+col;
+      switch(getDataType()){
+      case(GDT_Byte):
+        dvalue=theScale*(static_cast<unsigned char*>(m_data[band])[index])+theOffset;
+        break;
+      case(GDT_Int16):
+        dvalue=theScale*(static_cast<short*>(m_data[band])[index])+theOffset;
+        break;
+      case(GDT_UInt16):
+        dvalue=theScale*(static_cast<unsigned short*>(m_data[band])[index])+theOffset;
+        break;
+      case(GDT_Int32):
+        dvalue=theScale*(static_cast<int*>(m_data[band])[index])+theOffset;
+        break;
+      case(GDT_UInt32):
+        dvalue=theScale*(static_cast<unsigned int*>(m_data[band])[index])+theOffset;
+        break;
+      case(GDT_Float32):
+        dvalue=theScale*(static_cast<float*>(m_data[band])[index])+theOffset;
+        break;
+      case(GDT_Float64):
+        dvalue=theScale*(static_cast<double*>(m_data[band])[index])+theOffset;
+        break;
+      default:
+        std::string errorString="Error: data type not supported";
+        throw(errorString);
+        break;
+      }
+      value=static_cast<T>(dvalue);
+    }
+    else{
+      std::ostringstream s;
+      s << "Error: read 3D image only supported for in memory images";
+      throw(s.str());
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    throw;
+  }
+  catch(...){
+    throw;
+  }
+}
 /**
  * @param[out] buffer The vector with all cell values that were read
  * @param[in] minCol First column from where to start reading (counting starts from 0)
