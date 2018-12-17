@@ -101,8 +101,8 @@ void VectorOgr::destroyFeatures(size_t ilayer){
         OGRFeature::DestroyFeature( *fit );
         *fit=NULL;
       }
-      else
-        std::cerr << "Error: cannot destroy NULL feature" << std::endl;
+      // else
+      //   std::cerr << "Error: cannot destroy NULL feature" << std::endl;
     }
     m_features[ilayer].clear();
   }
