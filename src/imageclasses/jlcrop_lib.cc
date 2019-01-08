@@ -2983,7 +2983,7 @@ void Jim::cropDS(Jim& imgWriter, AppFactory& app){
       if((poBand->RasterIO(GF_Read,nXOff,nYOff+m_begin[iband],nXSize,nYSize,imgWriter.getDataPointer(iband),imgWriter.nrOfCol(),imgWriter.nrOfRow(),imgWriter.getGDALDataType(),0,0,&sExtraArg) != CE_None)){
         std::ostringstream errorStream;
         errorStream << "Error: could not read raster band using RasterIO";
-        throw(errorStream);
+        throw(errorStream.str());
       }
     }
   }
