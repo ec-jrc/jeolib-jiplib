@@ -148,8 +148,6 @@ void Jim::convert(Jim& imgWriter, AppFactory& app){
     if(description_opt.size())
       imgWriter.setImageDescription(description_opt[0]);
 
-    vector<double> readBuffer(nrOfCol());
-    vector<double> writeBuffer(nrOfCol());
     unsigned int nband=this->nrOfBand();
 
     // const char* pszMessage;
@@ -194,7 +192,13 @@ void Jim::convert(Jim& imgWriter, AppFactory& app){
       double readCol=0;
       double lowerCol=0;
       double upperCol=0;
+      #if JIPLIB_PROCESS_IN_PARALLEL == 1
+      #pragma omp parallel for
+      #else
+      #endif
       for(int irow=0;irow<imgWriter.nrOfRow();++irow){
+        vector<double> readBuffer(nrOfCol());
+        vector<double> writeBuffer(nrOfCol());
         // readRow=irow;
         readData(readBuffer,irow,readBand);
         for(int icol=0;icol<imgWriter.nrOfCol();++icol)
@@ -3085,25 +3089,37 @@ void Jim::createct(Jim& imgWriter, app::AppFactory& app){
     imgWriter.setColorTable(&colorTable);
   switch(getDataType()){
   case(GDT_Byte):{
-    vector<char> buffer;
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
     for(unsigned int irow=0;irow<nrOfRow();++irow){
+      vector<char> buffer;
       readData(buffer,irow);
       imgWriter.writeData(buffer,irow);
     }
     break;
   }
   case(GDT_Int16):{
-    vector<short> buffer;
     cout << "Warning: copying short to unsigned short without conversion, use convert with -scale if needed..." << endl;
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
     for(unsigned int irow=0;irow<nrOfRow();++irow){
+      vector<short> buffer;
       readData(buffer,irow);
       imgWriter.writeData(buffer,irow);
     }
     break;
   }
   case(GDT_UInt16):{
-    vector<unsigned short> buffer;
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
     for(unsigned int irow=0;irow<nrOfRow();++irow){
+      vector<unsigned short> buffer;
       readData(buffer,irow);
       imgWriter.writeData(buffer,irow);
     }
