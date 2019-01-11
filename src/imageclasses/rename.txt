@@ -61,7 +61,7 @@ mialib_erodil.h:extern IMAGE *msgradlinfngb(IMAGE **imap, int nc, IMAGE *imngb, 
 mialib_format.h:extern IMAGE *to_tiff1bitpp(IMAGE *im); convertTo1bitPerPixel
 mialib_format.h:extern IMAGE *to_tiff4bitpp(IMAGE *im); convertTo4bitPerPixel
 mialib_format.h:extern IMAGE *to_ushort(IMAGE *im); convertToUint16
-mialib_format.h:extern IMAGE *to_int32(IMAGE *im);  convertToUint32
+mialib_format.h:extern IMAGE *to_int32(IMAGE *im);  convertToInt32
 mialib_format.h:extern IMAGE *to_float(IMAGE *im); convertToFloat32
 mialib_format.h:extern IMAGE *to_double(IMAGE *im); convertToDouble64
 mialib_format.h:extern ERROR_TYPE to_uchar(IMAGE *im); convertToUchar8

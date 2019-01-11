@@ -130,7 +130,11 @@ def fun2method(inputfile, outputfile_basename):
 
 
         f.write('\n\t\timout =::'+a.get("name")+'('+cCall+');')
-        # f.write('\n\t\t\tthis->getMIA(iband);')
+
+        f.write('\n\t\t\tthis->setMIA(iband);')
+        for i in imRasterArray:
+            f.write('\n\t\t\t\tif(this!=&'+i+')')
+            f.write('\n\t\t\t\t\t'+i+'.setMIA(iband);')
 
         f.write('\n\t\t\tif (imout){')
         f.write('\n\t\t\t\tstd::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout);')
