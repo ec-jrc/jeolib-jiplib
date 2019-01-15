@@ -140,7 +140,7 @@ This file is part of jiplib
   GDT_Float32 = 6
   GDT_Float64 = 7
   JDT_UInt64 = 24
-  _Int64 = 25
+  JDT_Int64 = 25
 
   import os.path
   def createJim(arg1=None,**kwargs):
@@ -468,7 +468,7 @@ This file is part of jiplib
           jDataType=GDT_UInt32;
           break;
         case NPY_INT32:
-          jDataType=GDT_Int16;
+          jDataType=GDT_Int32;
           break;
         case NPY_FLOAT32:
           jDataType=GDT_Float32;
@@ -476,12 +476,12 @@ This file is part of jiplib
         case NPY_FLOAT64:
           jDataType=GDT_Float64;
           break;
-          // case NPY_UINT64:
-          //   jDataType=;
-          // break;
-          // case NPY_INT64:
-          //   jDataType=;
-          // break;
+        /* case NPY_UINT64: */
+        /*     jDataType=JDT_UInt64; */
+        /*   break; */
+        /* case NPY_INT64: */
+        /*     jDataType=JDT_Int64; */
+        /*   break; */
         default:
           std::string errorString="Error: Unknown data type";
           throw(errorString);
@@ -536,12 +536,12 @@ This file is part of jiplib
       case GDT_Float64:
         npDataType=NPY_FLOAT64;
         break;
-        // case JDT_UInt64:
-        //   npDataType=NPY_UINT64;
-        // break;
-        // case JDT_Int64:
-        //   npDataType=NPY_INT64;
-        // break;
+      /* case JDT_UInt64: */
+      /*   npDataType=NPY_UINT64; */
+      /*   break; */
+      /* case JDT_Int64: */
+      /*   npDataType=NPY_INT64; */
+      /*   break; */
       case GDT_Unknown:
       default:
         std::string errorString="Error: Unknown data type";
@@ -831,12 +831,12 @@ This file is part of jiplib
       case GDT_Float64:
         npDataType=NPY_FLOAT64;
         break;
-        // case JDT_UInt64:
-        //   npDataType=NPY_UINT64;
-        // break;
-        // case JDT_Int64:
-        //   npDataType=NPY_INT64;
-        // break;
+      case JDT_UInt64:
+        npDataType=NPY_UINT64;
+        break;
+      case JDT_Int64:
+        npDataType=NPY_INT64;
+        break;
       case GDT_Unknown:
       default:
         std::string errorString="Error: Unknown data type";
