@@ -255,7 +255,7 @@ mialib_stats.h:extern IMAGE *lookuprgb(IMAGE *imr, IMAGE *img, IMAGE *imb, IMAGE
 mialib_stats.h:extern IMAGE *class2d(IMAGE *im1, IMAGE *im2, IMAGE *imlut); applyLUT2d
 mialib_stats.h:extern IMAGE *area(IMAGE *im, int r, int type); surfaceArea
 mialib_stats.h:extern IMAGE *dirsum(IMAGE *im, int dir); runSumDir
-mialib_stats.h:extern G_TYPE *min_max(IMAGE *im); getMinM
+mialib_stats.h:extern G_TYPE *min_max(IMAGE *im); getMinMax
 mialib_stats.h:extern ERROR_TYPE getfirstmaxpos(IMAGE *im, unsigned long int *pos); getFirstMaxOffset
 mialib_stats.h:extern ERROR_TYPE histcompress(IMAGE *im); histoCompress
 mialib_stats.h:extern ERROR_TYPE lookup(IMAGE *im, IMAGE *imlut); applyLUT1d
