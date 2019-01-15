@@ -468,7 +468,7 @@ This file is part of jiplib
           jDataType=GDT_UInt32;
           break;
         case NPY_INT32:
-          jDataType=GDT_Int16;
+          jDataType=GDT_Int32;
           break;
         case NPY_FLOAT32:
           jDataType=GDT_Float32;
