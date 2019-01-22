@@ -921,6 +921,8 @@ class Jim : public std::enable_shared_from_this<Jim>
   CPLErr band2plane();
   ///read data bands into planes
   CPLErr readDataPlanes(std::vector<int> bands);
+  ///write data bands from planes
+  CPLErr writeDataPlanes();
   /// convert single band multiple plane image to single plane multiband image
   /* CPLErr plane2band(){};//not implemented yet */
 #if MIALIB == 1
@@ -951,9 +953,24 @@ class Jim : public std::enable_shared_from_this<Jim>
   //end insert from fun2method_errortype_d
   //start insert from fun2method_errortype_nd
   //end insert from fun2method_errortype_nd
+  /* template<typename T> xt::array<T> xt(){ */
+  /*   std::vector<std::size_t> shape; */
+  /*   if(nrOfPlane()>1){ */
+  /*     shape={nrOfPlane(),nrOfRow(),nrOfCol()}; */
+  /*   } */
+  /*   else if (nrOfBand()>1){ */
+  /*     band2plane(); */
+  /*     shape={nrOfPlane(),nrOfRow(),nrOfCol()}; */
+  /*   } */
+  /*   else */
+  /*     shape={nrOfRow(),nrOfCol()}; */
+  /*   auto a = xt::adapt(data, size, xt::no_ownership(), shape); */
+  /*   return(a); */
+  /* } */
  protected:
   ///reset all member variables
   void reset();
+  //convert data to PyArrayObject
   ///Initialize the memory for read/write image in cache
   CPLErr initMem(unsigned int memory);
   ///filename of this dataset

@@ -720,9 +720,9 @@ This file is part of jiplib
       int dim=(aJim->nrOfPlane()>1)? 3 : 2;
       if(aJim->nrOfPlane()>1){
         npy_intp dims[3];
-        dims[0]=aJim->nrOfRow();
-        dims[1]=aJim->nrOfCol();
-        dims[2]=aJim->nrOfPlane();
+        dims[0]=aJim->nrOfPlane();
+        dims[1]=aJim->nrOfRow();
+        dims[2]=aJim->nrOfCol();
         PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,npdata);
         if(npArray)
           return(PyArray_Return(npArray));
@@ -734,6 +734,67 @@ This file is part of jiplib
         dims[0]=aJim->nrOfRow();
         dims[1]=aJim->nrOfCol();
         /* PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,(void*)aJim->getDataPointer(band)); */
+        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,npdata);
+        if(npArray)
+          return(PyArray_Return(npArray));
+        else
+          return(0);
+      }
+    }
+
+  PyObject* np(std::shared_ptr<Jim> aJim) {
+      int npDataType;
+      switch (aJim->getDataType()){
+      case GDT_Byte:
+        npDataType=NPY_UINT8;
+        break;
+      case GDT_UInt16:
+        npDataType=NPY_UINT16;
+        break;
+      case GDT_Int16:
+        npDataType=NPY_INT16;
+        break;
+      case GDT_UInt32:
+        npDataType=NPY_UINT32;
+        break;
+      case GDT_Int32:
+        npDataType=NPY_INT32;
+        break;
+      case GDT_Float32:
+        npDataType=NPY_FLOAT32;
+        break;
+      case GDT_Float64:
+        npDataType=NPY_FLOAT64;
+        break;
+      case JDT_UInt64:
+        npDataType=NPY_UINT64;
+        break;
+      case JDT_Int64:
+        npDataType=NPY_INT64;
+        break;
+      case GDT_Unknown:
+      default:
+        std::string errorString="Error: Unknown data type";
+        throw(errorString);
+      }
+      void *npdata=0;
+      npdata=(void*)(aJim->getDataPointer());
+      int dim=(aJim->nrOfPlane()>1)? 3 : 2;
+      if(aJim->nrOfPlane()>1){
+        npy_intp dims[3];
+        dims[0]=aJim->nrOfPlane();
+        dims[1]=aJim->nrOfRow();
+        dims[2]=aJim->nrOfCol();
+        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,npdata);
+        if(npArray)
+          return(PyArray_Return(npArray));
+        else
+          return(0);
+      }
+      else{
+        npy_intp dims[2];
+        dims[0]=aJim->nrOfRow();
+        dims[1]=aJim->nrOfCol();
         PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,npdata);
         if(npArray)
           return(PyArray_Return(npArray));

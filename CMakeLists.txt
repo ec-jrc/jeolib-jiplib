@@ -1,4 +1,4 @@
-###############################################################################
+##############################################################################
 # CMakeLists build script for cmake
 # Author(s): Pieter.Kempeneers@ec.europa.eu
 # Copyright (c) 2016-2018 European Union (Joint Research Centre)
@@ -53,7 +53,7 @@ CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 if(COMPILER_SUPPORTS_CXX11)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-long-long")
-    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has C++11 support.")
+  message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has C++11 support.")
 else(COMPILER_SUPPORTS_CXX11)
   message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
@@ -94,6 +94,7 @@ else(PYTHONLIBS_FOUND)
   message(STATUS "Warning: PYTHON exact version ${PYTHON_VERSION} not found, trying default")
   FIND_PACKAGE(PythonLibs REQUIRED)
 endif(PYTHONLIBS_FOUND)
+INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIR})
 
 find_package(GDAL 2.00 REQUIRED)
 if(GDAL_FOUND)
@@ -176,7 +177,6 @@ if (BUILD_WITH_FANN)
     message(STATUS "Error: could not find FANN packagei version >= 2.2")
   endif()
 endif(BUILD_WITH_FANN)
-
 
 ###############################################################################
 
@@ -427,6 +427,7 @@ else(BUILD_WITH_LIBLAS)
 endif(BUILD_WITH_LIBLAS)
 
 ###############################################################################
+
 SET_TARGET_PROPERTIES(${JIPLIB_LIB_NAME}
   PROPERTIES
   SOVERSION ${JIPLIB_SOVERSION}
@@ -474,7 +475,7 @@ set(PYTHON_SRC_DIR src/swig)
 set(JIPLIB_I ${PYTHON_SRC_DIR}/jiplib.i)
 FIND_PACKAGE(SWIG REQUIRED)
 INCLUDE(${SWIG_USE_FILE})
-INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+# INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/src)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 

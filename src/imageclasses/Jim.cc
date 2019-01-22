@@ -60,22 +60,28 @@ CPLErr Jim::band2plane(){
   m_data[nrOfBand()]=(void *) calloc(static_cast<size_t>(nrOfCol()*m_blockSize),getDataTypeSizeBytes());
   //copy first band
   memcpy(m_data[nrOfBand()],m_data[0],getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
-  //delete temporary buffer
-  free(m_data[nrOfBand()]);
-  //erase m_data buffer
-  m_data.erase(m_data.begin()+nrOfBand());
   //allocate memory
   m_data[0]=(void *) calloc(static_cast<size_t>(nrOfBand()*nrOfCol()*m_blockSize),getDataTypeSizeBytes());
+  memcpy(m_data[0],m_data[nrOfBand()],getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
+  //delete temporary buffer
+  free(m_data[nrOfBand()]);
   //copy rest of the bands
   for(size_t iband=1;iband<nrOfBand();++iband){
     //memcp
-    memcpy(static_cast<char*>(m_data[0])+iband*nrOfCol()*nrOfRow(),static_cast<char*>(m_data[iband]),getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
+    // memcpy(static_cast<char*>(m_data[0])+iband*nrOfCol()*nrOfRow(),static_cast<char*>(m_data[iband]),getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
+    memcpy(m_data[0]+iband*nrOfCol()*nrOfRow(),m_data[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
     // memcpy(m_data[0]+iband*nrOfCol()*nrOfRow(),m_data[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
     free(m_data[iband]);
-    m_data.erase(m_data.begin()+iband);
+    m_data[iband]=0;
+#if MIALIB == 1
+    if(m_mia.size()>iband)
+      delete(m_mia[iband]);
+#endif
   }
+  m_data.erase(m_data.begin()+1,m_data.end());
   m_nplane=nrOfBand();
   m_nband=1;
+  m_mia.clear();
 }
 
 #if MIALIB == 1
@@ -333,23 +339,11 @@ void Jim::reset()
 #endif
 }
 
-/**
- * @param dataPointers External pointers to which the image data should be written in memory
- * @param ncol The number of columns in the image
- * @param nrow The number of rows in the image
- * @param dataType The data type of the image (one of the GDAL supported datatypes: GDT_Byte, GDT_[U]Int[16|32], GDT_Float[32|64])
- **/
 Jim::Jim(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType){
   reset();
   open(dataPointer,ncol,nrow,dataType);
 }
 
-/**
- * @param dataPointers External pointers to which the image data should be written in memory
- * @param ncol The number of columns in the image
- * @param nrow The number of rows in the image
- * @param dataType The data type of the image (one of the GDAL supported datatypes: GDT_Byte, GDT_[U]Int[16|32], GDT_Float[32|64])
- **/
 Jim::Jim(std::vector<void*> dataPointers, int ncol, int nrow, const GDALDataType& dataType){
   reset();
   open(dataPointers,ncol,nrow,dataType);
@@ -2831,6 +2825,37 @@ CPLErr Jim::write(){
   if(m_gds)
     GDALClose(m_gds);
   m_gds=0;
+  // reset();
+}
+
+CPLErr Jim::writeDataPlanes(){
+  CPLErr returnValue=CE_None;
+  if(m_gds == NULL){
+    std::string errorString="Error in writeDataPlanes: object contains no gdal dataset";
+    throw(errorString);
+  }
+  char **papszOptions=NULL;
+  for(std::vector<std::string>::const_iterator optionIt=m_options.begin();optionIt!=m_options.end();++optionIt)
+    papszOptions=CSLAddString(papszOptions,optionIt->c_str());
+  if(papszOptions)
+    CSLDestroy(papszOptions);
+
+  std::vector<int> gdalbands(nrOfPlane());
+  for(int iplane=0;iplane<nrOfPlane();++iplane)
+    gdalbands[iplane]=iplane+1;//gdal band numbers are 1 based (starting from 1)
+
+  GDALRasterIOExtraArg sExtraArg;
+  INIT_RASTERIO_EXTRA_ARG(sExtraArg);
+  sExtraArg.bFloatingPointWindowValidity = FALSE;
+  sExtraArg.dfXOff = 0;
+  sExtraArg.dfYOff = 0;
+  sExtraArg.dfXSize = 0;
+  sExtraArg.dfYSize = 0;
+  returnValue=getDataset()->RasterIO(GF_Write,0,0,nrOfCol(),nrOfRow(),m_data[0],nrOfCol(),nrOfRow(),getGDALDataType(),nrOfPlane(),&gdalbands[0],0,0,0,&sExtraArg);
+  if(m_gds)
+    GDALClose(m_gds);
+  m_gds=0;
+  return(returnValue);
   // reset();
 }
 
