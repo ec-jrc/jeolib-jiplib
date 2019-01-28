@@ -23,6 +23,24 @@ extern "C" {
 #include "algorithms/StatFactory.h"
 
 using namespace std;
+//Forgetting to place these commands will show itself as an ugly segmentation fault (crash) as soon as any C-API subroutine is actually called
+//see also: https://docs.scipy.org/doc/numpy-1.10.0/user/c-info.how-to-extend.html
+// and https://stackoverflow.com/questions/47026900/pyarray-check-gives-segmentation-fault-with-cython-c
+//just called only once
+int init_numpy(){
+  return _import_array(); // PyError if not successful
+  // return 0;
+}
+
+const static int numpy_initialized =  init_numpy();
+
+void parse_ndarraray(PyObject *obj) { // would be called every time
+  if (PyArray_Check(obj)) {
+    cout << "PyArray_Check Passed" << endl;
+  } else {
+    cout << "PyArray_Check Failed" << endl;
+  }
+}
 
 Jim::Jim(){
   reset();
@@ -339,6 +357,62 @@ void Jim::reset()
 #endif
 }
 
+// Jim::Jim(PyObject* npArray, bool copyData){
+//   reset();
+//   if(npArray){
+//     if(PyArray_Check(npArray)){
+//       PyArrayObject *obj=(PyArrayObject *)npArray;
+//       GDALDataType jDataType;
+//       int dim=obj->nd;
+//       int ncol=(dim==3)? obj->dimensions[2] : obj->dimensions[1];
+//       int nrow=(dim==3)? obj->dimensions[1] : obj->dimensions[0];
+//       int nplane=(dim==3)? obj->dimensions[0] : 1;
+//       switch(obj->descr->type_num){
+//       case NPY_UINT8:
+//         jDataType=GDT_Byte;
+//         break;
+//       case NPY_UINT16:
+//         jDataType=GDT_UInt16;
+//         break;
+//       case NPY_INT16:
+//         jDataType=GDT_Int16;
+//         break;
+//       case NPY_UINT32:
+//         jDataType=GDT_UInt32;
+//         break;
+//       case NPY_INT32:
+//         jDataType=GDT_Int32;
+//         break;
+//       case NPY_FLOAT32:
+//         jDataType=GDT_Float32;
+//         break;
+//       case NPY_FLOAT64:
+//         jDataType=GDT_Float64;
+//         break;
+//         // case NPY_UINT64:
+//         //   jDataType=;
+//         // break;
+//         // case NPY_INT64:
+//         //   jDataType=;
+//         // break;
+//       default:
+//         std::string errorString="Error: Unknown data type";
+//         throw(errorString);
+//       }
+//       GDALDataType datatype=GDT_Unknown;
+//       open(obj->data,ncol,nrow,nplane,jDataType,copyData);
+//     }
+//     else{
+//       std::string errorString="Error: not a numpy object";
+//       throw(errorString);
+//     }
+//   }
+//   else{
+//     std::string errorString="Error: pointer to numpy object 0";
+//     throw(errorString);
+//   }
+// }
+
 Jim::Jim(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType){
   reset();
   open(dataPointer,ncol,nrow,dataType);
@@ -442,6 +516,7 @@ CPLErr Jim::initMem(unsigned int memory)
   m_end.resize(nrOfBand());
   freeMem();
   m_data.resize(nrOfBand());
+  //todo check if needed when externalData is true
   for(int iband=0;iband<nrOfBand();++iband){
     m_data[iband]=(void *) calloc(static_cast<size_t>(nrOfPlane()*nrOfCol()*m_blockSize),getDataTypeSizeBytes());
     if(!(m_data[iband])){
@@ -3422,7 +3497,6 @@ CPLErr Jim::copyData(void* data, int band){
    // std::shared_ptr<Jim> pJim=std::make_shared<Jim>(filename,memory);
    return(pJim);
  }
-
 
 /**
  * @param metadata Set this metadata when writing the image (if supported byt the driver)

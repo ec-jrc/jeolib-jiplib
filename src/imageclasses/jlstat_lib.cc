@@ -290,7 +290,7 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
             // outputStream << "--stdev " << sqrt(varValue) << " " << std::endl;
           }
           if(var_opt){
-            mapString.insert(std::make_pair("stdev",type2string<double>(gsl_stats_variance(&(readBuffer[0]),stride,readBuffer.size()))));
+            mapString.insert(std::make_pair("var",type2string<double>(gsl_stats_variance(&(readBuffer[0]),stride,readBuffer.size()))));
             // mapString["var"]=type2string<double>(gsl_stats_variance(&(readBuffer[0]),stride,readBuffer.size()));
             // mapString["var"]=type2string<double>(varValue);
             // outputStream << "--var " << varValue << " " << std::endl;

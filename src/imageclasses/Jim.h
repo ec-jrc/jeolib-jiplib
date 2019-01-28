@@ -56,6 +56,9 @@ extern "C" {
 }
 #endif
 
+#include <Python.h>
+#include "numpy/arrayobject.h"
+
 namespace app{
   class AppFactory;
 }
@@ -119,6 +122,23 @@ static GDALDataType string2GDAL(const std::string &typeString){
   typeMap["GDT_Int32"]=GDT_Int32;
   typeMap["GDT_Float32"]=GDT_Float32;
   typeMap["GDT_Float64"]=GDT_Float64;
+  typeMap["int8"]=GDT_Byte;
+  typeMap["uint8"]=GDT_Byte;
+  typeMap["int16"]=GDT_Int16;
+  typeMap["uint16"]=GDT_UInt16;
+  typeMap["uint32"]=GDT_UInt32;
+  typeMap["int32"]=GDT_Int32;
+  typeMap["float32"]=GDT_Float32;
+  typeMap["float64"]=GDT_Float64;
+  typeMap["Int8"]=GDT_Byte;
+  typeMap["UInt8"]=GDT_Byte;
+  typeMap["UInt8"]=GDT_Byte;
+  typeMap["UInt16"]=GDT_UInt16;
+  typeMap["Int16"]=GDT_Int16;
+  typeMap["UInt32"]=GDT_UInt32;
+  typeMap["Int32"]=GDT_Int32;
+  typeMap["Float32"]=GDT_Float32;
+  typeMap["Float64"]=GDT_Float64;
   if(typeMap.count(typeString))
     return(typeMap[typeString]);
   else
@@ -159,6 +179,23 @@ static int getDataType(const std::string &typeString){
   typeMap["UInt64"]=JDT_UInt64;
   typeMap["JDT_Int64"]=JDT_Int64;
   typeMap["JDT_UInt64"]=JDT_UInt64;
+  typeMap["int8"]=GDT_Byte;
+  typeMap["uint8"]=GDT_Byte;
+  typeMap["int16"]=GDT_Int16;
+  typeMap["uint16"]=GDT_UInt16;
+  typeMap["uint32"]=GDT_UInt32;
+  typeMap["int32"]=GDT_Int32;
+  typeMap["float32"]=GDT_Float32;
+  typeMap["float64"]=GDT_Float64;
+  typeMap["Int8"]=GDT_Byte;
+  typeMap["UInt8"]=GDT_Byte;
+  typeMap["UInt8"]=GDT_Byte;
+  typeMap["UInt16"]=GDT_UInt16;
+  typeMap["Int16"]=GDT_Int16;
+  typeMap["UInt32"]=GDT_UInt32;
+  typeMap["Int32"]=GDT_Int32;
+  typeMap["Float32"]=GDT_Float32;
+  typeMap["Float64"]=GDT_Float64;
   if(typeMap.count(typeString))
     return(typeMap[typeString]);
   else
@@ -202,6 +239,7 @@ class Jim : public std::enable_shared_from_this<Jim>
  public:
     ///default constructor
   Jim();
+  /* Jim(PyObject* npArray, bool copyData=false); */
     ///constructor opening an image in memory using an external data pointer
   Jim(void* dataPointer, int ncol, int nrow, const GDALDataType& dataType);
   Jim(std::vector<void*> dataPointers, int ncol, int nrow, const GDALDataType& dataType);
@@ -285,16 +323,7 @@ class Jim : public std::enable_shared_from_this<Jim>
  /* }; */
   ///create shared pointer to Jim with random values only for in memory
  static std::shared_ptr<Jim> createImg(app::AppFactory &theApp);
- /* { */
- /*    std::shared_ptr<Jim> pRaster=std::make_shared<Jim>(theApp); */
- /*    return(pRaster); */
- /*  } */
-  ///create shared pointer to Jim with random values only for in memory
  static std::shared_ptr<Jim> createImg(const std::string filename, bool readData=true, unsigned int memory=0);
- /* { */
- /*    std::shared_ptr<Jim> pRaster=std::make_shared<Jim>(filename,memory); */
- /*    return(pRaster); */
- /*  } */
   ///get write mode
   bool writeMode(){return(m_access==WRITE);};
   ///get access mode
