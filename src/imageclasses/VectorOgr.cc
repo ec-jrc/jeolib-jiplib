@@ -303,6 +303,11 @@ OGRErr VectorOgr::open(app::AppFactory& app){
   //   errorStream << std::endl;
   //   throw(errorStream.str());
   // }
+  if(filename_opt.empty()){
+    std::ostringstream helpStream;
+    helpStream << "Error: VectorOgr constructor needs filename key";
+    throw(helpStream.str());//help was invoked, stop processing
+  }
   setAccess(access_opt[0]);
   if(getAccess()==GDAL_OF_READONLY){
     if(verbose_opt[0])
