@@ -172,17 +172,36 @@ OGRErr VectorOgr::open(const std::string& ogrFilename, const std::vector<std::st
 ///open a GDAL vector dataset for writing with layers to be pushed later
 OGRErr VectorOgr::open(const std::string& filename, const std::string& imageType, unsigned int access){
   try{
-    m_filename = filename;
+    std::cout << "filename: " << filename << std::endl;
+    //test
+    std::cout << "debug000" << std::endl;
     // setAccess(GDAL_OF_UPDATE);
     setAccess(access);
+    //test
+    std::cout << "m_filename: " << getFileName() << std::endl;
+    std::cout << "set m_filename to : " << filename << std::endl;
+    std::cout << "debug001" << std::endl;
+    m_filename = filename;
+    //test
+    std::cout << "debug002" << std::endl;
+    //test
+    std::cout << "debug003" << std::endl;
     setCodec(filename,imageType);
+    //test
+    std::cout << "debug004" << std::endl;
     if( m_gds == NULL ){
+      //test
+      std::cout << "debug4" << std::endl;
       std::string errorString="Open failed (1)";
       throw(errorString);
     }
+    //test
+    std::cout << "debug5" << std::endl;
     return(OGRERR_NONE);
   }
   catch(std::string errorString){
+    //test
+    std::cout << "debug6" << std::endl;
     std::cerr << errorString << std::endl;
     throw;
   }
@@ -472,11 +491,11 @@ OGRErr VectorOgr::pushLayer(const std::string& layername, OGRSpatialReference* t
   //if no constraints on the types geometry to be written: use wkbUnknown
   m_layer.push_back(m_gds->CreateLayer(layername.c_str(), theSRS, geometryType ,papszOptions));
   m_features.resize(m_layer.size());
-  if(m_layer.back()){
-    return(OGRERR_NONE);
+  if(!m_layer.back()){
+    std::string errorString="Open failed";
+    throw(errorString);
   }
-  else
-    return(OGRERR_FAILURE);
+  return(OGRERR_NONE);
 }
 
 ///Create a layer
@@ -628,6 +647,114 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
       }
       //test
       destroyEmptyFeatures(ilayer);
+    }
+    return(OGRERR_NONE);
+  }
+  catch(std::string errorString){
+    std::cerr << "Error: " << errorString << std::endl;
+    throw;
+  }
+  catch(...){
+    std::cerr << "Error: undefined" << std::endl;
+    throw;
+  }
+}
+
+std::shared_ptr<VectorOgr> VectorOgr::convexHull(app::AppFactory& app){
+  shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
+  if(convexHull(*ogrWriter, app)!=OGRERR_NONE){
+    std::cerr << "Failed to convexHull" << std::endl;
+  }
+  return(ogrWriter);
+}
+
+OGRErr VectorOgr::convexHull(VectorOgr& ogrWriter, app::AppFactory& app){
+  Optionjl<string> output_opt("o", "output", "Output sample dataset");
+  Optionjl<string> ogrformat_opt("f", "oformat", "Output vector dataset format","SQLite");
+  Optionjl<unsigned int> access_opt("access", "access", "Access (0: GDAL_OF_READ_ONLY, 1: GDAL_OF_UPDATE)",1);
+  Optionjl<std::string> options_opt("co", "co", "format dependent options controlling creation of the output file");
+  // Optionjl<bool> allCovered_opt("ac", "all_covered", "Set this flag to include only those polygons that are entirely covered by the raster", false);
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
+
+  // allCovered_opt.setHide(1);
+  options_opt.setHide(1);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=output_opt.retrieveOption(app);
+    ogrformat_opt.retrieveOption(app);
+    access_opt.retrieveOption(app);
+    options_opt.retrieveOption(app);
+    // allCovered_opt.retrieveOption(app);
+    verbose_opt.retrieveOption(app);
+    if(!doProcess){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+    char **papszOptions=NULL;
+    for(std::vector<std::string>::const_iterator optionIt=options_opt.begin();optionIt!=options_opt.end();++optionIt){
+      papszOptions=CSLAddString(papszOptions,optionIt->c_str());
+    }
+
+    if(output_opt.empty()){
+      std::ostringstream errorStream;
+      errorStream << "Error: no output file provided" << std::endl;
+      throw(errorStream.str());
+    }
+
+    ogrWriter.open(output_opt[0],ogrformat_opt[0]);
+    //test
+    std::cout << "debug1" << std::endl;
+    std::cout << "number of layers: " << getLayerCount() << std::endl;
+
+    for(int ilayer=0;ilayer<getLayerCount();++ilayer){
+      std::cout << "debug2" << std::endl;
+      ogrWriter.pushLayer(getLayerName(ilayer),getLayer(ilayer)->GetSpatialRef(),wkbPolygon,papszOptions);
+// #if JIPLIB_PROCESS_IN_PARALLEL == 1
+// #pragma omp parallel for
+// #else
+// #endif
+      ogrWriter.createField("id",OFTInteger,ilayer);
+
+      //test
+      std::cout << "debug3" << std::endl;
+      std::cout << "number of features: " << getFeatureCount(ilayer) << std::endl;
+      //test
+      OGRGeometryCollection geomColl;
+      for(size_t ifeature=0;ifeature<getFeatureCount(ilayer);++ifeature){
+        if(verbose_opt[0]>1)
+          std::cout << "feature " << ifeature << endl;
+        OGRFeature *readFeature=getFeatureRef(ifeature,ilayer);
+        if(readFeature)
+          geomColl.addGeometry(readFeature->GetGeometryRef());
+      }
+
+      //test
+      std::cout << "debug4" << std::endl;
+      OGRFeature *writeFeature=ogrWriter.createFeature(ilayer);
+      //test
+      std::cout << "debug5" << std::endl;
+    //todo: only set convexHulled features. check if NULL features are a problem when writing
+    // ogrWriter.pushFeature(writeFeature,ilayer);
+      OGRGeometry *pGeom=geomColl.ConvexHull();
+      //test
+      std::cout << "debug6" << std::endl;
+      OGRFeature *poFeature=ogrWriter.createFeature(ilayer);
+      //test
+      std::cout << "debug7" << std::endl;
+      poFeature->SetField("id",1);
+      //test
+      std::cout << "debug8" << std::endl;
+      poFeature->SetGeometry(pGeom);
+      //test
+      std::cout << "debug9" << std::endl;
+      ogrWriter.pushFeature(poFeature,ilayer);
+      //test
+      std::cout << "debug10" << std::endl;
+      //todo:check if need to destroy feature?
+      // destroyEmptyFeatures(ilayer);
     }
     return(OGRERR_NONE);
   }
@@ -963,15 +1090,25 @@ unsigned int VectorOgr::readFeatures(){
 
 ///read all features from an OGR dataset, specifying layer, attribute filter and spatial filter optionally
 unsigned int VectorOgr::readFeatures(size_t ilayer){
+  //test
+  std::cout << "readFeatures 0" << std::endl;
   if(ilayer>=m_features.size()){
     std::cout << "Warning: resize m_features" << std::endl;
     m_features.resize(ilayer+1);
   }
+  //test
+  std::cout << "readFeatures 1" << std::endl;
   unsigned int nfeatures=0;
   OGRFeature *poFeature;
   //start reading features from the layer
+  //test
+  std::cout << "readFeatures 2" << std::endl;
   m_layer[ilayer]->ResetReading();
+  //test
+  std::cout << "readFeatures 3" << std::endl;
   while( (poFeature = m_layer[ilayer]->GetNextFeature()) != NULL ){
+    //test
+    std::cout << "nfeatures: " << nfeatures << std::endl;
     m_features[ilayer].push_back(poFeature);
     ++nfeatures;
   }
@@ -1034,7 +1171,7 @@ OGRErr VectorOgr::addPoint(double x, double y, const std::map<std::string,double
   pt.setX(x);
   pt.setY(y);
   poFeature->SetGeometry( &pt );
-  return(pushFeature(poFeature));
+  return(pushFeature(poFeature,ilayer));
 }
 
  OGRErr VectorOgr::addPoint(double x, double y, const std::map<std::string,double>& pointAttributes, size_t ilayer){
@@ -1051,7 +1188,7 @@ OGRErr VectorOgr::addPoint(double x, double y, const std::map<std::string,double
   pt.setX(x);
   pt.setY(y);
   poFeature->SetGeometry( &pt );
-  return(pushFeature(poFeature));
+  return(pushFeature(poFeature,ilayer));
 }
 
 

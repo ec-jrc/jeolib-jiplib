@@ -24,6 +24,8 @@ using namespace std;
 shared_ptr<VectorOgr> Jim::polygonize(app::AppFactory& app, std::shared_ptr<Jim> mask){
   shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
   polygonize(*ogrWriter, app, mask);
+  //test
+  cout << "number of features: " << ogrWriter->getFeatureCount() << endl;
   return(ogrWriter);
 }
 
@@ -139,8 +141,24 @@ void Jim::polygonize(VectorOgr&ogrWriter, app::AppFactory &theApp, std::shared_p
           dfComplete=1.0;
           pfnProgress(dfComplete,pszMessage,pProgressArg);
         }
-        if(verbose_opt[0])
-          cout << "number of features: " << OGR_L_GetFeatureCount((OGRLayerH)ogrWriter.getLayer(),TRUE) << endl;
+        //test
+        std::cout << "number of layers 0: " << ogrWriter.getLayerCount() << std::endl;
+        // ogrWriter.write();
+        // ogrWriter.readFeatures();
+        for(size_t ilayer=0;ilayer<ogrWriter.getLayerCount();++ilayer){
+          OGRFeature *poFeature;
+          //start reading features from the layer
+          ogrWriter.getLayer(ilayer)->ResetReading();
+          while( (poFeature = ogrWriter.getLayer(ilayer)->GetNextFeature()) != NULL )
+            ogrWriter.pushFeature(poFeature,ilayer);
+        }
+        //test
+        std::cout << "number of layers 1: " << ogrWriter.getLayerCount() << std::endl;
+        // ogrWriter.close();
+        // ogrWriter.open(output_opt[0]);
+        //test
+        std::cout << "number of layers 2: " << ogrWriter.getLayerCount() << std::endl;
+        std::cout << "number of features: " << ogrWriter.getFeatureCount() << std::endl;
       }
     }
     else{

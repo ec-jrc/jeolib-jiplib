@@ -202,6 +202,8 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   std::shared_ptr<VectorOgr> intersect(const Jim& aJim, app::AppFactory& app);
   OGRErr intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFactory& app);
   OGRErr intersect(const Jim& aJim, VectorOgr& ogrWriter, app::AppFactory& app);
+  std::shared_ptr<VectorOgr> convexHull(app::AppFactory& app);
+  OGRErr convexHull(VectorOgr& ogrWriter, app::AppFactory& app);
   ///get access mode
   unsigned int getAccess(){return m_access;};
   ///set access mode
@@ -426,6 +428,8 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   /* ///static function for coordinate transform of a vector of points based on OGRSpatialReference */
   /* static bool transform(std::vector<double> &xvector, std::vector<double> &yvector, OGRSpatialReference *sourceSRS, OGRSpatialReference *targetSRS); */
   /* static OGRErr join(VectorOgr &ogrReader1, VectorOgr &ogrReader2, VectorOgr &ogrWriter, app::AppFactory& app); */
+  unsigned int readFeatures();
+  unsigned int readFeatures(size_t ilayer);
  private:
   ///train SVM classifier
   std::string trainSVM(app::AppFactory& app);
@@ -440,8 +444,6 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///classify ANN
   void classifyANN(VectorOgr& ogrWriter, app::AppFactory& app);
   ///read all features from an OGR dataset, attribute filter and spatial filter optionally
-  unsigned int readFeatures();
-  unsigned int readFeatures(size_t ilayer);
   std::string m_filename;
   unsigned int m_access;
   /* std::string m_projection; */

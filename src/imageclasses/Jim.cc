@@ -1435,6 +1435,11 @@ CPLErr Jim::open(const std::string& filename, bool readData, unsigned int memory
 
 CPLErr Jim::registerDriver()
 {
+  //close if gdaldataset was already set
+  if(m_gds)
+    GDALClose(m_gds);
+  m_gds=0;
+
   GDALAllRegister();
   if(writeMode()){
     GDALDriver *poDriver;
