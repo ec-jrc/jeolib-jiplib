@@ -1462,6 +1462,11 @@ CPLErr Jim::registerDriver()
       papszOptions=CSLAddString(papszOptions,optionIt->c_str());
 
     m_gds=poDriver->Create(m_filename.c_str(),nrOfCol(),nrOfRow(),nrOfBand(),getGDALDataType(),papszOptions);
+    if(!m_gds){
+      std::ostringstream s;
+      s << "Error: could not create driver for " << m_filename;
+      throw(s.str());
+    }
     // m_gds=poDriver->Create(m_filename.c_str(),m_ncol,m_nrow,m_nband,m_dataType,papszOptions);
     vector<double> gt(6);
     getGeoTransform(gt);

@@ -111,7 +111,6 @@ This file is part of jiplib
 // 20170317
 // integer box array with 2,4, or 6 size parameters (1-D, 2-D, or 3-D images respectively)
 %typemap(in) (int *box) {
-    std::cout << "we are in typemap(in) int *box for jiplib::Jim::$symname" << std::endl;
   int i, dim;
   $1 =  (int *) calloc(6, sizeof(int));
   if (!PySequence_Check($input)) {

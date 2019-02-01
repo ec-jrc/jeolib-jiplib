@@ -172,36 +172,16 @@ OGRErr VectorOgr::open(const std::string& ogrFilename, const std::vector<std::st
 ///open a GDAL vector dataset for writing with layers to be pushed later
 OGRErr VectorOgr::open(const std::string& filename, const std::string& imageType, unsigned int access){
   try{
-    std::cout << "filename: " << filename << std::endl;
-    //test
-    std::cout << "debug000" << std::endl;
-    // setAccess(GDAL_OF_UPDATE);
     setAccess(access);
-    //test
-    std::cout << "m_filename: " << getFileName() << std::endl;
-    std::cout << "set m_filename to : " << filename << std::endl;
-    std::cout << "debug001" << std::endl;
     m_filename = filename;
-    //test
-    std::cout << "debug002" << std::endl;
-    //test
-    std::cout << "debug003" << std::endl;
     setCodec(filename,imageType);
-    //test
-    std::cout << "debug004" << std::endl;
     if( m_gds == NULL ){
-      //test
-      std::cout << "debug4" << std::endl;
       std::string errorString="Open failed (1)";
       throw(errorString);
     }
-    //test
-    std::cout << "debug5" << std::endl;
     return(OGRERR_NONE);
   }
   catch(std::string errorString){
-    //test
-    std::cout << "debug6" << std::endl;
     std::cerr << errorString << std::endl;
     throw;
   }
@@ -645,7 +625,7 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
           }
         }
       }
-      //test
+      //todo: check if needed?
       destroyEmptyFeatures(ilayer);
     }
     return(OGRERR_NONE);
@@ -705,54 +685,28 @@ OGRErr VectorOgr::convexHull(VectorOgr& ogrWriter, app::AppFactory& app){
     }
 
     ogrWriter.open(output_opt[0],ogrformat_opt[0]);
-    //test
-    std::cout << "debug1" << std::endl;
-    std::cout << "number of layers: " << getLayerCount() << std::endl;
-
     for(int ilayer=0;ilayer<getLayerCount();++ilayer){
-      std::cout << "debug2" << std::endl;
       ogrWriter.pushLayer(getLayerName(ilayer),getLayer(ilayer)->GetSpatialRef(),wkbPolygon,papszOptions);
 // #if JIPLIB_PROCESS_IN_PARALLEL == 1
 // #pragma omp parallel for
 // #else
 // #endif
       ogrWriter.createField("id",OFTInteger,ilayer);
-
-      //test
-      std::cout << "debug3" << std::endl;
-      std::cout << "number of features: " << getFeatureCount(ilayer) << std::endl;
-      //test
       OGRGeometryCollection geomColl;
       for(size_t ifeature=0;ifeature<getFeatureCount(ilayer);++ifeature){
-        if(verbose_opt[0]>1)
-          std::cout << "feature " << ifeature << endl;
         OGRFeature *readFeature=getFeatureRef(ifeature,ilayer);
         if(readFeature)
           geomColl.addGeometry(readFeature->GetGeometryRef());
       }
 
-      //test
-      std::cout << "debug4" << std::endl;
       OGRFeature *writeFeature=ogrWriter.createFeature(ilayer);
-      //test
-      std::cout << "debug5" << std::endl;
-    //todo: only set convexHulled features. check if NULL features are a problem when writing
-    // ogrWriter.pushFeature(writeFeature,ilayer);
+      //todo: only set convexHulled features. check if NULL features are a problem when writing
+      // ogrWriter.pushFeature(writeFeature,ilayer);
       OGRGeometry *pGeom=geomColl.ConvexHull();
-      //test
-      std::cout << "debug6" << std::endl;
       OGRFeature *poFeature=ogrWriter.createFeature(ilayer);
-      //test
-      std::cout << "debug7" << std::endl;
       poFeature->SetField("id",1);
-      //test
-      std::cout << "debug8" << std::endl;
       poFeature->SetGeometry(pGeom);
-      //test
-      std::cout << "debug9" << std::endl;
       ogrWriter.pushFeature(poFeature,ilayer);
-      //test
-      std::cout << "debug10" << std::endl;
       //todo:check if need to destroy feature?
       // destroyEmptyFeatures(ilayer);
     }
@@ -1090,25 +1044,15 @@ unsigned int VectorOgr::readFeatures(){
 
 ///read all features from an OGR dataset, specifying layer, attribute filter and spatial filter optionally
 unsigned int VectorOgr::readFeatures(size_t ilayer){
-  //test
-  std::cout << "readFeatures 0" << std::endl;
   if(ilayer>=m_features.size()){
     std::cout << "Warning: resize m_features" << std::endl;
     m_features.resize(ilayer+1);
   }
-  //test
-  std::cout << "readFeatures 1" << std::endl;
   unsigned int nfeatures=0;
   OGRFeature *poFeature;
   //start reading features from the layer
-  //test
-  std::cout << "readFeatures 2" << std::endl;
   m_layer[ilayer]->ResetReading();
-  //test
-  std::cout << "readFeatures 3" << std::endl;
   while( (poFeature = m_layer[ilayer]->GetNextFeature()) != NULL ){
-    //test
-    std::cout << "nfeatures: " << nfeatures << std::endl;
     m_features[ilayer].push_back(poFeature);
     ++nfeatures;
   }
