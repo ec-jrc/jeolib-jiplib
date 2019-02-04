@@ -57,7 +57,7 @@ extern "C" {
 #endif
 
 #include <Python.h>
-#include "numpy/arrayobject.h"
+/* #include "numpy/arrayobject.h" */
 
 namespace app{
   class AppFactory;

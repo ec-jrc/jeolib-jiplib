@@ -27,20 +27,20 @@ using namespace std;
 //see also: https://docs.scipy.org/doc/numpy-1.10.0/user/c-info.how-to-extend.html
 // and https://stackoverflow.com/questions/47026900/pyarray-check-gives-segmentation-fault-with-cython-c
 //just called only once
-int init_numpy(){
-  return _import_array(); // PyError if not successful
-  // return 0;
-}
+// int init_numpy(){
+//   return _import_array(); // PyError if not successful
+//   // return 0;
+// }
 
-const static int numpy_initialized =  init_numpy();
+// const static int numpy_initialized =  init_numpy();
 
-void parse_ndarraray(PyObject *obj) { // would be called every time
-  if (PyArray_Check(obj)) {
-    cout << "PyArray_Check Passed" << endl;
-  } else {
-    cout << "PyArray_Check Failed" << endl;
-  }
-}
+// void parse_ndarraray(PyObject *obj) { // would be called every time
+//   if (PyArray_Check(obj)) {
+//     cout << "PyArray_Check Passed" << endl;
+//   } else {
+//     cout << "PyArray_Check Failed" << endl;
+//   }
+// }
 
 Jim::Jim(){
   reset();
