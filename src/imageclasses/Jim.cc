@@ -3823,6 +3823,45 @@ CPLErr Jim::rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vect
   return(CE_None);
 }
 
+void Jim::d_rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption, const std::vector<std::string>& layernames ){
+  if(m_blockSize<nrOfRow()){
+    std::ostringstream s;
+    s << "Error: increase memory to perform rasterize in entirely in buffer (now at " << 100.0*m_blockSize/nrOfRow() << "%)";
+    throw(s.str());
+  }
+  std::vector<OGRLayerH> layers;
+  if(layernames.size()){
+    for(std::vector<std::string>::const_iterator nit=layernames.begin();nit!=layernames.end();++nit)
+      layers.push_back((OGRLayerH)ogrReader.getLayer(*nit));
+  }
+  else{
+    for(size_t ilayer=0;ilayer<ogrReader.getLayerCount();++ilayer)
+      layers.push_back((OGRLayerH)ogrReader.getLayer(ilayer));
+  }
+  void* pTransformArg=NULL;
+  GDALProgressFunc pfnProgress=NULL;
+  void* pProgressArg=NULL;
+
+  char **coptions=NULL;
+  for(std::vector<std::string>::const_iterator optionIt=eoption.begin();optionIt!=eoption.end();++optionIt)
+    coptions=CSLAddString(coptions,optionIt->c_str());
+
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+  for(int iband=0;iband<nrOfBand();++iband){
+    Vector2d<double> initBlock(nrOfRow(),nrOfCol());
+    writeDataBlock(initBlock,0,nrOfCol()-1,0,nrOfRow()-1,iband);
+    vector<double> gt(6);
+    getGeoTransform(gt);
+    if(GDALRasterizeLayersBuf(m_data[iband],nrOfCol(),nrOfRow(),getGDALDataType(),getDataTypeSizeBytes(),0,layers.size(),&(layers[0]), getProjectionRef().c_str(),&gt[0],NULL, pTransformArg, burnValue, coptions,pfnProgress,pProgressArg)!=CE_None){
+      std::string errorString(CPLGetLastErrorMsg());
+      throw(errorString);
+    }
+  }
+}
+
 /**
  *
  *

@@ -731,6 +731,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   CPLErr setMetadata(char** metadata);
   CPLErr rasterizeBuf(const std::string& ogrFilename);
   CPLErr rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption=std::vector<std::string>(), const std::vector<std::string>& layernames=std::vector<std::string>());
+  void d_rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption=std::vector<std::string>(), const std::vector<std::string>& layernames=std::vector<std::string>());
 
   /* CPLErr rasterizeLayersBuf(std::vector<OGRLayer*>& layers, double burnValue=1.0); */
   /* CPLErr rasterizeLayersBuf(OGRLayer* layer, double burnValue=1.0){std::vector<OGRLayer*> layers;layers.push_back(layer);rasterizeLayersBuf(layers,burnValue);}; */

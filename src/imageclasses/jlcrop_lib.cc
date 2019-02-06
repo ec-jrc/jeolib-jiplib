@@ -1960,9 +1960,9 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
       double layer_uly;
       double layer_lrx;
       double layer_lry;
-      if(verbose_opt[0])
-        std::cout << "getExtent " << std::endl;
       sampleReader.getExtent(layer_ulx,layer_uly,layer_lrx,layer_lry,ilayer,sample2img);
+      if(verbose_opt[0])
+        std::cout << "getExtent: " << layer_ulx << ", " << layer_uly << ", " << layer_lrx << ", " << layer_lry << std::endl;
 
       if(doInit){
         ulx_opt[0]=layer_ulx;
@@ -1977,11 +1977,12 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
         if(layer_uly>uly_opt[0])
           uly_opt[0]=layer_uly;
         if(layer_lrx>lrx_opt[0])
-          ulx_opt[0]=layer_lrx;
+          lrx_opt[0]=layer_lrx;
         if(layer_lry<lry_opt[0])
           lry_opt[0]=layer_lry;
       }
     }
+
     //ulx_opt[0],uly_opt[0],lrx_opt[0],lry_opt[0] now is maximum extent over all selected layers
     if(croplrx>cropulx&&cropulx>ulx_opt[0])
       ulx_opt[0]=cropulx;
