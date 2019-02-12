@@ -1936,7 +1936,11 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
       OGRSpatialReference *sampleSpatialRef=readLayer->GetSpatialRef();
       OGRCoordinateTransformation *sample2img = OGRCreateCoordinateTransformation(sampleSpatialRef, &thisSpatialRef);
       OGRCoordinateTransformation *img2sample = OGRCreateCoordinateTransformation(&thisSpatialRef, sampleSpatialRef);
-      if(thisSpatialRef.IsSame(sampleSpatialRef)){
+      if(!sampleSpatialRef){
+        sample2img=0;
+        img2sample=0;
+      }
+      else if(thisSpatialRef.IsSame(sampleSpatialRef)){
         sample2img=0;
         img2sample=0;
       }

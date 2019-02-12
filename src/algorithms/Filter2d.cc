@@ -67,6 +67,44 @@ void filter2d::Filter2d::smooth(Jim& input, Jim& output, int dimX, int dimY)
 }
 
 
+void filter2d::Filter2d::filter(Jim& input, Jim& output, bool absolute, bool normalize){
+  if(!output.isInit())
+    output.open(input);
+  output.setNoData(m_noDataValues);
+
+  size_t dimx=input.nrOfCol();
+  size_t dimy=input.nrOfRow();
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+  for(unsigned int iband=0;iband<input.nrOfBand();++iband){
+    switch(input.getDataType()){
+    case(GDT_Byte):
+      filter<unsigned char>(static_cast<unsigned char*>(input.getDataPointer()),static_cast<unsigned char*>(output.getDataPointer()), dimx, dimy, absolute,normalize);
+      break;
+    case(GDT_Int16):
+      filter<short>(static_cast<short*>(input.getDataPointer()),static_cast<short*>(output.getDataPointer()), dimx, dimy, absolute,normalize);
+      break;
+    case(GDT_UInt16):
+      filter<unsigned short>(static_cast<unsigned short*>(input.getDataPointer()),static_cast<unsigned short*>(output.getDataPointer()), dimx, dimy, absolute,normalize);
+      break;
+    case(GDT_Int32):
+      filter<int>(static_cast<int*>(input.getDataPointer()),static_cast<int*>(output.getDataPointer()), dimx, dimy, absolute,normalize);
+      break;
+    case(GDT_UInt32):
+      filter<unsigned int>(static_cast<unsigned int*>(input.getDataPointer()),static_cast<unsigned int*>(output.getDataPointer()), dimx, dimy, absolute,normalize);
+      break;
+    case(GDT_Float32):
+      filter<float>(static_cast<float*>(input.getDataPointer()),static_cast<float*>(output.getDataPointer()), dimx, dimy, absolute,normalize);
+      break;
+    case(GDT_Float64):
+      filter<double>(static_cast<double*>(input.getDataPointer()),static_cast<double*>(output.getDataPointer()), dimx, dimy, absolute,normalize);
+      break;
+    }
+  }
+}
+
 void filter2d::Filter2d::filter(Jim& input, Jim& output, bool absolute, bool normalize, bool noData)
 {
   if(!output.isInit())
@@ -75,7 +113,6 @@ void filter2d::Filter2d::filter(Jim& input, Jim& output, bool absolute, bool nor
 
   int dimX=m_taps[0].size();//horizontal!!!
   int dimY=m_taps.size();//vertical!!!
-  //  byte* tmpbuf=new byte[input.rowSize()];
   const char* pszMessage;
   void* pProgressArg=NULL;
   GDALProgressFunc pfnProgress=GDALTermProgress;

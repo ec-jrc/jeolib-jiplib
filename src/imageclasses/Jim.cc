@@ -750,7 +750,7 @@ CPLErr Jim::setProjectionProj4(const std::string& projection)
       return(CE_Warning);
   }
   else
-    std::cerr << "Warning: empty projection" << std::endl;
+    // std::cerr << "Warning: empty projection" << std::endl;
     return(CE_Failure);
 }
 
@@ -1472,9 +1472,10 @@ CPLErr Jim::registerDriver()
     getGeoTransform(gt);
     if(setGeoTransform(gt)!=CE_None)
       std::cerr << "Warning: could not write geotransform information in " << m_filename << std::endl;
-    if(setProjection(m_projection)!=CE_None)
-      std::cerr << "Warning: could not write projection information in " << m_filename << std::endl;
-
+    if(m_projection.size()){
+      if(setProjection(m_projection)!=CE_None)
+        std::cerr << "Warning: could not write projection information in " << m_filename << std::endl;
+    }
 
     if(m_noDataValues.size()){
       for(int iband=0;iband<nrOfBand();++iband)
@@ -3289,7 +3290,9 @@ CPLErr Jim::open(Jim& imgSrc, bool copyData)
   m_nband=imgSrc.nrOfBand();
   m_nplane=imgSrc.nrOfPlane();
   m_dataType=imgSrc.getDataType();
-  setProjection(imgSrc.getProjection());
+  std::string srcProjection=imgSrc.getProjection();
+  if(srcProjection.size())
+    setProjection(srcProjection);
   copyGeoTransform(imgSrc);
   imgSrc.getNoDataValues(m_noDataValues);
   imgSrc.getScale(m_scale);
@@ -3783,6 +3786,30 @@ CPLErr Jim::rasterizeBuf(const std::string& ogrFilename){
 
 //todo: support transform
 ///Warning: this function cannot be exported via SWIG to Python as such, as it is destructive
+
+CPLErr Jim::rasterizeBuf(VectorOgr& ogrReader, app::AppFactory &app){
+// CPLErr Jim::rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption, const std::vector<std::string>& layernames ){
+  Optionjl<double> burn_opt("burn", "burn", "burn value", 1);
+  Optionjl<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ALL_TOUCHED=TRUE");
+  Optionjl<string> layernames_opt("ln", "ln", "Layer names");
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=burn_opt.retrieveOption(app);
+    eoption_opt.retrieveOption(app);
+    layernames_opt.retrieveOption(app);
+  }
+  catch(std::string predefinedString){
+    std::cout << predefinedString << std::endl;
+  }
+  if(!doProcess){
+    std::cout << std::endl;
+    std::ostringstream helpStream;
+    helpStream << "exception thrown due to help info";
+    throw(helpStream.str());//help was invoked, stop processing
+  }
+  return rasterizeBuf(ogrReader, burn_opt[0], eoption_opt, layernames_opt);
+}
+
 CPLErr Jim::rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption, const std::vector<std::string>& layernames ){
   if(m_blockSize<nrOfRow()){
     std::ostringstream s;
@@ -3806,10 +3833,10 @@ CPLErr Jim::rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vect
   for(std::vector<std::string>::const_iterator optionIt=eoption.begin();optionIt!=eoption.end();++optionIt)
     coptions=CSLAddString(coptions,optionIt->c_str());
 
-#if JIPLIB_PROCESS_IN_PARALLEL == 1
-#pragma omp parallel for
-#else
-#endif
+// #if JIPLIB_PROCESS_IN_PARALLEL == 1
+// #pragma omp parallel for
+// #else
+// #endif
   for(int iband=0;iband<nrOfBand();++iband){
     Vector2d<double> initBlock(nrOfRow(),nrOfCol());
     writeDataBlock(initBlock,0,nrOfCol()-1,0,nrOfRow()-1,iband);
@@ -3821,6 +3848,42 @@ CPLErr Jim::rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vect
     }
   }
   return(CE_None);
+}
+
+void Jim::d_rasterizeBuf(VectorOgr& ogrReader, app::AppFactory &app){
+  Optionjl<double> burn_opt("burn", "burn", "burn value", 1);
+  Optionjl<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ALL_TOUCHED=TRUE");
+  Optionjl<string> layernames_opt("ln", "ln", "Layer names");
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=burn_opt.retrieveOption(app);
+    eoption_opt.retrieveOption(app);
+    layernames_opt.retrieveOption(app);
+  }
+  catch(std::string predefinedString){
+    std::cout << predefinedString << std::endl;
+  }
+  if(!doProcess){
+    std::cout << std::endl;
+    std::ostringstream helpStream;
+    helpStream << "exception thrown due to help info";
+    throw(helpStream.str());//help was invoked, stop processing
+  }
+  try{
+    doProcess=burn_opt.retrieveOption(app);
+    eoption_opt.retrieveOption(app);
+    layernames_opt.retrieveOption(app);
+  }
+  catch(std::string predefinedString){
+    std::cout << predefinedString << std::endl;
+  }
+  if(!doProcess){
+    std::cout << std::endl;
+    std::ostringstream helpStream;
+    helpStream << "exception thrown due to help info";
+    throw(helpStream.str());//help was invoked, stop processing
+  }
+  d_rasterizeBuf(ogrReader, burn_opt[0], eoption_opt, layernames_opt);
 }
 
 void Jim::d_rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption, const std::vector<std::string>& layernames ){
@@ -3846,10 +3909,10 @@ void Jim::d_rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vect
   for(std::vector<std::string>::const_iterator optionIt=eoption.begin();optionIt!=eoption.end();++optionIt)
     coptions=CSLAddString(coptions,optionIt->c_str());
 
-#if JIPLIB_PROCESS_IN_PARALLEL == 1
-#pragma omp parallel for
-#else
-#endif
+// #if JIPLIB_PROCESS_IN_PARALLEL == 1
+// #pragma omp parallel for
+// #else
+// #endif
   for(int iband=0;iband<nrOfBand();++iband){
     Vector2d<double> initBlock(nrOfRow(),nrOfCol());
     writeDataBlock(initBlock,0,nrOfCol()-1,0,nrOfRow()-1,iband);

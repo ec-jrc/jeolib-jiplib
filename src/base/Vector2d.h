@@ -50,7 +50,7 @@ public:
     }
   };
   void selectCols(const std::list<int> &cols);
-  void sort(Vector2d<T>& output);  
+  void sort(Vector2d<T>& output);
   void scale(const std::vector<double> &scaleVector, const std::vector<double> &offsetVector, Vector2d<T>& scaledOutput);
   void scale(const T lbound, const T ubound, std::vector<double> &scaleVector, std::vector<double> &offsetVector, Vector2d<T>& scaledOutput);
   Vector2d<T>& operator=(const Vector2d<T>& v1);
@@ -63,13 +63,13 @@ public:
 
   T sum() const;
 };
-  
-template<class T> Vector2d<T>::Vector2d() 
+
+template<class T> Vector2d<T>::Vector2d()
   : std::vector< std::vector<T> >()
 {
 }
 
-template<class T> Vector2d<T>::~Vector2d() 
+template<class T> Vector2d<T>::~Vector2d()
 {
 }
 
@@ -101,7 +101,7 @@ template<class T> Vector2d<T>& Vector2d<T>::operator+=(const Vector2d<T>& v1){
   return *this;
 }
 
-template<class T> Vector2d<T>::Vector2d(int nrow) 
+template<class T> Vector2d<T>::Vector2d(int nrow)
   : std::vector< std::vector<T> >(nrow)
 {
 }

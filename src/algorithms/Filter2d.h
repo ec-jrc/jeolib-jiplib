@@ -78,11 +78,14 @@ public:
   void pushThreshold(double theThreshold){m_threshold.push_back(theThreshold);};
   void setThresholds(const std::vector<double>& theThresholds){m_threshold=theThresholds;};
   void setClasses(const std::vector<short>& theClasses){m_class=theClasses;};
-  void filter(Jim& input, Jim& output, bool absolute=false, bool normalize=false, bool noData=false);
+  void filter(Jim& input, Jim& output, bool absolute=false, bool normalize=false);
+  void filter(Jim& input, Jim& output, bool absolute, bool normalize, bool noData);
   void smooth(Jim& input, Jim& output,int dim);
   void smooth(Jim& input, Jim& output,int dimX, int dimY);
   void smoothNoData(Jim& input, Jim& output,int dim);
   void smoothNoData(Jim& input, Jim& output,int dimX, int dimY);
+
+  template<class T> void filter(T* inputVector, T* outputVector, size_t dimx, size_t dimy, bool absolute=false, bool normalize=false);
   template<class T1, class T2> void filter(const Vector2d<T1>& inputVector, Vector2d<T2>& outputVector);
   template<class T1, class T2> void smooth(const Vector2d<T1>& inputVector, Vector2d<T2>& outputVector,int dim);
   template<class T1, class T2> void smooth(const Vector2d<T1>& inputVector, Vector2d<T2>& outputVector,int dimX, int dimY);
@@ -114,7 +117,7 @@ public:
   template<class T> void shift(const Vector2d<T>& input, Vector2d<T>& output, double offsetX=0, double offsetY=0, double randomSigma=0, RESAMPLE resample=NEAR, bool verbose=false);
   void linearFeature(const Vector2d<float>& input, std::vector< Vector2d<float> >& output, float angle=361, float angleStep=1, float maxDistance=0, float eps=0, bool l1=true, bool a1=true, bool l2=true, bool a2=true, bool verbose=false);
   void linearFeature(Jim& input, Jim& output, float angle=361, float angleStep=1, float maxDistance=0, float eps=0, bool l1=true, bool a1=true, bool l2=true, bool a2=true, int band=0, bool verbose=false);
-  
+
 private:
   static void initMap(std::map<std::string, FILTER_TYPE>& m_filterMap){
     //initialize selMap
@@ -181,67 +184,56 @@ private:
     for(int j=0;j<dimY;++j){
       m_taps[j].resize(dimX);
       for(int i=0;i<dimX;++i)
-	m_taps[j][i]=1.0/dimX/dimY;
+        m_taps[j][i]=1.0/dimX/dimY;
     }
     filter(inputVector,outputVector);
   }
-  
-  template<class T1, class T2> void Filter2d::filter(const Vector2d<T1>& inputVector, Vector2d<T2>& outputVector)
-  {
-    outputVector.resize(inputVector.size());
-    int dimX=m_taps[0].size();//horizontal!!!
-    int dimY=m_taps.size();//vertical!!!
-    Vector2d<T1> inBuffer(dimY);
-    std::vector<T2> outBuffer(inputVector[0].size());
-    //initialize last half of inBuffer
-    int indexI=0;
-    int indexJ=0;
-    //initialize last half of inBuffer
-    for(int j=-(dimY-1)/2;j<=dimY/2;++j){
-      inBuffer[indexJ]=inputVector[abs(j)];
-      ++indexJ;
-    }
 
-    for(int y=0;y<inputVector.size();++y){
-      if(y){//inBuffer already initialized for y=0
-        //erase first line from inBuffer
-        inBuffer.erase(inBuffer.begin());
-        //read extra line and push back to inBuffer if not out of bounds
-        if(y+dimY/2<inputVector.size()){
-	  //allocate buffer
-          inBuffer.push_back(inputVector[y+dimY/2]);
-        }
-        else{
-          int over=y+dimY/2-inputVector.nRows();
-          int index=(inBuffer.size()-1)-over;
-          assert(index>=0);
-          assert(index<inBuffer.size());
-          inBuffer.push_back(inBuffer[index]);
-        }
-      }
-      for(int x=0;x<inputVector.nCols();++x){
-        outBuffer[x]=0;
-	for(int j=-(dimY-1)/2;j<=dimY/2;++j){
-	  for(int i=-(dimX-1)/2;i<=dimX/2;++i){
-	    indexI=x+i;
-	    indexJ=(dimY-1)/2+j;
-	    //check if out of bounds
-	    if(x<(dimX-1)/2)
-	      indexI=x+abs(i);
-	    else if(x>=inputVector.nCols()-(dimX-1)/2)
-	      indexI=x-abs(i);
-	    if(y<(dimY-1)/2)
-	      indexJ=(dimY-1)/2+abs(j);
-	    else if(y>=inputVector.nRows()-(dimY-1)/2)
-	      indexJ=(dimY-1)/2-abs(j);
-            outBuffer[x]+=(m_taps[(dimY-1)/2+j][(dimX-1)/2+i]*inBuffer[indexJ][indexI]);
-          }
-        }
-      }
-      //copy outBuffer to outputVector
-      outputVector[y]=outBuffer;
-    }
-  }
+ template<class T> void Filter2d::filter(T* inputVector, T* outputVector, size_t dimx, size_t dimy, bool absolute, bool normalize)
+ {
+   //todo: if kernel is not symmetric, we need to flip it...
+   int dimX=m_taps[0].size();//horizontal!!!
+   int dimY=m_taps.size();//vertical!!!
+   int indexI=0;
+   int indexJ=0;
+   for(int y=0;y<dimy;++y){
+     for(int x=0;x<dimx;++x){
+       double norm=0;
+       double accumulator=0;
+       for(int j=-(dimY-1)/2;j<=dimY/2;++j){
+         for(int i=-(dimX-1)/2;i<=dimX/2;++i){
+           indexI=x+i;
+           indexJ=y+(dimY-1)/2+j;
+           //check if out of bounds
+           if(x<(dimX-1)/2)
+             indexI=x+abs(i);
+           else if(x>=dimx-(dimX-1)/2)
+             indexI=x-abs(i);
+           if(y<(dimY-1)/2)
+             indexJ=y+(dimY-1)/2+abs(j);
+           else if(y>=dimy-(dimY-1)/2)
+             indexJ=y+(dimY-1)/2-abs(j);
+           //do not take masked values into account
+           bool masked=false;
+           for(int imask=0;imask<m_noDataValues.size();++imask){
+             if(inputVector[indexJ*dimy+indexI]==m_noDataValues[imask]){
+               masked=true;
+               break;
+             }
+           }
+           if(!masked){
+             outputVector[y*dimx+x]+=(m_taps[(dimY-1)/2+j][(dimX-1)/2+i]*inputVector[indexJ*dimy+indexI]);
+             norm+=m_taps[(dimY-1)/2+j][(dimX-1)/2+i];
+           }
+         }
+       }
+       if(absolute)
+         outputVector[y*dimx+x]=(normalize&&norm)? abs(outputVector[y*dimx+x])/norm : abs(outputVector[y*dimx+x]);
+       else if(normalize&&norm!=0)
+         outputVector[y*dimx+x]=outputVector[y*dimx+x]/norm;
+     }
+   }
+ }
 
 template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector, Vector2d<T2>& outputVector, const std::string& method, int dimX, int dimY, short down, bool disc)
 {
@@ -263,7 +255,7 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
   outputVector.resize((inputVector.size()+down-1)/down);
   Vector2d<T1> inBuffer(dimY);
   std::vector<T2> outBuffer((inputVector[0].size()+down-1)/down);
-  
+
   int indexI=0;
   int indexJ=0;
   //initialize last half of inBuffer
@@ -272,13 +264,13 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
     ++indexJ;
   }
   for(int y=0;y<inputVector.size();++y){
-    
+
     if(y){//inBuffer already initialized for y=0
       //erase first line from inBuffer
       inBuffer.erase(inBuffer.begin());
       //read extra line and push back to inBuffer if not out of bounds
       if(y+dimY/2<inputVector.size())
-	inBuffer.push_back(inputVector[y+dimY/2]);
+  inBuffer.push_back(inputVector[y+dimY/2]);
       else{
         int over=y+dimY/2-inputVector.size();
         int index=(inBuffer.size()-1)-over;
@@ -299,8 +291,8 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
       int centre=dimX*(dimY-1)/2+(dimX-1)/2;
       for(int j=-(dimY-1)/2;j<=dimY/2;++j){
         for(int i=-(dimX-1)/2;i<=dimX/2;++i){
-	  indexI=x+i;
-	  //check if out of bounds
+    indexI=x+i;
+    //check if out of bounds
           if(indexI<0)
             indexI=-indexI;
           else if(indexI>=inputVector[0].size())
@@ -328,7 +320,7 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
       }
       switch(getFilterType(method)){
       case(filter2d::nvalid):
-	outBuffer[x/down]=stat.nvalid(windowBuffer);
+  outBuffer[x/down]=stat.nvalid(windowBuffer);
         break;
       case(filter2d::median):
         outBuffer[x/down]=stat.median(windowBuffer);
@@ -341,7 +333,7 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
         T2 varValue=stat.var(windowBuffer);
         if(stat.isNoData(varValue))
           outBuffer[x/down]=noDataValue;
-        else          
+        else
           outBuffer[x/down]=sqrt(varValue);
         break;
       }
@@ -405,17 +397,17 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
         break;
       }
       case(filter2d::percentile):{
-	assert(m_threshold.size());
+  assert(m_threshold.size());
         outBuffer[x/down]=stat.percentile(windowBuffer,windowBuffer.begin(),windowBuffer.end(),m_threshold[0]);
         break;
       }
       case(filter2d::proportion):{
         stat.eraseNoData(windowBuffer);
-	T2 sum=stat.sum(windowBuffer);
-	if(sum)
-	  outBuffer[x/down]=windowBuffer[centre]/sum;
-	else
-	  outBuffer[x/down]=noDataValue;
+  T2 sum=stat.sum(windowBuffer);
+  if(sum)
+    outBuffer[x/down]=windowBuffer[centre]/sum;
+  else
+    outBuffer[x/down]=noDataValue;
         break;
       }
       case(filter2d::homog):{
@@ -498,10 +490,10 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
       }
       case(filter2d::countid):{
         if(occurrence.size())
-	  outBuffer[x/down]=occurrence.size();
-	else
-	  outBuffer[x/down]=noDataValue;
-	break;
+    outBuffer[x/down]=occurrence.size();
+  else
+    outBuffer[x/down]=noDataValue;
+  break;
       }
       case(filter2d::mode):{
         if(occurrence.size()){
@@ -534,18 +526,18 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
         break;
       }
       case(filter2d::scramble):{//could be done more efficiently window by window with random shuffling entire buffer and assigning entire buffer at once to output image...
-	if(windowBuffer.size()){
-	  int randomIndex=std::rand()%windowBuffer.size();
-	  if(randomIndex>=windowBuffer.size())
-	    outBuffer[x/down]=windowBuffer.back();
-	  else if(randomIndex<0)
-	    outBuffer[x/down]=windowBuffer[0];
-	  else
-	    outBuffer[x/down]=windowBuffer[randomIndex];
-	}
-	else
-	  outBuffer[x/down]=noDataValue;
-	break;
+  if(windowBuffer.size()){
+    int randomIndex=std::rand()%windowBuffer.size();
+    if(randomIndex>=windowBuffer.size())
+      outBuffer[x/down]=windowBuffer.back();
+    else if(randomIndex<0)
+      outBuffer[x/down]=windowBuffer[0];
+    else
+      outBuffer[x/down]=windowBuffer[randomIndex];
+  }
+  else
+    outBuffer[x/down]=noDataValue;
+  break;
       }
       case(filter2d::mixed):{
         enum MixType { BF=11, CF=12, MF=13, NF=20, W=30 };
@@ -885,37 +877,37 @@ template<class T> unsigned long int Filter2d::morphology(const Vector2d<T>& inpu
       short nmasked=0;
       std::vector<T> neighbors;
       for(int j=-(dimY-1)/2;j<=dimY/2;++j){
-	for(int i=-(dimX-1)/2;i<=dimX/2;++i){
-	  indexI=x+i;
-	  //check if out of bounds
-	  if(indexI<0)
-	    indexI=-indexI;
-	  else if(indexI>=tmpDSM.nCols())
-	    indexI=tmpDSM.nCols()-i;
-	  if(y+j<0)
-	    indexJ=-j;
-	  else if(y+j>=tmpDSM.nRows())
-	    indexJ=(dimY>2) ? (dimY-1)/2-j : 0;
-	  else
-	    indexJ=(dimY-1)/2+j;
-	  double difference=(centerValue-inBuffer[indexJ][indexI]);
-	  if(i||j)//skip centerValue
-	    neighbors.push_back(inBuffer[indexJ][indexI]);
-	  if(difference>hThreshold)
-	    ++nmasked;
-	}
+  for(int i=-(dimX-1)/2;i<=dimX/2;++i){
+    indexI=x+i;
+    //check if out of bounds
+    if(indexI<0)
+      indexI=-indexI;
+    else if(indexI>=tmpDSM.nCols())
+      indexI=tmpDSM.nCols()-i;
+    if(y+j<0)
+      indexJ=-j;
+    else if(y+j>=tmpDSM.nRows())
+      indexJ=(dimY>2) ? (dimY-1)/2-j : 0;
+    else
+      indexJ=(dimY-1)/2+j;
+    double difference=(centerValue-inBuffer[indexJ][indexI]);
+    if(i||j)//skip centerValue
+      neighbors.push_back(inBuffer[indexJ][indexI]);
+    if(difference>hThreshold)
+      ++nmasked;
+  }
       }
       if(nmasked<=nlimit){
-	++nchange;
-	//reset pixel in outputMask
-	outputMask[y][x]=0;
+  ++nchange;
+  //reset pixel in outputMask
+  outputMask[y][x]=0;
       }
       else{
-	//reset pixel height in tmpDSM
-	sort(neighbors.begin(),neighbors.end());
-	assert(neighbors.size()>1);
-	inBuffer[(dimY-1)/2][x]=neighbors[1];
-	/* inBuffer[(dimY-1)/2][x]=stat.mymin(neighbors); */
+  //reset pixel height in tmpDSM
+  sort(neighbors.begin(),neighbors.end());
+  assert(neighbors.size()>1);
+  inBuffer[(dimY-1)/2][x]=neighbors[1];
+  /* inBuffer[(dimY-1)/2][x]=stat.mymin(neighbors); */
       }
     }
     progress=(1.0+y);
@@ -979,37 +971,37 @@ template<class T> unsigned long int Filter2d::morphology(const Vector2d<T>& inpu
       short nmasked=0;
       std::vector<T> neighbors;
       for(int j=-(dimY-1)/2;j<=dimY/2;++j){
-	for(int i=-(dimX-1)/2;i<=dimX/2;++i){
-	  indexI=x+i;
-	  //check if out of bounds
-	  if(indexI<0)
-	    indexI=-indexI;
-	  else if(indexI>=tmpDSM.nCols())
-	    indexI=tmpDSM.nCols()-i;
-	  if(y+j<0)
-	    indexJ=-j;
-	  else if(y+j>=tmpDSM.nRows())
-	    indexJ=(dimY>2) ? (dimY-1)/2-j : 0;
-	  else
-	    indexJ=(dimY-1)/2+j;
-	  double difference=(centerValue-inBuffer[indexJ][indexI]);
-	  if(i||j)//skip centerValue
-	    neighbors.push_back(inBuffer[indexJ][indexI]);
-	  if(difference>hThreshold)
-	    ++nmasked;
-	}
+  for(int i=-(dimX-1)/2;i<=dimX/2;++i){
+    indexI=x+i;
+    //check if out of bounds
+    if(indexI<0)
+      indexI=-indexI;
+    else if(indexI>=tmpDSM.nCols())
+      indexI=tmpDSM.nCols()-i;
+    if(y+j<0)
+      indexJ=-j;
+    else if(y+j>=tmpDSM.nRows())
+      indexJ=(dimY>2) ? (dimY-1)/2-j : 0;
+    else
+      indexJ=(dimY-1)/2+j;
+    double difference=(centerValue-inBuffer[indexJ][indexI]);
+    if(i||j)//skip centerValue
+      neighbors.push_back(inBuffer[indexJ][indexI]);
+    if(difference>hThreshold)
+      ++nmasked;
+  }
       }
       if(nmasked<=nlimit){
-	++nchange;
-	//reset pixel in outputMask
-	outputMask[y][x]=0;
+  ++nchange;
+  //reset pixel in outputMask
+  outputMask[y][x]=0;
       }
       else{
-	//reset pixel height in tmpDSM
-	sort(neighbors.begin(),neighbors.end());
-	assert(neighbors.size()>1);
-	inBuffer[(dimY-1)/2][x]=neighbors[1];
-	/* inBuffer[(dimY-1)/2][x]=stat.mymin(neighbors); */
+  //reset pixel height in tmpDSM
+  sort(neighbors.begin(),neighbors.end());
+  assert(neighbors.size()>1);
+  inBuffer[(dimY-1)/2][x]=neighbors[1];
+  /* inBuffer[(dimY-1)/2][x]=stat.mymin(neighbors); */
       }
     }
     progress=(1.0+y);
@@ -1069,37 +1061,37 @@ template<class T> unsigned long int Filter2d::morphology(const Vector2d<T>& inpu
       short nmasked=0;
       std::vector<T> neighbors;
       for(int j=-(dimY-1)/2;j<=dimY/2;++j){
-	for(int i=-(dimX-1)/2;i<=dimX/2;++i){
-	  indexI=x+i;
-	  //check if out of bounds
-	  if(indexI<0)
-	    indexI=-indexI;
-	  else if(indexI>=tmpDSM.nCols())
-	    indexI=tmpDSM.nCols()-i;
-	  if(y+j<0)
-	    indexJ=-j;
-	  else if(y+j>=tmpDSM.nRows())
-	    indexJ=(dimY>2) ? (dimY-1)/2-j : 0;
-	  else
-	    indexJ=(dimY-1)/2+j;
-	  double difference=(centerValue-inBuffer[indexJ][indexI]);
-	  if(i||j)//skip centerValue
-	    neighbors.push_back(inBuffer[indexJ][indexI]);
-	  if(difference>hThreshold)
-	    ++nmasked;
-	}
+  for(int i=-(dimX-1)/2;i<=dimX/2;++i){
+    indexI=x+i;
+    //check if out of bounds
+    if(indexI<0)
+      indexI=-indexI;
+    else if(indexI>=tmpDSM.nCols())
+      indexI=tmpDSM.nCols()-i;
+    if(y+j<0)
+      indexJ=-j;
+    else if(y+j>=tmpDSM.nRows())
+      indexJ=(dimY>2) ? (dimY-1)/2-j : 0;
+    else
+      indexJ=(dimY-1)/2+j;
+    double difference=(centerValue-inBuffer[indexJ][indexI]);
+    if(i||j)//skip centerValue
+      neighbors.push_back(inBuffer[indexJ][indexI]);
+    if(difference>hThreshold)
+      ++nmasked;
+  }
       }
       if(nmasked<=nlimit){
-	++nchange;
-	//reset pixel in outputMask
-	outputMask[y][x]=0;
+  ++nchange;
+  //reset pixel in outputMask
+  outputMask[y][x]=0;
       }
       else{
-	//reset pixel height in tmpDSM
-	sort(neighbors.begin(),neighbors.end());
-	assert(neighbors.size()>1);
-	inBuffer[(dimY-1)/2][x]=neighbors[1];
-	/* inBuffer[(dimY-1)/2][x]=stat.mymin(neighbors); */
+  //reset pixel height in tmpDSM
+  sort(neighbors.begin(),neighbors.end());
+  assert(neighbors.size()>1);
+  inBuffer[(dimY-1)/2][x]=neighbors[1];
+  /* inBuffer[(dimY-1)/2][x]=stat.mymin(neighbors); */
       }
     }
     progress=(1.0+y);
@@ -1159,37 +1151,37 @@ template<class T> unsigned long int Filter2d::morphology(const Vector2d<T>& inpu
       short nmasked=0;
       std::vector<T> neighbors;
       for(int j=-(dimY-1)/2;j<=dimY/2;++j){
-	for(int i=-(dimX-1)/2;i<=dimX/2;++i){
-	  indexI=x+i;
-	  //check if out of bounds
-	  if(indexI<0)
-	    indexI=-indexI;
-	  else if(indexI>=tmpDSM.nCols())
-	    indexI=tmpDSM.nCols()-i;
-	  if(y+j<0)
-	    indexJ=-j;
-	  else if(y+j>=tmpDSM.nRows())
-	    indexJ=(dimY>2) ? (dimY-1)/2-j : 0;
-	  else
-	    indexJ=(dimY-1)/2+j;
-	  double difference=(centerValue-inBuffer[indexJ][indexI]);
-	  if(i||j)//skip centerValue
-	    neighbors.push_back(inBuffer[indexJ][indexI]);
-	  if(difference>hThreshold)
-	    ++nmasked;
-	}
+  for(int i=-(dimX-1)/2;i<=dimX/2;++i){
+    indexI=x+i;
+    //check if out of bounds
+    if(indexI<0)
+      indexI=-indexI;
+    else if(indexI>=tmpDSM.nCols())
+      indexI=tmpDSM.nCols()-i;
+    if(y+j<0)
+      indexJ=-j;
+    else if(y+j>=tmpDSM.nRows())
+      indexJ=(dimY>2) ? (dimY-1)/2-j : 0;
+    else
+      indexJ=(dimY-1)/2+j;
+    double difference=(centerValue-inBuffer[indexJ][indexI]);
+    if(i||j)//skip centerValue
+      neighbors.push_back(inBuffer[indexJ][indexI]);
+    if(difference>hThreshold)
+      ++nmasked;
+  }
       }
       if(nmasked<=nlimit){
-	++nchange;
-	//reset pixel in outputMask
-	outputMask[y][x]=0;
+  ++nchange;
+  //reset pixel in outputMask
+  outputMask[y][x]=0;
       }
       else{
-	//reset pixel height in tmpDSM
-	sort(neighbors.begin(),neighbors.end());
-	assert(neighbors.size()>1);
-	inBuffer[(dimY-1)/2][x]=neighbors[1];
-	/* inBuffer[(dimY-1)/2][x]=stat.mymin(neighbors); */
+  //reset pixel height in tmpDSM
+  sort(neighbors.begin(),neighbors.end());
+  assert(neighbors.size()>1);
+  inBuffer[(dimY-1)/2][x]=neighbors[1];
+  /* inBuffer[(dimY-1)/2][x]=stat.mymin(neighbors); */
       }
     }
     progress=(1.0+y);

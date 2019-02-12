@@ -656,7 +656,7 @@ This file is part of jiplib
       int ncol=PyArray_DIM((PyArrayObject*)npArray,1);
       int nband=1;//only single band supported for now
       std::shared_ptr<Jim> jim=Jim::createImg();
-      jim->open(ncol,nrow,nplane,jDataType);
+      jim->open(ncol,nrow,nband,nplane,jDataType);
       memcpy(jim->getDataPointer(),(void*)(((PyArrayObject*)npArray)->data),jim->getDataTypeSizeBytes()*jim->nrOfCol()*jim->nrOfRow()*jim->nrOfPlane());
       return(jim);
       /* return(jim->getShared()); */
