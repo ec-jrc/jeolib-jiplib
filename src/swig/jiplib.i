@@ -104,7 +104,6 @@ This file is part of jiplib
         $1->pushLongOption(theKey,theValue);
       }
     }
-    //$1->showOptions();
   } else {
     PyObject* kwargs;
     static char *kwlist[] = {
@@ -204,6 +203,29 @@ This file is part of jiplib
 %typemap(typecheck) (app::AppFactory& app) {
   $1 = PyDict_Check($input) ? 1 : 0;
  }
+
+/* %typemap(in) const Vector2d<double> &taps */
+/* { */
+/*   std::cout << "we are in typemap(in) std::vector<double>& for $symname with taps" << std::endl; */
+/*   if ($input != NULL && PyArray_Check($input)) */
+/*     { */
+/*       /\* $1=&tmpTaps; *\/ */
+/*       int nrow=PyArray_DIM((PyArrayObject*)($input),0); */
+/*       int ncol=PyArray_DIM((PyArrayObject*)($input),1); */
+/*       $1->resize(nrow,ncol); */
+/*       for(size_t irow=0;irow<nrow;++irow){ */
+/*         for(size_t icol=0;icol<ncol;++icol){ */
+/*           //todo: check if row and col should be reversed? */
+/*           ($1->at(irow)).at(icol)=*((double*)(PyArray_GETPTR2($input, irow, icol))); */
+/*         } */
+/*       } */
+/*     } */
+/*   else */
+/*     { */
+/*       PyErr_SetString(PyExc_TypeError, "not a numpy array"); */
+/*       SWIG_fail; */
+/*     } */
+/* } */
 
 /* https://stackoverflow.com/questions/15185010/how-to-receive-reference-and-pointer-arguments-in-python-swig */
 %typemap(in,numinputs=0) double& ulx (double temp) "$1 = &temp;"

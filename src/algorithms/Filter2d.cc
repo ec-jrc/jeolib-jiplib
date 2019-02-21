@@ -17,9 +17,9 @@ filter2d::Filter2d::Filter2d(void)
 {
 }
 
-filter2d::Filter2d::Filter2d(const Vector2d<double> &taps)
-  : m_taps(taps)
+filter2d::Filter2d::Filter2d(const Vector2d<double> &taps, bool flip)
 {
+  setTaps(taps,flip);
 }
 
 int filter2d::Filter2d::pushNoDataValue(double noDataValue)
@@ -29,9 +29,25 @@ int filter2d::Filter2d::pushNoDataValue(double noDataValue)
   return(m_noDataValues.size());
 }
 
-void filter2d::Filter2d::setTaps(const Vector2d<double> &taps)
+void filter2d::Filter2d::setTaps(const Vector2d<double> &taps, bool flip)
 {
-  m_taps=taps;
+  size_t dimY=taps.size();
+  if(dimY<=0){
+    std::string errorString="Error: empty taps";
+    throw(errorString);
+  }
+  size_t dimX=taps[0].size();
+  m_taps.resize(dimY,dimX);
+  if(flip){
+    for(size_t j=0;j<taps.size();++j){
+      m_taps[j].resize(dimX);
+      for(size_t i=0;i<taps[0].size();++i){
+        m_taps[taps.size()-j-1][taps[0].size()-i-1]=m_taps[j][i];
+      }
+    }
+  }
+  else
+    m_taps=taps;
 }
 
 void filter2d::Filter2d::smoothNoData(Jim& input, Jim& output, int dim)
@@ -52,7 +68,7 @@ void filter2d::Filter2d::smoothNoData(Jim& input, Jim& output, int dimX, int dim
     for(int i=0;i<dimX;++i)
       m_taps[j][i]=1.0;
   }
-  filter(input,output,false,true,true);
+  filterLB(input,output,false,true,true);
 }
 
 void filter2d::Filter2d::smooth(Jim& input, Jim& output, int dimX, int dimY)
@@ -63,7 +79,7 @@ void filter2d::Filter2d::smooth(Jim& input, Jim& output, int dimX, int dimY)
     for(int i=0;i<dimX;++i)
       m_taps[j][i]=1.0;
   }
-  filter(input,output,false,true,false);
+  filterLB(input,output,false,true,false);
 }
 
 
@@ -105,7 +121,7 @@ void filter2d::Filter2d::filter(Jim& input, Jim& output, bool absolute, bool nor
   }
 }
 
-void filter2d::Filter2d::filter(Jim& input, Jim& output, bool absolute, bool normalize, bool noData)
+void filter2d::Filter2d::filterLB(Jim& input, Jim& output, bool absolute, bool normalize, bool noData)
 {
   if(!output.isInit())
     output.open(input);

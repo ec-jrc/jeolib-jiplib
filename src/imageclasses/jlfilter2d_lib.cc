@@ -100,7 +100,9 @@ void Jim::filter2d(Jim& imgWriter, const app::AppFactory& app){
   Optionjl<short> class_opt("class", "class", "class value(s) to use for density, erosion, dilation, openening and closing, thresholding");
   Optionjl<double> threshold_opt("t", "threshold", "threshold value(s) to use for threshold filter (one for each class), or threshold to cut for dwt_cut (use 0 to keep all) or dwt_cut_from, or sigma for shift", 0);
   Optionjl<double> nodata_opt("nodata", "nodata", "nodata value(s) (e.g., used for smoothnodata filter)");
-  Optionjl<std::string> tap_opt("tap", "tap", "text file containing taps used for spatial filtering (from ul to lr). Use dimX and dimY to specify tap dimensions in x and y. Leave empty for not using taps");
+  Optionjl<double> tap_opt("tap", "tap", "taps used for spatial filtering (from ul to lr). Use dimX and dimY to specify tap dimensions in x and y. Leave empty for not using taps");
+  Optionjl<bool> abs_opt("abs", "abs", "use absolute values when filtering",false);
+  Optionjl<bool> norm_opt("norm", "norm", "normalize tap values values when filtering",false);
   Optionjl<string> padding_opt("pad","pad", "Padding method for filtering (how to handle edge effects). Choose between: symmetric, replicate, circular, zero (pad with 0).", "symmetric");
   Optionjl<std::string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
   Optionjl<string>  colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid). Use none to ommit color table");
@@ -114,6 +116,8 @@ void Jim::filter2d(Jim& imgWriter, const app::AppFactory& app){
   class_opt.setHide(1);
   threshold_opt.setHide(1);
   tap_opt.setHide(1);
+  abs_opt.setHide(1);
+  norm_opt.setHide(1);
   padding_opt.setHide(1);
   down_opt.setHide(1);
   beta_opt.setHide(1);
@@ -134,6 +138,8 @@ void Jim::filter2d(Jim& imgWriter, const app::AppFactory& app){
     class_opt.retrieveOption(app);
     threshold_opt.retrieveOption(app);
     tap_opt.retrieveOption(app);
+    abs_opt.retrieveOption(app);
+    norm_opt.retrieveOption(app);
     padding_opt.retrieveOption(app);
     down_opt.retrieveOption(app);
     beta_opt.retrieveOption(app);
@@ -289,13 +295,18 @@ void Jim::filter2d(Jim& imgWriter, const app::AppFactory& app){
     filter2d.setThresholds(threshold_opt);
 
     if(tap_opt.size()){
-      ifstream tapfile(tap_opt[0].c_str());
-      assert(tapfile);
+      // ifstream tapfile(tap_opt[0].c_str());
+      // assert(tapfile);
       Vector2d<double> taps(dimY_opt[0],dimX_opt[0]);
+      if(tap_opt.size()!=dimX_opt[0]*dimY_opt[0]){
+        std::string errorString="Error: wrong dimensions of taps";
+        throw(errorString);
+      }
 
       for(unsigned int j=0;j<dimY_opt[0];++j){
         for(unsigned int i=0;i<dimX_opt[0];++i){
-          tapfile >> taps[j][i];
+          taps[j][i]=tap_opt[j*dimX_opt[0]+i];
+          // tapfile >> taps[j][i];
         }
       }
       if(verbose_opt[0]){
@@ -308,8 +319,9 @@ void Jim::filter2d(Jim& imgWriter, const app::AppFactory& app){
         }
       }
       filter2d.setTaps(taps);
-      filter2d.filter(*this,imgWriter);
-      tapfile.close();
+      // filter2d.filter(*this,imgWriter,abs_opt[0],norm_opt[0]);
+      filter2d.filterLB(*this,imgWriter,abs_opt[0],norm_opt[0]);
+      // tapfile.close();
     }
     else{
       switch(filter2d::Filter2d::getFilterType(method_opt[0])){

@@ -95,7 +95,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
   Optionjl<double> msknodata_opt("msknodata", "msknodata", "Mask value not to extract.", 0);
   Optionjl<unsigned int> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed)", 0);
   Optionjl<float> polythreshold_opt("tp", "thresholdPolygon", "(absolute) threshold for selecting samples in each polygon");
-  Optionjl<short> buffer_opt("buf", "buffer", "Buffer for calculating statistics for point features (in number of pixels) ",0);
+  Optionjl<short> buffer_opt("buf", "buffer", "Buffer for calculating statistics in geometric units of raster dataset");
   Optionjl<bool> disc_opt("circ", "circular", "Use a circular disc kernel buffer (for vector point sample datasets only, use in combination with buffer option)", false);
   Optionjl<bool> allCovered_opt("ac", "all_covered", "Set this flag to include only those polygons that are entirely covered by the raster", false);
   Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
@@ -566,17 +566,30 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 
       if(layerGeometry==wkbPoint){
         if(calculateSpatialStatistics){
-          if(buffer_opt[0]<1)
-            buffer_opt[0]=1;
+          if(buffer_opt.size()){
+            if(buffer_opt[0]<getDeltaX())
+              buffer_opt[0]=getDeltaX();
+          }
+          else
+            buffer_opt.push_back(getDeltaX());
         }
       }
 
       //extend bounding box with buffer
+      //todo: check if safety margin is needed?
       if(buffer_opt.size()){
-        layer_uli-=buffer_opt[0];
-        layer_ulj-=buffer_opt[0];
-        layer_lri+=buffer_opt[0];
-        layer_lrj+=buffer_opt[0];
+        //in pixels:
+        // layer_uli-=buffer_opt[0];
+        // layer_ulj-=buffer_opt[0];
+        // layer_lri+=buffer_opt[0];
+        // layer_lrj+=buffer_opt[0];
+        //in geometric units of raster dataset:
+        double bufferI=buffer_opt[0]/getDeltaX();
+        double bufferJ=buffer_opt[0]/getDeltaY();
+        layer_uli-=bufferI;
+        layer_ulj-=bufferJ;
+        layer_lri+=bufferI;
+        layer_lrj+=bufferJ;
       }
 
       //we already checked there is coverage
@@ -785,14 +798,22 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
           std::cout << "processing feature " << readFeature->GetFID() << std::endl;
         //get x and y from readFeature
         // double x,y;
-        OGRGeometry *poGeometry;
-        poGeometry = readFeature->GetGeometryRef();
-        if(!VectorOgr::transform(poGeometry,sample2img)){
+        OGRGeometry *readGeometry;
+        readGeometry = readFeature->GetGeometryRef();
+        if(!VectorOgr::transform(readGeometry,sample2img)){
           std::string errorString="Error: coordinate transform not successful";
           throw(errorString);
         }
-        if(!poGeometry){
+        if(!readGeometry){
           std::string errorString="Error: geometry is empty";
+          throw(errorString);
+        }
+        //create buffer
+        OGRGeometry* poGeometry=readGeometry->clone();
+        if(buffer_opt.size())
+          poGeometry=poGeometry->Buffer(buffer_opt[0]);
+        if(!poGeometry){
+          std::string errorString="Error: po geometry is empty";
           throw(errorString);
         }
         try{
@@ -806,10 +827,10 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
             j_centre=static_cast<int>(j_centre);
             i_centre=static_cast<int>(i_centre);
 
-            double uli=i_centre-buffer_opt[0];
-            double ulj=j_centre-buffer_opt[0];
-            double lri=i_centre+buffer_opt[0];
-            double lrj=j_centre+buffer_opt[0];
+            double uli=i_centre;//-buffer_opt[0];
+            double ulj=j_centre;//-buffer_opt[0];
+            double lri=i_centre;//+buffer_opt[0];
+            double lrj=j_centre;//+buffer_opt[0];
 
             //nearest neighbour
             ulj=static_cast<int>(ulj);
@@ -834,7 +855,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 
             int nPointPolygon=0;
             if(createPolygon){
-              if(disc_opt[0]){
+              if(disc_opt[0]&&buffer_opt.size()){
+                //todo: check if this still makes sense with new meaning of buffer
                 double radius=buffer_opt[0]*sqrt(this->getDeltaX()*this->getDeltaY());
                 unsigned short nstep = 25;
                 for(int i=0;i<nstep;++i){
@@ -1131,10 +1153,13 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                   this->image2geo(i,j,theX,theY);
                   thePoint.setX(theX);
                   thePoint.setY(theY);
-                  if(disc_opt[0]&&buffer_opt[0]>0){
-                    double radius=buffer_opt[0]*sqrt(this->getDeltaX()*this->getDeltaY());
-                    if((theX-readPoint.getX())*(theX-readPoint.getX())+(theY-readPoint.getY())*(theY-readPoint.getY())>radius*radius)
-                      continue;
+                  //todo: check if this still makes sense with new meaning of buffer
+                  if(disc_opt[0]&&buffer_opt.size()){
+                    if(buffer_opt[0]>0){
+                      double radius=buffer_opt[0]*sqrt(this->getDeltaX()*this->getDeltaY());
+                      if((theX-readPoint.getX())*(theX-readPoint.getX())+(theY-readPoint.getY())*(theY-readPoint.getY())>radius*radius)
+                        continue;
+                    }
                   }
                   bool valid=true;
 
@@ -1462,6 +1487,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
             //get envelope
             OGREnvelope* psEnvelope=new OGREnvelope();
 
+
             if(wkbFlatten(poGeometry->getGeometryType()) == wkbPolygon){
               readPolygon = *((OGRPolygon *) poGeometry);
               readPolygon.closeRings();
@@ -1557,10 +1583,11 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                 std::string errorString="Error: coordinate transform img2sample not successful";
                 throw(errorString);
               }
-              writePolygonFeature->SetGeometry(poGeometry);
               //writePolygonFeature and readFeature are both of type wkbPolygon
               if(writePolygonFeature->SetFrom(readFeature)!= OGRERR_NONE)
                 cerr << "writing feature failed" << std::endl;
+              //uncomment if we want to get buffered geometry
+              // writePolygonFeature->SetGeometry(poGeometry);
               if(verbose_opt[0]>1)
                 std::cout << "copying new fields write polygon " << std::endl;
               if(verbose_opt[0]>1)
@@ -1915,6 +1942,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 
                   OGRFeature *writePointFeature;
                   if(!createPolygon){//write all points within polygon
+                    if(verbose_opt[0]>1)
+                      std::cout << "do not create polygon" << std::endl;
                     if(polythreshold_opt.size()){
                       if(polythreshold_opt[0]>0){
                         double p=static_cast<double>(rand())/(RAND_MAX);
@@ -1979,8 +2008,11 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                   // }
                   // else{
 
-                  if(!createPolygon&&label_opt.size())
+                  if(!createPolygon&&label_opt.size()){
+                    if(verbose_opt[0]>1)
+                      std::cout << "set field label" << std::endl;
                     writePointFeature->SetField("label",label_opt[0]);
+                  }
 
                   if(!createPolygon&&fid_opt.size())
                     writePointFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
@@ -1995,13 +2027,13 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                       value=((readValuesReal[iband])[indexJ])[indexI];
                       break;
                     }
-
                     if(!iband&&class_opt.size()){
                       for(int iclass=0;iclass<class_opt.size();++iclass){
                         if(value==class_opt[iclass])
                           polyClassValues[iclass]+=1;
                       }
                     }
+
                     if(verbose_opt[0]>1)
                       std::cout << ": " << value << std::endl;
                     if(!createPolygon){//write all points within polygon
@@ -2287,7 +2319,7 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
   Optionjl<double> msknodata_opt("msknodata", "msknodata", "Mask value not to consider for crop.", 0);
   Optionjl<unsigned int> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed)", 0);
   Optionjl<float> polythreshold_opt("tp", "thresholdPolygon", "(absolute) threshold for selecting samples in each polygon");
-  Optionjl<short> buffer_opt("buf", "buffer", "Buffer for calculating statistics for point features (in number of pixels) ",0);
+  Optionjl<short> buffer_opt("buf", "buffer", "Buffer for calculating statistics for point features (in geometric units of raster dataset) ");
   Optionjl<bool> disc_opt("circ", "circular", "Use a circular disc kernel buffer (for vector point sample datasets only, use in combination with buffer option)", false);
   Optionjl<bool> allCovered_opt("ac", "all_covered", "Set this flag to include only those polygons that are entirely covered by the raster", false);
   Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
@@ -2788,17 +2820,21 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
       if(calculateSpatialStatistics){
         if(verbose_opt[0])
           std::cout << "calculateSpatialStatistics is true" << std::endl;
-        if(buffer_opt[0]<1)
-          buffer_opt[0]=1;
+        // if(buffer_opt.size()){
+        //   if(buffer_opt[0]<getDeltaX())
+        //     buffer_opt[0]=getDeltaX();
+        // }
+        // else
+        //   buffer_opt.push_back(getDeltaX());
       }
     }
 
     //extend bounding box with buffer
     if(buffer_opt.size()){
-      layer_uli-=buffer_opt[0];
-      layer_ulj-=buffer_opt[0];
-      layer_lri+=buffer_opt[0];
-      layer_lrj+=buffer_opt[0];
+      layer_uli-=buffer_opt[0]/getDeltaX();
+      layer_ulj-=buffer_opt[0]/getDeltaY();
+      layer_lri+=buffer_opt[0]/getDeltaX();
+      layer_lrj+=buffer_opt[0]/getDeltaY();
     }
 
     //we already checked there is coverage
@@ -2992,17 +3028,22 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
       try{
         if(wkbFlatten(poGeometry->getGeometryType()) == wkbPoint ){
           OGRPoint readPoint = *((OGRPoint *) poGeometry);
-
           double i_centre,j_centre;
           this->geo2image(readPoint.getX(),readPoint.getY(),i_centre,j_centre);
           //nearest neighbour
           j_centre=static_cast<int>(j_centre);
           i_centre=static_cast<int>(i_centre);
 
-          double uli=i_centre-buffer_opt[0];
-          double ulj=j_centre-buffer_opt[0];
-          double lri=i_centre+buffer_opt[0];
-          double lrj=j_centre+buffer_opt[0];
+          double bufferI=buffer_opt.size() ? buffer_opt[0]/getDeltaX() : 1;
+          double bufferJ=buffer_opt.size() ? buffer_opt[0]/getDeltaY() : 1;
+          double uli=i_centre-bufferI;
+          double ulj=j_centre-bufferJ;
+          double lri=i_centre+bufferI;
+          double lrj=j_centre+bufferJ;
+          // double uli=i_centre-buffer_opt[0];
+          // double ulj=j_centre-buffer_opt[0];
+          // double lri=i_centre+buffer_opt[0];
+          // double lrj=j_centre+buffer_opt[0];
 
           //nearest neighbour
           ulj=static_cast<int>(ulj);
@@ -3026,7 +3067,7 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
           int nPointPolygon=0;
           if(createPolygon){
             if(disc_opt[0]){
-              double radius=buffer_opt[0]*sqrt(this->getDeltaX()*this->getDeltaY());
+              double radius=buffer_opt.size() ? buffer_opt[0] : sqrt(this->getDeltaX()*this->getDeltaY());
               unsigned short nstep = 25;
               for(int i=0;i<nstep;++i){
                 OGRPoint aPoint;
@@ -3302,8 +3343,8 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
                 this->image2geo(i,j,theX,theY);
                 thePoint.setX(theX);
                 thePoint.setY(theY);
-                if(disc_opt[0]&&buffer_opt[0]>0){
-                  double radius=buffer_opt[0]*sqrt(this->getDeltaX()*this->getDeltaY());
+                if(disc_opt[0]&&buffer_opt.size()){
+                  double radius=buffer_opt.size() ? buffer_opt[0] : sqrt(this->getDeltaX()*this->getDeltaY());
                   if((theX-readPoint.getX())*(theX-readPoint.getX())+(theY-readPoint.getY())*(theY-readPoint.getY())>radius*radius)
                     continue;
                 }

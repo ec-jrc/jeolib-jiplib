@@ -17,8 +17,7 @@ parser.add_argument("-noread","--noread",help="Postpone reading raster dataset",
 parser.add_argument("-random","--random",help="Number of random pixels to select",dest="random",required=False,type=int,default=100)
 args = parser.parse_args()
 
-# try:
-if True:
+try:
     jim0=jl.createJim(args.input)
     rules=['centroid','min','max','mean','stdev']
     if not args.vector:
@@ -65,9 +64,13 @@ if True:
                 jim_lodi.close()
                 v0.close()
             else:
-                v2=jim0.extractOgr(sample,{'rule':rules[3],'output':args.output,'oformat':'SQLite','co':'OVERWRITE=YES'})
+                v2=jim0.extractOgr(sample,{'rule':rules[2],'output':args.output,'oformat':'SQLite','co':'OVERWRITE=YES'})
+                vposbuffer=jim0.extractOgr(sample,{'rule':rules[2],'output':'/vsimem/posbuffer.sqlite','oformat':'SQLite','co':'OVERWRITE=YES', 'buffer':1000})
+                vnegbuffer=jim0.extractOgr(sample,{'rule':rules[2],'output':'/vsimem/negbuffer','oformat':'SQLite','co':'OVERWRITE=YES', 'buffer':-1000})
                 v2.write()
                 v2.close()
+                vposbuffer.close()
+                vnegbuffer.close()
         else:
             v=jl.createVector()
             for band in range(0,11):
@@ -79,7 +82,7 @@ if True:
                 if not band:
                     print("first time")
                     print("extractOgr")
-                    v=jl0.extractOgr(sample,{'rule':'mean','output':args.output,'oformat':'SQLite','co':['OVERWRITE=YES'],'bandname':bandname,'fid':'fid','verbose':2})
+                    v=jl0.extractOgr(sample,{'rule':'mean','output':args.output,'oformat':'SQLite','co':['OVERWRITE=YES'],'bandname':bandname,'fid':'fid'})
                     v.write()
                     v.close()
                 else:
@@ -94,7 +97,5 @@ if True:
         sample.close()
     jim0.close()
     print("Success: extractogr")
-try:
-    print("ok")
 except:
     print("Failed: extractogr")

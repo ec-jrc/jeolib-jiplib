@@ -53,7 +53,7 @@ class Filter2d
 public:
   enum RESAMPLE { NEAR = 0, BILINEAR = 1, BICUBIC = 2 };//bicubic not supported yet...
   Filter2d(void);
-  Filter2d(const Vector2d<double> &taps);
+  Filter2d(const Vector2d<double> &taps, bool flip=true);
   virtual ~Filter2d(){};
   static FILTER_TYPE getFilterType(const std::string filterType){
     std::map<std::string, FILTER_TYPE> m_filterMap;
@@ -71,7 +71,7 @@ public:
     }
   };
 
-  void setTaps(const Vector2d<double> &taps);
+  void setTaps(const Vector2d<double> &taps, bool flip=true);
   /* void setNoValue(double noValue=0){m_noValue=noValue;}; */
   void pushClass(short theClass=1){m_class.push_back(theClass);};
   int pushNoDataValue(double noDataValue=0);//{m_mask.push_back(theMask);};
@@ -79,7 +79,7 @@ public:
   void setThresholds(const std::vector<double>& theThresholds){m_threshold=theThresholds;};
   void setClasses(const std::vector<short>& theClasses){m_class=theClasses;};
   void filter(Jim& input, Jim& output, bool absolute=false, bool normalize=false);
-  void filter(Jim& input, Jim& output, bool absolute, bool normalize, bool noData);
+  void filterLB(Jim& input, Jim& output, bool absolute=false, bool normalize=false, bool noData=false);
   void smooth(Jim& input, Jim& output,int dim);
   void smooth(Jim& input, Jim& output,int dimX, int dimY);
   void smoothNoData(Jim& input, Jim& output,int dim);
@@ -191,7 +191,6 @@ private:
 
  template<class T> void Filter2d::filter(T* inputVector, T* outputVector, size_t dimx, size_t dimy, bool absolute, bool normalize)
  {
-   //todo: if kernel is not symmetric, we need to flip it...
    int dimX=m_taps[0].size();//horizontal!!!
    int dimY=m_taps.size();//vertical!!!
    int indexI=0;
@@ -203,16 +202,19 @@ private:
        for(int j=-(dimY-1)/2;j<=dimY/2;++j){
          for(int i=-(dimX-1)/2;i<=dimX/2;++i){
            indexI=x+i;
-           indexJ=y+(dimY-1)/2+j;
+           /* indexJ=y+(dimY-1)/2+j; */
+           indexJ=y+j;
            //check if out of bounds
            if(x<(dimX-1)/2)
              indexI=x+abs(i);
            else if(x>=dimx-(dimX-1)/2)
              indexI=x-abs(i);
            if(y<(dimY-1)/2)
-             indexJ=y+(dimY-1)/2+abs(j);
+             indexJ=y+abs(j);
+           /* indexJ=y+(dimY-1)/2+abs(j); */
            else if(y>=dimy-(dimY-1)/2)
-             indexJ=y+(dimY-1)/2-abs(j);
+             indexJ=y-abs(j);
+           /* indexJ=y+(dimY-1)/2-abs(j); */
            //do not take masked values into account
            bool masked=false;
            for(int imask=0;imask<m_noDataValues.size();++imask){
@@ -223,7 +225,7 @@ private:
            }
            if(!masked){
              outputVector[y*dimx+x]+=(m_taps[(dimY-1)/2+j][(dimX-1)/2+i]*inputVector[indexJ*dimy+indexI]);
-             norm+=m_taps[(dimY-1)/2+j][(dimX-1)/2+i];
+             norm+=abs(m_taps[(dimY-1)/2+j][(dimX-1)/2+i]);
            }
          }
        }
