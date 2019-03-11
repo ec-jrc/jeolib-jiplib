@@ -100,7 +100,7 @@ void Jim::filter2d(Jim& imgWriter, const app::AppFactory& app){
   Optionjl<short> class_opt("class", "class", "class value(s) to use for density, erosion, dilation, openening and closing, thresholding");
   Optionjl<double> threshold_opt("t", "threshold", "threshold value(s) to use for threshold filter (one for each class), or threshold to cut for dwt_cut (use 0 to keep all) or dwt_cut_from, or sigma for shift", 0);
   Optionjl<double> nodata_opt("nodata", "nodata", "nodata value(s) (e.g., used for smoothnodata filter)");
-  Optionjl<double> tap_opt("tap", "tap", "taps used for spatial filtering (from ul to lr). Use dimX and dimY to specify tap dimensions in x and y. Leave empty for not using taps");
+  Optionjl<double> tap_opt("tap", "tap", "taps used for spatial filtering (from ul to lr). Use dx and dy to specify tap dimensions in x and y. Leave empty for not using taps");
   Optionjl<bool> abs_opt("abs", "abs", "use absolute values when filtering",false);
   Optionjl<bool> norm_opt("norm", "norm", "normalize tap values values when filtering",false);
   Optionjl<string> padding_opt("pad","pad", "Padding method for filtering (how to handle edge effects). Choose between: symmetric, replicate, circular, zero (pad with 0).", "symmetric");
@@ -319,8 +319,8 @@ void Jim::filter2d(Jim& imgWriter, const app::AppFactory& app){
         }
       }
       filter2d.setTaps(taps);
-      // filter2d.filter(*this,imgWriter,abs_opt[0],norm_opt[0]);
-      filter2d.filterLB(*this,imgWriter,abs_opt[0],norm_opt[0]);
+      filter2d.filter(*this,imgWriter,abs_opt[0],norm_opt[0]);
+      // filter2d.filterLB(*this,imgWriter,abs_opt[0],norm_opt[0]);
       // tapfile.close();
     }
     else{

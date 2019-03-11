@@ -40,9 +40,8 @@ void filter2d::Filter2d::setTaps(const Vector2d<double> &taps, bool flip)
   m_taps.resize(dimY,dimX);
   if(flip){
     for(size_t j=0;j<taps.size();++j){
-      m_taps[j].resize(dimX);
-      for(size_t i=0;i<taps[0].size();++i){
-        m_taps[taps.size()-j-1][taps[0].size()-i-1]=m_taps[j][i];
+      for(size_t i=0;i<taps[j].size();++i){
+        m_taps[taps.size()-j-1][taps[0].size()-i-1]=taps[j][i];
       }
     }
   }
@@ -85,7 +84,7 @@ void filter2d::Filter2d::smooth(Jim& input, Jim& output, int dimX, int dimY)
 
 void filter2d::Filter2d::filter(Jim& input, Jim& output, bool absolute, bool normalize){
   if(!output.isInit())
-    output.open(input);
+    output.open(input,false);
   output.setNoData(m_noDataValues);
 
   size_t dimx=input.nrOfCol();
@@ -1328,21 +1327,12 @@ void filter2d::Filter2d::linearFeature(const Vector2d<float>& input, std::vector
       for(northAngle=0;northAngle<180;northAngle+=angleStep){
         if(angle<=360&&angle>=0&&angle!=northAngle)
           continue;
-        //test
-        if(verbose)
-          std::cout << "northAngle: " << northAngle << std::endl;
         float currentDistance=0;
         float theDir=0;
         for(short side=0;side<=1;side+=1){
           theDir=PI/2.0-DEG2RAD(northAngle)+side*PI;//in radians
-          //test
-          if(verbose)
-            std::cout << "theDir in deg: " << RAD2DEG(theDir) << std::endl;
           if(theDir<0)
             theDir+=2*PI;
-          //test
-          if(verbose)
-            std::cout << "theDir in deg: " << RAD2DEG(theDir) << std::endl;
           float nextValue=currentValue;
           for(float currentRay=1;currentRay<maxDistance;++currentRay){
             indexI=x+currentRay*cos(theDir);
@@ -1367,13 +1357,8 @@ void filter2d::Filter2d::linearFeature(const Vector2d<float>& input, std::vector
             }
             if(fabs(currentValue-nextValue)<=eps){
               ++currentDistance;
-              //test
-              if(verbose)
-                std::cout << "currentDistance: " << currentDistance << ", continue" << std::endl;
             }
             else{
-              if(verbose)
-                std::cout << "currentDistance: " << currentDistance << ", break" << std::endl;
               break;
             }
           }

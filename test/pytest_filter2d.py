@@ -8,6 +8,7 @@ import argparse
 import os
 import math
 import jiplib as jl
+import numpy as np
 
 parser=argparse.ArgumentParser()
 parser.add_argument("-input","--input",help="Path of the input raster dataset",dest="input",required=True,type=str)
@@ -23,7 +24,19 @@ try:
     jim=jl.createJim(args.input)
     if args.band:
         jim=jim.cropBand({'band':args.band})
-    if 'dwt' in args.filter:
+    if 'tap' in args.filter:
+        taps=np.array([[-1.0,0.0,1.0],[-2.0,0.0,2.0],[-1.0,0.0,1.0]])
+        fdict={}
+        fdict.update({'dy': taps.shape[0]})
+        fdict.update({'dx': taps.shape[1]})
+        fdict.update({'tap':taps.flatten().tolist()})
+        fdict.update({'verbose':2})
+        jim=jim.convert({'otype':'GDT_Float32'})
+        print(jim.getStats({}))
+        jim_filtered=jim.filter2d(fdict)
+        print(jim_filtered.getStats({}))
+        # jimdx.ngbops.filter2d(tapsdx,nodata=jim_object.properties.getNoDataVals(),abs=True,norm=True)
+    elif 'dwt' in args.filter:
         if args.cut > 0:
             jim_filtered=jim.filter2d({'filter':'dwt_cut','otype':'Int16','threshold':args.cut}).pushNoDataValue(0).setThreshold({'min':0,'max':255}).convert({'otype':'Byte'})
         else:

@@ -6,6 +6,7 @@
 
 # This file is part of jiplib
 ###############################################################################
+cmake_minimum_required(VERSION 3.7)
 
 # The project's name and version
 project(jiplib)
@@ -80,7 +81,8 @@ if(Boost_FOUND)
 endif()
 
 # Make sure Python libraries are found
-set(PYTHON_VERSION "2.7.6" CACHE STRING "Specify which Python version to use")
+# set(Python_ADDITIONAL_VERSIONS 3.5)
+set(PYTHON_VERSION "2.7.13" CACHE STRING "Specify which Python version to use")
 #from https://github.com/InsightSoftwareConsortium/ITK/blob/master/Wrapping/Generators/Python/CMakeLists.txt#L1-18
 # if(PYTHON_VERSION_STRING VERSION_EQUAL PYTHONLIBS_VERSION_STRING)
 # if(PYTHON_VERSION_STRING VERSION_LESS 2.6)
