@@ -361,7 +361,8 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   double getLry(size_t ilayer, OGRCoordinateTransformation *poCT) const{double ulx,uly,lrx,lry;getExtent(ulx,uly,lrx,lry,ilayer,poCT);return(lry);};
   ///resize features
   OGRErr resize(size_t theSize, size_t ilayer=0){
-    m_features[ilayer].resize(theSize);};
+    m_features[ilayer].resize(theSize);
+  };
   ///create a new feature
   OGRFeature* createFeature(size_t ilayer=0){OGRFeature* newFeature=OGRFeature::CreateFeature(getLayer(ilayer)->GetLayerDefn());return(newFeature);};
   ///push feature to the object

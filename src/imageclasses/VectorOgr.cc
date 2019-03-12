@@ -88,8 +88,9 @@ void VectorOgr::destroyEmptyFeatures(size_t ilayer){
         ++fit;
         continue;
       }
-      else
+      else{
         m_features[ilayer].erase(fit);
+      }
     }
   }
 }
@@ -601,6 +602,7 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
       ogrWriter.pushLayer(getLayerName(ilayer),getProjection(ilayer),getGeometryType(ilayer),papszOptions);
       ogrWriter.copyFields(*this,std::vector<std::string>(),ilayer);
       ogrWriter.resize(getFeatureCount(ilayer),ilayer);
+
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
@@ -626,7 +628,7 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
         }
       }
       //todo: check if needed?
-      destroyEmptyFeatures(ilayer);
+      ogrWriter.destroyEmptyFeatures(ilayer);
     }
     return(OGRERR_NONE);
   }
