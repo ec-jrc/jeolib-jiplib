@@ -672,13 +672,16 @@ This file is part of jiplib
         std::string errorString="Error: Unknown data type";
         throw(errorString);
       }
-      int dim=(PyArray_NDIM((PyArrayObject*)npArray))? 3 : 2;
-      int nplane=(PyArray_NDIM((PyArrayObject*)npArray)==3) ? PyArray_DIM((PyArrayObject*)npArray,2): 1;//todo: check if nth dim starts from 0
-      int nrow=PyArray_DIM((PyArrayObject*)npArray,0);
-      int ncol=PyArray_DIM((PyArrayObject*)npArray,1);
+      int ndim=(PyArray_NDIM((PyArrayObject*)npArray))? 3 : 2;
+      int nplane=(PyArray_NDIM((PyArrayObject*)npArray)==3) ? PyArray_DIM((PyArrayObject*)npArray,2): 1;
+      int nrow=(PyArray_NDIM((PyArrayObject*)npArray)==3) ? PyArray_DIM((PyArrayObject*)npArray,1): PyArray_DIM((PyArrayObject*)npArray,0);
+      int ncol=(PyArray_NDIM((PyArrayObject*)npArray)==3) ? PyArray_DIM((PyArrayObject*)npArray,2): PyArray_DIM((PyArrayObject*)npArray,1);
+      /* int nrow=PyArray_DIM((PyArrayObject*)npArray,1); */
+      /* int ncol=PyArray_DIM((PyArrayObject*)npArray,2); */
       int nband=1;//only single band supported for now
       std::shared_ptr<Jim> jim=Jim::createImg();
       jim->open(ncol,nrow,nband,nplane,jDataType);
+
       memcpy(jim->getDataPointer(),(void*)(((PyArrayObject*)npArray)->data),jim->getDataTypeSizeBytes()*jim->nrOfCol()*jim->nrOfRow()*jim->nrOfPlane());
       return(jim);
       /* return(jim->getShared()); */
@@ -739,13 +742,13 @@ This file is part of jiplib
       }
       else
         npdata=(void*)(aJim->getDataPointer(band));
-      int dim=(aJim->nrOfPlane()>1)? 3 : 2;
+      int ndim=(aJim->nrOfPlane()>1)? 3 : 2;
       if(aJim->nrOfPlane()>1){
         npy_intp dims[3];
         dims[0]=aJim->nrOfPlane();
         dims[1]=aJim->nrOfRow();
         dims[2]=aJim->nrOfCol();
-        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,npdata);
+        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(ndim,dims,npDataType,npdata);
         if(npArray)
           return(PyArray_Return(npArray));
         else
@@ -756,7 +759,7 @@ This file is part of jiplib
         dims[0]=aJim->nrOfRow();
         dims[1]=aJim->nrOfCol();
         /* PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,(void*)aJim->getDataPointer(band)); */
-        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,npdata);
+        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(ndim,dims,npDataType,npdata);
         if(npArray)
           return(PyArray_Return(npArray));
         else
@@ -801,13 +804,13 @@ This file is part of jiplib
       }
       void *npdata=0;
       npdata=(void*)(aJim->getDataPointer());
-      int dim=(aJim->nrOfPlane()>1)? 3 : 2;
+      int ndim=(aJim->nrOfPlane()>1)? 3 : 2;
       if(aJim->nrOfPlane()>1){
         npy_intp dims[3];
         dims[0]=aJim->nrOfPlane();
         dims[1]=aJim->nrOfRow();
         dims[2]=aJim->nrOfCol();
-        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,npdata);
+        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(ndim,dims,npDataType,npdata);
         if(npArray)
           return(PyArray_Return(npArray));
         else
@@ -817,7 +820,7 @@ This file is part of jiplib
         npy_intp dims[2];
         dims[0]=aJim->nrOfRow();
         dims[1]=aJim->nrOfCol();
-        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,npdata);
+        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(ndim,dims,npDataType,npdata);
         if(npArray)
           return(PyArray_Return(npArray));
         else
