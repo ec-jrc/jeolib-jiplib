@@ -628,7 +628,7 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
         }
       }
       //todo: check if needed?
-      ogrWriter.destroyEmptyFeatures(ilayer);
+      // ogrWriter.destroyEmptyFeatures(ilayer);
     }
     return(OGRERR_NONE);
   }
