@@ -164,7 +164,7 @@ mialib_label.h:extern IMAGE *alphacc(IMAGE *dissx, IMAGE *dissy, int alpha); dis
 mialib_label.h:extern IMAGE *labelvertex(IMAGE *im, int alpha, int graph); vertexDegreeAlpha
 mialib_label.h:extern IMAGE *vertexseparation(IMAGE *im, int graph, int type); vertexSeparation
 mialib_label.h:extern IMAGE *labelvertexconnectedness(IMAGE *im, int alpha, int graph, int deg); labelVertexConnectedness
-mialib_label.h:extern IMAGE *labelcc(IMAGE *im, IMAGE *imse, int ox, int oy, int oz, int rg, int rl); labelAlphaCCs
+mialib_label.h:extern IMAGE *labelcc(IMAGE *im, IMAGE *imse, int ox, int oy, int oz, int rg, int rl); labelConstrainedCCs
 mialib_label.h:extern IMAGE *labelccms(IMAGE **imap, int nc, IMAGE *imse, int ox, int oy, int oz, int r1, int r2); labelConstrainedCCsMultiband
 mialib_label.h:extern IMAGE *labelccmi(IMAGE *im, IMAGE *immi, IMAGE *imse, int ox, int oy, int oz, int rg, int rl); labelConstrainedCCsMi
 mialib_label.h:extern IMAGE *labelci(IMAGE *im, IMAGE *imse, int ox, int oy, int oz, int rl); labelConstrainedCCsCi
