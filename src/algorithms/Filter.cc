@@ -8,7 +8,8 @@ This file is part of jiplib
 ***********************************************************************/
 #include "Filter.h"
 #include <assert.h>
-#include <math.h>
+// #include <math.h>
+#include <cmath>
 #include <iostream>
 
 using namespace std;

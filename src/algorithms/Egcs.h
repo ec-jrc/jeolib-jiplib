@@ -6,7 +6,8 @@ License EUPLv1.2
 
 This file is part of jiplib
 ***********************************************************************/
-#include <math.h>
+/* #include <math.h> */
+#include <cmath>
 #include <string>
 
 #ifndef _EGCS_H_

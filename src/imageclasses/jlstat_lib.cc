@@ -8,7 +8,8 @@ This file is part of jiplib
 ***********************************************************************/
 #include <iostream>
 #include <fstream>
-#include <math.h>
+// #include <math.h>
+#include <cmath>
 #include "base/Optionjl.h"
 #include "algorithms/StatFactory.h"
 #include "algorithms/ImgRegression.h"

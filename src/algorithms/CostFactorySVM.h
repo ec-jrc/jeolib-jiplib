@@ -9,7 +9,8 @@ This file is part of jiplib
 #ifndef _COSTFACTORYSVM_H_
 #define _COSTFACTORYSVM_H_
 
-#include <math.h>
+/* #include <math.h> */
+#include <cmath>
 #include <vector>
 #include <map>
 #include "base/Vector2d.h"

@@ -10,7 +10,8 @@ This file is part of jiplib
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <math.h>
+// #include <math.h>
+#include <cmath>
 #include <sys/types.h>
 #include <stdio.h>
 #include "base/Optionjl.h"

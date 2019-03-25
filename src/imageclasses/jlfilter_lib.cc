@@ -11,7 +11,8 @@ This file is part of jiplib
 #include <string>
 #include <fstream>
 #include <memory>
-#include <math.h>
+// #include <math.h>
+#include <cmath>
 #include <sys/types.h>
 #include <stdio.h>
 #include "base/Optionjl.h"

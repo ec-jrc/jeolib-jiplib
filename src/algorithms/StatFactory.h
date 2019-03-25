@@ -12,7 +12,8 @@ This file is part of jiplib
 #include <iostream>
 #include <vector>
 #include <map>
-#include <math.h>
+/* #include <math.h> */
+#include <cmath>
 #include <assert.h>
 #include <string>
 #include <sstream>

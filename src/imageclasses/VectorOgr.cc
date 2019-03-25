@@ -80,6 +80,19 @@ void VectorOgr::destroyAll(){
   m_layer.clear();
 }
 
+bool VectorOgr::isEmpty(size_t ilayer){
+  if(m_features.size()>ilayer){
+    std::vector<OGRFeature*>::iterator fit=m_features[ilayer].begin();
+    while(fit!=m_features[ilayer].end()){
+      if(*fit){
+        ++fit;
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 void VectorOgr::destroyEmptyFeatures(size_t ilayer){
   if(m_features.size()>ilayer){
     std::vector<OGRFeature*>::iterator fit=m_features[ilayer].begin();

@@ -27,7 +27,8 @@ This file is part of jiplib
 #endif
 
 #include <assert.h>
-#include <math.h>
+/* #include <math.h> */
+#include <cmath>
 #include <limits>
 #include <vector>
 #include <string>
@@ -226,13 +227,13 @@ private:
            }
            if(!masked){
              outputVector[y*dimx+x]+=(m_taps[(dimY-1)/2+j][(dimX-1)/2+i]*inputVector[indexJ*dimy+indexI]);
-             norm+=abs(m_taps[(dimY-1)/2+j][(dimX-1)/2+i]);
+             norm+=abs(static_cast<double>(m_taps[(dimY-1)/2+j][(dimX-1)/2+i]));
            }
          }
        }
 
        if(absolute)
-         outputVector[y*dimx+x]=(normalize&&norm)? abs(outputVector[y*dimx+x])/norm : abs(outputVector[y*dimx+x]);
+         outputVector[y*dimx+x]=(normalize&&norm)? abs(static_cast<double>(outputVector[y*dimx+x]))/norm : abs(static_cast<double>(outputVector[y*dimx+x]));
        else if(normalize&&norm!=0)
          outputVector[y*dimx+x]=outputVector[y*dimx+x]/norm;
      }

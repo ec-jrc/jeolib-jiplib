@@ -9,7 +9,8 @@ This file is part of jiplib
 #ifndef _FEATURESELECTOR_H_
 #define _FEATURESELECTOR_H_
 
-#include <math.h>
+/* #include <math.h> */
+#include <cmath>
 #include <vector>
 #include <list>
 #include <algorithm>

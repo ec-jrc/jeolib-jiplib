@@ -165,6 +165,7 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///destroy all features in object
   void destroyAll();
   void destroyEmptyFeatures(size_t ilayer=0);
+  bool isEmpty(size_t ilayer=0);
   void destroyFeatures(size_t ilayer=0);
   ///open using a copy
   //OGRErr open(const VectorOgr& vectorOgr, const std::string& layername=std::string());

@@ -7,7 +7,8 @@ License EUPLv1.2
 This file is part of jiplib
 ***********************************************************************/
 #include <assert.h>
-#include <math.h>
+// #include <math.h>
+#include <cmath>
 #include <stdlib.h>
 #include <sstream>
 #include <string>
