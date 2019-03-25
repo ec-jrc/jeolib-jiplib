@@ -47,7 +47,6 @@ template<typename T> std::string Jim::trainSML(JimList& referenceReader, app::Ap
   Optionjl<unsigned int> bend_opt("eband", "endband", "End band sequence number");
   Optionjl<unsigned short> class_opt("c", "class", "Class(es) to extract from reference. Leave empty to extract two classes only: 1 against rest",1);
   Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0);
-  Optionjl<double> dstnodata_opt("dstnodata", "dstnodata", "Nodata value to put where image is masked as nodata", 0);
   Optionjl<short> verbose_opt("v", "verbose", "Verbose level",0,2);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
@@ -58,7 +57,6 @@ template<typename T> std::string Jim::trainSML(JimList& referenceReader, app::Ap
     bend_opt.retrieveOption(app);
     class_opt.retrieveOption(app);
     srcnodata_opt.retrieveOption(app);
-    dstnodata_opt.retrieveOption(app);
     verbose_opt.retrieveOption(app);
     // memory_opt.retrieveOption(app);
 

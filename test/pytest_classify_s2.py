@@ -75,8 +75,6 @@ try:
             #training
             #explicitly define all band names to use for training
             sample.train({'method':args.classifier,'label':'label','bandname':['B02','B03','B04','B08'],'model':args.model})
-            #test
-            sample.write()
             #define selection of band names to use for training
             #sample.train({'method':'svm','label':'label','bandname':['B03','B08'],'model':args.model})
             sample.close()

@@ -767,7 +767,7 @@ This file is part of jiplib
       }
     }
 
-  PyObject* np(std::shared_ptr<Jim> aJim) {
+  PyObject* np(std::shared_ptr<Jim> aJim, size_t band=0) {
       int npDataType;
       switch (aJim->getDataType()){
       case GDT_Byte:
@@ -803,7 +803,7 @@ This file is part of jiplib
         throw(errorString);
       }
       void *npdata=0;
-      npdata=(void*)(aJim->getDataPointer());
+      npdata=(void*)(aJim->getDataPointer(band));
       int ndim=(aJim->nrOfPlane()>1)? 3 : 2;
       if(aJim->nrOfPlane()>1){
         npy_intp dims[3];
