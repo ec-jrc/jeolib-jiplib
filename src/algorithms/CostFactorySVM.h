@@ -28,7 +28,7 @@ CostFactorySVM();
 CostFactorySVM(std::string svm_type, std::string kernel_type, unsigned short kernel_degree, float gamma, float coef0, float ccost, float nu,  float epsilon_loss, int cache, float epsilon_tol, bool shrinking, bool prob_est, unsigned short cv, short verbose);
 ~CostFactorySVM();
 double getCost(const std::vector<Vector2d<float> > &trainingFeatures);
-  
+
 private:
 std::string m_svm_type;
 std::string m_kernel_type;

@@ -85,9 +85,9 @@ bool VectorOgr::isEmpty(size_t ilayer){
     std::vector<OGRFeature*>::iterator fit=m_features[ilayer].begin();
     while(fit!=m_features[ilayer].end()){
       if(*fit){
-        ++fit;
         return false;
       }
+      ++fit;
     }
   }
   return true;

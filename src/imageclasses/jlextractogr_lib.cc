@@ -305,7 +305,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       sampleReader.getExtent(layer_ulx,layer_uly,layer_lrx,layer_lry,ilayer,sample2img);
 
       if(verbose_opt[0])
-        std::cout << "--ulx " << layer_ulx<< " --uly " << layer_uly<< " --lrx " << layer_lrx   << " --lry " << layer_lry << std::endl;
+        std::cout<< std::setprecision(12) << "--ulx " << layer_ulx << " --uly " << layer_uly << " --lrx " << layer_lrx   << " --lry " << layer_lry << std::endl;
       if(verbose_opt[0])
         std::cout << "all_covered: " << allCovered_opt[0] << std::endl;
       //check if rule contains allpoints
@@ -517,7 +517,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       // sampleReader.getExtent(layer_ulx,layer_uly,layer_lrx,layer_lry,sample2img);
 
       if(verbose_opt[0])
-        std::cout<< std::setprecision(12) << "--ulx " << layer_ulx << " --uly " << layer_uly<< " --lrx " << layer_lrx   << " --lry " << layer_lry << std::endl;
+        std::cout<< std::setprecision(12) << "--ulx " << layer_ulx << " --uly " << layer_uly << " --lrx " << layer_lrx   << " --lry " << layer_lry << std::endl;
       bool hasCoverage=((layer_ulx >= this->getUlx())&&(layer_lrx <= this->getLrx())&&(layer_uly <= this->getUly())&&(layer_lry >= this->getLry()));
       if(!hasCoverage){
         std::cerr << "Warning: raster dataset does not fully cover vector layer " << ilayer << endl;
@@ -1140,13 +1140,13 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                   int indexJ=j-layer_ulj;
                   int indexI=i-layer_uli;
                   if(indexJ<0)
-                    indexJ=0;
+                    continue;
                   if(indexI<0)
-                    indexI=0;
+                    continue;
                   if(indexJ>=this->nrOfRow())
-                    indexJ=this->nrOfRow()-1;
+                    continue;
                   if(indexI>=this->nrOfCol())
-                    indexI=this->nrOfCol()-1;
+                    continue;
 
                   double theX=0;
                   double theY=0;
@@ -1525,6 +1525,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
             }
             else if(verbose_opt[0]>2){
               std::cout << "raster does cover polygon: " << readFeature->GetFID()  <<  std::endl;
+              std::cout << "bounding box of polygon in SRS of raster: " << readFeature->GetFID()  <<  std::endl;
               std::cout<< std::setprecision(12) << "--ulx " << ulx << " --uly " << uly<< " --lrx " << lrx   << " --lry " << lry << std::endl;
             }
             // if(!this->covers(ulx,uly,lrx,lry,allCovered_opt[0])){
@@ -1805,7 +1806,12 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
             if(calculateSpatialStatistics||ruleMap[rule_opt[0]]==rule::allpoints){
               this->geo2image(ulx,uly,uli,ulj);
               this->geo2image(lrx,lry,lri,lrj);
-              //nearest neighbour
+              if(verbose_opt[0]>1){
+      std::cout << "calculated uli=" << uli << "and ulj" << ulj << " from ulx=" << ulx << "and uly=" << uly << std::endl;
+      std::cout << "calculated lri=" << lri << "and lrj" << lrj << " from lrx=" << lrx << "and lry=" << lry << std::endl;
+      std::cout << "bounding box for polygon feature " << ifeature << ": " << uli << " " << ulj << " " << lri << " " << lrj << std::endl;
+    }
+      //nearest neighbour
               ulj=static_cast<int>(ulj);
               uli=static_cast<int>(uli);
               lrj=static_cast<int>(lrj);
@@ -1880,7 +1886,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                   }
                   int indexJ=j-layer_ulj;
                   int indexI=i-layer_uli;
-
+                  if(indexJ<0||indexJ>=this->nrOfRow()||indexI<0||indexI>=this->nrOfCol())
+                    continue;
                   double theX=0;
                   double theY=0;
                   this->image2geo(i,j,theX,theY);
@@ -2075,6 +2082,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                       polyValues[iband].push_back(value);
                     }
                   }//iband
+
                   if(!createPolygon){
                     //todo: only if valid feature?
                     //write feature
@@ -3326,17 +3334,17 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
                 int indexJ=j-layer_ulj;
                 int indexI=i-layer_uli;
                 if(indexJ<0)
-                  indexJ=0;
+                  continue;
                 if(indexI<0)
-                  indexI=0;
+                  continue;
                 // if(indexJ>=this->nrOfRow())
                 //   indexJ=this->nrOfRow()-1;
                 // if(indexI>=this->nrOfCol())
                 //   indexI=this->nrOfCol()-1;
                 if(indexJ>=this->nrOfRow())
-                  indexJ=this->nrOfRow()-1;
+                  continue;
                 if(indexI>=this->nrOfCol())
-                  indexI=this->nrOfCol()-1;
+                  continue;
 
                 double theX=0;
                 double theY=0;
@@ -3985,6 +3993,9 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
                   continue;
                 int indexJ=j-layer_ulj;
                 int indexI=i-layer_uli;
+                //test
+                if(indexJ<0||indexJ>=this->nrOfRow()||indexI<0||indexI>=this->nrOfCol())
+                  continue;
 
                 double theX=0;
                 double theY=0;
@@ -4453,9 +4464,12 @@ CPLErr JimList::extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, AppFac
       if(append){
         if(verbose_opt[0])
           std::cout << "We are in append"<< std::endl;
-        if((*imit)->extractOgr(sampleReader,ogrWriter,extractApp)!=CE_None){
-          string errorstring="Error: could not extractOgr";
-          throw(errorstring);
+        try{
+          (*imit)->extractOgr(sampleReader,ogrWriter,extractApp);
+        }
+        catch(string errorString){
+          std::cout << errorString << ", continuing with next image"<< std::endl;
+          continue;
         }
       }
       else{//join

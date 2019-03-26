@@ -9,7 +9,8 @@ This file is part of jiplib
 #ifndef _COSTFACTORY_H_
 #define _COSTFACTORY_H_
 
-#include <math.h>
+/* #include <math.h> */
+#include <cmath>
 #include <vector>
 #include <map>
 #include "ConfusionMatrix.h"
