@@ -24,7 +24,7 @@ set (JIPLIB_PACKAGE_BUGREPORT "pieter.kempeneers@ec.europa.eu")
 
 set(CLASSIF 0 CACHE STRING "set a variable that can be used in Jim.cc")
 set(ODOITHIN 0 CACHE STRING "set a variable that can be used in Jim.cc")
-set(MCISRG 0 CACHE STRING "set a variable that can be used in Jim.cc")
+set(MCISRG 1 CACHE STRING "set a variable that can be used in Jim.cc")
 
 set(BUILD_WITH_LIBLAS FALSE CACHE BOOL "Choose if jiplib is to be built with liblas")
 set(BUILD_WITH_FANN TRUE CACHE BOOL "Choose if jiplib is to be built with fann")

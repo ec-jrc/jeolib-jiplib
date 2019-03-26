@@ -7,3 +7,4 @@
 #define MIALIB @MIA_BOOL@
 #define CLASSIF @CLASSIF@
 #define ODOITHIN @ODOITHIN@
+#define MCISRG @MCISRG@

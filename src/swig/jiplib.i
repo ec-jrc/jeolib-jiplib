@@ -767,6 +767,7 @@ This file is part of jiplib
       }
     }
 
+  //todo: return multi-plane/band images according to: http://scikit-image.org/docs/dev/user_guide/numpy_images.html
   PyObject* np(std::shared_ptr<Jim> aJim, size_t band=0) {
       int npDataType;
       switch (aJim->getDataType()){

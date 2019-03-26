@@ -4456,49 +4456,50 @@ CPLErr JimList::extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, AppFac
     else if(verbose_opt[0])
       std::cout << "We are in append" << std::endl;
     while(imit!=end()){
-      if(!((*imit)->isGeoRef())){
-        std::cerr << "Warning: input image is not georeferenced" << std::endl;
-        // string errorstring="Warning: input image is not georeferenced";
-        // throw(errorstring);
-      }
-      if(append){
-        if(verbose_opt[0])
-          std::cout << "We are in append"<< std::endl;
-        try{
+      try{
+        if(!((*imit)->isGeoRef())){
+          std::cerr << "Warning: input image is not georeferenced" << std::endl;
+          // string errorstring="Warning: input image is not georeferenced";
+          // throw(errorstring);
+        }
+        if(append){
+          if(verbose_opt[0])
+            std::cout << "We are in append"<< std::endl;
           (*imit)->extractOgr(sampleReader,ogrWriter,extractApp);
         }
-        catch(string errorString){
-          std::cout << errorString << ", continuing with next image"<< std::endl;
-          continue;
+        else{//join
+          if(verbose_opt[0])
+            std::cout << "We are in join, band " << iband << std::endl;
+
+          VectorOgr v1=VectorOgr(ogrFilename);
+          VectorOgr v2;
+          extractApp.clearOption("bandname");
+          if(bandNames_opt.size())
+            extractApp.setLongOption("bandname",bandNames_opt[iband]);
+          extractApp.setLongOption("output","/vsimem/v2.sqlite");
+          //*imit is ImageProcess
+          (*imit)->extractOgr(sampleReader, v2, extractApp);
+          v2.write();
+          app::AppFactory joinApp(extractApp);
+          joinApp.setLongOption("output",ogrFilename);
+          joinApp.setLongOption("key","fid");
+          VectorOgr nextWriter;
+          if(verbose_opt[0])
+            std::cout << "joining vectors" << std::endl;
+          v1.join(v2,nextWriter,joinApp);
+          v1.close();
+          v2.close();
+          if(verbose_opt[0])
+            std::cout << "Writing vector nextWriter " << nextWriter.getFileName() << std::endl;
+          nextWriter.write();
+          nextWriter.close();
+          ++iband;
         }
       }
-      else{//join
-        if(verbose_opt[0])
-          std::cout << "We are in join, band " << iband << std::endl;
-
-        VectorOgr v1=VectorOgr(ogrFilename);
-        VectorOgr v2;
-        extractApp.clearOption("bandname");
-        if(bandNames_opt.size())
-          extractApp.setLongOption("bandname",bandNames_opt[iband]);
-        extractApp.setLongOption("output","/vsimem/v2.sqlite");
-        //*imit is ImageProcess
-        (*imit)->extractOgr(sampleReader, v2, extractApp);
-        v2.write();
-        app::AppFactory joinApp(extractApp);
-        joinApp.setLongOption("output",ogrFilename);
-        joinApp.setLongOption("key","fid");
-        VectorOgr nextWriter;
-        if(verbose_opt[0])
-          std::cout << "joining vectors" << std::endl;
-        v1.join(v2,nextWriter,joinApp);
-        v1.close();
-        v2.close();
-        if(verbose_opt[0])
-          std::cout << "Writing vector nextWriter " << nextWriter.getFileName() << std::endl;
-        nextWriter.write();
-        nextWriter.close();
-        ++iband;
+      catch(string errorString){
+        std::cout << errorString << ", continuing with next image"<< std::endl;
+        ++imit;
+        continue;
       }
       ++imit;
     }
