@@ -132,6 +132,14 @@ def fun2method(inputfile, outputfile_basename):
         if setNc:
             f.write('\n\t\tint nc = this->size();')
         f.write('\n\t\timout =::'+a.get("name")+'('+cCall+');')
+
+        for idx, arg in enumerate(a.get("arguments")[1:len(a.get("arguments"))]):
+            if (arg[0]=='IMAGE *'):
+                f.write('\n\t\timRaster_'+arg[1]+'.setMIA();')
+
+        f.write('\n\t\tfor(int iimg=0;iimg<this->size();++iimg)')
+        f.write('\n\t\t\tthis->getImage(iimg)->setMIA();')
+
         f.write('\n\t\tif (imout){')
         f.write('\n\t\t\tstd::shared_ptr<Jim> imgWriter=std::make_shared<Jim>(imout);')
         f.write('\n\t\t\timgWriter->copyGeoTransform(*front());')

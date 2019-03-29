@@ -26,8 +26,33 @@ VectorOgr::VectorOgr(void) : m_gds(NULL), m_access(GDAL_OF_READONLY){m_filename.
 
 ///Copy constructor
 VectorOgr::VectorOgr(VectorOgr& other, app::AppFactory &app) : m_gds(NULL){
-  app.setLongOption("access","1");
-  open(app);
+  Optionjl<std::string> filename_opt("fn", "filename", "filename");
+  Optionjl<std::string> ogrformat_opt("f", "oformat", "Output sample dataset format","SQLite");
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=filename_opt.retrieveOption(app);
+    ogrformat_opt.retrieveOption(app);
+    verbose_opt.retrieveOption(app);
+  }
+  catch(std::string predefinedString){
+    std::cout << predefinedString << std::endl;
+  }
+  if(!doProcess){
+    std::cout << std::endl;
+    std::ostringstream helpStream;
+    helpStream << "exception thrown due to help info";
+    throw(helpStream.str());//help was invoked, stop processing
+  }
+
+  if(filename_opt.empty()){
+    std::ostringstream helpStream;
+    helpStream << "Error: VectorOgr constructor needs filename key";
+    throw(helpStream.str());//help was invoked, stop processing
+  }
+
+  open(filename_opt[0], ogrformat_opt[0], 1);
   copy(other,app);
 }
 
@@ -1157,9 +1182,7 @@ OGRErr VectorOgr::addPoint(double x, double y, const std::map<std::string,double
  **/
 shared_ptr<VectorOgr> VectorOgr::join(VectorOgr &ogrReader, app::AppFactory& app){
   std::shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
-  if(join(ogrReader, *ogrWriter, app)!=OGRERR_NONE){
-    std::cerr << "Error: failed to join" << std::endl;
-  }
+  join(ogrReader, *ogrWriter, app);
   return(ogrWriter);
 }
 
@@ -1283,7 +1306,11 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
     // if(ogrWriter.open(output_opt[0],ogrformat_opt[0],access_opt[0])!=OGRERR_NONE)
     if(ogrWriter.open(output_opt[0],ogrformat_opt[0])!=OGRERR_NONE)
       initWriter=false;
-
+    if(isEmpty() || ogrReader.isEmpty()){
+      ostringstream errorStream;
+      errorStream << "Error: features are empty";
+      throw(errorStream.str());
+    }
     if(verbose_opt[0]){
       std::cout << "join this vector containing " << getFeatureCount() << " features with vector containing " << ogrReader.getFeatureCount() << std::endl;
 
@@ -1739,6 +1766,26 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
     throw;
+  }
+}
+///append two VectorOgr objects (append to first layer)
+void VectorOgr::append(VectorOgr &ogrReader){
+  size_t ilayer=0;
+  size_t currentSize=getFeatureCount(ilayer);
+  resize(currentSize+ogrReader.getFeatureCount(ilayer),ilayer);
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+  for(size_t ifeature = 0; ifeature < ogrReader.getFeatureCount(ilayer); ++ifeature) {
+    OGRFeature *thatFeature=ogrReader.getFeatureRef(ifeature,ilayer);
+    if(!thatFeature){
+      // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+      continue;
+    }
+    OGRFeature *writeFeature=createFeature(ilayer);
+    writeFeature->SetFrom(thatFeature);
+    setFeature(currentSize+ifeature,writeFeature,ilayer);
   }
 }
 

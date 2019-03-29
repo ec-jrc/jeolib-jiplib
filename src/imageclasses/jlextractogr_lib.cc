@@ -655,6 +655,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       // OGRLayer *writeLayer;
       try{
         if(initWriter){
+          if(verbose_opt[0])
+            std::cout << "initWriter is true" << std::endl;
           if(createPolygon){
             //create polygon
             if(verbose_opt[0])
@@ -701,9 +703,16 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
           if(fid_opt.size()){
             if(verbose_opt[0])
               std::cout << "create fid" << std::endl;
-            ogrWriter.createField(fid_opt[0],OFTInteger64,ilayer);
+            if(ogrWriter.createField(fid_opt[0],OFTInteger64,ilayer)!=OGRERR_NONE){
+              std::string errorString="Error: could not create fid";
+              throw(errorString);
+            }
+            if(verbose_opt[0])
+              std::cout << "fid has been created" << std::endl;
           }
 
+          if(verbose_opt[0])
+            std::cout << "checking rules" << std::endl;
           for(int irule=0;irule<rule_opt.size();++irule){
             for(int iband=0;iband<nband;++iband){
               int theBand=(band_opt.size()) ? band_opt[iband] : iband;
@@ -743,7 +752,11 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               }
             }
           }
+          if(verbose_opt[0])
+            std::cout << "end of initWriter" << std::endl;
         }
+        if(verbose_opt[0])
+          std::cout << "after initWriter" << std::endl;
       }
       catch(std::string errorString){
         std::cerr << errorString << "failed to initWriter" << std::endl;
@@ -753,6 +766,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       unsigned long int ifeature=0;
       // unsigned long int nfeatureLayer=sampleReaderOgr.getFeatureCount();
       unsigned long int nfeatureLayer=sampleReader.getFeatureCount(ilayer);
+      if(verbose_opt[0])
+        std::cout << "nfeatureLayer: " << nfeatureLayer << std::endl;
       unsigned long int ntotalvalidLayer=0;
 
       ogrWriter.resize(sampleReader.getFeatureCount(ilayer),ilayer);
@@ -800,16 +815,16 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         // double x,y;
         OGRGeometry *readGeometry;
         readGeometry = readFeature->GetGeometryRef();
-        if(!VectorOgr::transform(readGeometry,sample2img)){
-          std::string errorString="Error: coordinate transform not successful";
-          throw(errorString);
-        }
         if(!readGeometry){
           std::string errorString="Error: geometry is empty";
           throw(errorString);
         }
         //create buffer
         OGRGeometry* poGeometry=readGeometry->clone();
+        if(!VectorOgr::transform(poGeometry,sample2img)){
+          std::string errorString="Error: coordinate transform not successful";
+          throw(errorString);
+        }
         if(buffer_opt.size())
           poGeometry=poGeometry->Buffer(buffer_opt[0]);
         if(!poGeometry){
@@ -1479,8 +1494,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               ++ntotalvalid;
               ++ntotalvalidLayer;
             }
-          }
-          else{
+          }//for points
+          else{//(multi-)polygons
             OGRPolygon readPolygon;//readPolygon is in SRS of raster dataset
             OGRMultiPolygon readMultiPolygon;//readMultiPolygon is in SRS of raster dataset
 
@@ -1807,11 +1822,11 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               this->geo2image(ulx,uly,uli,ulj);
               this->geo2image(lrx,lry,lri,lrj);
               if(verbose_opt[0]>1){
-      std::cout << "calculated uli=" << uli << "and ulj" << ulj << " from ulx=" << ulx << "and uly=" << uly << std::endl;
-      std::cout << "calculated lri=" << lri << "and lrj" << lrj << " from lrx=" << lrx << "and lry=" << lry << std::endl;
-      std::cout << "bounding box for polygon feature " << ifeature << ": " << uli << " " << ulj << " " << lri << " " << lrj << std::endl;
-    }
-      //nearest neighbour
+                std::cout << "calculated uli=" << uli << "and ulj" << ulj << " from ulx=" << ulx << "and uly=" << uly << std::endl;
+                std::cout << "calculated lri=" << lri << "and lrj" << lrj << " from lrx=" << lrx << "and lry=" << lry << std::endl;
+                std::cout << "bounding box for polygon feature " << ifeature << ": " << uli << " " << ulj << " " << lri << " " << lrj << std::endl;
+              }
+              //nearest neighbour
               ulj=static_cast<int>(ulj);
               uli=static_cast<int>(uli);
               lrj=static_cast<int>(lrj);
@@ -4465,6 +4480,10 @@ CPLErr JimList::extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, AppFac
         if(append){
           if(verbose_opt[0])
             std::cout << "We are in append"<< std::endl;
+          if(verbose_opt[0]){
+            std::cout << "bbox of sampleReader: " << " -ulx " << sampleReader.getUlx()<< " -uly " << sampleReader.getUly()<< " -lrx " << sampleReader.getLrx()   << " -lry " << sampleReader.getLry() << std::endl;
+            std::cout << "bbox of raster image: " << " -ulx " << (*imit)->getUlx()<< " -uly " << (*imit)->getUly()<< " -lrx " << (*imit)->getLrx()   << " -lry " << (*imit)->getLry() << std::endl;
+          }
           (*imit)->extractOgr(sampleReader,ogrWriter,extractApp);
         }
         else{//join

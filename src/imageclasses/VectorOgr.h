@@ -392,6 +392,8 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   OGRErr addPoint(double x, double y, const std::map<std::string,double>& pointAttributes, size_t ilayer=0);
   size_t serialize(std::vector<unsigned char> &vbytes);
   void dumpOgr(app::AppFactory& app);
+  ///append two VectorOgr
+  void append(VectorOgr &ogrReader);
   ///joins two VectorOgr based on key value
   std::shared_ptr<VectorOgr> join(VectorOgr &ogrReader, app::AppFactory& app);
   ///joins two VectorOgr based on key value
