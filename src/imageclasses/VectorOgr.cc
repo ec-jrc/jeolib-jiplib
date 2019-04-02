@@ -1778,14 +1778,20 @@ void VectorOgr::append(VectorOgr &ogrReader){
 #else
 #endif
   for(size_t ifeature = 0; ifeature < ogrReader.getFeatureCount(ilayer); ++ifeature) {
-    OGRFeature *thatFeature=ogrReader.getFeatureRef(ifeature,ilayer);
-    if(!thatFeature){
-      // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+    try{
+      OGRFeature *thatFeature=ogrReader.getFeatureRef(ifeature,ilayer);
+      if(!thatFeature){
+        // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+        continue;
+      }
+      OGRFeature *writeFeature=createFeature(ilayer);
+      writeFeature->SetFrom(thatFeature);
+      setFeature(currentSize+ifeature,writeFeature,ilayer);
+    }
+    catch(std::string errorString){
+      std::cerr << errorString << std::endl;
       continue;
     }
-    OGRFeature *writeFeature=createFeature(ilayer);
-    writeFeature->SetFrom(thatFeature);
-    setFeature(currentSize+ifeature,writeFeature,ilayer);
   }
 }
 

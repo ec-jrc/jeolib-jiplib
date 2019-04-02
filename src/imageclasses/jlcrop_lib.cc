@@ -3406,6 +3406,11 @@ void JimList::stackBand(Jim& imgWriter, AppFactory& app){
       }
       if(vband.size()){
         for(size_t iband=0;iband<vband.size();++iband){
+          if(iband>=(*imit)->nrOfBand()){
+            std::string errorString="Error: band number out of range";
+            throw(errorString);
+          }
+
           (*imit)->copyData(imgWriter.getDataPointer(currentBand),vband[iband]);
           ++currentBand;
         }
