@@ -1591,6 +1591,7 @@ CPLErr Jim::open(app::AppFactory &app){
   Optionjl<bool> noread_opt("noread", "noread", "do not read data when opening",false);
   Optionjl<bool> band2plane_opt("band2plane", "band2plane", "read bands as planes",false);
   Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
+  Optionjl<bool> nogeo_opt("nogeo", "nogeo", "use image coordinates instead of spatial reference system",false);
   Optionjl<short> verbose_opt("verbose", "verbose", "verbose output",0,2);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
@@ -1627,6 +1628,7 @@ CPLErr Jim::open(app::AppFactory &app){
     noread_opt.retrieveOption(app);
     band2plane_opt.retrieveOption(app);
     memory_opt.retrieveOption(app);
+    nogeo_opt.retrieveOption(app);
     verbose_opt.retrieveOption(app);
   }
   catch(std::string predefinedString){
@@ -1942,26 +1944,6 @@ CPLErr Jim::open(app::AppFactory &app){
             throw(errorStream.str());
           }
         }
-        // if(dx_opt.size()){//convert to number of samples
-        //   if(ulx_opt.size()&&lrx_opt.size()){
-        //     nsample_opt.clear();
-        //     nsample_opt.push_back((lrx_opt[0]-ulx_opt[0])/dx_opt[0]);
-        //     dx_opt.clear();
-        //   }
-        //   else{
-        //     dx_opt.clear();
-        //   }
-        // }
-        // if(dy_opt.size()){//convert to number of lines
-        //   if(uly_opt.size()&&lry_opt.size()){
-        //     nline_opt.clear();
-        //     nline_opt.push_back((uly_opt[0]-lry_opt[0])/dy_opt[0]);
-        //     dy_opt.clear();
-        //   }
-        //   else{
-        //     dy_opt.clear();
-        //   }
-        // }
         //both ulx and uly need to be set
         if(ulx_opt.size() && uly_opt.size()){
           if(target2gds){
@@ -1989,6 +1971,25 @@ CPLErr Jim::open(app::AppFactory &app){
         else{
           lrx_opt.clear();
           lry_opt.clear();
+        }
+      }
+      else if(nogeo_opt[0]){
+        if(nogeo_opt.size()&&dx_opt.size())
+          dx_opt[0]*=getDeltaX();
+        if(nogeo_opt.size()&&dy_opt.size())
+          dy_opt[0]*=getDeltaY();
+        //here comes nogeo
+        //ulx_opt and uly_opt in image coordinates: convert to georeferenced coordinates
+        if(ulx_opt.size() && uly_opt.size()){
+          this->image2geo(ulx_opt[0],uly_opt[0],ulx_opt[0],uly_opt[0]);
+          ulx_opt[0]-=getDeltaX()/2;
+          uly_opt[0]+=getDeltaY()/2;
+        }
+        if(lrx_opt.size() && lry_opt.size()){
+          //lrx_opt and lry_opt in image coordinates: convert to georeferenced coordinates
+          this->image2geo(lrx_opt[0],lry_opt[0],lrx_opt[0],lry_opt[0]);
+          lrx_opt[0]+=getDeltaX()/2;
+          lry_opt[0]-=getDeltaY()/2;
         }
       }
     }
