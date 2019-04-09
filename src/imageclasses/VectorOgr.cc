@@ -572,7 +572,10 @@ OGRErr VectorOgr::pushLayer(const std::string& layername, const std::string& the
 std::shared_ptr<VectorOgr> VectorOgr::intersect(OGRPolygon *pGeom, app::AppFactory& app){
   shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
   if(intersect(pGeom, *ogrWriter, app)!=OGRERR_NONE){
-    std::cerr << "Failed to intersect" << std::endl;
+    std::ostringstream errorStream;
+    errorStream << "Error: failed to intersect" << std::endl;
+    std::cerr << errorStream.str() << std::endl;
+    throw(errorStream);
   }
   return(ogrWriter);
 }
@@ -580,7 +583,10 @@ std::shared_ptr<VectorOgr> VectorOgr::intersect(OGRPolygon *pGeom, app::AppFacto
 std::shared_ptr<VectorOgr> VectorOgr::intersect(const Jim& aJim, app::AppFactory& app){
   shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
   if(intersect(aJim, *ogrWriter, app)!=OGRERR_NONE){
-    std::cerr << "Failed to intersect" << std::endl;
+    std::ostringstream errorStream;
+    errorStream << "Error: failed to intersect" << std::endl;
+    std::cerr << errorStream.str() << std::endl;
+    throw(errorStream);
   }
   return(ogrWriter);
 }
