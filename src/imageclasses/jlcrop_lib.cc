@@ -434,7 +434,7 @@ void Jim::crop(Jim& imgWriter, AppFactory& app){
       std::cout << "stridei: " << stridei << std::endl;
       std::cout << "stridej: " << stridej << std::endl;
     }
-    if(cropuli+stridei/2 < 0 || cropuli+(ncropcol-1)*stridei+stridei/2 >= nrOfRow()){
+    if(cropuli+stridei/2 < 0 || cropuli+(ncropcol-1)*stridei+stridei/2 >= nrOfCol()){
       errorStream << "Warning: columns requested out of bounding box" << std::endl;
       errorStream << "cropuli+stridei/2: " << cropuli+stridei/2 << std::endl;
       errorStream << "cropuli+(ncropcol-1)*stridei+stridei/2: " << cropuli+(ncropcol-1)*stridei+stridei/2 << std::endl;
