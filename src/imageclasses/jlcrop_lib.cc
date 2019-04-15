@@ -285,8 +285,15 @@ void Jim::crop(Jim& imgWriter, AppFactory& app){
     double dx=dx_opt[0];
     double dy=dy_opt[0];
     if(nogeo_opt[0]){
-      if(verbose_opt[0])
+      if(verbose_opt[0]){
         std::cout << "crop in nogeo mode" << std::endl;
+        std::cout << "cropulx: " << cropulx << std::endl;
+        std::cout << "cropuly: " << cropuly << std::endl;
+        std::cout << "croplrx: " << croplrx << std::endl;
+        std::cout << "croplry: " << croplry << std::endl;
+        std::cout << "dx: " << dx << std::endl;
+        std::cout << "dy: " << dy << std::endl;
+      }
       if(cropulx>=croplrx){
         cropulx=0;
         croplrx=nrOfCol();
@@ -320,8 +327,15 @@ void Jim::crop(Jim& imgWriter, AppFactory& app){
       croplry+=this->getDeltaY()/2.0;
     }
     else{
-      if(verbose_opt[0])
+      if(verbose_opt[0]){
         std::cout << "crop in geo mode" << std::endl;
+        std::cout << "cropulx: " << cropulx << std::endl;
+        std::cout << "cropuly: " << cropuly << std::endl;
+        std::cout << "croplrx: " << croplrx << std::endl;
+        std::cout << "croplry: " << croplry << std::endl;
+        std::cout << "dx: " << dx << std::endl;
+        std::cout << "dy: " << dy << std::endl;
+      }
       if(cropulx>=croplrx){
         cropulx=getUlx();
         croplrx=getLrx();
@@ -329,18 +343,6 @@ void Jim::crop(Jim& imgWriter, AppFactory& app){
       if(cropuly<=croplry){
         cropuly=getUly();
         croplry=getLry();
-      }
-      if(dx>0)
-        stridei=dx/getDeltaX();
-      else{
-        stridei=1;
-        dx=getDeltaX();
-      }
-      if(dy>0)
-        stridej=dy/getDeltaY();
-      else{
-        stridej=1;
-        dy=getDeltaY();
       }
       if(align_opt[0]){
         if(verbose_opt[0])
@@ -367,6 +369,24 @@ void Jim::crop(Jim& imgWriter, AppFactory& app){
             cropuly-=fmod(cropuly-this->getUly(),dy)+dy;
         }
       }
+      else{
+        if(dx>0){
+          stridei=dx/getDeltaX();
+          // stridei=(croplrx-cropulx)/dx;
+        }
+        else{
+          stridei=1;
+          dx=getDeltaX();
+        }
+        if(dy>0){
+          stridej=dy/getDeltaY();
+          // stridej=(cropuly-croplry)/dy;
+        }
+        else{
+          stridej=1;
+          dy=getDeltaY();
+        }
+      }
       this->geo2image(cropulx,cropuly,cropuli,cropulj);
       this->geo2image(croplrx-this->getDeltaX(),croplry+this->getDeltaY(),croplri,croplrj);
 
@@ -374,9 +394,13 @@ void Jim::crop(Jim& imgWriter, AppFactory& app){
       cropulj=floor(cropulj);
       croplri=floor(croplri)+1;
       croplrj=floor(croplrj)+1;
+      // croplri=ceil(croplri);
+      // croplrj=ceil(croplrj);
     }
-    size_t ncropcol=(croplri-cropuli)/stridei;
-    size_t ncroprow=(croplrj-cropulj)/stridej;
+    // size_t ncropcol=(croplri-cropuli)/stridei;
+    // size_t ncroprow=(croplrj-cropulj)/stridej;
+    size_t ncropcol=(croplrx-cropulx)/dx;
+    size_t ncroprow=(cropuly-croplry)/dy;
     if(verbose_opt[0]){
       std::cout << "ncropcol: " << ncropcol << std::endl;
       std::cout << "ncroprow: " << ncroprow << std::endl;
