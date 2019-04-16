@@ -64,7 +64,7 @@ namespace app{
 }
 
 #if MIALIB
-enum JIPLIBDataType {JDT_Unknown=0, JDT_Int64=14, JDT_UInt64=15};
+enum JIPLIBDataType {JDT_Unknown=0, JDT_Int64=14, JDT_UInt64=15, JDT_Word=16};
 #endif
 
 enum DATA_ACCESS { READ_ONLY = 0, UPDATE = 1, WRITE = 3};
@@ -151,6 +151,7 @@ static JIPLIBDataType string2JDT(const std::string &typeString){
   typeMap["Int64"]=JDT_Int64;
   typeMap["JDT_UInt64"]=JDT_UInt64;
   typeMap["JDT_Int64"]=JDT_Int64;
+  typeMap["JDT_Word"]=JDT_Word;
   if(typeMap.count(typeString))
     return(typeMap[typeString]);
   else
@@ -179,6 +180,7 @@ static int getDataType(const std::string &typeString){
   typeMap["UInt64"]=JDT_UInt64;
   typeMap["JDT_Int64"]=JDT_Int64;
   typeMap["JDT_UInt64"]=JDT_UInt64;
+  typeMap["JDT_Word"]=JDT_Word;
   typeMap["int8"]=GDT_Byte;
   typeMap["uint8"]=GDT_Byte;
   typeMap["int16"]=GDT_Int16;

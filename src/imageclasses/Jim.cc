@@ -52,6 +52,8 @@ size_t Jim::getDataTypeSizeBytes(int band) const {
   case JDT_UInt64:
   case JDT_Int64:
     return(static_cast<size_t>(8));
+  case JDT_Word:
+    return(static_cast<size_t>(1));
   default:{
     GDALDataType theType=getGDALDataType(band);
     if(theType==GDT_Unknown){
@@ -272,6 +274,8 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
      return t_UINT64;
    case JDT_Int64:
      return t_INT64;
+   case JDT_Word:
+     return t_FOURBITPERPIXEL;
    case t_UNSUPPORTED:
      return GDT_Unknown;
    default:
@@ -285,6 +289,8 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
      return(t_UINT64);
    else if(aJIPLIBDataType==JDT_Int64)
      return(t_INT64);
+   else if(aJIPLIBDataType==JDT_Word)
+     return(t_FOURBITPERPIXEL);
    else
      return(GDAL2MIALDataType(aJIPLIBDataType));
  }
@@ -317,6 +323,8 @@ CPLErr Jim::setMIA(IMAGE* mia, int band){
      return JDT_UInt64;
    case t_INT64:
      return JDT_Int64;
+   case t_FOURBITPERPIXEL:
+     return JDT_Word;
    case t_UNSUPPORTED:
      return GDT_Unknown;
    default:
@@ -1835,8 +1843,10 @@ CPLErr Jim::open(app::AppFactory &app){
       distribution="none";
 
     if(stat.getDistributionType(distribution)==statfactory::StatFactory::none){
-      for(size_t iband=0;iband<nrOfBand();++iband)
-        setData(mean_opt[0],iband);
+      for(size_t iband=0;iband<nrOfBand();++iband){
+        if(getDataType() < GDT_TypeCount)
+          setData(mean_opt[0],iband);
+      }
     }
     else{
       if(nrOfPlane()>1){
