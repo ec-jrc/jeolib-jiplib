@@ -123,10 +123,10 @@ void JimList::statProfile(Jim& imgWriter, app::AppFactory& app){
     if(theType==GDT_Unknown)
       theType=this->front()->getGDALDataType();
 
-    if(verbose_opt[0])
+    if(verbose_opt[0]>1)
       std::cout << std::endl << "Output pixel type:  " << GDALGetDataTypeName(theType) << endl;
 
-    if(verbose_opt[0])
+    if(verbose_opt[0]>1)
       cout << "Calculating statistic metrics: " << function_opt.size() << endl;
     // imgWriter.open(output_opt[0],this->nrOfCol(),this->nrOfRow(),function_opt.size(),theType,imageType,memory_opt[0],option_opt);
     //todo: expand for collections that have different image dimensions and geotransforms?
@@ -152,7 +152,8 @@ void JimList::statProfile(Jim& imgWriter, app::AppFactory& app){
     void* pProgressArg=NULL;
     GDALProgressFunc pfnProgress=GDALTermProgress;
     double progress=0;
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    if(verbose_opt[0])
+      MyProgressFunc(progress,pszMessage,pProgressArg);
     Vector2d<double> lineInput_transposed(this->front()->nrOfCol(),size());//band interleaved by pixel
     for(unsigned int y=0;y<this->front()->nrOfRow();++y){
       std::list<std::shared_ptr<Jim> >::const_iterator imit=begin();
@@ -248,7 +249,8 @@ void JimList::statProfile(Jim& imgWriter, app::AppFactory& app){
         imgWriter.writeData(lineOutput[imethod],y,imethod);
       }
       progress=(1.0+y)/imgWriter.nrOfRow();
-      MyProgressFunc(progress,pszMessage,pProgressArg);
+      if(verbose_opt[0])
+        MyProgressFunc(progress,pszMessage,pProgressArg);
     }
   }
   catch(string predefinedString){
@@ -354,10 +356,10 @@ void Jim::statProfile(Jim& imgWriter, app::AppFactory& app){
     if(theType==GDT_Unknown)
       theType=this->getGDALDataType();
 
-    if(verbose_opt[0])
+    if(verbose_opt[0]>1)
       std::cout << std::endl << "Output pixel type:  " << GDALGetDataTypeName(theType) << endl;
 
-    if(verbose_opt[0])
+    if(verbose_opt[0]>1)
       cout << "Calculating statistic metrics: " << function_opt.size() << endl;
     // imgWriter.open(output_opt[0],this->nrOfCol(),this->nrOfRow(),function_opt.size(),theType,imageType,memory_opt[0],option_opt);
     imgWriter.open(this->nrOfCol(),this->nrOfRow(),function_opt.size(),theType);
@@ -382,7 +384,8 @@ void Jim::statProfile(Jim& imgWriter, app::AppFactory& app){
     void* pProgressArg=NULL;
     GDALProgressFunc pfnProgress=GDALTermProgress;
     double progress=0;
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    if(verbose_opt[0])
+      MyProgressFunc(progress,pszMessage,pProgressArg);
     Vector2d<double> lineInput_transposed(nrOfCol(),nrOfBand());//band interleaved by pixel
     for(unsigned int y=0;y<this->nrOfRow();++y){
       for(unsigned int iband=0;iband<this->nrOfBand();++iband)
@@ -468,7 +471,8 @@ void Jim::statProfile(Jim& imgWriter, app::AppFactory& app){
         imgWriter.writeData(lineOutput[imethod],y,imethod);
       }
       progress=(1.0+y)/imgWriter.nrOfRow();
-      MyProgressFunc(progress,pszMessage,pProgressArg);
+      if(verbose_opt[0])
+        MyProgressFunc(progress,pszMessage,pProgressArg);
     }
   }
   catch(string predefinedString){

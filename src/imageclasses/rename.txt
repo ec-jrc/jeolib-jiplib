@@ -255,7 +255,7 @@ mialib_stats.h:extern IMAGE *lookuprgb(IMAGE *imr, IMAGE *img, IMAGE *imb, IMAGE
 mialib_stats.h:extern IMAGE *class2d(IMAGE *im1, IMAGE *im2, IMAGE *imlut); applyLUT2d
 mialib_stats.h:extern IMAGE *area(IMAGE *im, int r, int type); surfaceArea
 mialib_stats.h:extern IMAGE *dirsum(IMAGE *im, int dir); runSumDir
-mialib_stats.h:extern G_TYPE *min_max(IMAGE *im); getMinMax
+mialib_stats.h:extern G_TYPE *min_max(IMAGE *im); getMiaMinMax
 mialib_stats.h:extern ERROR_TYPE getfirstmaxpos(IMAGE *im, unsigned long int *pos); getFirstMaxOffset
 mialib_stats.h:extern ERROR_TYPE histcompress(IMAGE *im); histoCompress
 mialib_stats.h:extern ERROR_TYPE lookup(IMAGE *im, IMAGE *imlut); applyLUT1d
@@ -264,7 +264,7 @@ mialib_stats.h:extern ERROR_TYPE volume(IMAGE *im); getSum
 mialib_stats.h:extern ERROR_TYPE dirmax(IMAGE *im, int dir); propagateMaxDir
 mialib_stats.h:extern ERROR_TYPE imequalp(IMAGE *im1, IMAGE *im2); predicateIdentity
 mialib_stats.h:extern ERROR_TYPE getmax(IMAGE *im, double *maxval); getMax
-mialib_stats.h:extern ERROR_TYPE getminmax(IMAGE *im, double *minval, double *maxval); getMinMax
+mialib_stats.h:extern ERROR_TYPE getminmax(IMAGE *im, double *minval, double *maxval); getMiaMinMax
 mialib_stats.h:extern IMAGE **histrgbmatch(IMAGE *cdf_rgb_src, IMAGE *cdf_rg_tgt, IMAGE *cdf_rb_tgt, IMAGE *cdf_gb_tgt); histoMatchRgb
 mialib_stats.h:extern IMAGE **histrgb3dmatch(IMAGE *cdf_rgb_src, IMAGE *cdf_rg_tgt, IMAGE *cdf_rb_tgt, IMAGE *cdf_gb_tgt); histoMatch3dRgb
 mialib_stats.h:extern ERROR_TYPE mblincomb(IMAGE **imap, int nc, IMAGE *matrix); linearCombinationMultiband

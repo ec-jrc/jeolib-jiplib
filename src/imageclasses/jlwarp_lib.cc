@@ -30,6 +30,7 @@ void Jim::warp(Jim& imgWriter, app::AppFactory &theApp){
   Optionjl<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference for the output file, e.g., epsg:3035 to use European projection and force to European grid");
   Optionjl<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
   Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.",0);
+  Optionjl<std::string> warp_opt("wo", "wo", "Warp option(s). Multiple options can be specified.");
   Optionjl<std::string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
   Optionjl<short> verbose_opt("verbose", "verbose", "verbose output",0,2);
 
@@ -39,6 +40,7 @@ void Jim::warp(Jim& imgWriter, app::AppFactory &theApp){
     targetSRS_opt.retrieveOption(theApp);
     resample_opt.retrieveOption(theApp);
     nodata_opt.retrieveOption(theApp);
+    warp_opt.retrieveOption(theApp);
     otype_opt.retrieveOption(theApp);
     verbose_opt.retrieveOption(theApp);
   }
@@ -136,6 +138,8 @@ void Jim::warp(Jim& imgWriter, app::AppFactory &theApp){
                 poDatasetOut->SetGeoTransform(&targetGT[0]);
 
                 psOptions->papszWarpOptions = CSLSetNameValue(psOptions->papszWarpOptions,"INIT_DEST",type2string<double>(nodata_opt[0]).c_str());
+                // psOptions->GDALWarpOptions  = CSLSetNameValue(psOptions->papszWarpOptions,"eResampleAlg",resample_opt[0]);
+                psOptions->papszWarpOptions = CSLSetNameValue(psOptions->papszWarpOptions,"eResampleAlg",resample_opt[0].c_str());
                 // Perform the reprojection
                 if( GDALReprojectImage(poDatasetMem, getProjectionRef().c_str(), poDatasetOut, targetWKT, eResampleAlg, dfWarpMemoryLimit, dfMaxError, pfnProgress, pProgressArg, psOptions) == CE_None ){
                   // Copy pixels to pout

@@ -118,7 +118,7 @@ void Jim::convert(Jim& imgWriter, AppFactory& app){
       if(theType==GDT_Unknown)
         std::cout << "Warning: unknown output pixel type: " << otype_opt[0] << ", using input type as default" << std::endl;
     }
-    if(verbose_opt[0])
+    if(verbose_opt[0]>1)
       cout << "Output pixel type:  " << GDALGetDataTypeName(theType) << endl;
 
     if(scale_opt.size()){
@@ -135,7 +135,7 @@ void Jim::convert(Jim& imgWriter, AppFactory& app){
 
     if(theType==GDT_Unknown){
       theType=this->getGDALDataType();
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         cout << "Using data type from input image: " << GDALGetDataTypeName(theType) << endl;
     }
     imgWriter.open(nrOfCol(),nrOfRow(),nrOfBand(),theType);
@@ -158,7 +158,7 @@ void Jim::convert(Jim& imgWriter, AppFactory& app){
 
     for(unsigned int iband=0;iband<nband;++iband){
       unsigned int readBand=iband;
-      if(verbose_opt[0]){
+      if(verbose_opt[0]>1){
         cout << "extracting band " << readBand << endl;
         // MyProgressFunc(progress,pszMessage,pProgressArg);
       }
@@ -166,7 +166,7 @@ void Jim::convert(Jim& imgWriter, AppFactory& app){
       double theMax=0;
       if(autoscale_opt.size()){
         this->getMinMax(0,nrOfCol()-1,0,nrOfRow()-1,readBand,theMin,theMax);
-        if(verbose_opt[0])
+        if(verbose_opt[0]>1)
           cout << "minmax: " << theMin << ", " << theMax << endl;
         double theScale=(autoscale_opt[1]-autoscale_opt[0])/(theMax-theMin);
         double theOffset=autoscale_opt[0]-theScale*theMin;
@@ -285,7 +285,7 @@ void Jim::crop(Jim& imgWriter, AppFactory& app){
     double dx=dx_opt[0];
     double dy=dy_opt[0];
     if(nogeo_opt[0]){
-      if(verbose_opt[0]){
+      if(verbose_opt[0]>1){
         std::cout << "crop in nogeo mode" << std::endl;
         std::cout << "cropulx: " << cropulx << std::endl;
         std::cout << "cropuly: " << cropuly << std::endl;
@@ -327,7 +327,7 @@ void Jim::crop(Jim& imgWriter, AppFactory& app){
       croplry+=this->getDeltaY()/2.0;
     }
     else{
-      if(verbose_opt[0]){
+      if(verbose_opt[0]>1){
         std::cout << "crop in geo mode" << std::endl;
         std::cout << "cropulx: " << cropulx << std::endl;
         std::cout << "cropuly: " << cropuly << std::endl;
@@ -345,7 +345,7 @@ void Jim::crop(Jim& imgWriter, AppFactory& app){
         croplry=getLry();
       }
       if(align_opt[0]){
-        if(verbose_opt[0])
+        if(verbose_opt[0]>1)
           std::cout << "using align option" << std::endl;
         //do align
         if(dx>0){
@@ -401,7 +401,7 @@ void Jim::crop(Jim& imgWriter, AppFactory& app){
     // size_t ncroprow=(croplrj-cropulj)/stridej;
     size_t ncropcol=(croplrx-cropulx)/dx;
     size_t ncroprow=(cropuly-croplry)/dy;
-    if(verbose_opt[0]){
+    if(verbose_opt[0]>1){
       std::cout << "ncropcol: " << ncropcol << std::endl;
       std::cout << "ncroprow: " << ncroprow << std::endl;
       std::cout << "dx: " << dx << std::endl;
@@ -428,7 +428,7 @@ void Jim::crop(Jim& imgWriter, AppFactory& app){
     // double nodataValue=m_noDataValues.size() ? m_noDataValues[0] : 0;
     std::ostringstream errorStream;
 
-    if(verbose_opt[0]){
+    if(verbose_opt[0]>1){
       std::cout << "cropuli: " << cropuli << std::endl;
       std::cout << "cropulj: " << cropulj << std::endl;
       std::cout << "stridei: " << stridei << std::endl;
@@ -1680,7 +1680,7 @@ void Jim::d_cropBand(AppFactory& app){
   size_t iband=0;
   while(scale_it!=m_scale.end()){
     if(find(vband.begin(),vband.end(),iband)==vband.end()){
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         std::cout << "removing scale for band " << iband << std::endl;
       if(m_scale.size()>1&&m_scale.size()>iband)
         m_scale.erase(scale_it);
@@ -1694,7 +1694,7 @@ void Jim::d_cropBand(AppFactory& app){
   iband=0;
   while(offset_it!=m_offset.end()){
     if(find(vband.begin(),vband.end(),iband)==vband.end()){
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         std::cout << "removing offset for band " << iband << std::endl;
       if(m_offset.size()>1&&m_offset.size()>iband)
         m_offset.erase(offset_it);
@@ -1708,7 +1708,7 @@ void Jim::d_cropBand(AppFactory& app){
   iband=0;
   while(begin_it!=m_begin.end()){
     if(find(vband.begin(),vband.end(),iband)==vband.end()){
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         std::cout << "removing begin for band " << iband << std::endl;
       if(m_begin.size()>1&&m_begin.size()>iband)
         m_begin.erase(begin_it);
@@ -1722,7 +1722,7 @@ void Jim::d_cropBand(AppFactory& app){
   iband=0;
   while(end_it!=m_end.end()){
     if(find(vband.begin(),vband.end(),iband)==vband.end()){
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         std::cout << "removing end for band " << iband << std::endl;
       if(m_end.size()>1&&m_end.size()>iband)
         m_end.erase(end_it);
@@ -1736,12 +1736,12 @@ void Jim::d_cropBand(AppFactory& app){
   iband=0;
   while(data_it!=m_data.end()){
     if(find(vband.begin(),vband.end(),iband)==vband.end()){
-        if(verbose_opt[0])
+        if(verbose_opt[0]>1)
           std::cout << "removing data for band " << iband << std::endl;
         m_data.erase(data_it);
     }
     else{
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         std::cout << "keeping data for band " << iband << std::endl;
       ++data_it;
     }
@@ -1845,12 +1845,12 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
     RESAMPLE theResample;
     if(resample_opt[0]=="near"){
       theResample=NEAR;
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         cout << "resampling: nearest neighbor" << endl;
     }
     else if(resample_opt[0]=="bilinear"){
       theResample=BILINEAR;
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         cout << "resampling: bilinear interpolation" << endl;
     }
     else{
@@ -1863,7 +1863,8 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
     void* pProgressArg=NULL;
     GDALProgressFunc pfnProgress=GDALTermProgress;
     double progress=0;
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    if(verbose_opt[0])
+      MyProgressFunc(progress,pszMessage,pProgressArg);
     // ImgReaderGdal imgReader;
     // ImgWriterGdal imgWriter;
     //open input images to extract number of bands and spatial resolution
@@ -1932,7 +1933,7 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
       if(theType==GDT_Unknown)
         std::cout << "Warning: unknown output pixel type: " << otype_opt[0] << ", using input type as default" << std::endl;
     }
-    if(verbose_opt[0])
+    if(verbose_opt[0]>1)
       cout << "Output pixel type:  " << GDALGetDataTypeName(theType) << endl;
 
     //bounding box of cropped image
@@ -1948,7 +1949,7 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
       if(layer_opt.size())
         if(find(layer_opt.begin(),layer_opt.end(),currentLayername)==layer_opt.end())
           continue;
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         std::cout << "getLayer " << std::endl;
       OGRLayer *readLayer=sampleReader.getLayer(ilayer);
       if(!readLayer){
@@ -1989,7 +1990,7 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
       double layer_lrx;
       double layer_lry;
       sampleReader.getExtent(layer_ulx,layer_uly,layer_lrx,layer_lry,ilayer,sample2img);
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         std::cout << "getExtent: " << layer_ulx << ", " << layer_uly << ", " << layer_lrx << ", " << layer_lry << std::endl;
 
       if(doInit){
@@ -2021,7 +2022,7 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
     if(croplry<cropuly&&croplry>lry_opt[0])
       lry_opt[0]=croplry;
     //ulx_opt[0],uly_opt[0],lrx_opt[0],lry_opt[0] now is minimum extent over all selected layers and user defined bounding box
-    if(verbose_opt[0])
+    if(verbose_opt[0]>1)
       cout << "--ulx=" << ulx_opt[0] << " --uly=" << uly_opt[0] << " --lrx=" << lrx_opt[0] << " --lry=" << lry_opt[0] << endl;
 
     if(doInit){//should have been set to false
@@ -2091,7 +2092,7 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
 
     if(theType==GDT_Unknown){
       theType=this->getGDALDataType();
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         cout << "Using data type from input image: " << GDALGetDataTypeName(theType) << endl;
     }
     // if(option_opt.findSubstring("INTERLEAVE=")==option_opt.end()){
@@ -2177,7 +2178,7 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
     // double deltaX=this->getDeltaX();
     // double deltaY=this->getDeltaY();
     if(!imgWriter.nrOfBand()){//not opened yet
-      if(verbose_opt[0]){
+      if(verbose_opt[0]>1){
         cout << "cropulx: " << cropulx << endl;
         cout << "cropuly: " << cropuly << endl;
         cout << "croplrx: " << croplrx << endl;
@@ -2219,7 +2220,7 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
       gt[5]=(this->isGeoRef())? -dy : dy;
       imgWriter.setGeoTransform(gt);
       if(projection_opt.size()){
-        if(verbose_opt[0])
+        if(verbose_opt[0]>1)
           cout << "projection: " << projection_opt[0] << endl;
         imgWriter.setProjectionProj4(projection_opt[0]);
       }
@@ -2260,7 +2261,7 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
     unsigned int nband=(vband.size())?vband.size() : this->nrOfBand();
     for(unsigned int iband=0;iband<nband;++iband){
       unsigned int readBand=(vband.size()>iband)?vband[iband]:iband;
-      if(verbose_opt[0]){
+      if(verbose_opt[0]>1){
         cout << "extracting band " << readBand << endl;
         MyProgressFunc(progress,pszMessage,pProgressArg);
       }
@@ -2273,7 +2274,7 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
         catch(string errorString){
           cout << errorString << endl;
         }
-        if(verbose_opt[0])
+        if(verbose_opt[0]>1)
           cout << "minmax: " << theMin << ", " << theMax << endl;
         double theScale=(autoscale_opt[1]-autoscale_opt[0])/(theMax-theMin);
         double theOffset=autoscale_opt[0]-theScale*theMin;
@@ -2425,7 +2426,7 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
         if(verbose_opt[0]){
           progress=(1.0+irow);
           progress/=imgWriter.nrOfRow();
-          MyProgressFunc(progress,pszMessage,pProgressArg);
+            MyProgressFunc(progress,pszMessage,pProgressArg);
         }
         else{
           progress=(1.0+irow);
@@ -2433,7 +2434,8 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
           progress/=imgWriter.nrOfBand()*imgWriter.nrOfRow();
           assert(progress>=0);
           assert(progress<=1);
-          MyProgressFunc(progress,pszMessage,pProgressArg);
+          if(verbose_opt[0])
+            MyProgressFunc(progress,pszMessage,pProgressArg);
         }
       }
       ++writeBand;
@@ -2569,7 +2571,8 @@ void Jim::cropDS(Jim& imgWriter, AppFactory& app){
     void* pProgressArg=NULL;
     GDALProgressFunc pfnProgress=GDALTermProgress;
     double progress=0;
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    if(verbose_opt[0])
+      MyProgressFunc(progress,pszMessage,pProgressArg);
     // ImgReaderGdal imgReader;
     // ImgWriterGdal imgWriter;
     //open input images to extract number of bands and spatial resolution

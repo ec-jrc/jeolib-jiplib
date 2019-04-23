@@ -57,7 +57,7 @@ std::multimap<std::string,std::string> Jim::getStats(AppFactory& app){
 // JimList& JimList::getStats(AppFactory& app){
 std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
   Optionjl<unsigned short> band_opt("b","band","band(s) on which to calculate statistics",0);
-  Optionjl<std::string> function_opt("f", "function", "Statistics function (invalid, valid, filename, basic, gdal, mean, median, var, skewness, kurtosis,stdev, sum, minmax, min, max, histogram, histogram2d, rmse, regression, regressionError, regressionPerpendicular","basic");
+  Optionjl<std::string> function_opt("f", "function", "Statistics function (invalid, valid, filename, basic, gdal, mean, median, var, skewness, kurtosis,stdev, sum, minmax, min, max, histogram, histogram2d, rmse, regression, regressionError, regressionPerpendicular)","basic");
   // Optionjl<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box");
   // Optionjl<double>  uly_opt("uly", "uly", "Upper left y value bounding box");
   // Optionjl<double>  lrx_opt("lrx", "lrx", "Lower right x value bounding box");

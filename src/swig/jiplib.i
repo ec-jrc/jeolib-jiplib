@@ -307,6 +307,22 @@ This file is part of jiplib
  /*  $result = pyList; */
  /* } */
 
+%typemap(in, numinputs=0) double *minval (double temp) {
+  $1 = &temp;
+ }
+
+%typemap(argout) double* minval {
+  %append_output(PyFloat_FromDouble(*$1));
+ }
+
+%typemap(in, numinputs=0) double *maxval (double temp) {
+  $1 = &temp;
+ }
+
+%typemap(argout) double* maxval {
+  %append_output(PyFloat_FromDouble(*$1));
+ }
+
 %typemap(argout) unsigned long int* ofs{
   %append_output(PyInt_FromLong(*$1));
  }
