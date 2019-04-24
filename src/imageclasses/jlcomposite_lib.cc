@@ -185,12 +185,12 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
     RESAMPLE theResample;
     if(resample_opt[0]=="near"){
       theResample=NEAR;
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         cout << "resampling: nearest neighbor" << endl;
     }
     else if(resample_opt[0]=="bilinear"){
       theResample=BILINEAR;
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         cout << "resampling: bilinear interpolation" << endl;
     }
     else{
@@ -216,7 +216,7 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
       if(theType==GDT_Unknown)
         std::cout << "Warning: unknown output pixel type: " << otype_opt[0] << ", using input type as default" << std::endl;
     }
-    if(verbose_opt[0])
+    if(verbose_opt[0]>1)
       cout << "Output pixel type:  " << GDALGetDataTypeName(theType) << endl;
 
     double dx=0;
@@ -262,7 +262,7 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
       }
     }
 
-    if(verbose_opt[0])
+    if(verbose_opt[0]>1)
       cout << "--ulx=" << ulx_opt[0] << " --uly=" << uly_opt[0] << " --lrx=" << lrx_opt[0] << " --lry=" << lry_opt[0] << endl;
 
 
@@ -287,7 +287,7 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
       // }
 
       if((ulx_opt[0]||uly_opt[0]||lrx_opt[0]||lry_opt[0])&&(!(*imit)->covers(ulx_opt[0],uly_opt[0],lrx_opt[0],lry_opt[0]))){
-        if(verbose_opt[0])
+        if(verbose_opt[0]>1)
           cout << "Input not within bounding box, skipping..." << endl;
         continue;
       }
@@ -298,10 +298,10 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
         errorStream << "Error: input is not georeferenced or wrong bounding box, only referenced images are supported for composite ";
         throw(errorStream.str());
       }
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         cout << "Bounding Box (ULX ULY LRX LRY): " << fixed << setprecision(6) << theULX << " " << theULY << " " << theLRX << " " << theLRY << endl;
       if(!init){
-        if(verbose_opt[0]){
+        if(verbose_opt[0]>1){
           switch(cruleMap[crule_opt[0]]){
           default:
           case(overwrite):
@@ -362,11 +362,11 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
         //if output type not set, get type from input image
         if(theType==GDT_Unknown){
           theType=(*imit)->getGDALDataType();
-          if(verbose_opt[0])
+          if(verbose_opt[0]>1)
             cout << "Using data type from input image: " << GDALGetDataTypeName(theType) << endl;
         }
 
-        if(verbose_opt[0]){
+        if(verbose_opt[0]>1){
           cout << "input data type: " << theType << endl;
           cout << "nband: " << nband << endl;
         }
@@ -393,7 +393,7 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
       }
       // (*imit).close();
     }
-    if(verbose_opt[0])
+    if(verbose_opt[0]>1)
       cout << "bounding box input images (ULX ULY LRX LRY): " << fixed << setprecision(6) << minULX << " " << maxULY << " " << maxLRX << " " << minLRY << endl;
     if(ulx_opt[0]||uly_opt[0]||lrx_opt[0]||lry_opt[0]){
       maxLRX=lrx_opt[0];
@@ -439,10 +439,10 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
         maxULY-=fmod(maxULY-front()->getUly(),dy)+dy;
     }
 
-    if(verbose_opt[0])
+    if(verbose_opt[0]>1)
       cout << "bounding box composite image (ULX ULY LRX LRY): " << fixed << setprecision(6) << minULX << " " << maxULY << " " << maxLRX << " " << minLRY << endl;
     //initialize image
-    if(verbose_opt[0])
+    if(verbose_opt[0]>1)
       cout << "initializing composite image..." << endl;
     //   double dcol=(maxLRX-minULX+dx-1)/dx;
     //   double drow=(maxULY-minLRY+dy-1)/dy;
@@ -452,11 +452,11 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
     int ncol=ceil((maxLRX-minULX)/dx);
     int nrow=ceil((maxULY-minLRY)/dy);
 
-    if(verbose_opt[0])
+    if(verbose_opt[0]>1)
       cout << "composite image dim (nrow x ncol): " << nrow << " x " << ncol << endl;
     while(weight_opt.size()<size())
       weight_opt.push_back(weight_opt[0]);
-    if(verbose_opt[0]){
+    if(verbose_opt[0]>1){
       std::cout << weight_opt << std::endl;
     }
     if(cruleMap[crule_opt[0]]==mode){
@@ -482,12 +482,12 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
     imgWriter.setGeoTransform(gt);
 
     if(projection_opt.size()){
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         cout << "projection: " << projection_opt[0] << endl;
       imgWriter.setProjectionProj4(projection_opt[0]);
     }
     else if(theProjection!=""){
-      if(verbose_opt[0])
+      if(verbose_opt[0]>1)
         cout << "projection: " << theProjection << endl;
       imgWriter.setProjection(theProjection);
     }
@@ -510,7 +510,7 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
       if(projection_opt.size())
         maskReader.setProjectionProj4(projection_opt[0]);
       else if(theProjection!=""){
-        if(verbose_opt[0])
+        if(verbose_opt[0]>1)
           cout << "projection: " << theProjection << endl;
         maskReader.setProjection(theProjection);
       }
@@ -533,7 +533,7 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
     }
 
     //create composite image
-    if(verbose_opt[0])
+    if(verbose_opt[0]>1)
       cout << "creating composite image" << endl;
     Vector2d<double> writeBuffer(nband,imgWriter.nrOfCol());
     Vector2d<short> fileBuffer(file_opt.size());//holds information on the selected files (number of available files and or index of selected file)
@@ -567,7 +567,8 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
     void* pProgressArg=NULL;
     GDALProgressFunc pfnProgress=GDALTermProgress;
     double progress=0;
-    pfnProgress(progress,pszMessage,pProgressArg);
+    if(verbose_opt[0])
+      pfnProgress(progress,pszMessage,pProgressArg);
     for(unsigned int irow=0;irow<imgWriter.nrOfRow();++irow){
       vector<float> lineMask;
       Vector2d< vector<double> > storeBuffer;
@@ -1117,7 +1118,7 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
               }
             }
             catch(string error){
-              if(verbose_opt[0])
+              if(verbose_opt[0]>1)
                 cerr << error << endl;
               writeBuffer[iband][icol]=dstnodata_opt[0];
               continue;
@@ -1129,7 +1130,8 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
           imgWriter.writeData(fileBuffer[bfile],irow,imgWriter.nrOfBand()-file_opt.size()+bfile);
       }
       progress=static_cast<float>(irow+1.0)/imgWriter.nrOfRow();
-      pfnProgress(progress,pszMessage,pProgressArg);
+      if(verbose_opt[0])
+        pfnProgress(progress,pszMessage,pProgressArg);
     }
     if(extent_opt.size()&&(cut_opt[0]||eoption_opt.size())){
       extentReader.close();
