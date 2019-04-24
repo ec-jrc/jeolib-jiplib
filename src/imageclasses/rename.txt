@@ -169,7 +169,7 @@ mialib_label.h:extern IMAGE *labelccms(IMAGE **imap, int nc, IMAGE *imse, int ox
 mialib_label.h:extern IMAGE *labelccmi(IMAGE *im, IMAGE *immi, IMAGE *imse, int ox, int oy, int oz, int rg, int rl); labelConstrainedCCsMi
 mialib_label.h:extern IMAGE *labelci(IMAGE *im, IMAGE *imse, int ox, int oy, int oz, int rl); labelConstrainedCCsCi
 mialib_label.h:extern IMAGE *labelcims(IMAGE **imap, int nc, IMAGE *imse, int ox, int oy, int oz, int rl); labelStronglyCCsMultiband
-mialib_label.h:extern IMAGE *labelccdissim(IMAGE *im, IMAGE *imh, IMAGE *imv, int rg, int rl); labelConstrainedCCs
+mialib_label.h:extern IMAGE *labelccdissim(IMAGE *im, IMAGE *imh, IMAGE *imv, int rg, int rl); labelConstrainedCCsDissim
 mialib_label.h:extern IMAGE *labelccvar(IMAGE *im, IMAGE *imse, int ox, int oy, int oz, int rg, int rl, double varmax); labelConstrainedCCsVariance
 mialib_label.h:extern IMAGE *labelccmsdissim(IMAGE **imap, int nc, IMAGE *imh, IMAGE *imv, int rg, int rl); labelConstrainedCCsMultibandDissim
 mialib_label.h:extern IMAGE *labelccattr(IMAGE *im, int graph, int rg, int rl); labelConstrainedCCsAttr
