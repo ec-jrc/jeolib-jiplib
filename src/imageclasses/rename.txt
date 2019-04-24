@@ -85,7 +85,7 @@ mialib_geodesy.h:extern IMAGE *sqtgsym(IMAGE *im_m, IMAGE *im_r, int graph); geo
 
 mialib_geometry.h:extern ERROR_TYPE framebox(IMAGE *im, int *box, G_TYPE gval); imageFrameSet
 mialib_geometry.h:extern ERROR_TYPE addframebox(IMAGE *im, int *box, G_TYPE gval); imageFrameAdd
-mialib_geometry.h:extern ERROR_TYPE subframebox(IMAGE *im, int *box); imageFrameSubstract
+mialib_geometry.h:extern ERROR_TYPE subframebox(IMAGE *im, int *box); imageFrameSubtract
 mialib_geometry.h:extern ERROR_TYPE imputop(IMAGE *im1, IMAGE *im2, int x, int y, int z, int op); imageInsert
 mialib_geometry.h:extern ERROR_TYPE imputcompose(IMAGE *im1, IMAGE *imlbl, IMAGE *im2, int x, int y, int z, int val); imageInsertCompose
 mialib_geometry.h:extern IMAGE *imcut(IMAGE *im, int x1, int y1, int z1, int x2, int y2, int z2); imageCut
