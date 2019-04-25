@@ -163,7 +163,7 @@ CPLErr Jim::setMIA(int band){
       m_ncol=m_mia[band]->nx;
     }
     if(m_nrow!=m_mia[band]->ny){
-      std::cerr << "Warning: y dimension of image (" << m_ncol << ") does not match MIA (" << m_mia[band]->ny << "), adapting m_nrow" << std::endl;
+      std::cerr << "Warning: y dimension of image (" << m_nrow << ") does not match MIA (" << m_mia[band]->ny << "), adapting m_nrow" << std::endl;
       m_nrow=m_mia[band]->ny;
       m_blockSize=m_nrow;
     }
