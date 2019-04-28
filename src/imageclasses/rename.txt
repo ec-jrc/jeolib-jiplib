@@ -236,7 +236,7 @@ mialib_segment.h:extern ERROR_TYPE srg(IMAGE *im1, IMAGE *im2, IMAGE *im3, int o
 mialib_segment.h:extern ERROR_TYPE mssrg(IMAGE **imap, int nc, IMAGE *im2, IMAGE *im3, int ox, int oy, int oz); segmentationSeededRegionGrowingMultiband
 mialib_segment.h:extern ERROR_TYPE mssrgcore(IMAGE **imap, int nc, IMAGE *im2, IMAGE *im3, int ox, int oy, int oz); segmentationSeededRegionGrowingCore
 mialib_segment.h:extern IMAGE *labelImage(IMAGE **imap, int nc, IMAGE *labelIm, int graph, long int lambda); labelQuasiFlatZones
-mialib_segment.h:extern ERROR_TYPE mcisrg(IMAGE **imap, int nc, IMAGE *seedsIm, int graph, long int regionNumber, int version); segmentationSeededRegionGrowingMultiband
+mialib_segment.h:extern ERROR_TYPE mcisrg(IMAGE **imap, int nc, IMAGE *seedsIm, int graph, long int regionNumber, int version); segmentationSeededRegionGrowingIterativeMultiband
 mialib_segment.h:extern IMAGE *segmentImage(IMAGE **imap, int nc, int graph, int varianz, long int regionSize, int contrast, int version, char *fndat); segmentImageMultiband
 mialib_segment.h:extern ERROR_TYPE writeGnuPlot3D(IMAGE **imap, int nc, int graph, int regionSize, int varianz, char *fileName); writeGnuPlot3D
 mialib_segment.h:extern ERROR_TYPE vectorizeImage(IMAGE **imap, int nc, char *filename, int format, double simplifyBorderLines); vectorizeImage
