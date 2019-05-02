@@ -1051,7 +1051,9 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///register driver for GDAl
   CPLErr registerDriver();
   ///Create options
-  std::vector<std::string> m_options;
+  std::vector<std::string> m_coptions;
+  ///Open options
+  std::vector<std::string> m_ooptions;
   ///We are writing a physical file
   /* bool m_writeMode; */
   ///access mode (ReadOnly or GA_Update)

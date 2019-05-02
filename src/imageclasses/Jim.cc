@@ -350,7 +350,8 @@ void Jim::reset()
   m_blockSize=0;
   m_begin.clear();
   m_end.clear();
-  m_options.clear();
+  m_coptions.clear();
+  m_ooptions.clear();
   // m_writeMode=false;
   m_access=READ_ONLY;
   m_resample=GRIORA_NearestNeighbour;
@@ -1466,8 +1467,9 @@ CPLErr Jim::registerDriver()
       s << "Error: image type " << m_imageType << " not supported";
       throw(s.str());
     }
+    //create options
     char **papszOptions=NULL;
-    for(std::vector<std::string>::const_iterator optionIt=m_options.begin();optionIt!=m_options.end();++optionIt)
+    for(std::vector<std::string>::const_iterator optionIt=m_coptions.begin();optionIt!=m_coptions.end();++optionIt)
       papszOptions=CSLAddString(papszOptions,optionIt->c_str());
 
     m_gds=poDriver->Create(m_filename.c_str(),nrOfCol(),nrOfRow(),nrOfBand(),getGDALDataType(),papszOptions);
@@ -1533,14 +1535,20 @@ CPLErr Jim::registerDriver()
     else
       m_gds = (GDALDataset *) GDALOpen(m_filename.c_str(), GA_ReadOnly );
 #else
+    //open options
+    char **papszOptions=NULL;
+    for(std::vector<std::string>::const_iterator optionIt=m_ooptions.begin();optionIt!=m_ooptions.end();++optionIt)
+      papszOptions=CSLAddString(papszOptions,optionIt->c_str());
+    papszOptions=CSLAddString(papszOptions,NULL);
     if(m_access==UPDATE)
-      m_gds = (GDALDataset*) GDALOpenEx(m_filename.c_str(), GDAL_OF_UPDATE|GDAL_OF_RASTER, NULL, NULL, NULL);
-    else
-      m_gds = (GDALDataset*) GDALOpenEx(m_filename.c_str(), GDAL_OF_READONLY|GDAL_OF_RASTER, NULL, NULL, NULL);
+      m_gds = (GDALDataset*) GDALOpenEx(m_filename.c_str(), GDAL_OF_UPDATE|GDAL_OF_RASTER, NULL, papszOptions, NULL);
+    else{
+      m_gds = (GDALDataset*) GDALOpenEx(m_filename.c_str(), GDAL_OF_READONLY|GDAL_OF_RASTER, NULL, papszOptions, NULL);
+    }
 #endif
 
     if(m_gds == NULL){
-      std::string errorString="FileOpenError";
+      std::string errorString="FileOpenError 0";
       throw(errorString);
     }
     m_ncol=m_gds->GetRasterXSize();
@@ -1576,7 +1584,8 @@ CPLErr Jim::open(app::AppFactory &app){
   Optionjl<int> nplane_opt("nplane", "nplane", "Number of planes",1);
   Optionjl<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64/Int64/UInt64})","Byte");
   Optionjl<std::string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
-  Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<std::string> coption_opt("co", "co", "Creation option(s) for output file. Multiple options can be specified.");
+  Optionjl<std::string> ooption_opt("oo", "oo", "Open option(s) for output file. Multiple options can be specified.");
   Optionjl<unsigned long int> seed_opt("seed", "seed", "seed value for random generator",0);
   Optionjl<double> mean_opt("mean", "mean", "Mean value for random generator",0);
   Optionjl<double> stdev_opt("stdev", "stdev", "Standard deviation for Gaussian random generator",0);
@@ -1624,7 +1633,8 @@ CPLErr Jim::open(app::AppFactory &app){
     nplane_opt.retrieveOption(app);
     otype_opt.retrieveOption(app);
     oformat_opt.retrieveOption(app);
-    option_opt.retrieveOption(app);
+    coption_opt.retrieveOption(app);
+    ooption_opt.retrieveOption(app);
     seed_opt.retrieveOption(app);
     mean_opt.retrieveOption(app);
     stdev_opt.retrieveOption(app);
@@ -1770,6 +1780,7 @@ CPLErr Jim::open(app::AppFactory &app){
     m_nband = nband_opt[0];
     m_nplane = nplane_opt[0];
     m_dataType = theType;
+    m_coptions=coption_opt;
     initMem(0);
     for(int iband=0;iband<m_nband;++iband){
       m_begin[iband]=0;
@@ -1877,6 +1888,8 @@ CPLErr Jim::open(app::AppFactory &app){
   else if(input_opt.size()){
     setAccess(access_opt[0]);
     m_filename=input_opt[0];
+    m_coptions=coption_opt;
+    m_ooptions=ooption_opt;
     //set class member variables based on GDAL dataset
     registerDriver();
     if(assignSRS_opt.size())
@@ -2092,6 +2105,14 @@ CPLErr Jim::open(app::AppFactory &app){
       lrx_opt[0]=gds_lrx;
     if(lry_opt[0]<gds_lry)
       lry_opt[0]=gds_lry;
+
+    if(verbose_opt[0]){
+      std::cout << "forced boundingbox:" << std::endl;
+      std::cout << "ulx=" << ulx_opt[0] << std::endl;
+      std::cout << "uly=" << uly_opt[0] << std::endl;
+      std::cout << "lrx=" << lrx_opt[0] << std::endl;
+      std::cout << "lry=" << lry_opt[0] << std::endl;
+    }
     std::vector<double> gt(6);
     gt[0]=ulx_opt[0];
     gt[3]=uly_opt[0];
@@ -2105,7 +2126,12 @@ CPLErr Jim::open(app::AppFactory &app){
     int nBufYSize=static_cast<unsigned int>(ceil((uly_opt[0]-lry_opt[0])/dy_opt[0]-FLT_EPSILON));
     m_ncol=nBufXSize;
     m_nrow=nBufYSize;
+    m_blockSize=m_nrow;
 
+    if(verbose_opt[0]){
+      std::cout << "m_ncol: " << m_ncol << std::endl;
+      std::cout << "m_nrow: " << m_nrow << std::endl;
+    }
     //we initialize memory using class member variables instead of those read from GDAL dataset
     if(band2plane_opt[0]){
 #if MIALIB == 1
@@ -2137,7 +2163,13 @@ CPLErr Jim::open(app::AppFactory &app){
           m_end[iband]=m_begin[iband]+m_blockSize;
           if(!noread_opt[0]){
             //we can not use readData(iband) because sequence of band_opt might not correspond bands in GDAL dataset
+            if(verbose_opt[0]){
+              std::cout << "reading dataset" << std::endl;
+            }
             readDataDS(iband,band_opt[iband]);
+            if(verbose_opt[0]){
+              std::cout << "dataset has been read" << std::endl;
+            }
           }
         }
       }
@@ -2268,8 +2300,8 @@ CPLErr Jim::readNewBlockDS(int row, int iband, int ds_band){
   // int nYOff=static_cast<int>(dfYOff);
   int nXSize=static_cast<unsigned int>(ceil((getLrx()-getUlx())/gds_dx));//x-size in pixels of region to read in original image
   int nXOff=static_cast<int>(dfXOff);
-  if(nXSize>gds_ncol)
-    nXSize=gds_ncol;
+  if(nXSize>gds_ncol-nXOff)
+    nXSize=gds_ncol-nXOff;
 
   double dfYSize=0;
   double dfYOff=0;
@@ -2290,11 +2322,21 @@ CPLErr Jim::readNewBlockDS(int row, int iband, int ds_band){
 
   dfYSize=(m_end[iband]-m_begin[iband])*getDeltaY()/gds_dy;//y-size in pixels of region to read in original image
   nYSize=static_cast<unsigned int>(ceil((m_end[iband]-m_begin[iband])*getDeltaY()/gds_dy));//y-size in pixels of region to read in original image
-  if(nYSize>gds_nrow)
-    nYSize=gds_nrow;
   dfYOff=(gds_uly-getUly())/gds_dy+m_begin[iband]*getDeltaY()/gds_dy;
   nYOff=static_cast<int>(dfYOff);
+  if(nYSize>gds_nrow-nYOff)
+    nYSize=gds_nrow-nYOff;
+  bool useOverview=false;
   if(poBand->GetOverviewCount()){
+    // useOverview=true;
+    // for(auto ovit=m_ooptions.begin();ovit!=m_ooptions.end();++ovit)
+    //   std::cout << *ovit << std::endl;
+    // useOverview=true;
+    // if(std::find_if(m_ooptions.begin(), m_ooptions.end(), [](const std::string& str) { return str.find("OVERVIEW_LEVEL") != std::string::npos; }) != m_ooptions.end()) {
+    //   useOverview=false;
+    // }
+  // }
+  // if(useOverview){
     //calculate number of desired samples in overview
     int nDesiredSamples=static_cast<unsigned int>(ceil((gds_lrx-gds_ulx)/getDeltaX()))*static_cast<unsigned int>(ceil((gds_uly-gds_lry)/getDeltaY()));
     poBand=poBand->GetRasterSampleOverview(nDesiredSamples);
@@ -2311,16 +2353,17 @@ CPLErr Jim::readNewBlockDS(int row, int iband, int ds_band){
     // dfXSize=diffXm/ods_dx;
     dfXSize=(getLrx()-getUlx())/ods_dx;
     nXSize=static_cast<unsigned int>(ceil((getLrx()-getUlx())/ods_dx));//x-size in pixels of region to read in overview image
-    if(nXSize>ods_ncol)
-      nXSize=ods_ncol;
     dfXOff=diffXm/ods_dx;
     nXOff=static_cast<int>(dfXOff);
+    if(nXSize>ods_ncol-nXOff)
+      nXSize=ods_ncol-nXOff;
+
     dfYSize=(m_end[iband]-m_begin[iband])*getDeltaY()/ods_dy;//y-size in pixels of region to read in overview image
     nYSize=static_cast<unsigned int>(ceil((m_end[iband]-m_begin[iband])*getDeltaY()/ods_dy));//y-size in pixels of region to read in overview image
-    if(nYSize>ods_nrow)
-      nYSize=ods_nrow;
     dfYOff=(gds_uly-getUly())/ods_dy+m_begin[iband]*getDeltaY()/ods_dy;
     nYOff=static_cast<int>(dfYOff);
+    if(nYSize>ods_nrow-nYOff)
+      nYSize=ods_nrow-nYOff;
   }
   if(dfXOff-nXOff>0||dfYOff-nYOff>0||getDeltaX()<gds_dx||getDeltaX()>gds_dx||getDeltaY()<gds_dy||getDeltaY()>gds_dy){
     sExtraArg.bFloatingPointWindowValidity = TRUE;
@@ -2336,6 +2379,7 @@ CPLErr Jim::readNewBlockDS(int row, int iband, int ds_band){
     sExtraArg.dfXSize = dfXSize;
     sExtraArg.dfYSize = dfYSize;
   }
+  //test
   // std::cout << "nYOff: " << nYOff << std::endl;
   // std::cout << "dfXOff: " << dfXOff << std::endl;
   // std::cout << "dfYOff: " << dfYOff << std::endl;
@@ -2916,7 +2960,7 @@ CPLErr Jim::write(){
       writeNewBlock(nrOfRow(),iband);
   }
   char **papszOptions=NULL;
-  for(std::vector<std::string>::const_iterator optionIt=m_options.begin();optionIt!=m_options.end();++optionIt)
+  for(std::vector<std::string>::const_iterator optionIt=m_coptions.begin();optionIt!=m_coptions.end();++optionIt)
     papszOptions=CSLAddString(papszOptions,optionIt->c_str());
   if(papszOptions)
     CSLDestroy(papszOptions);
@@ -2933,7 +2977,7 @@ CPLErr Jim::writeDataPlanes(){
     throw(errorString);
   }
   char **papszOptions=NULL;
-  for(std::vector<std::string>::const_iterator optionIt=m_options.begin();optionIt!=m_options.end();++optionIt)
+  for(std::vector<std::string>::const_iterator optionIt=m_coptions.begin();optionIt!=m_coptions.end();++optionIt)
     papszOptions=CSLAddString(papszOptions,optionIt->c_str());
   if(papszOptions)
     CSLDestroy(papszOptions);
@@ -2961,19 +3005,19 @@ CPLErr Jim::writeDataPlanes(){
 CPLErr Jim::write(app::AppFactory &app){
   Optionjl<std::string> input_opt("fn", "filename", "filename");
   Optionjl<std::string>  oformat_opt("of", "oformat", "Output image format (see also gdal_translate).","GTiff");
-  Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<std::string> coption_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
   Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.");
   Optionjl<string> colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid)");
   Optionjl<string> description_opt("d", "description", "Set image description");
   Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
 
-  option_opt.setHide(1);
+  coption_opt.setHide(1);
   memory_opt.setHide(1);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   doProcess=input_opt.retrieveOption(app);
   oformat_opt.retrieveOption(app);
-  option_opt.retrieveOption(app);
+  coption_opt.retrieveOption(app);
   nodata_opt.retrieveOption(app);
   colorTable_opt.retrieveOption(app);
   description_opt.retrieveOption(app);
@@ -3001,7 +3045,7 @@ CPLErr Jim::write(app::AppFactory &app){
   if(nodata_opt.size())
     setNoData(nodata_opt);
   if(input_opt.size()){
-    CPLErr result=setFile(input_opt[0],oformat_opt[0],memory_opt[0],option_opt);
+    CPLErr result=setFile(input_opt[0],oformat_opt[0],memory_opt[0],coption_opt);
     if(colorTable_opt.size()){
       if(colorTable_opt[0]!="none"||colorTable_opt[0]!="None")
         setColorTable(colorTable_opt[0]);
@@ -3470,7 +3514,7 @@ CPLErr Jim::setFile(const std::string& filename, const std::string& imageType, u
   m_access=WRITE;
   // m_writeMode=true;
   m_filename=filename;
-  m_options=options;
+  m_coptions=options;
   m_imageType=imageType;
   if(nrOfCol()&&nrOfRow()&&nrOfBand()){
     registerDriver();
