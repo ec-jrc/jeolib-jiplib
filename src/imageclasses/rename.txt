@@ -85,7 +85,7 @@ mialib_geodesy.h:extern IMAGE *sqtgsym(IMAGE *im_m, IMAGE *im_r, int graph); geo
 
 mialib_geometry.h:extern ERROR_TYPE framebox(IMAGE *im, int *box, G_TYPE gval); imageFrameSet
 mialib_geometry.h:extern ERROR_TYPE addframebox(IMAGE *im, int *box, G_TYPE gval); imageFrameAdd
-mialib_geometry.h:extern ERROR_TYPE subframebox(IMAGE *im, int *box); imageFrameSubstract
+mialib_geometry.h:extern ERROR_TYPE subframebox(IMAGE *im, int *box); imageFrameSubtract
 mialib_geometry.h:extern ERROR_TYPE imputop(IMAGE *im1, IMAGE *im2, int x, int y, int z, int op); imageInsert
 mialib_geometry.h:extern ERROR_TYPE imputcompose(IMAGE *im1, IMAGE *imlbl, IMAGE *im2, int x, int y, int z, int val); imageInsertCompose
 mialib_geometry.h:extern IMAGE *imcut(IMAGE *im, int x1, int y1, int z1, int x2, int y2, int z2); imageCut
@@ -169,7 +169,7 @@ mialib_label.h:extern IMAGE *labelccms(IMAGE **imap, int nc, IMAGE *imse, int ox
 mialib_label.h:extern IMAGE *labelccmi(IMAGE *im, IMAGE *immi, IMAGE *imse, int ox, int oy, int oz, int rg, int rl); labelConstrainedCCsMi
 mialib_label.h:extern IMAGE *labelci(IMAGE *im, IMAGE *imse, int ox, int oy, int oz, int rl); labelConstrainedCCsCi
 mialib_label.h:extern IMAGE *labelcims(IMAGE **imap, int nc, IMAGE *imse, int ox, int oy, int oz, int rl); labelStronglyCCsMultiband
-mialib_label.h:extern IMAGE *labelccdissim(IMAGE *im, IMAGE *imh, IMAGE *imv, int rg, int rl); labelConstrainedCCs
+mialib_label.h:extern IMAGE *labelccdissim(IMAGE *im, IMAGE *imh, IMAGE *imv, int rg, int rl); labelConstrainedCCsDissim
 mialib_label.h:extern IMAGE *labelccvar(IMAGE *im, IMAGE *imse, int ox, int oy, int oz, int rg, int rl, double varmax); labelConstrainedCCsVariance
 mialib_label.h:extern IMAGE *labelccmsdissim(IMAGE **imap, int nc, IMAGE *imh, IMAGE *imv, int rg, int rl); labelConstrainedCCsMultibandDissim
 mialib_label.h:extern IMAGE *labelccattr(IMAGE *im, int graph, int rg, int rl); labelConstrainedCCsAttr
@@ -236,7 +236,7 @@ mialib_segment.h:extern ERROR_TYPE srg(IMAGE *im1, IMAGE *im2, IMAGE *im3, int o
 mialib_segment.h:extern ERROR_TYPE mssrg(IMAGE **imap, int nc, IMAGE *im2, IMAGE *im3, int ox, int oy, int oz); segmentationSeededRegionGrowingMultiband
 mialib_segment.h:extern ERROR_TYPE mssrgcore(IMAGE **imap, int nc, IMAGE *im2, IMAGE *im3, int ox, int oy, int oz); segmentationSeededRegionGrowingCore
 mialib_segment.h:extern IMAGE *labelImage(IMAGE **imap, int nc, IMAGE *labelIm, int graph, long int lambda); labelQuasiFlatZones
-mialib_segment.h:extern ERROR_TYPE mcisrg(IMAGE **imap, int nc, IMAGE *seedsIm, int graph, long int regionNumber, int version); segmentationSeededRegionGrowingMultiband
+mialib_segment.h:extern ERROR_TYPE mcisrg(IMAGE **imap, int nc, IMAGE *seedsIm, int graph, long int regionNumber, int version); segmentationSeededRegionGrowingIterativeMultiband
 mialib_segment.h:extern IMAGE *segmentImage(IMAGE **imap, int nc, int graph, int varianz, long int regionSize, int contrast, int version, char *fndat); segmentImageMultiband
 mialib_segment.h:extern ERROR_TYPE writeGnuPlot3D(IMAGE **imap, int nc, int graph, int regionSize, int varianz, char *fileName); writeGnuPlot3D
 mialib_segment.h:extern ERROR_TYPE vectorizeImage(IMAGE **imap, int nc, char *filename, int format, double simplifyBorderLines); vectorizeImage
