@@ -650,6 +650,7 @@ This file is part of jiplib
 
    %inline %{
      std::shared_ptr<Jim> np2jim(PyObject* npArray) {
+       app::AppFactory afactory;
     /* jim.np2jim(npArray); */
     if(PyArray_Check(npArray)){
       PyArrayObject *obj=(PyArrayObject *)npArray;
@@ -658,45 +659,59 @@ This file is part of jiplib
 
       switch(PyArray_TYPE((PyArrayObject*)npArray)){
       case NPY_UINT8:
-        jDataType=GDT_Byte;
+        afactory.pushLongOption("otype","GDT_Byte");
+        /* jDataType=GDT_Byte; */
         break;
       case NPY_UINT16:
-        jDataType=GDT_UInt16;
+        afactory.pushLongOption("otype","GDT_UInt16");
+        /* jDataType=GDT_UInt16; */
         break;
       case NPY_INT16:
-        jDataType=GDT_Int16;
+        afactory.pushLongOption("otype","GDT_Int16");
+        /* jDataType=GDT_Int16; */
         break;
       case NPY_UINT32:
-        jDataType=GDT_UInt32;
+        afactory.pushLongOption("otype","GDT_UInt32");
+        /* jDataType=GDT_UInt32; */
         break;
       case NPY_INT32:
-        jDataType=GDT_Int32;
+        afactory.pushLongOption("otype","GDT_Int32");
+        /* jDataType=GDT_Int32; */
         break;
       case NPY_FLOAT32:
-        jDataType=GDT_Float32;
+        afactory.pushLongOption("otype","GDT_Float32");
+        /* jDataType=GDT_Float32; */
         break;
       case NPY_FLOAT64:
-        jDataType=GDT_Float64;
+        afactory.pushLongOption("otype","GDT_Float64");
+        /* jDataType=GDT_Float64; */
         break;
-        // case NPY_UINT64:
-        //   jDataType=;
-        // break;
-        // case NPY_INT64:
-        //   jDataType=;
-        // break;
+        case NPY_UINT64:
+          afactory.pushLongOption("otype","JDT_UInt64");
+          /* jDataType="JDT_UInt64"; */
+        break;
+        case NPY_INT64:
+          afactory.pushLongOption("otype","JDT_Int64");
+          /* jDataType='JDT_Int64'; */
+        break;
       default:
         std::string errorString="Error: Unknown data type";
         throw(errorString);
       }
       int ndim=(PyArray_NDIM((PyArrayObject*)npArray))? 3 : 2;
-      int nplane=(PyArray_NDIM((PyArrayObject*)npArray)==3) ? PyArray_DIM((PyArrayObject*)npArray,2): 1;
+      int nplane=(PyArray_NDIM((PyArrayObject*)npArray)==3) ? PyArray_DIM((PyArrayObject*)npArray,0): 1;
       int nrow=(PyArray_NDIM((PyArrayObject*)npArray)==3) ? PyArray_DIM((PyArrayObject*)npArray,1): PyArray_DIM((PyArrayObject*)npArray,0);
       int ncol=(PyArray_NDIM((PyArrayObject*)npArray)==3) ? PyArray_DIM((PyArrayObject*)npArray,2): PyArray_DIM((PyArrayObject*)npArray,1);
       /* int nrow=PyArray_DIM((PyArrayObject*)npArray,1); */
       /* int ncol=PyArray_DIM((PyArrayObject*)npArray,2); */
       int nband=1;//only single band supported for now
+      afactory.pushLongOption("ncol",ncol);
+      afactory.pushLongOption("nrow",nrow);
+      afactory.pushLongOption("nplane",nplane);
+      afactory.pushLongOption("nband",nband);
       std::shared_ptr<Jim> jim=Jim::createImg();
-      jim->open(ncol,nrow,nband,nplane,jDataType);
+      jim->open(afactory);
+      /* jim->open(ncol,nrow,nband,nplane,jDataType); */
 
       memcpy(jim->getDataPointer(),(void*)(((PyArrayObject*)npArray)->data),jim->getDataTypeSizeBytes()*jim->nrOfCol()*jim->nrOfRow()*jim->nrOfPlane());
       return(jim);

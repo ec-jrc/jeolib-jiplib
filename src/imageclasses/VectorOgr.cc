@@ -890,15 +890,19 @@ OGRErr VectorOgr::write(const std::string& filename){
       while(fit!=m_features[ilayer].end()){
         if(*fit){
           if(getLayer(ilayer)->CreateFeature(*fit)!=OGRERR_NONE){
-            std::string errorString="Error: could not create feature";
-            throw(errorString);
+            std::ostringstream errorStream;
+            errorStream << "Warning: could not create feature " << ifeature << std::endl;
+            std::cerr << errorStream.str();
+            // throw(errorStream.str());
           }
+          ++ifeature;
           ++fit;
         }
         else{
           // std::string errorString="Warning: NULL feature in m_feature";
           // std::cout << errorString << std::endl;
           m_features[ilayer].erase(fit);
+          ++ifeature;
         }
       }
     }
