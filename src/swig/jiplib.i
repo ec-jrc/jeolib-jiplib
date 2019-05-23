@@ -490,7 +490,7 @@ This file is part of jiplib
   %typemap(out) CPLErr {
     //std::cout << "we are in typemap(out) CPLErr for jiplib::Jim::$symname" << std::endl;
     if($1==CE_Failure)
-      std::cout << "Warning: CE_Failure" << std::endl;
+      std::cout << "Warning: CE_Failure in method $symname" << std::endl;
     void *argp2;
     int res2=0;
     res2 = SWIG_ConvertPtr($self, &argp2, SWIGTYPE_p_std__shared_ptrT_Jim_t,  0  | 0);
