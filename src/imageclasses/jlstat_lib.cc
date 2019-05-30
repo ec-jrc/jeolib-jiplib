@@ -196,28 +196,24 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
       while(offset_opt.size()<size())
         offset_opt.push_back(offset_opt[0]);
     }
+    std::vector< std::vector<double> > orignodata(size());
     std::list<std::shared_ptr<Jim> >::const_iterator imit=begin();
+    size_t iimage=0;
     for(imit=begin();imit!=end();++imit){
       if(filename_opt)
         mapString.insert(std::make_pair("filename",(*imit)->getFileName()));
-        // mapString["filename"]=(*imit)->getFileName();
-
-      // outputStream << " --filename " << (*imit)->getFileName() << " " << std::endl;
 
       if(nodata_opt.size()){
-        for(int inodata=0;inodata<nodata_opt.size();++inodata)
+        (*imit)->getNoDataValues(orignodata[iimage]);
+        for(size_t inodata=0;inodata<nodata_opt.size();++inodata)
           (*imit)->pushNoDataValue(nodata_opt[inodata]);
       }
-      // else{
-      //   for(std::vector<double>::const_iterator ndit=(*imit)->getNoDataValues().begin();ndit!=(*imit)->getNoDataValues().end();++ndit)
-      //     nodata_opt.push_back(*ndit);
-      // }
 
       int nband=band_opt.size();
       for(int iband=0;iband<nband;++iband){
         minValue=(src_min_opt.size()>iband)? src_min_opt[iband] : 0;
         maxValue=(src_max_opt.size()>iband)? src_max_opt[iband] : 0;
-        for(int inodata=0;inodata<nodata_opt.size();++inodata){
+        for(size_t inodata=0;inodata<nodata_opt.size();++inodata){
           if(!inodata)
             (*imit)->GDALSetNoDataValue(nodata_opt[0],band_opt[iband]);//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
         }
@@ -242,7 +238,7 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
           // for(int i=0;i<10;++i){
           //   std::cout << readBuffer[i] << " ";
           // }
-          std::cout << std::endl;
+          // std::cout << std::endl;
           (*imit)->readDataBlock(readBuffer, 0, (*imit)->nrOfCol()-1, 0, (*imit)->nrOfRow()-1, band_opt[iband]);
           // //test
           // for(int i=0;i<10;++i)
@@ -646,6 +642,7 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
         // mapString["r2"]=type2string<double>(r2);
       }
       // imgReader.close();
+      ++iimage;
     }
     // if(rmse_opt&&(input_opt.size()>1)){
     //   while(band_opt.size()<input_opt.size())
@@ -1147,6 +1144,14 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
       // std::cout << outputStream.str();
 // #endif
     // }
+    //reset nodata values
+    if(nodata_opt.size()){
+      size_t iimage=0;
+      for(imit=begin();imit!=end();++imit){
+          (*imit)->setNoData(orignodata[iimage]);
+          ++iimage;
+      }
+    }
   }
   catch(string predefinedString){
 // #if(BUILD_WITH_PYTHON==1)
