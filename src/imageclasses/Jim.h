@@ -828,14 +828,25 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///destructive version of stack band(s) from another Jim
   void d_stackBand(Jim& imgSrc, app::AppFactory& app);
   void d_stackBand(Jim& imgSrc){app::AppFactory theApp; d_stackBand(imgSrc,theApp);};
+  ///destructive version of stack plane(s) from another Jim
+  void d_stackPlane(Jim& imgSrc, app::AppFactory& app);
+  void d_stackPlane(Jim& imgSrc){app::AppFactory theApp; d_stackPlane(imgSrc,theApp);};
   ///crop band(s)
   std::shared_ptr<Jim> cropBand(app::AppFactory& app);
   std::shared_ptr<Jim> cropBand(){app::AppFactory theApp;return cropBand(theApp);};
+  ///crop plane(s)
+  std::shared_ptr<Jim> cropPlane(app::AppFactory& app);
+  std::shared_ptr<Jim> cropPlane(){app::AppFactory theApp;return cropPlane(theApp);};
   void cropBand(Jim& imgWriter, app::AppFactory& app);
   void cropBand(Jim& imgWriter){app::AppFactory theApp;return cropBand(imgWriter,theApp);};
   ///destructive version of cropBand
   void d_cropBand(app::AppFactory& app);
   void d_cropBand(){app::AppFactory theApp;d_cropBand(theApp);};
+  void cropPlane(Jim& imgWriter, app::AppFactory& app);
+  void cropPlane(Jim& imgWriter){app::AppFactory theApp;return cropPlane(imgWriter,theApp);};
+  ///destructive version of cropPlane
+  void d_cropPlane(app::AppFactory& app);
+  void d_cropPlane(){app::AppFactory theApp;d_cropPlane(theApp);};
   ///convert image only for in memory
   std::shared_ptr<Jim> convert(app::AppFactory& app);
   ///crop image only for in memory

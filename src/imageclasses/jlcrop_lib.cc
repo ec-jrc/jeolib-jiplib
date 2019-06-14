@@ -40,6 +40,12 @@ shared_ptr<Jim> Jim::cropBand(AppFactory& app){
   return(imgWriter);
 }
 
+shared_ptr<Jim> Jim::cropPlane(AppFactory& app){
+  shared_ptr<Jim> imgWriter=Jim::createImg();
+  cropPlane(*imgWriter, app);
+  return(imgWriter);
+}
+
 shared_ptr<Jim> Jim::cropOgr(VectorOgr& sampleReader, AppFactory& app){
   shared_ptr<Jim> imgWriter=Jim::createImg();
   cropOgr(sampleReader, *imgWriter, app);
@@ -1750,6 +1756,180 @@ void Jim::d_cropBand(AppFactory& app){
   m_nband=m_data.size();
 }
 
+void Jim::cropPlane(Jim& imgWriter, AppFactory& app){
+  Optionjl<unsigned int> plane_opt("p", "plane", "plane index to crop (leave empty to retain all planes)");
+  Optionjl<unsigned int> bstart_opt("splane", "startplane", "Start plane sequence number");
+  Optionjl<unsigned int> bend_opt("eplane", "endplane", "End plane sequence number");
+  Optionjl<short> verbose_opt("v", "verbose", "verbose", 0,2);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=plane_opt.retrieveOption(app);
+    bstart_opt.retrieveOption(app);
+    bend_opt.retrieveOption(app);
+    verbose_opt.retrieveOption(app);
+
+    if(!doProcess){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+
+    std::vector<std::string> badKeys;
+    app.badKeys(badKeys);
+    if(badKeys.size()){
+      std::ostringstream errorStream;
+      if(badKeys.size()>1)
+        errorStream << "Error: unknown keys: ";
+      else
+        errorStream << "Error: unknown key: ";
+      for(int ikey=0;ikey<badKeys.size();++ikey){
+        errorStream << badKeys[ikey] << " ";
+      }
+      errorStream << std::endl;
+      throw(errorStream.str());
+    }
+  }
+  catch(string predefinedString){
+    std::cerr << predefinedString << std::endl;
+    throw;
+  }
+  std::vector<unsigned int> vplane=plane_opt;
+  if(bstart_opt.size()!=bend_opt.size()){
+    std::cerr << "Error: size of start plane is not equal to size of end plane" << std::endl;
+    throw;
+  }
+  for(size_t ipair=0;ipair<bstart_opt.size();++ipair){
+    if(bend_opt[ipair]<bstart_opt[ipair]){
+      string errorstring="Error: index for start plane must be smaller then end plane";
+      throw(errorstring);
+    }
+    for(size_t iplane=bstart_opt[ipair];iplane<=bend_opt[ipair];++iplane)
+      vplane.push_back(iplane);
+  }
+  if(vplane.empty()){
+    for(size_t iplane=0;iplane<nrOfPlane();++iplane)
+      vplane.push_back(iplane);
+  }
+  if(vplane.empty()){
+    std::cerr << "Error: no planes selected" << std::endl;
+    throw;
+  }
+  for(size_t iplane=0;iplane<vplane.size();++iplane){
+    if(vplane[iplane]>=nrOfPlane()){
+      std::ostringstream errorStream;
+      errorStream << "Error: selected plane " << vplane[iplane] << " is out of range";
+      std::cerr << errorStream.str() << std::endl;
+      throw(errorStream.str());
+    }
+    if(vplane[iplane]<0){
+      std::ostringstream errorStream;
+      errorStream << "Error: selected plane " << vplane[iplane] << " is out of range";
+      std::cerr << errorStream.str() << std::endl;
+      throw(errorStream.str());
+    }
+  }
+  // m_data[nrOfBand()]=(void *) calloc(static_cast<size_t>(nrOfCol()*nrOfRow()*vplane.size()),getDataTypeSizeBytes());
+  // for(size_t iband=0;iband<nrOfBand();++iband){
+  //   for(size_t iplane=0;iplane<vplane.size();++iplane){
+  //     memcpy(m_data[nrOfBand()]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*iplane,m_data[iband]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*vplane[iplane],getDataTypeSizeBytes()*nrOfCol()*nrOfRow());
+  //   }
+  //   memcpy(m_data[iband],m_data[nrOfBand()],getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*vplane.size());
+  // }
+
+  imgWriter.open(nrOfCol(),nrOfRow(),nrOfBand(),vplane.size(),getGDALDataType());
+  imgWriter.copyGeoTransform(*this);
+  imgWriter.setProjection(this->getProjection());
+  for(size_t iband=0;iband<nrOfBand();++iband){
+    for(size_t iplane=0;iplane<vplane.size();++iplane){
+      memcpy(imgWriter.getDataPointer(iband)+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*iplane,m_data[iband]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*vplane[iplane],getDataTypeSizeBytes()*nrOfCol()*nrOfRow());
+    }
+  }
+}
+
+///destructive version of cropPlane
+void Jim::d_cropPlane(AppFactory& app){
+  Optionjl<unsigned int> plane_opt("p", "plane", "plane index to crop (leave empty to retain all planes)");
+  Optionjl<unsigned int> bstart_opt("splane", "startplane", "Start plane sequence number");
+  Optionjl<unsigned int> bend_opt("eplane", "endplane", "End plane sequence number");
+  Optionjl<short> verbose_opt("v", "verbose", "verbose", 0,2);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=plane_opt.retrieveOption(app);
+    bstart_opt.retrieveOption(app);
+    bend_opt.retrieveOption(app);
+    verbose_opt.retrieveOption(app);
+
+    if(!doProcess){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+
+    std::vector<std::string> badKeys;
+    app.badKeys(badKeys);
+    if(badKeys.size()){
+      std::ostringstream errorStream;
+      if(badKeys.size()>1)
+        errorStream << "Error: unknown keys: ";
+      else
+        errorStream << "Error: unknown key: ";
+      for(int ikey=0;ikey<badKeys.size();++ikey){
+        errorStream << badKeys[ikey] << " ";
+      }
+      errorStream << std::endl;
+      throw(errorStream.str());
+    }
+  }
+  catch(string predefinedString){
+    std::cerr << predefinedString << std::endl;
+    throw;
+  }
+  std::vector<unsigned int> vplane=plane_opt;
+  if(bstart_opt.size()!=bend_opt.size()){
+    std::cerr << "Error: size of start plane is not equal to size of end plane" << std::endl;
+    throw;
+  }
+  for(size_t ipair=0;ipair<bstart_opt.size();++ipair){
+    if(bend_opt[ipair]<bstart_opt[ipair]){
+      string errorstring="Error: index for start plane must be smaller then end plane";
+      throw(errorstring);
+    }
+    for(size_t iplane=bstart_opt[ipair];iplane<=bend_opt[ipair];++iplane)
+      vplane.push_back(iplane);
+  }
+  if(vplane.empty()){
+    for(size_t iplane=0;iplane<nrOfPlane();++iplane)
+      vplane.push_back(iplane);
+  }
+  if(vplane.empty()){
+    std::cerr << "Error: no planes selected" << std::endl;
+    throw;
+  }
+  for(size_t iplane=0;iplane<vplane.size();++iplane){
+    if(vplane[iplane]>=nrOfPlane()){
+      std::ostringstream errorStream;
+      errorStream << "Error: selected plane " << vplane[iplane] << " is out of range";
+      std::cerr << errorStream.str() << std::endl;
+      throw(errorStream.str());
+    }
+  }
+  m_data.resize(nrOfBand()+1);
+  m_data[nrOfBand()]=(void *) calloc(static_cast<size_t>(nrOfCol()*nrOfRow()*vplane.size()),getDataTypeSizeBytes());
+  for(size_t iband=0;iband<nrOfBand();++iband){
+    for(size_t iplane=0;iplane<vplane.size();++iplane){
+      memcpy(m_data[nrOfBand()]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*iplane,m_data[iband]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*vplane[iplane],getDataTypeSizeBytes()*nrOfCol()*nrOfRow());
+    }
+    memcpy(m_data[iband],m_data[nrOfBand()],getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*vplane.size());
+  }
+  free(m_data[nrOfBand()]);
+  m_data.resize(nrOfBand());
+  m_nplane=vplane.size();
+}
+
 void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
   Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
   //todo: support layer names
@@ -3448,6 +3628,162 @@ void JimList::stackBand(Jim& imgWriter, AppFactory& app){
           ++currentBand;
         }
       }
+    }
+  }
+  catch(string predefinedString){
+    std::cout << predefinedString << std::endl;
+    throw;
+  }
+}
+
+//destructive version of stack image to current image
+void Jim::d_stackPlane(Jim& imgSrc, AppFactory& app){
+  Optionjl<short> verbose_opt("v", "verbose", "verbose", 0,2);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=verbose_opt.retrieveOption(app);
+
+    if(!doProcess){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+
+    std::vector<std::string> badKeys;
+    app.badKeys(badKeys);
+    if(badKeys.size()){
+      std::ostringstream errorStream;
+      if(badKeys.size()>1)
+        errorStream << "Error: unknown keys: ";
+      else
+        errorStream << "Error: unknown key: ";
+      for(int ikey=0;ikey<badKeys.size();++ikey){
+        errorStream << badKeys[ikey] << " ";
+      }
+      errorStream << std::endl;
+      throw(errorStream.str());
+    }
+  }
+  catch(string predefinedString){
+    std::cerr << predefinedString << std::endl;
+    throw;
+  }
+  if(m_ncol!=imgSrc.nrOfCol()){
+    std::string errorString="Error: number of columns do not match";
+    throw(errorString);
+  }
+  if(m_nrow!=imgSrc.nrOfRow()){
+    std::string errorString="Error: number of rows do not match";
+    throw(errorString);
+  }
+  if(m_nband!=imgSrc.nrOfBand()){
+    std::string errorString="Error: number of bands do not match";
+    throw(errorString);
+  }
+  if(m_dataType!=imgSrc.getDataType()){
+    std::string errorString="Error: data types do not match";
+    throw(errorString);
+  }
+  size_t oldnplane=nrOfPlane();
+  m_nplane+=imgSrc.nrOfPlane();
+  m_data.resize(nrOfBand()+1);
+  m_data[nrOfBand()]=(void *) calloc(static_cast<size_t>(nrOfCol()*nrOfRow()*oldnplane),getDataTypeSizeBytes());
+  for(size_t iband=0;iband<nrOfBand();++iband){
+    memcpy(m_data[nrOfBand()],m_data[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize*oldnplane);
+    //allocate memory
+    free(m_data[iband]);
+    m_data[iband]=(void *) calloc(static_cast<size_t>(nrOfCol()*nrOfRow()*nrOfPlane()),getDataTypeSizeBytes());
+    memcpy(m_data[iband],m_data[nrOfBand()],getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*oldnplane);
+    memcpy(m_data[iband]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*oldnplane,imgSrc.getDataPointer(iband),imgSrc.getDataTypeSizeBytes()*imgSrc.nrOfCol()*imgSrc.nrOfRow()*imgSrc.nrOfPlane());
+  }
+  free(m_data[nrOfBand()]);
+  m_data.resize(nrOfBand());
+}
+
+
+shared_ptr<Jim> JimList::stackPlane(AppFactory& app){
+  shared_ptr<Jim> imgWriter=Jim::createImg();
+  stackPlane(*imgWriter, app);
+  return(imgWriter);
+}
+
+void JimList::stackPlane(Jim& imgWriter, AppFactory& app){
+  Optionjl<short> verbose_opt("v", "verbose", "verbose", 0,2);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=verbose_opt.retrieveOption(app);
+
+    if(!doProcess){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+    if(empty()){
+      std::ostringstream errorStream;
+      errorStream << "Input collection is empty. Use --help for more help information" << std::endl;
+      throw(errorStream.str());
+    }
+
+    std::vector<std::string> badKeys;
+    app.badKeys(badKeys);
+    if(badKeys.size()){
+      std::ostringstream errorStream;
+      if(badKeys.size()>1)
+        errorStream << "Error: unknown keys: ";
+      else
+        errorStream << "Error: unknown key: ";
+      for(int ikey=0;ikey<badKeys.size();++ikey){
+        errorStream << badKeys[ikey] << " ";
+      }
+      errorStream << std::endl;
+      throw(errorStream.str());
+    }
+    std::list<std::shared_ptr<Jim> >::const_iterator imit=begin();
+    bool initWriter=false;
+
+    size_t nplane=0;
+    for(imit=begin();imit!=end();++imit)
+      nplane+=(*imit)->nrOfPlane();
+
+    imgWriter.open((*begin())->nrOfCol(),(*begin())->nrOfRow(),(*begin())->nrOfBand(),nplane,(*begin())->getGDALDataType());
+    imgWriter.copyGeoTransform(*(*begin()));
+    imgWriter.setProjection((*begin())->getProjection());
+    size_t currentBand=0;
+    size_t iplane=0;
+    for(imit=begin();imit!=end();++imit){
+      if((*begin())->nrOfCol()!=imgWriter.nrOfCol()){
+        std::string errorString="Error: number of columns do not match";
+        throw(errorString);
+      }
+      if((*begin())->nrOfRow()!=imgWriter.nrOfRow()){
+        std::string errorString="Error: number of rows do not match";
+        throw(errorString);
+      }
+      if((*begin())->nrOfBand()!=imgWriter.nrOfBand()){
+        std::string errorString="Error: number of bands do not match";
+        throw(errorString);
+      }
+      if((*begin())->getDataType()!=imgWriter.getDataType()){
+        std::string errorString="Error: data types do not match";
+        throw(errorString);
+      }
+      if(!(*imit)){
+        std::ostringstream errorStream;
+        errorStream << "Error: image in list is empty"<< std::endl;
+        throw(errorStream.str());
+      }
+      for(size_t iband=0;iband<imgWriter.nrOfBand();++iband){
+          if(iband>=(*imit)->nrOfBand()){
+            std::string errorString="Error: band number out of range";
+            throw(errorString);
+          }
+          (*imit)->copyData(imgWriter.getDataPointer(iband)+imgWriter.nrOfCol()*imgWriter.nrOfRow()*iplane*imgWriter.getDataTypeSizeBytes(),iband);
+      }
+      iplane+=(*imit)->nrOfPlane();
     }
   }
   catch(string predefinedString){

@@ -217,6 +217,14 @@ public:
   std::shared_ptr<Jim> stackBand(app::AppFactory& app);
   ///stack image only for in memory (alias for crop)
   std::shared_ptr<Jim> stackBand(){app::AppFactory app;return stackBand(app);};
+  ///stack image
+  void stackPlane(Jim& imgWriter, app::AppFactory& app);
+  ///stack image
+  void stackPlane(Jim& imgWriter){app::AppFactory app;return stackPlane(imgWriter,app);};
+  ///stack image only for in memory (alias for crop)
+  std::shared_ptr<Jim> stackPlane(app::AppFactory& app);
+  ///stack image only for in memory (alias for crop)
+  std::shared_ptr<Jim> stackPlane(){app::AppFactory app;return stackPlane(app);};
   ///stat profile image
   void statProfile(Jim& imgWriter, app::AppFactory& app);
   ///stat profile image only for in memory
