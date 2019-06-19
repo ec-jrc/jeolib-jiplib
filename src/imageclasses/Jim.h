@@ -204,6 +204,24 @@ static int getDataType(const std::string &typeString){
     return(GDT_Unknown);
 }
 
+static size_t getDataTypeSizeBytes(const std::string &typeString){
+  int typeInt=getDataType(typeString);
+  switch (typeInt){
+  case JDT_UInt64:
+  case JDT_Int64:
+    return(static_cast<size_t>(8));
+  case JDT_Word:
+    return(static_cast<size_t>(1));
+  default:{
+    if(typeInt==GDT_Unknown){
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+    }
+    return(static_cast<size_t>(GDALGetDataTypeSize(static_cast<GDALDataType>(typeInt))>>3));
+  }
+  }
+}
+
 static GDALRIOResampleAlg getGDALResample(const std::string &resampleString){
   //initialize selMap
   std::map<std::string,GDALRIOResampleAlg> resampleMap;
@@ -628,14 +646,15 @@ class Jim : public std::enable_shared_from_this<Jim>
   /* CPLErr readData(app::AppFactory &app); */
   ///Read a single pixel cell value at a specific column and row for a specific band (all indices start counting from 0)
   template<typename T> void readData(T& value, int col, int row, int band=0);
-  template<typename T> void readData3D(T& value, int col, int row, int plane, int band=0);
+  template<typename T> void readData3D(T& value, size_t col, size_t row, size_t plane, size_t band=0);
+  template<typename T> void readData3D(std::vector<T>& buffer, size_t minCol, size_t maxCol, size_t row, size_t plane, size_t band=0);
   ///Return a single pixel cell value at a specific column and row for a specific band (all indices start counting from 0)
   double readData(int col, int row, int band=0){
     double value;
     readData(value, col, row, band);
     return(value);
   };
-  double readData3D(int col, int row, int plane, int band=0){
+  double readData3D(size_t col, size_t row, size_t plane, size_t band=0){
     double value;
     readData3D(value, col, row, plane, band);
     return(value);
@@ -716,6 +735,10 @@ class Jim : public std::enable_shared_from_this<Jim>
   template<typename T> CPLErr writeData(std::vector<T>& buffer, int minCol, int maxCol, int row, int band=0);
   ///Write pixel cell values for an entire row for a specific band (all indices start counting from 0)
   template<typename T> CPLErr writeData(std::vector<T>& buffer, int row, int band=0);
+  /* template<typename T> void writeData3D(std::vector<T>& buffer, size_t minCol, size_t maxCol, size_t row, size_t plane, size_t band=0); */
+  /* template<typename T> void writeData3D(std::vector<T>& buffer, size_t row, size_t plane, size_t band=0){ */
+  /*   writeData3D(buffer, row, 0, nrOfCol()-1, plane, band); */
+  /* }; */
   // deprecated? Write an entire image from memory to file
   // CPLErr writeData(void* pdata, const GDALDataType& dataType, int band=0);
   ///Write pixel cell values for a range of columns and rows for a specific band (all indices start counting from 0). The buffer is a two dimensional vector (stl vector of stl vector) representing [row][col].
@@ -1171,7 +1194,7 @@ template<typename T> void Jim::readData(T& value, int col, int row, int band)
   }
 }
 
-template<typename T> void Jim::readData3D(T& value, int col, int row, int plane, int band)
+template<typename T> void Jim::readData3D(T& value, size_t col, size_t row, size_t plane, size_t band)
 {
   try{
     if(nrOfBand()<=band){
@@ -1254,6 +1277,98 @@ template<typename T> void Jim::readData3D(T& value, int col, int row, int plane,
     throw;
   }
 }
+
+template<typename T> void Jim::readData3D(std::vector<T>& buffer, size_t minCol, size_t maxCol, size_t row, size_t plane, size_t band)
+{
+  try{
+    if(nrOfBand()<=band){
+      std::string errorString="Error: band number exceeds number of bands in input image";
+      throw(errorString);
+    }
+    if(nrOfRow()<=row){
+      std::string errorString="Error: row number exceeds number of rows in input image";
+      throw(errorString);
+    }
+    if(nrOfPlane()<=plane){
+      std::string errorString="Error: plane number exceeds number of planes in input image";
+      throw(errorString);
+    }
+    double theScale=1;
+    double theOffset=0;
+    if(m_scale.size()>band||m_offset.size()>band){
+      if(m_scale.size()>band)
+        theScale=m_scale[band];
+      if(m_offset.size()>band)
+        theOffset=m_offset[band];
+    }
+    if(m_data.size()){
+      if(row<m_begin[band]||row>=m_end[band]){
+        if(m_filename.size())
+          readNewBlock(row,band);
+      }
+      if(buffer.size()!=maxCol-minCol+1)
+        buffer.resize(maxCol-minCol+1);
+      int index=plane*nrOfRow()*nrOfCol()+(row-m_begin[band])*nrOfCol();
+      int minindex=(index+minCol);
+      int maxindex=(index+maxCol);
+      /* if(type2GDAL<T>()==getDataType()){//no conversion needed */
+      /*   buffer.assign(static_cast<T*>(m_data[band])+minindex,static_cast<T*>(m_data[band])+maxindex); */
+      /*   typename std::vector<T>::iterator bufit=buffer.begin(); */
+      /*   while(bufit!=buffer.end()){ */
+      /*     double dvalue=theScale*(*bufit)+theOffset; */
+      /*     *(bufit++)=static_cast<T>(dvalue); */
+      /*   } */
+      /* } */
+      /* else{ */
+      typename std::vector<T>::iterator bufit=buffer.begin();
+      for(index=minindex;index<=maxindex;++index,++bufit){
+        double dvalue=0;
+        switch(getDataType()){
+        case(GDT_Byte):
+          dvalue=theScale*(static_cast<unsigned char*>(m_data[band])[index])+theOffset;
+          break;
+        case(GDT_Int16):
+          dvalue=theScale*(static_cast<short*>(m_data[band])[index])+theOffset;
+          break;
+        case(GDT_UInt16):
+          dvalue=theScale*(static_cast<unsigned short*>(m_data[band])[index])+theOffset;
+          break;
+        case(GDT_Int32):
+          dvalue=theScale*(static_cast<int*>(m_data[band])[index])+theOffset;
+          break;
+        case(GDT_UInt32):
+          dvalue=theScale*(static_cast<unsigned int*>(m_data[band])[index])+theOffset;
+          break;
+        case(GDT_Float32):
+          dvalue=theScale*(static_cast<float*>(m_data[band])[index])+theOffset;
+          break;
+        case(GDT_Float64):
+          dvalue=theScale*(static_cast<double*>(m_data[band])[index])+theOffset;
+          break;
+        default:
+          std::string errorString="Error: data type not supported";
+          throw(errorString);
+          break;
+        }
+        // double dvalue=theScale*(*(static_cast<double*>(m_data[band])+index))+theOffset;
+        *(bufit)=static_cast<T>(dvalue);
+      }
+    }
+    else{
+      std::ostringstream s;
+      s << "Error: read 3D image only supported for in memory images";
+      throw(s.str());
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    throw;
+  }
+  catch(...){
+    throw;
+  }
+}
+
 /**
  * @param[out] buffer The vector with all cell values that were read
  * @param[in] minCol First column from where to start reading (counting starts from 0)
@@ -1667,14 +1782,6 @@ template<typename T> CPLErr Jim::writeData(const T& value, int col, int row, int
   return(returnValue);
 }
 
-/**
- * @param[in] buffer The vector with all cell values to write
- * @param[in] minCol First column from where to start writing (counting starts from 0)
- * @param[in] maxCol Last column that must be written (counting starts from 0)
- * @param[in] row The row number to write (counting starts from 0)
- * @param[in] band The band number to write (counting starts from 0)
- * @return true if write successful
- **/
 template<typename T> CPLErr Jim::writeData(std::vector<T>& buffer, int minCol, int maxCol, int row, int band)
 {
   CPLErr returnValue=CE_None;
@@ -1782,6 +1889,115 @@ template<typename T> CPLErr Jim::writeData(std::vector<T>& buffer, int minCol, i
   }
   return(returnValue);
 }
+
+/* template<typename T> void Jim::writeData3D(std::vector<T>& buffer, size_t minCol, size_t maxCol, size_t row, size_t plane, size_t band) */
+/* { */
+/*   if(buffer.size()!=maxCol-minCol+1){ */
+/*     std::string errorstring="invalid size of buffer"; */
+/*     throw(errorstring); */
+/*   } */
+/*   if(minCol>=nrOfCol()){ */
+/*     std::ostringstream s; */
+/*     s << "minCol (" << minCol << ") exceeds nrOfCol (" << nrOfCol() << ")"; */
+/*     throw(s.str()); */
+/*   } */
+/*   if(minCol<0){ */
+/*     std::ostringstream s; */
+/*     s << "mincol (" << minCol << ") is negative"; */
+/*     throw(s.str()); */
+/*   } */
+/*   if(maxCol>=nrOfCol()){ */
+/*     std::ostringstream s; */
+/*     s << "maxCol (" << maxCol << ") exceeds nrOfCol (" << nrOfCol() << ")"; */
+/*     throw(s.str()); */
+/*   } */
+/*   if(maxCol<minCol){ */
+/*     std::ostringstream s; */
+/*     s << "maxCol (" << maxCol << ") is less than minCol (" << minCol << ")"; */
+/*     throw(s.str()); */
+/*   } */
+/*   if(row>=nrOfRow()){ */
+/*     std::ostringstream s; */
+/*     s << "row (" << row << ") exceeds nrOfRow (" << nrOfRow() << ")"; */
+/*     throw(s.str()); */
+/*   } */
+/*   if(row<0){ */
+/*     std::ostringstream s; */
+/*     s << "row (" << row << ") is negative"; */
+/*     throw(s.str()); */
+/*   } */
+/*   if(plane>=nrOfPlane()){ */
+/*     std::ostringstream s; */
+/*     s << "plane (" << plane << ") exceeds nrOfPlane (" << nrOfPlane() << ")"; */
+/*     throw(s.str()); */
+/*   } */
+/*   if(plane<0){ */
+/*     std::ostringstream s; */
+/*     s << "plane (" << plane << ") is negative"; */
+/*     throw(s.str()); */
+/*   } */
+/*   if(m_data.size()){ */
+/*     if(minCol>0){ */
+/*       std::ostringstream s; */
+/*       s << "Error: increase memory to support random access writing (now at " << 100.0*m_blockSize/nrOfRow() << "%)"; */
+/*       throw(s.str()); */
+/*     } */
+/*     if(row>=m_end[band]){ */
+/*       if(row>=m_end[band]+m_blockSize){ */
+/*         std::ostringstream s; */
+/*         s << "Error: increase memory to support random access writing (now at " << 100.0*m_blockSize/nrOfRow() << "%)"; */
+/*         throw(s.str()); */
+/*       } */
+/*       else if(m_filename.size()) */
+/*         writeNewBlock(row,band); */
+/*     } */
+/*     int index=plane*nrOfRow()*nrOfCol()+(row-m_begin[band])*nrOfCol(); */
+/*     int minindex=(index+minCol); */
+/*     int maxindex=(index+maxCol); */
+/*     typename std::vector<T>::const_iterator bufit=buffer.begin(); */
+/*     double theScale=1; */
+/*     double theOffset=0; */
+/*     if(m_scale.size()>band) */
+/*       theScale=m_scale[band]; */
+/*     if(m_offset.size()>band) */
+/*       theOffset=m_offset[band]; */
+/*     for(index=minindex;index<=maxindex;++index,++bufit){ */
+/*       double dvalue=theScale*(*(bufit))+theOffset; */
+/*       switch(getDataType()){ */
+/*       case(GDT_Byte): */
+/*         static_cast<unsigned char*>(m_data[band])[index]=static_cast<unsigned char>(dvalue); */
+/*         break; */
+/*       case(GDT_Int16): */
+/*         static_cast<short*>(m_data[band])[index]=static_cast<short>(dvalue); */
+/*         break; */
+/*       case(GDT_UInt16): */
+/*         static_cast<unsigned short*>(m_data[band])[index]=static_cast<unsigned short>(dvalue); */
+/*         break; */
+/*       case(GDT_Int32): */
+/*         static_cast<int*>(m_data[band])[index]=static_cast<int>(dvalue); */
+/*         break; */
+/*       case(GDT_UInt32): */
+/*         static_cast<unsigned int*>(m_data[band])[index]=static_cast<unsigned int>(dvalue); */
+/*         break; */
+/*       case(GDT_Float32): */
+/*         static_cast<float*>(m_data[band])[index]=static_cast<float>(dvalue); */
+/*         break; */
+/*       case(GDT_Float64): */
+/*         static_cast<double*>(m_data[band])[index]=static_cast<double>(dvalue); */
+/*         break; */
+/*       default: */
+/*         std::string errorString="Error: data type not supported"; */
+/*         throw(errorString); */
+/*         break; */
+/*       } */
+/*     } */
+/*   } */
+/*   else{ */
+/*       std::ostringstream s; */
+/*       s << "writeData3D only supported for data in memory"; */
+/*       throw(s.str()); */
+/*   } */
+/* } */
 
 /**
  * @param[in] buffer The vector with all cell values to write

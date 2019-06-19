@@ -74,6 +74,82 @@ shared_ptr<Jim> Jim::stackBand(Jim& srcImg, AppFactory& app){
 }
 
 
+// void Jim::d_convertType(AppFactory& app){
+//   Optionjl<string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
+//   Optionjl<short>  verbose_opt("v", "verbose", "verbose", 0,2);
+
+//   bool doProcess;//stop process when program was invoked with help option (-h --help)
+//   try{
+//     doProcess=otype_opt.retrieveOption(app);
+//     verbose_opt.retrieveOption(app);
+
+//     if(!doProcess){
+//       cout << endl;
+//       std::ostringstream helpStream;
+//       helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+//       throw(helpStream.str());//help was invoked, stop processing
+//     }
+
+//     std::vector<std::string> badKeys;
+//     app.badKeys(badKeys);
+//     if(badKeys.size()){
+//       std::ostringstream errorStream;
+//       if(badKeys.size()>1)
+//         errorStream << "Error: unknown keys: ";
+//       else
+//         errorStream << "Error: unknown key: ";
+//       for(int ikey=0;ikey<badKeys.size();++ikey){
+//         errorStream << badKeys[ikey] << " ";
+//       }
+//       errorStream << std::endl;
+//       throw(errorStream.str());
+//     }
+//     GDALDataType theType=getGDALDataType();
+//     if(otype_opt.size()){
+//       theType=string2GDAL(otype_opt[0]);
+//       if(theType==GDT_Unknown)
+//         std::cout << "Warning: unknown output pixel type: " << otype_opt[0] << ", using input type as default" << std::endl;
+//     }
+//     if(verbose_opt[0]>1)
+//       cout << "Output pixel type:  " << GDALGetDataTypeName(theType) << endl;
+
+//     if(scale_opt.size()){
+//       while(scale_opt.size()<nrOfBand())
+//         scale_opt.push_back(scale_opt[0]);
+//     }
+//     if(offset_opt.size()){
+//       while(offset_opt.size()<nrOfBand())
+//         offset_opt.push_back(offset_opt[0]);
+//     }
+//     if(autoscale_opt.size()){
+//       assert(autoscale_opt.size()%2==0);
+//     }
+
+//     if(theType==GDT_Unknown){
+//       theType=this->getGDALDataType();
+//       if(verbose_opt[0]>1)
+//         cout << "Using data type from input image: " << GDALGetDataTypeName(theType) << endl;
+//     }
+//     Jim imgWriter(nrOfCol(),nrOfRow(),1,nrOfPlane(),getDataType());
+//     memcpy(imgWriter.getDataPointer(),m_data[0],getDataTypeSizeBytes()*nrOfCol()*nrOfRow*nrOfPlane());
+//     free(m_data[0]);
+//     m_data[0]=(void *) calloc(static_cast<size_t>(nrOfPlane()*nrOfCol()*nrOfRow()),getDataTypeSizeBytes(otype_opt[0]));
+    
+//     for(size_t iband=0;iband<nrOfBand();++iband){
+//       memcpy(m_data[nrOfBand()],m_data[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize*oldnplane);
+//       //allocate memory
+//       free(m_data[iband]);
+//       m_data[iband]=(void *) calloc(static_cast<size_t>(nrOfCol()*nrOfRow()*nrOfPlane()),getDataTypeSizeBytes());
+//       memcpy(m_data[iband],m_data[nrOfBand()],getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*oldnplane);
+//       memcpy(m_data[iband]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*oldnplane,imgSrc.getDataPointer(iband),imgSrc.getDataTypeSizeBytes()*imgSrc.nrOfCol()*imgSrc.nrOfRow()*imgSrc.nrOfPlane());
+//     }
+//   }
+//   catch(string predefinedString){
+//     std::cerr << predefinedString << std::endl;
+//     throw;
+//   }
+// }
+
 void Jim::convert(Jim& imgWriter, AppFactory& app){
   Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
   Optionjl<double> autoscale_opt("as", "autoscale", "scale output to min and max, e.g., --autoscale 0 --autoscale 255");
@@ -1910,24 +1986,26 @@ void Jim::d_cropPlane(AppFactory& app){
     throw;
   }
   for(size_t iplane=0;iplane<vplane.size();++iplane){
-    if(vplane[iplane]>=nrOfPlane()){
+    if(vplane[iplane]>=nrOfPlane()||vplane[iplane]<0){
       std::ostringstream errorStream;
       errorStream << "Error: selected plane " << vplane[iplane] << " is out of range";
       std::cerr << errorStream.str() << std::endl;
       throw(errorStream.str());
     }
   }
-  m_data.resize(nrOfBand()+1);
-  m_data[nrOfBand()]=(void *) calloc(static_cast<size_t>(nrOfCol()*nrOfRow()*vplane.size()),getDataTypeSizeBytes());
-  for(size_t iband=0;iband<nrOfBand();++iband){
-    for(size_t iplane=0;iplane<vplane.size();++iplane){
-      memcpy(m_data[nrOfBand()]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*iplane,m_data[iband]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*vplane[iplane],getDataTypeSizeBytes()*nrOfCol()*nrOfRow());
+  if(nrOfPlane() > 1){
+    m_data.resize(nrOfBand()+1);
+    m_data[nrOfBand()]=(void *) calloc(static_cast<size_t>(nrOfCol()*nrOfRow()*vplane.size()),getDataTypeSizeBytes());
+    for(size_t iband=0;iband<nrOfBand();++iband){
+      for(size_t iplane=0;iplane<vplane.size();++iplane){
+        memcpy(m_data[nrOfBand()]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*iplane,m_data[iband]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*vplane[iplane],getDataTypeSizeBytes()*nrOfCol()*nrOfRow());
+      }
+      memcpy(m_data[iband],m_data[nrOfBand()],getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*vplane.size());
     }
-    memcpy(m_data[iband],m_data[nrOfBand()],getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*vplane.size());
+    free(m_data[nrOfBand()]);
+    m_data.resize(nrOfBand());
+    m_nplane=vplane.size();
   }
-  free(m_data[nrOfBand()]);
-  m_data.resize(nrOfBand());
-  m_nplane=vplane.size();
 }
 
 void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
