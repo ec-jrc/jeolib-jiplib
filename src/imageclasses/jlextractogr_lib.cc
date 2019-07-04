@@ -86,6 +86,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
   Optionjl<string> ftype_opt("ft", "ftype", "Field type (only Real or Integer)", "Real");
   Optionjl<int> band_opt("b", "band", "Band index(es) to extract (0 based). Leave empty to use all bands");
   Optionjl<std::string> bandNames_opt("bn", "bandname", "Band name(s) corresponding to band index(es).");
+  Optionjl<std::string> planeNames_opt("bn", "planename", "Plane name(s) corresponding to plane index(es).");
   Optionjl<unsigned short> bstart_opt("sband", "startband", "Start band sequence number");
   Optionjl<unsigned short> bend_opt("eband", "endband", "End band sequence number");
   Optionjl<string> rule_opt("r", "rule", "Rule how to report image information per feature. point (single point within polygon), allpoints (all points within polygon), centroid, mean, stdev, median, proportion, count, min, max, mode, sum, percentile.","centroid");
@@ -136,6 +137,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
     ftype_opt.retrieveOption(app);
     band_opt.retrieveOption(app);
     bandNames_opt.retrieveOption(app);
+    planeNames_opt.retrieveOption(app);
     bstart_opt.retrieveOption(app);
     bend_opt.retrieveOption(app);
     rule_opt.retrieveOption(app);
@@ -231,6 +233,16 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
     if(output_opt.empty()){
       std::cerr << "No output dataset provided (use option -o). Use --help for help information";
       return(CE_Failure);
+    }
+    if(nrOfPlane()>1){
+      if(planeNames_opt.size()<nrOfPlane()){
+        planeNames_opt.clear();
+        for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+          ostringstream planestream;
+          planestream << "p" << iplane << endl;
+          planeNames_opt.push_back(planestream.str());
+        }
+      }
     }
 
     char **papszOptions=NULL;
@@ -548,9 +560,20 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 
       //read entire block for coverage in memory
       //todo: use different data types
-      vector< Vector2d<float> > readValuesReal(nband);
-      vector< Vector2d<int> > readValuesInt(nband);
+      vector< vector< Vector2d<float> > > readValuesReal(nrOfPlane());
+      vector< vector< Vector2d<int> > > readValuesInt(nrOfPlane());
 
+      for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+        switch( fieldType ){
+        case OFTInteger:
+          readValuesInt[iplane].resize(nband);
+          break;
+        case OFTReal:
+          readValuesReal[iplane].resize(nband);
+        default:
+          break;
+        }
+      }
       double layer_uli;
       double layer_ulj;
       double layer_lri;
@@ -606,29 +629,31 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       if(getBlockSize()>=layer_lrj-layer_ulj){
         if(verbose_opt[0])
           std::cout << "blockSize " << getBlockSize() << " >= " << layer_lrj-layer_ulj << std::endl;
-        for(int iband=0;iband<nband;++iband){
-          int theBand=(band_opt.size()) ? band_opt[iband] : iband;
-          if(theBand<0){
-            string errorString="Error: illegal band (must be positive and starting from 0)";
-            throw(errorString);
+        for(int iplane=0;iplane<nrOfPlane();++iplane){
+          for(int iband=0;iband<nband;++iband){
+            int theBand=(band_opt.size()) ? band_opt[iband] : iband;
+            if(theBand<0){
+              string errorString="Error: illegal band (must be positive and starting from 0)";
+              throw(errorString);
+            }
+            if(theBand>=this->nrOfBand()){
+              string errorString="Error: illegal band (must be lower than number of bands in input raster dataset)";
+              throw(errorString);
+            }
+            if(verbose_opt[0])
+              cout << "reading image band " << theBand << " block rows " << layer_ulj << "-" << layer_lrj << ", cols " << layer_uli << "-" << layer_lri << endl;
+            switch( fieldType ){
+            case OFTInteger:
+              this->readDataBlock3D(readValuesInt[iplane][iband],layer_uli,layer_lri,layer_ulj,layer_lrj,iplane,theBand);
+              break;
+            case OFTReal:
+            default:
+              this->readDataBlock3D(readValuesReal[iplane][iband],layer_uli,layer_lri,layer_ulj,layer_lrj,iplane,theBand);
+              break;
+            }
           }
-          if(theBand>=this->nrOfBand()){
-            string errorString="Error: illegal band (must be lower than number of bands in input raster dataset)";
-            throw(errorString);
-          }
-          if(verbose_opt[0])
-            cout << "reading image band " << theBand << " block rows " << layer_ulj << "-" << layer_lrj << ", cols " << layer_uli << "-" << layer_lri << endl;
-          switch( fieldType ){
-          case OFTInteger:
-            this->readDataBlock(readValuesInt[iband],layer_uli,layer_lri,layer_ulj,layer_lrj,theBand);
-            break;
-          case OFTReal:
-          default:
-            this->readDataBlock(readValuesReal[iband],layer_uli,layer_lri,layer_ulj,layer_lrj,theBand);
-            break;
-          }
+          layerRead=true;
         }
-        layerRead=true;
       }
       else{
         if(verbose_opt[0])
@@ -714,41 +739,47 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
           if(verbose_opt[0])
             std::cout << "checking rules" << std::endl;
           for(int irule=0;irule<rule_opt.size();++irule){
-            for(int iband=0;iband<nband;++iband){
-              int theBand=(band_opt.size()) ? band_opt[iband] : iband;
-              ostringstream fs;
-              if(bandNames_opt.size()){
-                if(rule_opt.size()>1)
-                  fs << fieldMap[rule_opt[irule]];
-                fs << bandNames_opt[iband];
-              }
-              else{
-                if(rule_opt.size()>1||nband==1)
-                  fs << fieldMap[rule_opt[irule]];
-                if(nband>1)
-                  fs << "b" << theBand;
-              }
-              switch(ruleMap[rule_opt[irule]]){
-              case(rule::proportion):
-              case(rule::count):{//count for each class
-                for(int iclass=0;iclass<class_opt.size();++iclass){
-                  ostringstream fsclass;
-                  fsclass << fs.str() << "class" << class_opt[iclass];
-                  ogrWriter.createField(fsclass.str(),fieldType,ilayer);
+            for(int iplane=0;iplane<nrOfPlane();++iplane){
+                for(int iband=0;iband<nband;++iband){
+                int theBand=(band_opt.size()) ? band_opt[iband] : iband;
+                ostringstream fs;
+                if(bandNames_opt.size()){
+                  if(rule_opt.size()>1)
+                    fs << fieldMap[rule_opt[irule]];
+                  if(planeNames_opt.size())
+                    fs << planeNames_opt[iplane];
+                  fs << bandNames_opt[iband];
                 }
-                break;
-              }
-              case(rule::percentile):{//for each percentile
-                for(int iperc=0;iperc<percentile_opt.size();++iperc){
-                  ostringstream fsperc;
-                  fsperc << fs.str() << percentile_opt[iperc];
-                  ogrWriter.createField(fsperc.str(),fieldType,ilayer);
+                else{
+                  if(rule_opt.size()>1||nband==1)
+                    fs << fieldMap[rule_opt[irule]];
+                  if(planeNames_opt.size())
+                    fs << planeNames_opt[iplane];
+                  if(nband>1)
+                    fs << "b" << theBand;
                 }
-                break;
-              }
-              default:
-                ogrWriter.createField(fs.str(),fieldType,ilayer);
-                break;
+                switch(ruleMap[rule_opt[irule]]){
+                case(rule::proportion):
+                case(rule::count):{//count for each class
+                  for(int iclass=0;iclass<class_opt.size();++iclass){
+                    ostringstream fsclass;
+                    fsclass << fs.str() << "class" << class_opt[iclass];
+                    ogrWriter.createField(fsclass.str(),fieldType,ilayer);
+                  }
+                  break;
+                }
+                case(rule::percentile):{//for each percentile
+                  for(int iperc=0;iperc<percentile_opt.size();++iperc){
+                    ostringstream fsperc;
+                    fsperc << fs.str() << percentile_opt[iperc];
+                    ogrWriter.createField(fsperc.str(),fieldType,ilayer);
+                  }
+                  break;
+                }
+                default:
+                  ogrWriter.createField(fs.str(),fieldType,ilayer);
+                  break;
+                }
               }
             }
           }
@@ -952,67 +983,76 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                     }
                   }
                 }
-                if(valid){
-                  if(srcnodata_opt.empty())
-                    validFeature=true;
-                  else{
-                    for(int vband=0;vband<bndnodata_opt.size();++vband){
-                      switch( fieldType ){
-                      case OFTInteger:{
-                        int value;
-                        value=((readValuesInt[vband])[indexJ])[indexI];
-                        if(value==srcnodata_opt[vband])
-                          valid=false;
-                        break;
+                for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                  if(valid){
+                    if(srcnodata_opt.empty())
+                      validFeature=true;
+                    else{
+                      for(int vband=0;vband<bndnodata_opt.size();++vband){
+                        switch( fieldType ){
+                        case OFTInteger:{
+                          int value;
+                          value=((readValuesInt[iplane][vband])[indexJ])[indexI];
+                          if(value==srcnodata_opt[vband])
+                            valid=false;
+                          break;
+                        }
+                        case OFTReal:{
+                          double value;
+                          value=((readValuesReal[iplane][vband])[indexJ])[indexI];
+                          if(value==srcnodata_opt[vband])
+                            valid=false;
+                          break;
+                        }
+                        }
+                        if(!valid)
+                          continue;
+                        else
+                          validFeature=true;
                       }
-                      case OFTReal:{
-                        double value;
-                        value=((readValuesReal[vband])[indexJ])[indexI];
-                        if(value==srcnodata_opt[vband])
-                          valid=false;
-                        break;
-                      }
-                      }
-                      if(!valid)
-                        continue;
-                      else
-                        validFeature=true;
                     }
                   }
-                }
-                if(valid){
-                  if(label_opt.size())
-                    writePolygonFeature->SetField("label",label_opt[0]);
-                  if(fid_opt.size())
-                    writePolygonFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                  for(int iband=0;iband<nband;++iband){
-                    int theBand=(band_opt.size()) ? band_opt[iband] : iband;
-                    //write fields for point on surface and centroid
-                    string fieldname;
-                    ostringstream fs;
-                    if(bandNames_opt.size()){
-                      if(rule_opt.size()>1)
-                        fs << fieldMap["centroid"];
-                      fs << bandNames_opt[iband];
-                    }
-                    else{
-                      if(rule_opt.size()>1||nband==1)
-                        fs << fieldMap["centroid"];
-                      if(nband>1)
-                        fs << "b" << theBand;
-                    }
-                    fieldname=fs.str();
-                    switch( fieldType ){
-                    case OFTInteger:
-                      writePolygonFeature->SetField(fieldname.c_str(),static_cast<int>(((readValuesInt[iband])[indexJ])[indexI]));
-                      break;
-                    case OFTReal:
-                      writePolygonFeature->SetField(fieldname.c_str(),((readValuesReal[iband])[indexJ])[indexI]);
-                      break;
-                    default://not supported
-                      std::string errorString="field type not supported";
-                      throw(errorString);
-                      break;
+                  // if(valid){
+                  if(validFeature){//replace valid with validFeature!
+                    if(label_opt.size())
+                      writePolygonFeature->SetField("label",label_opt[0]);
+                    if(fid_opt.size())
+                      writePolygonFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
+                    for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                      for(int iband=0;iband<nband;++iband){
+                        int theBand=(band_opt.size()) ? band_opt[iband] : iband;
+                        //write fields for point on surface and centroid
+                        string fieldname;
+                        ostringstream fs;
+                        if(bandNames_opt.size()){
+                          if(rule_opt.size()>1)
+                            fs << fieldMap["centroid"];
+                          if(planeNames_opt.size())
+                            fs << planeNames_opt[iplane];
+                          fs << bandNames_opt[iband];
+                        }
+                        else{
+                          if(rule_opt.size()>1||nband==1)
+                            fs << fieldMap["centroid"];
+                          if(planeNames_opt.size())
+                            fs << planeNames_opt[iplane];
+                          if(nband>1)
+                            fs << "b" << theBand;
+                        }
+                        fieldname=fs.str();
+                        switch( fieldType ){
+                        case OFTInteger:
+                          writePolygonFeature->SetField(fieldname.c_str(),static_cast<int>(((readValuesInt[iplane][iband])[indexJ])[indexI]));
+                          break;
+                        case OFTReal:
+                          writePolygonFeature->SetField(fieldname.c_str(),((readValuesReal[iplane][iband])[indexJ])[indexI]);
+                          break;
+                        default://not supported
+                          std::string errorString="field type not supported";
+                          throw(errorString);
+                          break;
+                        }
+                      }
                     }
                   }
                 }
@@ -1052,81 +1092,91 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                   if(srcnodata_opt.empty())
                     validFeature=true;
                   else{
-                    for(int vband=0;vband<bndnodata_opt.size();++vband){
-                      switch( fieldType ){
-                      case OFTInteger:{
-                        int value;
-                        value=((readValuesInt[vband])[indexJ])[indexI];
-                        if(value==srcnodata_opt[vband])
-                          valid=false;
-                        break;
+                    for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                      for(int vband=0;vband<bndnodata_opt.size();++vband){
+                        switch( fieldType ){
+                        case OFTInteger:{
+                          int value;
+                          value=((readValuesInt[iplane][vband])[indexJ])[indexI];
+                          if(value==srcnodata_opt[vband])
+                            valid=false;
+                          break;
+                        }
+                        case OFTReal:{
+                          double value;
+                          value=((readValuesReal[iplane][vband])[indexJ])[indexI];
+                          if(value==srcnodata_opt[vband])
+                            valid=false;
+                          break;
+                        }
+                        }
+                        if(!valid)
+                          continue;
+                        else
+                          validFeature=true;
                       }
-                      case OFTReal:{
-                        double value;
-                        value=((readValuesReal[vband])[indexJ])[indexI];
-                        if(value==srcnodata_opt[vband])
-                          valid=false;
-                        break;
-                      }
-                      }
-                      if(!valid)
-                        continue;
-                      else
-                        validFeature=true;
                     }
                   }
                 }
-                if(valid){
+
+                // if(valid){
+                if(validFeature){//replaced valid with validFeature!
                   if(label_opt.size())
                     writePolygonFeature->SetField("label",label_opt[0]);
                   if(fid_opt.size())
                     writePolygonFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                  for(int iband=0;iband<nband;++iband){
-                    int theBand=(band_opt.size()) ? band_opt[iband] : iband;
-                    //write fields for point on surface and centroid
-                    string fieldname;
-                    ostringstream fs;
-                    if(bandNames_opt.size()){
-                      if(rule_opt.size()>1)
-                        fs << fieldMap["point"];
-                      fs << bandNames_opt[iband];
-                    }
-                    else{
-                      if(rule_opt.size()>1||nband==1)
-                        fs << fieldMap["point"];
-                      if(nband>1)
-                        fs << "b" << theBand;
-                    }
-                    fieldname=fs.str();
-                    switch( fieldType ){
-                    case OFTInteger:
-                      writePolygonFeature->SetField(fieldname.c_str(),static_cast<int>(((readValuesInt[iband])[indexJ])[indexI]));
-                      break;
-                    case OFTReal:
-                      writePolygonFeature->SetField(fieldname.c_str(),((readValuesReal[iband])[indexJ])[indexI]);
-                      break;
-                    default://not supported
-                      std::string errorString="field type not supported";
-                      throw(errorString);
-                      break;
+                  for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                    for(int iband=0;iband<nband;++iband){
+                      int theBand=(band_opt.size()) ? band_opt[iband] : iband;
+                      //write fields for point on surface and centroid
+                      string fieldname;
+                      ostringstream fs;
+                      if(bandNames_opt.size()){
+                        if(rule_opt.size()>1)
+                          fs << fieldMap["point"];
+                        if(planeNames_opt.size())
+                          fs << planeNames_opt[iplane];
+                        fs << bandNames_opt[iband];
+                      }
+                      else{
+                        if(rule_opt.size()>1||nband==1)
+                          fs << fieldMap["point"];
+                        if(planeNames_opt.size())
+                          fs << planeNames_opt[iplane];
+                        if(nband>1)
+                          fs << "b" << theBand;
+                      }
+                      fieldname=fs.str();
+                      switch( fieldType ){
+                      case OFTInteger:
+                        writePolygonFeature->SetField(fieldname.c_str(),static_cast<int>(((readValuesInt[iplane][iband])[indexJ])[indexI]));
+                        break;
+                      case OFTReal:
+                        writePolygonFeature->SetField(fieldname.c_str(),((readValuesReal[iplane][iband])[indexJ])[indexI]);
+                        break;
+                      default://not supported
+                        std::string errorString="field type not supported";
+                        throw(errorString);
+                        break;
+                      }
                     }
                   }
                 }
               }//if point
             }//if createPolygon
-
             if(calculateSpatialStatistics||!createPolygon){
-              Vector2d<double> polyValues;
-              vector<double> polyClassValues;
-
-              if(class_opt.size()){
-                polyClassValues.resize(class_opt.size());
-                //initialize
-                for(int iclass=0;iclass<class_opt.size();++iclass)
-                  polyClassValues[iclass]=0;
+              vector< Vector2d<double> > polyValues(nrOfPlane());
+              vector< vector<double> > polyClassValues(nrOfPlane());
+              for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                if(class_opt.size()){
+                  polyClassValues[iplane].resize(class_opt.size());
+                  //initialize
+                  for(int iclass=0;iclass<class_opt.size();++iclass)
+                    polyClassValues[iplane][iclass]=0;
+                }
+                else
+                  polyValues[iplane].resize(nband);
               }
-              else
-                polyValues.resize(nband);
 
               OGRPoint thePoint;
               for(int j=ulj;j<=lrj;++j){
@@ -1193,35 +1243,38 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                       }
                     }
                   }
-                  if(srcnodata_opt.size()){
-                    for(int vband=0;vband<bndnodata_opt.size();++vband){
-                      switch( fieldType ){
-                      case OFTInteger:{
-                        int value=((readValuesInt[vband])[indexJ])[indexI];
-                        if(value==srcnodata_opt[vband]){
-                          valid=false;
+                  for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                    if(srcnodata_opt.size()){
+                      for(int vband=0;vband<bndnodata_opt.size();++vband){
+                        switch( fieldType ){
+                        case OFTInteger:{
+                          int value=((readValuesInt[iplane][vband])[indexJ])[indexI];
+                          if(value==srcnodata_opt[vband]){
+                            valid=false;
+                          }
+                          break;
                         }
-                        break;
-                      }
-                      default:{
-                        float value=((readValuesReal[vband])[indexJ])[indexI];
-                        if(value==srcnodata_opt[vband]){
-                          valid=false;
+                        default:{
+                          float value=((readValuesReal[iplane][vband])[indexJ])[indexI];
+                          if(value==srcnodata_opt[vband]){
+                            valid=false;
+                          }
+                          break;
                         }
-                        break;
-                      }
+                        }
                       }
                     }
+                    if(!valid){
+                      continue;
+                    }
+                    else
+                      validFeature=true;
                   }
-                  if(!valid){
-                    continue;
-                  }
-                  else
-                    validFeature=true;
 
                   ++nPointPolygon;
                   OGRFeature *writePointFeature;
-                  if(valid&&!createPolygon){//write all points
+                  // if(valid&&!createPolygon){//write all points
+                  if(validFeature&&!createPolygon){//write all points: replaced valid with validFeature!
                     if(polythreshold_opt.size()){
                       if(polythreshold_opt[0]>0){
                         double p=static_cast<double>(rand())/(RAND_MAX);
@@ -1272,71 +1325,80 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                   //       polyClassValues[iclass]+=1;
                   //   }
                   // }
-                  if(valid){
+                  // if(valid){
+                  if(validFeature){//replaced valid with validFeature...
                     if(!createPolygon&&label_opt.size())
                       writePointFeature->SetField("label",label_opt[0]);
                     if(!createPolygon&&fid_opt.size())
                       writePointFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                    for(int iband=0;iband<nband;++iband){
-                      int theBand=(band_opt.size()) ? band_opt[iband] : iband;
-                      double value=0;
-                      switch( fieldType ){
-                      case OFTInteger:
-                        value=((readValuesInt[iband])[indexJ])[indexI];
-                        break;
-                      case OFTReal:
-                        value=((readValuesReal[iband])[indexJ])[indexI];
-                        break;
-                      }
-                      if(!iband&&class_opt.size()){
-                        for(int iclass=0;iclass<class_opt.size();++iclass){
-                          if(value==class_opt[iclass])
-                            polyClassValues[iclass]+=1;
-                        }
-                      }
-
-                      if(verbose_opt[0]>1)
-                        std::cout << ": " << value << std::endl;
-                      if(!createPolygon){//write all points within polygon
-                        string fieldname;
-                        ostringstream fs;
-                        if(bandNames_opt.size()){
-                          if(rule_opt.size()>1)
-                            fs << fieldMap["allpoints"];
-                          fs << bandNames_opt[iband];
-                        }
-                        else{
-                          if(rule_opt.size()>1||nband==1)
-                            fs << fieldMap["allpoints"];
-                          if(nband>1)
-                            fs << "b" << theBand;
-                        }
-                        fieldname=fs.str();
-                        int fieldIndex=writePointFeature->GetFieldIndex(fieldname.c_str());
-                        if(fieldIndex<0){
-                          ostringstream ess;
-                          ess << "field " << fieldname << " was not found" << endl;
-                          throw(ess.str());
-                          // return(CE_Failure);
-                        }
-                        if(verbose_opt[0]>1)
-                          std::cout << "set field " << fieldname << " to " << value << std::endl;
+                    for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                      for(int iband=0;iband<nband;++iband){
+                        int theBand=(band_opt.size()) ? band_opt[iband] : iband;
+                        double value=0;
                         switch( fieldType ){
                         case OFTInteger:
-                        case OFTReal:
-                          writePointFeature->SetField(fieldname.c_str(),value);
+                          value=((readValuesInt[iplane][iband])[indexJ])[indexI];
                           break;
-                        default://not supported
-                          assert(0);
+                        case OFTReal:
+                          value=((readValuesReal[iplane][iband])[indexJ])[indexI];
                           break;
                         }
-                      }
-                      else{
-                        polyValues[iband].push_back(value);
-                      }
-                    }//iband
+                        if(!iband&&class_opt.size()){
+                          for(int iclass=0;iclass<class_opt.size();++iclass){
+                            if(value==class_opt[iclass])
+                              polyClassValues[iplane][iclass]+=1;
+                          }
+                        }
+
+                        if(verbose_opt[0]>1)
+                          std::cout << ": " << value << std::endl;
+                        if(!createPolygon){//write all points within polygon
+                          string fieldname;
+                          ostringstream fs;
+                          if(bandNames_opt.size()){
+                            if(rule_opt.size()>1)
+                              fs << fieldMap["allpoints"];
+                            if(planeNames_opt.size())
+                              fs << planeNames_opt[iplane];
+                            fs << bandNames_opt[iband];
+                          }
+                          else{
+                            if(rule_opt.size()>1||nband==1)
+                              fs << fieldMap["allpoints"];
+                            if(planeNames_opt.size())
+                              fs << planeNames_opt[iplane];
+                            if(nband>1)
+                              fs << "b" << theBand;
+                          }
+                          fieldname=fs.str();
+                          int fieldIndex=writePointFeature->GetFieldIndex(fieldname.c_str());
+                          if(fieldIndex<0){
+                            ostringstream ess;
+                            ess << "field " << fieldname << " was not found" << endl;
+                            throw(ess.str());
+                            // return(CE_Failure);
+                          }
+                          if(verbose_opt[0]>1)
+                            std::cout << "set field " << fieldname << " to " << value << std::endl;
+                          switch( fieldType ){
+                          case OFTInteger:
+                          case OFTReal:
+                            writePointFeature->SetField(fieldname.c_str(),value);
+                            break;
+                          default://not supported
+                            assert(0);
+                            break;
+                          }
+                        }
+                        else{
+                          polyValues[iplane][iband].push_back(value);
+                        }
+                      }//iband
+                    }
                   }
-                  if(valid&&!createPolygon){
+
+                  // if(valid&&!createPolygon){
+                  if(validFeature&&!createPolygon){//replaced valid with validFeature!
                     //write feature
                     if(verbose_opt[0]>1)
                       std::cout << "creating point feature" << std::endl;
@@ -1369,106 +1431,112 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                     writePolygonFeature->SetField("label",label_opt[0]);
                   if(!irule&&fid_opt.size())
                     writePolygonFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                  for(int iband=0;iband<nband;++iband){
-                    int theBand=(band_opt.size()) ? band_opt[iband] : iband;
-                    vector<double> theValue;
-                    vector<string> fieldname;
-                    ostringstream fs;
-                    if(bandNames_opt.size()){
-                      if(rule_opt.size()>1)
-                        fs << fieldMap[rule_opt[irule]];
-                      fs << bandNames_opt[iband];
-                    }
-                    else{
-                      if(rule_opt.size()>1||nband==1)
-                        fs << fieldMap[rule_opt[irule]];
-                      if(nband>1)
-                        fs << "b" << theBand;
-                    }
-                    switch(ruleMap[rule_opt[irule]]){
-                    case(rule::proportion)://deliberate fall through
-                      stat.normalize_pct(polyClassValues);
-                    case(rule::count):{//count for each class
-                      for(int index=0;index<polyClassValues.size();++index){
-                        theValue.push_back(polyClassValues[index]);
-                        ostringstream fsclass;
-                        fsclass << fs.str() << "class" << class_opt[index];
-                        fieldname.push_back(fsclass.str());
+                  for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                    for(int iband=0;iband<nband;++iband){
+                      int theBand=(band_opt.size()) ? band_opt[iband] : iband;
+                      vector< vector<double> > theValue(nrOfPlane());
+                      vector< vector<string> > fieldname(nrOfPlane());
+                      ostringstream fs;
+                      if(bandNames_opt.size()){
+                        if(rule_opt.size()>1)
+                          fs << fieldMap[rule_opt[irule]];
+                        if(planeNames_opt.size())
+                          fs << planeNames_opt[iplane];
+                        fs << bandNames_opt[iband];
                       }
-                      break;
-                    }
-                    case(rule::mode):{
-                      //maximum votes in polygon
-                      if(verbose_opt[0])
-                        std::cout << "number of points in polygon: " << nPointPolygon << std::endl;
-                      //search for class with maximum votes
-                      int maxClass=stat.mymin(class_opt);
-                      vector<double>::iterator maxit;
-                      maxit=stat.mymax(polyClassValues,polyClassValues.begin(),polyClassValues.end());
-                      int maxIndex=distance(polyClassValues.begin(),maxit);
-                      maxClass=class_opt[maxIndex];
-                      if(verbose_opt[0]>0)
-                        std::cout << "maxClass: " << maxClass << std::endl;
-                      theValue.push_back(maxClass);
-                      fieldname.push_back(fs.str());
-                      break;
-                    }
-                    case(rule::mean):
-                      theValue.push_back(stat.mean(polyValues[iband]));
-                      fieldname.push_back(fs.str());
-                      break;
-                    case(rule::median):
-                      theValue.push_back(stat.median(polyValues[iband]));
-                      fieldname.push_back(fs.str());
-                      break;
-                    case(rule::stdev):
-                      theValue.push_back(sqrt(stat.var(polyValues[iband])));
-                      fieldname.push_back(fs.str());
-                      break;
-                    case(rule::percentile):{
-                      for(int iperc=0;iperc<percentile_opt.size();++iperc){
-                        theValue.push_back(stat.percentile(polyValues[iband],polyValues[iband].begin(),polyValues[iband].end(),percentile_opt[iperc]));
-                        ostringstream fsperc;
-                        fsperc << fs.str() << percentile_opt[iperc];
-                        fieldname.push_back(fsperc.str());
+                      else{
+                        if(rule_opt.size()>1||nband==1)
+                          fs << fieldMap[rule_opt[irule]];
+                        if(planeNames_opt.size())
+                          fs << planeNames_opt[iplane];
+                        if(nband>1)
+                          fs << "b" << theBand;
                       }
-                      break;
-                    }
-                    case(rule::sum):
-                      theValue.push_back(stat.sum(polyValues[iband]));
-                      fieldname.push_back(fs.str());
-                      break;
-                    case(rule::max):
-                      theValue.push_back(stat.mymax(polyValues[iband]));
-                      fieldname.push_back(fs.str());
-                      break;
-                    case(rule::min):
-                      theValue.push_back(stat.mymin(polyValues[iband]));
-                      fieldname.push_back(fs.str());
-                      break;
-                    case(rule::point):
-                    case(rule::centroid):
-                      theValue.push_back(polyValues[iband].back());
-                    fieldname.push_back(fs.str());
-                    break;
-                    default://not supported
-                      break;
-                    }
-                    for(int ivalue=0;ivalue<theValue.size();++ivalue){
-                      switch( fieldType ){
-                      case OFTInteger:
-                        writePolygonFeature->SetField(fieldname[ivalue].c_str(),static_cast<int>(theValue[ivalue]));
+                      switch(ruleMap[rule_opt[irule]]){
+                      case(rule::proportion)://deliberate fall through
+                        stat.normalize_pct(polyClassValues[iplane]);
+                      case(rule::count):{//count for each class
+                        for(int index=0;index<polyClassValues[iplane].size();++index){
+                          theValue[iplane].push_back(polyClassValues[iplane][index]);
+                          ostringstream fsclass;
+                          fsclass << fs.str() << "class" << class_opt[index];
+                          fieldname[iplane].push_back(fsclass.str());
+                        }
                         break;
-                      case OFTReal:
-                        writePolygonFeature->SetField(fieldname[ivalue].c_str(),theValue[ivalue]);
+                      }
+                      case(rule::mode):{
+                        //maximum votes in polygon
+                        if(verbose_opt[0])
+                          std::cout << "number of points in polygon: " << nPointPolygon << std::endl;
+                        //search for class with maximum votes
+                        int maxClass=stat.mymin(class_opt);
+                        vector<double>::iterator maxit;
+                        maxit=stat.mymax(polyClassValues[iplane],polyClassValues[iplane].begin(),polyClassValues[iplane].end());
+                        int maxIndex=distance(polyClassValues[iplane].begin(),maxit);
+                        maxClass=class_opt[maxIndex];
+                        if(verbose_opt[0]>0)
+                          std::cout << "maxClass: " << maxClass << std::endl;
+                        theValue[iplane].push_back(maxClass);
+                        fieldname[iplane].push_back(fs.str());
                         break;
-                      case OFTString:
-                        writePolygonFeature->SetField(fieldname[ivalue].c_str(),type2string<double>(theValue[ivalue]).c_str());
+                      }
+                      case(rule::mean):
+                        theValue[iplane].push_back(stat.mean(polyValues[iplane][iband]));
+                        fieldname[iplane].push_back(fs.str());
                         break;
+                      case(rule::median):
+                        theValue[iplane].push_back(stat.median(polyValues[iplane][iband]));
+                        fieldname[iplane].push_back(fs.str());
+                        break;
+                      case(rule::stdev):
+                        theValue[iplane].push_back(sqrt(stat.var(polyValues[iplane][iband])));
+                        fieldname[iplane].push_back(fs.str());
+                        break;
+                      case(rule::percentile):{
+                        for(int iperc=0;iperc<percentile_opt.size();++iperc){
+                          theValue[iplane].push_back(stat.percentile(polyValues[iplane][iband],polyValues[iplane][iband].begin(),polyValues[iplane][iband].end(),percentile_opt[iperc]));
+                          ostringstream fsperc;
+                          fsperc << fs.str() << percentile_opt[iperc];
+                          fieldname[iplane].push_back(fsperc.str());
+                        }
+                        break;
+                      }
+                      case(rule::sum):
+                        theValue[iplane].push_back(stat.sum(polyValues[iplane][iband]));
+                        fieldname[iplane].push_back(fs.str());
+                        break;
+                      case(rule::max):
+                        theValue[iplane].push_back(stat.mymax(polyValues[iplane][iband]));
+                        fieldname[iplane].push_back(fs.str());
+                        break;
+                      case(rule::min):
+                        theValue[iplane].push_back(stat.mymin(polyValues[iplane][iband]));
+                        fieldname[iplane].push_back(fs.str());
+                        break;
+                      case(rule::point):
+                      case(rule::centroid):
+                        theValue[iplane].push_back(polyValues[iplane][iband].back());
+                      fieldname[iplane].push_back(fs.str());
+                      break;
                       default://not supported
-                        std::string errorString="field type not supported";
-                        throw(errorString);
                         break;
+                      }
+                      for(int ivalue=0;ivalue<theValue[iplane].size();++ivalue){
+                        switch( fieldType ){
+                        case OFTInteger:
+                          writePolygonFeature->SetField(fieldname[iplane][ivalue].c_str(),static_cast<int>(theValue[iplane][ivalue]));
+                          break;
+                        case OFTReal:
+                          writePolygonFeature->SetField(fieldname[iplane][ivalue].c_str(),theValue[iplane][ivalue]);
+                          break;
+                        case OFTString:
+                          writePolygonFeature->SetField(fieldname[iplane][ivalue].c_str(),type2string<double>(theValue[iplane][ivalue]).c_str());
+                          break;
+                        default://not supported
+                          std::string errorString="field type not supported";
+                          throw(errorString);
+                          break;
+                        }
                       }
                     }
                   }
@@ -1656,63 +1724,72 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                 if(srcnodata_opt.empty())
                   validFeature=true;
                 else{
-                  for(int vband=0;vband<bndnodata_opt.size();++vband){
-                    switch( fieldType ){
-                    case OFTInteger:{
-                      int value;
-                      value=((readValuesInt[vband])[indexJ])[indexI];
-                      if(value==srcnodata_opt[vband])
-                        valid=false;
-                      break;
+                  for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                    for(int vband=0;vband<bndnodata_opt.size();++vband){
+                      switch( fieldType ){
+                      case OFTInteger:{
+                        int value;
+                        value=((readValuesInt[iplane][vband])[indexJ])[indexI];
+                        if(value==srcnodata_opt[vband])
+                          valid=false;
+                        break;
+                      }
+                      case OFTReal:{
+                        double value;
+                        value=((readValuesReal[iplane][vband])[indexJ])[indexI];
+                        if(value==srcnodata_opt[vband])
+                          valid=false;
+                        break;
+                      }
+                      }
+                      if(!valid)
+                        continue;
+                      else
+                        validFeature=true;
                     }
-                    case OFTReal:{
-                      double value;
-                      value=((readValuesReal[vband])[indexJ])[indexI];
-                      if(value==srcnodata_opt[vband])
-                        valid=false;
-                      break;
-                    }
-                    }
-                    if(!valid)
-                      continue;
-                    else
-                      validFeature=true;
                   }
                 }
               }
-              if(valid){
+              // if(valid){
+              if(validFeature){//replace valid with validFeature!
                 if(label_opt.size())
                   writePolygonFeature->SetField("label",label_opt[0]);
                 if(fid_opt.size())
                   writePolygonFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                for(int iband=0;iband<nband;++iband){
-                  int theBand=(band_opt.size()) ? band_opt[iband] : iband;
-                  //write fields for point on surface and centroid
-                  string fieldname;
-                  ostringstream fs;
-                  if(bandNames_opt.size()){
-                    if(rule_opt.size()>1)
-                      fs << fieldMap["centroid"];
-                    fs << bandNames_opt[iband];
-                  }
-                  else{
-                    if(rule_opt.size()>1||nband==1)
-                      fs << fieldMap["centroid"];
-                    if(nband>1)
-                      fs << "b" << theBand;
-                  }
-                  fieldname=fs.str();
-                  switch( fieldType ){
-                  case OFTInteger:
-                    writePolygonFeature->SetField(fieldname.c_str(),static_cast<int>(((readValuesInt[iband])[indexJ])[indexI]));
-                    break;
-                  case OFTReal:
-                    writePolygonFeature->SetField(fieldname.c_str(),((readValuesReal[iband])[indexJ])[indexI]);
-                    break;
-                  default://not supported
-                    std::string errorString="field type not supported";
-                    throw(errorString);
-                    break;
+                for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                  for(int iband=0;iband<nband;++iband){
+                    int theBand=(band_opt.size()) ? band_opt[iband] : iband;
+                    //write fields for point on surface and centroid
+                    string fieldname;
+                    ostringstream fs;
+                    if(bandNames_opt.size()){
+                      if(rule_opt.size()>1)
+                        fs << fieldMap["centroid"];
+                      if(planeNames_opt.size())
+                        fs << planeNames_opt[iplane];
+                      fs << bandNames_opt[iband];
+                    }
+                    else{
+                      if(rule_opt.size()>1||nband==1)
+                        fs << fieldMap["centroid"];
+                      if(planeNames_opt.size())
+                        fs << planeNames_opt[iplane];
+                      if(nband>1)
+                        fs << "b" << theBand;
+                    }
+                    fieldname=fs.str();
+                    switch( fieldType ){
+                    case OFTInteger:
+                      writePolygonFeature->SetField(fieldname.c_str(),static_cast<int>(((readValuesInt[iplane][iband])[indexJ])[indexI]));
+                      break;
+                    case OFTReal:
+                      writePolygonFeature->SetField(fieldname.c_str(),((readValuesReal[iplane][iband])[indexJ])[indexI]);
+                      break;
+                    default://not supported
+                      std::string errorString="field type not supported";
+                      throw(errorString);
+                      break;
+                    }
                   }
                 }
               }
@@ -1753,67 +1830,76 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                   }
                 }
               }
-              if(valid){
-                if(srcnodata_opt.empty())
-                  validFeature=true;
-                else{
-                  for(int vband=0;vband<bndnodata_opt.size();++vband){
-                    switch( fieldType ){
-                    case OFTInteger:{
-                      int value;
-                      value=((readValuesInt[vband])[indexJ])[indexI];
-                      if(value==srcnodata_opt[vband])
-                        valid=false;
-                      break;
+              for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                if(valid){
+                  if(srcnodata_opt.empty())
+                    validFeature=true;
+                  else{
+                    for(int vband=0;vband<bndnodata_opt.size();++vband){
+                      switch( fieldType ){
+                      case OFTInteger:{
+                        int value;
+                        value=((readValuesInt[iplane][vband])[indexJ])[indexI];
+                        if(value==srcnodata_opt[vband])
+                          valid=false;
+                        break;
+                      }
+                      case OFTReal:{
+                        double value;
+                        value=((readValuesReal[iplane][vband])[indexJ])[indexI];
+                        if(value==srcnodata_opt[vband])
+                          valid=false;
+                        break;
+                      }
+                      }
+                      if(!valid)
+                        continue;
+                      else
+                        validFeature=true;
                     }
-                    case OFTReal:{
-                      double value;
-                      value=((readValuesReal[vband])[indexJ])[indexI];
-                      if(value==srcnodata_opt[vband])
-                        valid=false;
-                      break;
-                    }
-                    }
-                    if(!valid)
-                      continue;
-                    else
-                      validFeature=true;
                   }
                 }
               }
-              if(valid){
+              // if(valid){
+              if(validFeature){//replace valid with validFeature!
                 if(label_opt.size())
                   writePolygonFeature->SetField("label",label_opt[0]);
                 if(fid_opt.size())
                   writePolygonFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                for(int iband=0;iband<nband;++iband){
-                  int theBand=(band_opt.size()) ? band_opt[iband] : iband;
-                  //write fields for point on surface and centroid
-                  string fieldname;
-                  ostringstream fs;
-                  if(bandNames_opt.size()){
-                    if(rule_opt.size()>1)
-                      fs << fieldMap["point"];
-                    fs << bandNames_opt[iband];
-                  }
-                  else{
-                    if(rule_opt.size()>1||nband==1)
-                      fs << fieldMap["point"];
-                    if(nband>1)
-                      fs << "b" << theBand;
-                  }
-                  fieldname=fs.str();
-                  switch( fieldType ){
-                  case OFTInteger:
-                    writePolygonFeature->SetField(fieldname.c_str(),static_cast<int>(((readValuesInt[iband])[indexJ])[indexI]));
-                    break;
-                  case OFTReal:
-                    writePolygonFeature->SetField(fieldname.c_str(),((readValuesReal[iband])[indexJ])[indexI]);
-                    break;
-                  default://not supported
-                    std::string errorString="field type not supported";
-                    throw(errorString);
-                    break;
+                for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                  for(int iband=0;iband<nband;++iband){
+                    int theBand=(band_opt.size()) ? band_opt[iband] : iband;
+                    //write fields for point on surface and centroid
+                    string fieldname;
+                    ostringstream fs;
+                    if(bandNames_opt.size()){
+                      if(rule_opt.size()>1)
+                        fs << fieldMap["point"];
+                      if(planeNames_opt.size())
+                        fs << planeNames_opt[iplane];
+                      fs << bandNames_opt[iband];
+                    }
+                    else{
+                      if(rule_opt.size()>1||nband==1)
+                        fs << fieldMap["point"];
+                      if(planeNames_opt.size())
+                        fs << planeNames_opt[iplane];
+                      if(nband>1)
+                        fs << "b" << theBand;
+                    }
+                    fieldname=fs.str();
+                    switch( fieldType ){
+                    case OFTInteger:
+                      writePolygonFeature->SetField(fieldname.c_str(),static_cast<int>(((readValuesInt[iplane][iband])[indexJ])[indexI]));
+                      break;
+                    case OFTReal:
+                      writePolygonFeature->SetField(fieldname.c_str(),(readValuesReal[iband][iplane][indexJ])[indexI]);
+                      break;
+                    default://not supported
+                      std::string errorString="field type not supported";
+                      throw(errorString);
+                      break;
+                    }
                   }
                 }
               }
@@ -1862,17 +1948,19 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 
               if(verbose_opt[0]>1)
                 std::cout << "bounding box for polygon feature after check " << ifeature << ": " << uli << " " << ulj << " " << lri << " " << lrj << std::endl;
-              Vector2d<double> polyValues;
-              vector<double> polyClassValues;
+              vector< Vector2d<double> > polyValues(nrOfPlane());
+              vector< vector<double> > polyClassValues(nrOfPlane());
 
-              if(class_opt.size()){
-                polyClassValues.resize(class_opt.size());
-                //initialize
-                for(int iclass=0;iclass<class_opt.size();++iclass)
-                  polyClassValues[iclass]=0;
+              for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                if(class_opt.size()){
+                  polyClassValues[iplane].resize(class_opt.size());
+                  //initialize
+                  for(int iclass=0;iclass<class_opt.size();++iclass)
+                    polyClassValues[iplane][iclass]=0;
+                }
+                else
+                  polyValues[iplane].resize(nband);
               }
-              else
-                polyValues.resize(nband);
 
               OGRPoint thePoint;//in SRS of raster dataset
               for(int j=ulj;j<=lrj;++j){
@@ -1933,30 +2021,32 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                       }
                     }
                   }
-                  if(srcnodata_opt.size()){
-                    for(int vband=0;vband<bndnodata_opt.size();++vband){
-                      switch( fieldType ){
-                      case OFTInteger:{
-                        int value=((readValuesInt[vband])[indexJ])[indexI];
-                        if(value==srcnodata_opt[vband]){
-                          valid=false;
+                  for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                    if(srcnodata_opt.size()){
+                      for(int vband=0;vband<bndnodata_opt.size();++vband){
+                        switch( fieldType ){
+                        case OFTInteger:{
+                          int value=((readValuesInt[iplane][vband])[indexJ])[indexI];
+                          if(value==srcnodata_opt[vband]){
+                            valid=false;
+                          }
+                          break;
                         }
-                        break;
-                      }
-                      default:{
-                        float value=((readValuesReal[vband])[indexJ])[indexI];
-                        if(value==srcnodata_opt[vband]){
-                          valid=false;
+                        default:{
+                          float value=((readValuesReal[iplane][vband])[indexJ])[indexI];
+                          if(value==srcnodata_opt[vband]){
+                            valid=false;
+                          }
+                          break;
                         }
-                        break;
-                      }
+                        }
                       }
                     }
+                    if(!valid)
+                      continue;
+                    else
+                      validFeature=true;
                   }
-                  if(!valid)
-                    continue;
-                  else
-                    validFeature=true;
 
                   if(verbose_opt[0]>1)
                     std::cout << "point is on surface: " << thePoint.getX() << "," << thePoint.getY() << std::endl;
@@ -2038,65 +2128,71 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 
                   if(!createPolygon&&fid_opt.size())
                     writePointFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                  for(int iband=0;iband<nband;++iband){
-                    int theBand=(band_opt.size()) ? band_opt[iband] : iband;
-                    double value=0;
-                    switch( fieldType ){
-                    case OFTInteger:
-                      value=((readValuesInt[iband])[indexJ])[indexI];
-                      break;
-                    case OFTReal:
-                      value=((readValuesReal[iband])[indexJ])[indexI];
-                      break;
-                    }
-                    if(!iband&&class_opt.size()){
-                      for(int iclass=0;iclass<class_opt.size();++iclass){
-                        if(value==class_opt[iclass])
-                          polyClassValues[iclass]+=1;
-                      }
-                    }
-
-                    if(verbose_opt[0]>1)
-                      std::cout << ": " << value << std::endl;
-                    if(!createPolygon){//write all points within polygon
-                      string fieldname;
-                      ostringstream fs;
-                      if(bandNames_opt.size()){
-                        if(rule_opt.size()>1)
-                          fs << fieldMap["allpoints"];
-                        fs << bandNames_opt[iband];
-                      }
-                      else{
-                        if(rule_opt.size()>1||nband==1)
-                          fs << fieldMap["allpoints"];
-                        if(nband>1)
-                          fs << "b" << theBand;
-                      }
-                      fieldname=fs.str();
-                      int fieldIndex=writePointFeature->GetFieldIndex(fieldname.c_str());
-                      if(fieldIndex<0){
-                        ostringstream ess;
-                        ess << "field " << fieldname << " was not found" << endl;
-                        throw(ess.str());
-                        // cerr << "field " << fieldname << " was not found" << endl;
-                        // return(CE_Failure);
-                      }
-                      if(verbose_opt[0]>1)
-                        std::cout << "set field " << fieldname << " to " << value << std::endl;
+                  for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                    for(int iband=0;iband<nband;++iband){
+                      int theBand=(band_opt.size()) ? band_opt[iband] : iband;
+                      double value=0;
                       switch( fieldType ){
                       case OFTInteger:
-                      case OFTReal:
-                        writePointFeature->SetField(fieldname.c_str(),value);
+                        value=((readValuesInt[iplane][iband])[indexJ])[indexI];
                         break;
-                      default://not supported
-                        assert(0);
+                      case OFTReal:
+                        value=((readValuesReal[iplane][iband])[indexJ])[indexI];
                         break;
                       }
-                    }
-                    else{
-                      polyValues[iband].push_back(value);
-                    }
-                  }//iband
+                      if(!iband&&class_opt.size()){
+                        for(int iclass=0;iclass<class_opt.size();++iclass){
+                          if(value==class_opt[iclass])
+                            polyClassValues[iplane][iclass]+=1;
+                        }
+                      }
+
+                      if(verbose_opt[0]>1)
+                        std::cout << ": " << value << std::endl;
+                      if(!createPolygon){//write all points within polygon
+                        string fieldname;
+                        ostringstream fs;
+                        if(bandNames_opt.size()){
+                          if(rule_opt.size()>1)
+                            fs << fieldMap["allpoints"];
+                          if(planeNames_opt.size())
+                            fs << planeNames_opt[iplane];
+                          fs << bandNames_opt[iband];
+                        }
+                        else{
+                          if(rule_opt.size()>1||nband==1)
+                            fs << fieldMap["allpoints"];
+                          if(planeNames_opt.size())
+                            fs << planeNames_opt[iplane];
+                          if(nband>1)
+                            fs << "b" << theBand;
+                        }
+                        fieldname=fs.str();
+                        int fieldIndex=writePointFeature->GetFieldIndex(fieldname.c_str());
+                        if(fieldIndex<0){
+                          ostringstream ess;
+                          ess << "field " << fieldname << " was not found" << endl;
+                          throw(ess.str());
+                          // cerr << "field " << fieldname << " was not found" << endl;
+                          // return(CE_Failure);
+                        }
+                        if(verbose_opt[0]>1)
+                          std::cout << "set field " << fieldname << " to " << value << std::endl;
+                        switch( fieldType ){
+                        case OFTInteger:
+                        case OFTReal:
+                          writePointFeature->SetField(fieldname.c_str(),value);
+                          break;
+                        default://not supported
+                          assert(0);
+                          break;
+                        }
+                      }
+                      else{
+                        polyValues[iplane][iband].push_back(value);
+                      }
+                    }//iband
+                  }//iplane
 
                   if(!createPolygon){
                     //todo: only if valid feature?
@@ -2131,106 +2227,112 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                     writePolygonFeature->SetField("label",label_opt[0]);
                   if(!irule&&fid_opt.size())
                     writePolygonFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                  for(int iband=0;iband<nband;++iband){
-                    int theBand=(band_opt.size()) ? band_opt[iband] : iband;
-                    vector<double> theValue;
-                    vector<string> fieldname;
-                    ostringstream fs;
-                    if(bandNames_opt.size()){
-                      if(rule_opt.size()>1)
-                        fs << fieldMap[rule_opt[irule]];
-                      fs << bandNames_opt[iband];
-                    }
-                    else{
-                      if(rule_opt.size()>1||nband==1)
-                        fs << fieldMap[rule_opt[irule]];
-                      if(nband>1)
-                        fs << "b" << theBand;
-                    }
-                    switch(ruleMap[rule_opt[irule]]){
-                    case(rule::proportion):
-                      stat.normalize_pct(polyClassValues);
-                    case(rule::count):{//count for each class
-                      for(int index=0;index<polyClassValues.size();++index){
-                        theValue.push_back(polyClassValues[index]);
-                        ostringstream fsclass;
-                        fsclass << fs.str() << "class" << class_opt[index];
-                        fieldname.push_back(fsclass.str());
+                  for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                    for(int iband=0;iband<nband;++iband){
+                      int theBand=(band_opt.size()) ? band_opt[iband] : iband;
+                      vector< vector<double> > theValue(nrOfPlane());
+                      vector< vector<string> > fieldname(nrOfPlane());
+                      ostringstream fs;
+                      if(bandNames_opt.size()){
+                        if(rule_opt.size()>1)
+                          fs << fieldMap[rule_opt[irule]];
+                        if(planeNames_opt.size())
+                          fs << planeNames_opt[iplane];
+                        fs << bandNames_opt[iband];
                       }
-                      break;
-                    }
-                    case(rule::mode):{
-                      //maximum votes in polygon
-                      if(verbose_opt[0])
-                        std::cout << "number of points in polygon: " << nPointPolygon << std::endl;
-                      //search for class with maximum votes
-                      int maxClass=stat.mymin(class_opt);
-                      vector<double>::iterator maxit;
-                      maxit=stat.mymax(polyClassValues,polyClassValues.begin(),polyClassValues.end());
-                      int maxIndex=distance(polyClassValues.begin(),maxit);
-                      maxClass=class_opt[maxIndex];
-                      if(verbose_opt[0]>0)
-                        std::cout << "maxClass: " << maxClass << std::endl;
-                      theValue.push_back(maxClass);
-                      fieldname.push_back(fs.str());
-                      break;
-                    }
-                    case(rule::mean):
-                      theValue.push_back(stat.mean(polyValues[iband]));
-                      fieldname.push_back(fs.str());
-                      break;
-                    case(rule::median):
-                      theValue.push_back(stat.median(polyValues[iband]));
-                      fieldname.push_back(fs.str());
-                      break;
-                    case(rule::stdev):
-                      theValue.push_back(sqrt(stat.var(polyValues[iband])));
-                      fieldname.push_back(fs.str());
-                      break;
-                    case(rule::percentile):{
-                      for(int iperc=0;iperc<percentile_opt.size();++iperc){
-                        theValue.push_back(stat.percentile(polyValues[iband],polyValues[iband].begin(),polyValues[iband].end(),percentile_opt[iperc]));
-                        ostringstream fsperc;
-                        fsperc << fs.str() << percentile_opt[iperc];
-                        fieldname.push_back(fsperc.str());
+                      else{
+                        if(rule_opt.size()>1||nband==1)
+                          fs << fieldMap[rule_opt[irule]];
+                        if(planeNames_opt.size())
+                          fs << planeNames_opt[iplane];
+                        if(nband>1)
+                          fs << "b" << theBand;
                       }
-                      break;
-                    }
-                    case(rule::sum):
-                      theValue.push_back(stat.sum(polyValues[iband]));
-                      fieldname.push_back(fs.str());
-                      break;
-                    case(rule::max):
-                      theValue.push_back(stat.mymax(polyValues[iband]));
-                      fieldname.push_back(fs.str());
-                      break;
-                    case(rule::min):
-                      theValue.push_back(stat.mymin(polyValues[iband]));
-                      fieldname.push_back(fs.str());
-                      break;
-                    case(rule::centroid):
-                    case(rule::point):
-                      theValue.push_back(polyValues[iband].back());
-                    fieldname.push_back(fs.str());
-                    break;
-                    default://not supported
-                      break;
-                    }
-                    for(int ivalue=0;ivalue<theValue.size();++ivalue){
-                      switch( fieldType ){
-                      case OFTInteger:
-                        writePolygonFeature->SetField(fieldname[ivalue].c_str(),static_cast<int>(theValue[ivalue]));
+                      switch(ruleMap[rule_opt[irule]]){
+                      case(rule::proportion):
+                        stat.normalize_pct(polyClassValues[iplane]);
+                      case(rule::count):{//count for each class
+                        for(int index=0;index<polyClassValues[iplane].size();++index){
+                          theValue[iplane].push_back(polyClassValues[iplane][index]);
+                          ostringstream fsclass;
+                          fsclass << fs.str() << "class" << class_opt[index];
+                          fieldname[iplane].push_back(fsclass.str());
+                        }
                         break;
-                      case OFTReal:
-                        writePolygonFeature->SetField(fieldname[ivalue].c_str(),theValue[ivalue]);
+                      }
+                      case(rule::mode):{
+                        //maximum votes in polygon
+                        if(verbose_opt[0])
+                          std::cout << "number of points in polygon: " << nPointPolygon << std::endl;
+                        //search for class with maximum votes
+                        int maxClass=stat.mymin(class_opt);
+                        vector<double>::iterator maxit;
+                        maxit=stat.mymax(polyClassValues[iplane],polyClassValues[iplane].begin(),polyClassValues[iplane].end());
+                        int maxIndex=distance(polyClassValues[iplane].begin(),maxit);
+                        maxClass=class_opt[maxIndex];
+                        if(verbose_opt[0]>0)
+                          std::cout << "maxClass: " << maxClass << std::endl;
+                        theValue[iplane].push_back(maxClass);
+                        fieldname[iplane].push_back(fs.str());
                         break;
-                      case OFTString:
-                        writePolygonFeature->SetField(fieldname[ivalue].c_str(),type2string<double>(theValue[ivalue]).c_str());
+                      }
+                      case(rule::mean):
+                        theValue[iplane].push_back(stat.mean(polyValues[iplane][iband]));
+                        fieldname[iplane].push_back(fs.str());
                         break;
+                      case(rule::median):
+                        theValue[iplane].push_back(stat.median(polyValues[iplane][iband]));
+                        fieldname[iplane].push_back(fs.str());
+                        break;
+                      case(rule::stdev):
+                        theValue[iplane].push_back(sqrt(stat.var(polyValues[iplane][iband])));
+                        fieldname[iplane].push_back(fs.str());
+                        break;
+                      case(rule::percentile):{
+                        for(int iperc=0;iperc<percentile_opt.size();++iperc){
+                          theValue[iplane].push_back(stat.percentile(polyValues[iplane][iband],polyValues[iplane][iband].begin(),polyValues[iplane][iband].end(),percentile_opt[iperc]));
+                          ostringstream fsperc;
+                          fsperc << fs.str() << percentile_opt[iperc];
+                          fieldname[iplane].push_back(fsperc.str());
+                        }
+                        break;
+                      }
+                      case(rule::sum):
+                        theValue[iplane].push_back(stat.sum(polyValues[iplane][iband]));
+                        fieldname[iplane].push_back(fs.str());
+                        break;
+                      case(rule::max):
+                        theValue[iplane].push_back(stat.mymax(polyValues[iplane][iband]));
+                        fieldname[iplane].push_back(fs.str());
+                        break;
+                      case(rule::min):
+                        theValue[iplane].push_back(stat.mymin(polyValues[iplane][iband]));
+                        fieldname[iplane].push_back(fs.str());
+                        break;
+                      case(rule::centroid):
+                      case(rule::point):
+                        theValue[iplane].push_back(polyValues[iplane][iband].back());
+                      fieldname[iplane].push_back(fs.str());
+                      break;
                       default://not supported
-                        std::string errorString="field type not supported";
-                        throw(errorString);
                         break;
+                      }
+                      for(int ivalue=0;ivalue<theValue[iplane].size();++ivalue){
+                        switch( fieldType ){
+                        case OFTInteger:
+                          writePolygonFeature->SetField(fieldname[iplane][ivalue].c_str(),static_cast<int>(theValue[iplane][ivalue]));
+                          break;
+                        case OFTReal:
+                          writePolygonFeature->SetField(fieldname[iplane][ivalue].c_str(),theValue[iplane][ivalue]);
+                          break;
+                        case OFTString:
+                          writePolygonFeature->SetField(fieldname[iplane][ivalue].c_str(),type2string<double>(theValue[iplane][ivalue]).c_str());
+                          break;
+                        default://not supported
+                          std::string errorString="field type not supported";
+                          throw(errorString);
+                          break;
+                        }
                       }
                     }
                   }

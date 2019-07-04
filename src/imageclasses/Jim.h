@@ -665,8 +665,10 @@ class Jim : public std::enable_shared_from_this<Jim>
   template<typename T> CPLErr readData(std::vector<T>& buffer, int minCol, int maxCol, double row, int band, RESAMPLE resample);
   ///Read pixel cell values for a range of columns and rows for a specific band (all indices start counting from 0). The buffer is a two dimensional vector (stl vector of stl vector) representing [row][col].
   template<typename T> CPLErr readDataBlock(Vector2d<T>& buffer2d, int minCol, int maxCol, int minRow, int maxRow, int band=0);
+  template<typename T> void readDataBlock3D(Vector2d<T>& buffer2d, size_t minCol, size_t maxCol, size_t minRow, size_t maxRow, size_t plane, size_t band=0);
   ///Read pixel cell values for a range of columns and rows for a specific band (all indices start counting from 0). The buffer is a one dimensional stl vector representing all pixel values read starting from upper left to lower right.
   template<typename T> CPLErr readDataBlock(std::vector<T>& buffer , int minCol, int maxCol, int minRow, int maxRow, int band=0);
+  template<typename T> void readDataBlock3D(std::vector<T>& buffer , size_t minCol, size_t maxCol, size_t minRow, size_t maxRow, size_t plane, size_t band=0);
   ///Read pixel cell values for a range of columns, rows and bands for a specific band (all indices start counting from 0). The buffer is a one dimensional stl vector representing all pixel values read starting from upper left to lower right, band interleaved.
   template<typename T> CPLErr readData(std::vector<T>& buffer, int row, int band=0);
   ///Read pixel cell values for an entire row for a specific band (all indices start counting from 0). The row counter can be floating, in which case a resampling is applied at the row level. You still must apply the resampling at column level. This function will be deprecated, as the GDAL API now supports rasterIO resampling (see http://www.gdal.org/structGDALRasterIOExtraArg.html)
@@ -1571,6 +1573,20 @@ template<typename T> CPLErr Jim::readDataBlock(Vector2d<T>& buffer2d, int minCol
   return(returnValue);
 }
 
+template<typename T> void Jim::readDataBlock3D(Vector2d<T>& buffer2d, size_t minCol, size_t maxCol, size_t minRow, size_t maxRow, size_t plane, size_t band){
+  buffer2d.resize(maxRow-minRow+1,maxCol-minCol+1);
+  typename std::vector<T> buffer;
+  readDataBlock3D(buffer,minCol,maxCol,minRow,maxRow,plane,band);
+  typename std::vector<T>::const_iterator startit=buffer.begin();
+  typename std::vector<T>::const_iterator endit=startit;
+  for(int irow=minRow;irow<=maxRow;++irow){
+    //buffer2d[irow-minRow].resize(maxCol-minCol+1);
+    endit+=maxCol-minCol+1;
+    buffer2d[irow-minRow].assign(startit,endit);
+    startit+=maxCol-minCol+1;
+  }
+}
+
 /**
  * @param[out] buffer One dimensional vector representing all pixel values read starting from upper left to lower right.
  * @param[in] minCol First column from where to start reading (counting starts from 0)
@@ -1661,6 +1677,85 @@ template<typename T> CPLErr Jim::readDataBlock(std::vector<T>& buffer, int minCo
       }
     }
     return(returnValue);
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    throw;
+  }
+  catch(...){
+    throw;
+  }
+}
+
+template<typename T> void Jim::readDataBlock3D(std::vector<T>& buffer, size_t minCol, size_t maxCol, size_t minRow, size_t maxRow, size_t plane, size_t band)
+{
+  try{
+    double theScale=1;
+    double theOffset=0;
+    if(m_scale.size()>band)
+      theScale=m_scale[band];
+    if(m_offset.size()>band)
+      theOffset=m_offset[band];
+    if(minCol>=nrOfCol() ||
+       (minCol<0) ||
+       (maxCol>=nrOfCol()) ||
+       (minCol>maxCol) ||
+       (minRow>=nrOfRow()) ||
+       (minRow<0) ||
+       (maxRow>=nrOfRow()) ||
+       (minRow>maxRow) ||
+       (plane>=nrOfPlane()) ||
+       (plane<0)){
+      std::string errorString="block not within image boundaries";
+      throw(errorString);
+    }
+    if(buffer.size()!=(maxRow-minRow+1)*(maxCol-minCol+1))
+      buffer.resize((maxRow-minRow+1)*(maxCol-minCol+1));
+    if(m_data.size()){
+      typename std::vector<T>::iterator bufit=buffer.begin();
+      for(int irow=minRow;irow<=maxRow;++irow){
+        if(irow<m_begin[band]||irow>=m_end[band]){
+          if(m_filename.size())
+            readNewBlock(irow,band);
+        }
+        /* int index=(irow-m_begin[band])*nrOfCol(); */
+        size_t index=(plane*nrOfRow()*nrOfCol())+(irow-m_begin[band])*nrOfCol();
+        size_t minindex=(index+minCol);//*(GDALGetDataTypeSize(getDataType())>>3);
+        size_t maxindex=(index+maxCol);//*(GDALGetDataTypeSize(getDataType())>>3);
+
+        for(index=minindex;index<=maxindex;++index,++bufit){
+          double dvalue=0;
+          switch(getDataType()){
+          case(GDT_Byte):
+            dvalue=theScale*(static_cast<unsigned char*>(m_data[band])[index])+theOffset;
+            break;
+          case(GDT_Int16):
+            dvalue=theScale*(static_cast<short*>(m_data[band])[index])+theOffset;
+            break;
+          case(GDT_UInt16):
+            dvalue=theScale*(static_cast<unsigned short*>(m_data[band])[index])+theOffset;
+            break;
+          case(GDT_Int32):
+            dvalue=theScale*(static_cast<int*>(m_data[band])[index])+theOffset;
+            break;
+          case(GDT_UInt32):
+            dvalue=theScale*(static_cast<unsigned int*>(m_data[band])[index])+theOffset;
+            break;
+          case(GDT_Float32):
+            dvalue=theScale*(static_cast<float*>(m_data[band])[index])+theOffset;
+            break;
+          case(GDT_Float64):
+            dvalue=theScale*(static_cast<double*>(m_data[band])[index])+theOffset;
+            break;
+          default:
+            std::string errorString="Error: data type not supported";
+            throw(errorString);
+            break;
+          }
+          *(bufit)=static_cast<T>(dvalue);
+        }//for index
+      }
+    }
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
