@@ -85,6 +85,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
   Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
   Optionjl<string> ftype_opt("ft", "ftype", "Field type (only Real or Integer)", "Real");
   Optionjl<int> band_opt("b", "band", "Band index(es) to extract (0 based). Leave empty to use all bands");
+  Optionjl<size_t> plane_opt("p", "plane", "Band index(es) to extract (0 based). Leave empty to use all bands");
   Optionjl<std::string> bandNames_opt("bn", "bandname", "Band name(s) corresponding to band index(es).");
   Optionjl<std::string> planeNames_opt("bn", "planename", "Plane name(s) corresponding to plane index(es).");
   Optionjl<unsigned short> bstart_opt("sband", "startband", "Start band sequence number");
@@ -136,6 +137,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
     option_opt.retrieveOption(app);
     ftype_opt.retrieveOption(app);
     band_opt.retrieveOption(app);
+    plane_opt.retrieveOption(app);
     bandNames_opt.retrieveOption(app);
     planeNames_opt.retrieveOption(app);
     bstart_opt.retrieveOption(app);
@@ -234,12 +236,19 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       std::cerr << "No output dataset provided (use option -o). Use --help for help information";
       return(CE_Failure);
     }
-    if(nrOfPlane()>1){
-      if(planeNames_opt.size()<nrOfPlane()){
+    if(plane_opt.empty()){
+      size_t iplane=0;
+      while(plane_opt.size()<nrOfPlane())
+        plane_opt.push_back(iplane++);
+    }
+    int nplane=plane_opt.size();
+    if(nplane>1){
+      if(planeNames_opt.size()<nplane){
         planeNames_opt.clear();
-        for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+        for(size_t iplane=0;iplane<nplane;++iplane){
+          int thePlane=plane_opt[iplane];
           ostringstream planestream;
-          planestream << "p" << iplane << endl;
+          planestream << "t" << thePlane;
           planeNames_opt.push_back(planestream.str());
         }
       }
@@ -560,10 +569,10 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 
       //read entire block for coverage in memory
       //todo: use different data types
-      vector< vector< Vector2d<float> > > readValuesReal(nrOfPlane());
-      vector< vector< Vector2d<int> > > readValuesInt(nrOfPlane());
+      vector< vector< Vector2d<float> > > readValuesReal(nplane);
+      vector< vector< Vector2d<int> > > readValuesInt(nplane);
 
-      for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+      for(size_t iplane=0;iplane<nplane;++iplane){
         switch( fieldType ){
         case OFTInteger:
           readValuesInt[iplane].resize(nband);
@@ -629,7 +638,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       if(getBlockSize()>=layer_lrj-layer_ulj){
         if(verbose_opt[0])
           std::cout << "blockSize " << getBlockSize() << " >= " << layer_lrj-layer_ulj << std::endl;
-        for(int iplane=0;iplane<nrOfPlane();++iplane){
+        for(int iplane=0;iplane<nplane;++iplane){
+          int thePlane=plane_opt[iplane];
           for(int iband=0;iband<nband;++iband){
             int theBand=(band_opt.size()) ? band_opt[iband] : iband;
             if(theBand<0){
@@ -644,11 +654,11 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               cout << "reading image band " << theBand << " block rows " << layer_ulj << "-" << layer_lrj << ", cols " << layer_uli << "-" << layer_lri << endl;
             switch( fieldType ){
             case OFTInteger:
-              this->readDataBlock3D(readValuesInt[iplane][iband],layer_uli,layer_lri,layer_ulj,layer_lrj,iplane,theBand);
+              this->readDataBlock3D(readValuesInt[iplane][iband],layer_uli,layer_lri,layer_ulj,layer_lrj,thePlane,theBand);
               break;
             case OFTReal:
             default:
-              this->readDataBlock3D(readValuesReal[iplane][iband],layer_uli,layer_lri,layer_ulj,layer_lrj,iplane,theBand);
+              this->readDataBlock3D(readValuesReal[iplane][iband],layer_uli,layer_lri,layer_ulj,layer_lrj,thePlane,theBand);
               break;
             }
           }
@@ -739,7 +749,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
           if(verbose_opt[0])
             std::cout << "checking rules" << std::endl;
           for(int irule=0;irule<rule_opt.size();++irule){
-            for(int iplane=0;iplane<nrOfPlane();++iplane){
+            for(int iplane=0;iplane<nplane;++iplane){
+              int thePlane=plane_opt[iplane];
                 for(int iband=0;iband<nband;++iband){
                 int theBand=(band_opt.size()) ? band_opt[iband] : iband;
                 ostringstream fs;
@@ -983,7 +994,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                     }
                   }
                 }
-                for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                for(size_t iplane=0;iplane<nplane;++iplane){
                   if(valid){
                     if(srcnodata_opt.empty())
                       validFeature=true;
@@ -1018,7 +1029,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                       writePolygonFeature->SetField("label",label_opt[0]);
                     if(fid_opt.size())
                       writePolygonFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                    for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                    for(size_t iplane=0;iplane<nplane;++iplane){
                       for(int iband=0;iband<nband;++iband){
                         int theBand=(band_opt.size()) ? band_opt[iband] : iband;
                         //write fields for point on surface and centroid
@@ -1092,7 +1103,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                   if(srcnodata_opt.empty())
                     validFeature=true;
                   else{
-                    for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                    for(size_t iplane=0;iplane<nplane;++iplane){
                       for(int vband=0;vband<bndnodata_opt.size();++vband){
                         switch( fieldType ){
                         case OFTInteger:{
@@ -1125,7 +1136,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                     writePolygonFeature->SetField("label",label_opt[0]);
                   if(fid_opt.size())
                     writePolygonFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                  for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                  for(size_t iplane=0;iplane<nplane;++iplane){
                     for(int iband=0;iband<nband;++iband){
                       int theBand=(band_opt.size()) ? band_opt[iband] : iband;
                       //write fields for point on surface and centroid
@@ -1167,7 +1178,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
             if(calculateSpatialStatistics||!createPolygon){
               vector< Vector2d<double> > polyValues(nrOfPlane());
               vector< vector<double> > polyClassValues(nrOfPlane());
-              for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+              for(size_t iplane=0;iplane<nplane;++iplane){
                 if(class_opt.size()){
                   polyClassValues[iplane].resize(class_opt.size());
                   //initialize
@@ -1243,7 +1254,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                       }
                     }
                   }
-                  for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                  for(size_t iplane=0;iplane<nplane;++iplane){
                     if(srcnodata_opt.size()){
                       for(int vband=0;vband<bndnodata_opt.size();++vband){
                         switch( fieldType ){
@@ -1331,7 +1342,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                       writePointFeature->SetField("label",label_opt[0]);
                     if(!createPolygon&&fid_opt.size())
                       writePointFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                    for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                    for(size_t iplane=0;iplane<nplane;++iplane){
                       for(int iband=0;iband<nband;++iband){
                         int theBand=(band_opt.size()) ? band_opt[iband] : iband;
                         double value=0;
@@ -1431,7 +1442,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                     writePolygonFeature->SetField("label",label_opt[0]);
                   if(!irule&&fid_opt.size())
                     writePolygonFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                  for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                  for(size_t iplane=0;iplane<nplane;++iplane){
                     for(int iband=0;iband<nband;++iband){
                       int theBand=(band_opt.size()) ? band_opt[iband] : iband;
                       vector< vector<double> > theValue(nrOfPlane());
@@ -1724,7 +1735,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                 if(srcnodata_opt.empty())
                   validFeature=true;
                 else{
-                  for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                  for(size_t iplane=0;iplane<nplane;++iplane){
                     for(int vband=0;vband<bndnodata_opt.size();++vband){
                       switch( fieldType ){
                       case OFTInteger:{
@@ -1756,7 +1767,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                   writePolygonFeature->SetField("label",label_opt[0]);
                 if(fid_opt.size())
                   writePolygonFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                for(size_t iplane=0;iplane<nplane;++iplane){
                   for(int iband=0;iband<nband;++iband){
                     int theBand=(band_opt.size()) ? band_opt[iband] : iband;
                     //write fields for point on surface and centroid
@@ -1830,7 +1841,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                   }
                 }
               }
-              for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+              for(size_t iplane=0;iplane<nplane;++iplane){
                 if(valid){
                   if(srcnodata_opt.empty())
                     validFeature=true;
@@ -1866,7 +1877,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                   writePolygonFeature->SetField("label",label_opt[0]);
                 if(fid_opt.size())
                   writePolygonFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                for(size_t iplane=0;iplane<nplane;++iplane){
                   for(int iband=0;iband<nband;++iband){
                     int theBand=(band_opt.size()) ? band_opt[iband] : iband;
                     //write fields for point on surface and centroid
@@ -1951,7 +1962,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               vector< Vector2d<double> > polyValues(nrOfPlane());
               vector< vector<double> > polyClassValues(nrOfPlane());
 
-              for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+              for(size_t iplane=0;iplane<nplane;++iplane){
                 if(class_opt.size()){
                   polyClassValues[iplane].resize(class_opt.size());
                   //initialize
@@ -2021,7 +2032,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                       }
                     }
                   }
-                  for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                  for(size_t iplane=0;iplane<nplane;++iplane){
                     if(srcnodata_opt.size()){
                       for(int vband=0;vband<bndnodata_opt.size();++vband){
                         switch( fieldType ){
@@ -2128,7 +2139,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 
                   if(!createPolygon&&fid_opt.size())
                     writePointFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                  for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                  for(size_t iplane=0;iplane<nplane;++iplane){
                     for(int iband=0;iband<nband;++iband){
                       int theBand=(band_opt.size()) ? band_opt[iband] : iband;
                       double value=0;
@@ -2227,7 +2238,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                     writePolygonFeature->SetField("label",label_opt[0]);
                   if(!irule&&fid_opt.size())
                     writePolygonFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
-                  for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+                  for(size_t iplane=0;iplane<nplane;++iplane){
                     for(int iband=0;iband<nband;++iband){
                       int theBand=(band_opt.size()) ? band_opt[iband] : iband;
                       vector< vector<double> > theValue(nrOfPlane());
