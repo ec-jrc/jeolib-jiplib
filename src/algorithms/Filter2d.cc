@@ -96,30 +96,31 @@ void filter2d::Filter2d::filter(Jim& input, Jim& output, bool absolute, bool nor
   for(unsigned int iband=0;iband<input.nrOfBand();++iband){
     switch(input.getDataType()){
     case(GDT_Byte):
-      filter<unsigned char>(static_cast<unsigned char*>(input.getDataPointer()),static_cast<unsigned char*>(output.getDataPointer()), dimx, dimy, absolute,normalize);
+      filter<unsigned char>(static_cast<unsigned char*>(input.getDataPointer(iband)),static_cast<unsigned char*>(output.getDataPointer(iband)), dimx, dimy, absolute,normalize);
       break;
     case(GDT_Int16):
-      filter<short>(static_cast<short*>(input.getDataPointer()),static_cast<short*>(output.getDataPointer()), dimx, dimy, absolute,normalize);
+      filter<short>(static_cast<short*>(input.getDataPointer(iband)),static_cast<short*>(output.getDataPointer(iband)), dimx, dimy, absolute,normalize);
       break;
     case(GDT_UInt16):
-      filter<unsigned short>(static_cast<unsigned short*>(input.getDataPointer()),static_cast<unsigned short*>(output.getDataPointer()), dimx, dimy, absolute,normalize);
+      filter<unsigned short>(static_cast<unsigned short*>(input.getDataPointer(iband)),static_cast<unsigned short*>(output.getDataPointer(iband)), dimx, dimy, absolute,normalize);
       break;
     case(GDT_Int32):
-      filter<int>(static_cast<int*>(input.getDataPointer()),static_cast<int*>(output.getDataPointer()), dimx, dimy, absolute,normalize);
+      filter<int>(static_cast<int*>(input.getDataPointer(iband)),static_cast<int*>(output.getDataPointer(iband)), dimx, dimy, absolute,normalize);
       break;
     case(GDT_UInt32):
-      filter<unsigned int>(static_cast<unsigned int*>(input.getDataPointer()),static_cast<unsigned int*>(output.getDataPointer()), dimx, dimy, absolute,normalize);
+      filter<unsigned int>(static_cast<unsigned int*>(input.getDataPointer(iband)),static_cast<unsigned int*>(output.getDataPointer(iband)), dimx, dimy, absolute,normalize);
       break;
     case(GDT_Float32):
-      filter<float>(static_cast<float*>(input.getDataPointer()),static_cast<float*>(output.getDataPointer()), dimx, dimy, absolute,normalize);
+      filter<float>(static_cast<float*>(input.getDataPointer(iband)),static_cast<float*>(output.getDataPointer(iband)), dimx, dimy, absolute,normalize);
       break;
     case(GDT_Float64):
-      filter<double>(static_cast<double*>(input.getDataPointer()),static_cast<double*>(output.getDataPointer()), dimx, dimy, absolute,normalize);
+      filter<double>(static_cast<double*>(input.getDataPointer(iband)),static_cast<double*>(output.getDataPointer(iband)), dimx, dimy, absolute,normalize);
       break;
     }
   }
 }
 
+//line based version
 void filter2d::Filter2d::filterLB(Jim& input, Jim& output, bool absolute, bool normalize, bool noData)
 {
   if(!output.isInit())

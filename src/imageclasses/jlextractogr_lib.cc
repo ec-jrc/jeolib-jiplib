@@ -85,7 +85,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
   Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
   Optionjl<string> ftype_opt("ft", "ftype", "Field type (only Real or Integer)", "Real");
   Optionjl<int> band_opt("b", "band", "Band index(es) to extract (0 based). Leave empty to use all bands");
-  Optionjl<size_t> plane_opt("p", "plane", "Band index(es) to extract (0 based). Leave empty to use all bands");
+  Optionjl<size_t> plane_opt("p", "plane", "Plane index(es) to extract (0 based). Leave empty to use all bands");
   Optionjl<std::string> bandNames_opt("bn", "bandname", "Band name(s) corresponding to band index(es).");
   Optionjl<std::string> planeNames_opt("bn", "planename", "Plane name(s) corresponding to plane index(es).");
   Optionjl<unsigned short> bstart_opt("sband", "startband", "Start band sequence number");
