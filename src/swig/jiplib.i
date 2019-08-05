@@ -468,6 +468,7 @@ This file is part of jiplib
 
 %{
 #include <memory>
+#include <algorithm>
 #include "imageclasses/Jim.h"
 #include "imageclasses/JimList.h"
 /* #include "../../build/src/imageclasses/Jim.h" */
@@ -567,8 +568,23 @@ This file is part of jiplib
         PyDict_SetItem(d, PyString_FromString(keyBin.c_str()), lb);
         PyDict_SetItem(d, PyString_FromString(key.c_str()), lh);
       }
-      else
-        PyDict_SetItem(d, PyString_FromString(key.c_str()), PyFloat_FromDouble(std::stod(val.c_str())));
+      else if(val.find("[")==std::string::npos)
+          PyDict_SetItem(d, PyString_FromString(key.c_str()), PyFloat_FromDouble(std::stod(val.c_str())));
+      else{
+        PyObject *lb = PyList_New(0);
+        val.erase(std::remove(val.begin(), val.end(), '['), val.end());
+        val.erase(std::remove(val.begin(), val.end(), ']'), val.end());
+
+        std::stringstream ss(val);
+
+        for (double dv; ss >> dv;) {
+
+          PyList_Append(lb,PyFloat_FromDouble(dv));
+          if (ss.peek() == ',')
+            ss.ignore();
+        }
+        PyDict_SetItem(d, PyString_FromString(key.c_str()), lb);
+      }
       ++mit;
     }
     $result=d;

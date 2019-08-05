@@ -210,6 +210,14 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
       }
 
       int nband=band_opt.size();
+      std::vector<std::string> nvalids;
+      std::vector<std::string> ninvalids;
+      std::vector<std::string> means;
+      std::vector<std::string> medians;
+      std::vector<std::string> vars;
+      std::vector<std::string> stdevs;
+      std::vector<std::string> mins;
+      std::vector<std::string> maxs;
       for(int iband=0;iband<nband;++iband){
         minValue=(src_min_opt.size()>iband)? src_min_opt[iband] : 0;
         maxValue=(src_max_opt.size()>iband)? src_max_opt[iband] : 0;
@@ -219,11 +227,13 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
         }
 
         if(valid_opt)
-          mapString.insert(std::make_pair("nvalid",type2string<unsigned long int>((*imit)->getNvalid(band_opt[iband]))));
+          nvalids.push_back(type2string<unsigned long int>((*imit)->getNvalid(band_opt[iband])));
+        // mapString.insert(std::make_pair("nvalid",type2string<unsigned long int>((*imit)->getNvalid(band_opt[iband]))));
           // mapString["nvalid"]=type2string<unsigned long int>((*imit)->getNvalid(band_opt[0]));
         // outputStream << "--nvalid " << (*imit)->getNvalid(band_opt[0]) << endl;
         if(invalid_opt)
-          mapString.insert(std::make_pair("ninvalid",type2string<unsigned long int>((*imit)->getNinvalid(band_opt[iband]))));
+          ninvalids.push_back(type2string<unsigned long int>((*imit)->getNinvalid(band_opt[iband])));
+          // mapString.insert(std::make_pair("ninvalid",type2string<unsigned long int>((*imit)->getNinvalid(band_opt[iband]))));
           // mapString["ninvalid"]=type2string<unsigned long int>((*imit)->getNinvalid(band_opt[0]));
         // outputStream << "--ninvalid " << (*imit)->getNinvalid(band_opt[0]) << endl;
         if(stat_opt||mean_opt||median_opt||var_opt||stdev_opt||min_opt||max_opt||minmax_opt){//the hard way (in memory)
@@ -260,7 +270,8 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
           // stat.minmax(readBuffer,readBuffer.begin(),readBuffer.end(),minValue,maxValue);
           size_t stride=1;
           if(mean_opt||stat_opt){
-            mapString.insert(std::make_pair("mean",type2string<double>(gsl_stats_mean(&(readBuffer[0]),stride,readBuffer.size()))));
+            means.push_back(type2string<double>(gsl_stats_mean(&(readBuffer[0]),stride,readBuffer.size())));
+            // mapString.insert(std::make_pair("mean",type2string<double>(gsl_stats_mean(&(readBuffer[0]),stride,readBuffer.size()))));
             // mapString["mean"]=type2string<double>(gsl_stats_mean(&(readBuffer[0]),stride,readBuffer.size()));
             // double data[10]={17,22,18,14,8,3,5,10,10,8};
             // std::vector<double> testv(10);
@@ -277,26 +288,31 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
           if(median_opt){
             tmpBuffer=readBuffer;
             gsl_sort(&(tmpBuffer[0]),stride,readBuffer.size());
-            mapString.insert(std::make_pair("median",type2string<double>(gsl_stats_median_from_sorted_data(&(tmpBuffer[0]),stride,readBuffer.size()))));
+            medians.push_back(type2string<double>(gsl_stats_median_from_sorted_data(&(tmpBuffer[0]),stride,readBuffer.size())));
+            // mapString.insert(std::make_pair("median",type2string<double>(gsl_stats_median_from_sorted_data(&(tmpBuffer[0]),stride,readBuffer.size()))));
             tmpBuffer.clear();
           }
           if(stdev_opt||stat_opt){
-            mapString.insert(std::make_pair("stdev",type2string<double>(gsl_stats_sd(&(readBuffer[0]),stride,readBuffer.size()))));
+            stdevs.push_back(type2string<double>(gsl_stats_sd(&(readBuffer[0]),stride,readBuffer.size())));
+            // mapString.insert(std::make_pair("stdev",type2string<double>(gsl_stats_sd(&(readBuffer[0]),stride,readBuffer.size()))));
             // mapString["stdev"]=type2string<double>(gsl_stats_sd(&(readBuffer[0]),stride,readBuffer.size()));
             // mapString["stdev"]=type2string<double>(sqrt(varValue));
             // outputStream << "--stdev " << sqrt(varValue) << " " << std::endl;
           }
           if(var_opt){
-            mapString.insert(std::make_pair("var",type2string<double>(gsl_stats_variance(&(readBuffer[0]),stride,readBuffer.size()))));
+            vars.push_back(type2string<double>(gsl_stats_variance(&(readBuffer[0]),stride,readBuffer.size())));
+            // mapString.insert(std::make_pair("var",type2string<double>(gsl_stats_variance(&(readBuffer[0]),stride,readBuffer.size()))));
             // mapString["var"]=type2string<double>(gsl_stats_variance(&(readBuffer[0]),stride,readBuffer.size()));
             // mapString["var"]=type2string<double>(varValue);
             // outputStream << "--var " << varValue << " " << std::endl;
           }
           if(min_opt||minmax_opt||stat_opt)
-            mapString.insert(std::make_pair("min",type2string<double>(gsl_stats_min(&(readBuffer[0]),stride,readBuffer.size()))));
+            mins.push_back(type2string<double>(gsl_stats_min(&(readBuffer[0]),stride,readBuffer.size())));
+            // mapString.insert(std::make_pair("min",type2string<double>(gsl_stats_min(&(readBuffer[0]),stride,readBuffer.size()))));
             // mapString["min"]=type2string<double>(gsl_stats_min(&(readBuffer[0]),stride,readBuffer.size()));
           if(max_opt||minmax_opt||stat_opt)
-            mapString.insert(std::make_pair("max",type2string<double>(gsl_stats_max(&(readBuffer[0]),stride,readBuffer.size()))));
+            maxs.push_back(type2string<double>(gsl_stats_max(&(readBuffer[0]),stride,readBuffer.size())));
+            // mapString.insert(std::make_pair("max",type2string<double>(gsl_stats_max(&(readBuffer[0]),stride,readBuffer.size()))));
             // mapString["max"]=type2string<double>(gsl_stats_max(&(readBuffer[0]),stride,readBuffer.size()));
           // if(stat_opt){
             // mapString["min"]=type2string<double>(minValue);
@@ -314,17 +330,20 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
           GDALRasterBand* rasterBand;
           rasterBand=(*imit)->getRasterBand(band_opt[iband]);
           rasterBand->ComputeStatistics(0,&minValue,&maxValue,&meanValue,&stdDev,pfnProgress,pProgressData);
-          mapString.insert(std::make_pair("min",type2string<double>(minValue)));
-          mapString.insert(std::make_pair("max",type2string<double>(maxValue)));
-          mapString.insert(std::make_pair("mean",type2string<double>(meanValue)));
-          mapString.insert(std::make_pair("stdev",type2string<double>(stdDev)));
+          mins.push_back(type2string<double>(minValue));
+          maxs.push_back(type2string<double>(maxValue));
+          means.push_back(type2string<double>(meanValue));
+          stdevs.push_back(type2string<double>(stdDev));
+          // mapString.insert(std::make_pair("min",type2string<double>(minValue)));
+          // mapString.insert(std::make_pair("max",type2string<double>(maxValue)));
+          // mapString.insert(std::make_pair("mean",type2string<double>(meanValue)));
+          // mapString.insert(std::make_pair("stdev",type2string<double>(stdDev)));
           // mapString["min"]=type2string<double>(minValue);
           // mapString["max"]=type2string<double>(maxValue);
           // mapString["mean"]=type2string<double>(meanValue);
           // mapString["stdev"]=type2string<double>(stdDev);
           // outputStream << "--min " << minValue << " --max " << maxValue << " --mean " << meanValue << " --stdev " << stdDev << " " << std::endl;
         }
-
         // if(minmax_opt||min_opt||max_opt){
         //   assert(band_opt[iband]<(*imit)->nrOfBand());
 
@@ -352,6 +371,143 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
         //   }
         // }
       }
+      if(mins.size()){
+        std::ostringstream isminvalues;
+        for(size_t ivalue=0;ivalue<mins.size();++ivalue){
+          if(mins.size()>1){
+            if(!ivalue)
+              isminvalues << "[";
+            else
+              isminvalues << ",";
+            isminvalues << mins[ivalue];
+            if(ivalue==mins.size()-1)
+              isminvalues << "]";
+          }
+          else
+            isminvalues << mins[0];
+        }
+        mapString.insert(std::make_pair("min",isminvalues.str()));
+      }
+      if(maxs.size()){
+        std::ostringstream ismaxvalues;
+        for(size_t ivalue=0;ivalue<maxs.size();++ivalue){
+          if(maxs.size()>1){
+            if(!ivalue)
+              ismaxvalues << "[";
+            else
+              ismaxvalues << ",";
+            ismaxvalues << maxs[ivalue];
+            if(ivalue==maxs.size()-1)
+              ismaxvalues << "]";
+          }
+          else
+            ismaxvalues << maxs[0];
+        }
+        mapString.insert(std::make_pair("max",ismaxvalues.str()));
+      }
+      if(means.size()){
+        std::ostringstream ismeanvalues;
+        for(size_t ivalue=0;ivalue<means.size();++ivalue){
+          if(means.size()>1){
+            if(!ivalue)
+              ismeanvalues << "[";
+            else
+              ismeanvalues << ",";
+            ismeanvalues << means[ivalue];
+            if(ivalue==means.size()-1)
+              ismeanvalues << "]";
+          }
+          else
+            ismeanvalues << means[0];
+        }
+        mapString.insert(std::make_pair("mean",ismeanvalues.str()));
+      }
+      if(medians.size()){
+        std::ostringstream ismedianvalues;
+        for(size_t ivalue=0;ivalue<medians.size();++ivalue){
+          if(medians.size()>1){
+            if(!ivalue)
+              ismedianvalues << "[";
+            else
+              ismedianvalues << ",";
+            ismedianvalues << medians[ivalue];
+            if(ivalue==medians.size()-1)
+              ismedianvalues << "]";
+          }
+          else
+            ismedianvalues << medians[0];
+        }
+        mapString.insert(std::make_pair("median",ismedianvalues.str()));
+      }
+      if(vars.size()){
+        std::ostringstream isvarvalues;
+        for(size_t ivalue=0;ivalue<vars.size();++ivalue){
+          if(vars.size()>1){
+            if(!ivalue)
+              isvarvalues << "[";
+            else
+              isvarvalues << ",";
+            isvarvalues << vars[ivalue];
+            if(ivalue==vars.size()-1)
+              isvarvalues << "]";
+          }
+          else
+            isvarvalues << vars[0];
+        }
+        mapString.insert(std::make_pair("var",isvarvalues.str()));
+      }
+      if(stdevs.size()){
+        std::ostringstream isstdevvalues;
+        for(size_t ivalue=0;ivalue<stdevs.size();++ivalue){
+          if(stdevs.size()>1){
+            if(!ivalue)
+              isstdevvalues << "[";
+            else
+              isstdevvalues << ",";
+            isstdevvalues << stdevs[ivalue];
+            if(ivalue==stdevs.size()-1)
+              isstdevvalues << "]";
+          }
+          else
+            isstdevvalues << stdevs[0];
+        }
+        mapString.insert(std::make_pair("stdev",isstdevvalues.str()));
+      }
+      if(nvalids.size()){
+        std::ostringstream isnvalidvalues;
+        for(size_t ivalue=0;ivalue<nvalids.size();++ivalue){
+          if(nvalids.size()>1){
+            if(!ivalue)
+              isnvalidvalues << "[";
+            else
+              isnvalidvalues << ",";
+            isnvalidvalues << nvalids[ivalue];
+            if(ivalue==nvalids.size()-1)
+              isnvalidvalues << "]";
+          }
+          else
+            isnvalidvalues << nvalids[0];
+        }
+        mapString.insert(std::make_pair("nvalid",isnvalidvalues.str()));
+      }
+      if(ninvalids.size()){
+        std::ostringstream isninvalidvalues;
+        for(size_t ivalue=0;ivalue<ninvalids.size();++ivalue){
+          if(ninvalids.size()>1){
+            if(!ivalue)
+              isninvalidvalues << "[";
+            else
+              isninvalidvalues << ",";
+            isninvalidvalues << ninvalids[ivalue];
+            if(ivalue==ninvalids.size()-1)
+              isninvalidvalues << "]";
+          }
+          else
+            isninvalidvalues << ninvalids[0];
+        }
+        mapString.insert(std::make_pair("ninvalid",isninvalidvalues.str()));
+      }
+
       if(histogram_opt){//aggregate results from multiple inputs, but only calculate for first selected band
         assert(band_opt[0]<(*imit)->nrOfBand());
         nbin=(nbin_opt.size())? nbin_opt[0]:0;
