@@ -56,7 +56,7 @@ std::multimap<std::string,std::string> Jim::getStats(AppFactory& app){
  **/
 // JimList& JimList::getStats(AppFactory& app){
 std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
-  Optionjl<unsigned short> band_opt("b","band","band(s) on which to calculate statistics",0);
+  Optionjl<unsigned short> band_opt("b","band","band(s) on which to calculate statistics");
   Optionjl<std::string> function_opt("f", "function", "Statistics function (invalid, valid, filename, basic, gdal, mean, median, var, skewness, kurtosis,stdev, sum, minmax, min, max, histogram, histogram2d, rmse, regression, regressionError, regressionPerpendicular)","basic");
   // Optionjl<double>  ulx_opt("ulx", "ulx", "Upper left x value bounding box");
   // Optionjl<double>  uly_opt("uly", "uly", "Upper left y value bounding box");
@@ -160,6 +160,15 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
     bool reg_opt=std::find(function_opt.begin(),function_opt.end(),"regression")!=function_opt.end();//calculate linear regression between two raster datasets and get correlation coefficient
     bool regerr_opt=std::find(function_opt.begin(),function_opt.end(),"regressionError")!=function_opt.end();//calculate linear regression between two raster datasets and get root mean square error
     bool preg_opt=std::find(function_opt.begin(),function_opt.end(),"regressionPerpendicular")!=function_opt.end();//calculate perpendicular regression between two raster datasets and get correlation coefficient
+
+
+    srand(time(NULL));
+
+    if(!band_opt.size()){
+      for(size_t iband=0;iband<(this->getImage(0))->nrOfBand();++iband)
+        band_opt.push_back(iband);
+    }
+
     if(src_min_opt.size()){
       while(src_min_opt.size()<band_opt.size())
         src_min_opt.push_back(src_min_opt[0]);
@@ -179,8 +188,6 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
     double meanValue=0;
     double medianValue=0;
     double stdDev=0;
-
-    srand(time(NULL));
 
     statfactory::StatFactory stat;
     imgregression::ImgRegression imgreg;
