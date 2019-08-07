@@ -149,7 +149,6 @@ def fun2method(inputfile, outputfile_basename):
         f.write('\n\t\t\t\tcopyImg->setMIA(iband);')
         for i in imRasterArray:
           f.write('\n\t\t\t\t'+i+'.setMIA(iband);')
-        f.write('\n\t\t\t\treturn(copyImg);')
         f.write('\n\t\t\t}')
 
         f.write('\n\t\t\telse{')
@@ -161,6 +160,7 @@ def fun2method(inputfile, outputfile_basename):
         f.write('\n\t\t\t}')
 
         f.write('\n\t\t}')
+        f.write('\n\t\treturn(copyImg);')
         f.write('\n\t}')
 
         f.write('\n\tcatch(std::string errorString){')
@@ -169,7 +169,7 @@ def fun2method(inputfile, outputfile_basename):
         f.write('\n\t}')
         f.write('\n\tcatch(...){')
         f.write('\n\t\tthrow;')
-        f.write('\t\t\n}')
+        f.write('\n\t}')
         f.write('\n}\n')
 #         f.write('''
 #         catch(std::string errorString){

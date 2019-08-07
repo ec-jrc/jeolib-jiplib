@@ -1209,7 +1209,6 @@ size_t VectorOgr::serialize(vector<unsigned char> &vbytes){
         VSIFCloseL(file);
       }
     }
-    VSIUnlink(getFileName().c_str());
     return(filesize);
   }
   else{
