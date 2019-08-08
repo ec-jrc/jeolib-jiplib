@@ -1023,20 +1023,10 @@ class Jim : public std::enable_shared_from_this<Jim>
   //end insert from fun2method_errortype_d
   //start insert from fun2method_errortype_nd
   //end insert from fun2method_errortype_nd
-  /* template<typename T> xt::array<T> xt(){ */
-  /*   std::vector<std::size_t> shape; */
-  /*   if(nrOfPlane()>1){ */
-  /*     shape={nrOfPlane(),nrOfRow(),nrOfCol()}; */
-  /*   } */
-  /*   else if (nrOfBand()>1){ */
-  /*     band2plane(); */
-  /*     shape={nrOfPlane(),nrOfRow(),nrOfCol()}; */
-  /*   } */
-  /*   else */
-  /*     shape={nrOfRow(),nrOfCol()}; */
-  /*   auto a = xt::adapt(data, size, xt::no_ownership(), shape); */
-  /*   return(a); */
-  /* } */
+  //start insert from fun2method_errortype_nm
+  //end insert from fun2method_errortype_nm
+  //start insert from fun2method_errortype_d_nm
+  //end insert from fun2method_errortype_d_nm
  protected:
   ///reset all member variables
   void reset();
