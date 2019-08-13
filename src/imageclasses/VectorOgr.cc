@@ -1778,31 +1778,31 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
   }
 }
 ///append two VectorOgr objects (append to first layer)
-void VectorOgr::append(VectorOgr &ogrReader){
-  size_t ilayer=0;
-  size_t currentSize=getFeatureCount(ilayer);
-  resize(currentSize+ogrReader.getFeatureCount(ilayer),ilayer);
-#if JIPLIB_PROCESS_IN_PARALLEL == 1
-#pragma omp parallel for
-#else
-#endif
-  for(size_t ifeature = 0; ifeature < ogrReader.getFeatureCount(ilayer); ++ifeature) {
-    try{
-      OGRFeature *thatFeature=ogrReader.getFeatureRef(ifeature,ilayer);
-      if(!thatFeature){
-        // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
-        continue;
-      }
-      OGRFeature *writeFeature=createFeature(ilayer);
-      writeFeature->SetFrom(thatFeature);
-      setFeature(currentSize+ifeature,writeFeature,ilayer);
-    }
-    catch(std::string errorString){
-      std::cerr << errorString << std::endl;
-      continue;
-    }
-  }
-}
+// void VectorOgr::append(VectorOgr &ogrReader){
+//   size_t ilayer=0;
+//   size_t currentSize=getFeatureCount(ilayer);
+//   resize(currentSize+ogrReader.getFeatureCount(ilayer),ilayer);
+// #if JIPLIB_PROCESS_IN_PARALLEL == 1
+// #pragma omp parallel for
+// #else
+// #endif
+//   for(size_t ifeature = 0; ifeature < ogrReader.getFeatureCount(ilayer); ++ifeature) {
+//     try{
+//       OGRFeature *thatFeature=ogrReader.getFeatureRef(ifeature,ilayer);
+//       if(!thatFeature){
+//         // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+//         continue;
+//       }
+//       OGRFeature *writeFeature=createFeature(ilayer);
+//       writeFeature->SetFrom(thatFeature);
+//       setFeature(currentSize+ifeature,writeFeature,ilayer);
+//     }
+//     catch(std::string errorString){
+//       std::cerr << errorString << std::endl;
+//       continue;
+//     }
+//   }
+// }
 
 // OGRErr VectorOgr::sortByLabel(std::map<std::string,Vector2d<float> > &mapPixels, const std::string& label, std::vector<std::string>& bandNames){
 //   //[classNr][pixelNr][bandNr]

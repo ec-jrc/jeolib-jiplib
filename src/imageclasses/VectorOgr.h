@@ -393,7 +393,7 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   size_t serialize(std::vector<unsigned char> &vbytes);
   void dumpOgr(app::AppFactory& app);
   ///append two VectorOgr
-  void append(VectorOgr &ogrReader);
+  /* void append(VectorOgr &ogrReader); */
   ///joins two VectorOgr based on key value
   std::shared_ptr<VectorOgr> join(VectorOgr &ogrReader, app::AppFactory& app);
   ///joins two VectorOgr based on key value
