@@ -89,7 +89,7 @@ CPLErr Jim::band2plane(){
   for(size_t iband=1;iband<nrOfBand();++iband){
     //memcp
     // memcpy(static_cast<char*>(m_data[0])+iband*nrOfCol()*nrOfRow(),static_cast<char*>(m_data[iband]),getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
-    memcpy(m_data[0]+iband*nrOfCol()*nrOfRow(),m_data[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
+    memcpy(m_data[0]+iband*nrOfCol()*nrOfRow()*getDataTypeSizeBytes(),m_data[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
     // memcpy(m_data[0]+iband*nrOfCol()*nrOfRow(),m_data[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
     free(m_data[iband]);
     m_data[iband]=0;
