@@ -745,7 +745,7 @@ std::string Jim::getProjectionRef() const
  * @param projection projection string to be used for this dataset
  * @return the projection of this data set in string format
  **/
-CPLErr Jim::setProjectionProj4(const std::string& projection)
+void Jim::setProjectionProj4(const std::string& projection)
 {
   if(projection.size()){
     OGRSpatialReference theRef;
@@ -755,13 +755,8 @@ CPLErr Jim::setProjectionProj4(const std::string& projection)
     m_projection=wktString;
     //todo: must not be limited to access==WRITE?
     if(m_gds&&m_access==WRITE)
-      return(m_gds->SetProjection(wktString));
-    else
-      return(CE_Warning);
+      m_gds->SetProjection(wktString);
   }
-  else
-    // std::cerr << "Warning: empty projection" << std::endl;
-    return(CE_Failure);
 }
 
 /**
@@ -1484,8 +1479,7 @@ CPLErr Jim::registerDriver()
     if(setGeoTransform(gt)!=CE_None)
       std::cerr << "Warning: could not write geotransform information in " << m_filename << std::endl;
     if(m_projection.size()){
-      if(setProjection(m_projection)!=CE_None)
-        std::cerr << "Warning: could not write projection information in " << m_filename << std::endl;
+      setProjection(m_projection);
     }
 
     if(m_noDataValues.size()){

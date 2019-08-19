@@ -436,9 +436,9 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///Copy geotransform information from another georeferenced image
   CPLErr copyGeoTransform(const Jim& imgSrc);
   ///Set the projection for this dataset in well known text (wkt) format
-  CPLErr setProjection(const std::string& projection){setProjectionProj4(projection);};
+  void setProjection(const std::string& projection){setProjectionProj4(projection);};
   ///Set the projection for this dataset from user input (supports epsg:<number> format)
-  CPLErr setProjectionProj4(const std::string& projection);
+  void setProjectionProj4(const std::string& projection);
   ///Get the bounding box of this dataset in georeferenced coordinates with coordinate transform
   void getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT=0) const;
   ///Get the bounding box of this dataset in georeferenced coordinates with coordinate transform
