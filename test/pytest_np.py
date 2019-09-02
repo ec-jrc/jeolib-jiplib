@@ -1,4 +1,12 @@
+###############################################################################
 # pytest_pytest_np.py: jim2np and np2jim
+# Author(s): Pieter.Kempeneers@ec.europa.eu
+# Copyright (c) 2016-2019 European Union (Joint Research Centre)
+# License EUPLv1.2
+# 
+# This file is part of jiplib
+###############################################################################
+
 # History
 # 2018/10/04 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

@@ -1,4 +1,12 @@
+###############################################################################
 # pytest_setmask.py: setMask with vector
+# Author(s): Pieter.Kempeneers@ec.europa.eu
+# Copyright (c) 2016-2019 European Union (Joint Research Centre)
+# License EUPLv1.2
+# 
+# This file is part of jiplib
+###############################################################################
+
 # History
 # 2017/10/24 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

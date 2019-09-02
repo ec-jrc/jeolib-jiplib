@@ -1,8 +1,10 @@
 /**********************************************************************
 testMemoryLeak.cc: test app for jiblib detecting memory leaks
-History
-2017/01/23 - Created by Pieter Kempeneers
-Change log
+Author(s): Pieter.Kempeneers@ec.europa.eu
+Copyright (c) 2016-2019 European Union (Joint Research Centre)
+License EUPLv1.2
+
+This file is part of jiplib
 ***********************************************************************/
 #include <memory>
 #include <string>

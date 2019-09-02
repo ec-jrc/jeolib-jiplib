@@ -1,4 +1,12 @@
+###############################################################################
 # pytest_classify_s2.py: classify
+# Author(s): Pieter.Kempeneers@ec.europa.eu
+# Copyright (c) 2016-2019 European Union (Joint Research Centre)
+# License EUPLv1.2
+#
+# This file is part of jiplib
+###############################################################################
+
 # History
 # 2018/01/22 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log
@@ -28,7 +36,7 @@ try:
     classDict['forest']=25
     classDict['water']=41
     classDict['rest']=50
-    classFrom=range(0,50)
+    classFrom=list(range(0,50))
     classTo=[50]*50
     for i in range(0,50):
         if i>=1 and i<10:
@@ -50,7 +58,7 @@ try:
         jim.train(reflist,{'method':'sml','model':args.model,'class':sorted(classDict.values())})
         sml=jim.classify({'method':'sml','model':args.model})
         #preparation of output
-        sml_class=sml.statProfile({'function':'maxindex'}).reclass({'class':range(0,sml.nrOfBand()),'reclass':sorted(classDict.values())})
+        sml_class=sml.statProfile({'function':'maxindex'}).reclass({'class':list(range(0,sml.nrOfBand())),'reclass':sorted(classDict.values())})
         if args.output:
             sml_class.write({'filename':args.output})
         sml_class.close()

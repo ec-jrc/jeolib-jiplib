@@ -1,4 +1,12 @@
+###############################################################################
 # pytest_setthreshold.py: setThreshold to create mask
+# Author(s): Pieter.Kempeneers@ec.europa.eu
+# Copyright (c) 2016-2019 European Union (Joint Research Centre)
+# License EUPLv1.2
+#
+# This file is part of jiplib
+###############################################################################
+
 # History
 # 2017/10/24 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log
@@ -35,18 +43,18 @@ elif(args.min==10 and args.max==50):
         jim1=jim0.setThreshold({'min':10,'max':50})
         theStats=jim1.getStats({'function':['min','max'],'nodata':0})
         print(theStats)
-        if theStats['min']!=10:
+        if theStats['min'][0]!=10:
             print("Failed: min",theStats['min'])
             throw()
-        if theStats['max']!=50:
+        if theStats['max'][0]!=50:
             print("Failed: max",theStats['max'])
             throw()
         jim1=jim0.setThreshold({'min':10,'max':50,'value':100}).clearNoData()
         theStats=jim1.getStats({'function':['min','max']})
-        if theStats['min']!=0:
+        if theStats['min'][0]!=0:
             print("Failed: min",theStats['min'])
             throw()
-        if theStats['max']!=100:
+        if theStats['max'][0]!=100:
             print("Failed: max",theStats['max'])
             throw()
         print("Success: masking")

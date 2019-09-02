@@ -1,8 +1,10 @@
 /**********************************************************************
 pktestexternal: test program for Jim constructor with external data
-History
-2018/04/19 - Created by Pieter Kempeneers
-Change log
+Author(s): Pieter.Kempeneers@ec.europa.eu
+Copyright (c) 2016-2019 European Union (Joint Research Centre)
+License EUPLv1.2
+
+This file is part of jiplib
 ***********************************************************************/
 #include <math.h>
 #include <string>

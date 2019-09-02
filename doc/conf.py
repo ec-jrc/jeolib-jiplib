@@ -59,7 +59,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'JIPlib'
-copyright = u'European Commission, 2018'
+copyright = u'European Commission, 2016-2019'
 author = u'Pieter Kempeneers, Davide De Marchi, Pierre Soille'
 
 # The version info for the project you're documenting, acts as replacement for

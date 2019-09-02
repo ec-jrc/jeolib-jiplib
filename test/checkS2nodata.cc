@@ -1,8 +1,10 @@
 /**********************************************************************
 test1.cc: test app for jiblib
-History
-2016/06/24 - Created by Pieter Kempeneers
-Change log
+Author(s): Pieter.Kempeneers@ec.europa.eu
+Copyright (c) 2016-2019 European Union (Joint Research Centre)
+License EUPLv1.2
+
+This file is part of jiplib
 ***********************************************************************/
 #include <memory>
 #include "base/Optionjl.h"
@@ -42,7 +44,7 @@ Optionjl<string>  input_opt("i", "input", "Input image file(s). If input contain
   app::AppFactory app(argc,argv);
   // app.setOption("dx","100");
   // app.setOption("dy","100");
-  
+
   filter2d::Filter2d filter;
   try{
     Jim inputImg(input_opt[0]);
@@ -66,4 +68,4 @@ Optionjl<string>  input_opt("i", "input", "Input image file(s). If input contain
     return(1);
   }
   return(0);
-}  
+}

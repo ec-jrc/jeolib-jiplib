@@ -1,7 +1,7 @@
 /**********************************************************************
 Interface file for SWIG
 Author(s): Pieter.Kempeneers@ec.europa.eu, Pierre.Soille@ec.europa.eu
-Copyright (c) 2016-2018 European Union (Joint Research Centre)
+Copyright (c) 2016-2019 European Union (Joint Research Centre)
 License EUPLv1.2
 
 This file is part of jiplib
@@ -73,22 +73,46 @@ This file is part of jiplib
     /* $1=new app::AppFactory(); */
     $1=&tempFactory;
     while (PyDict_Next($input, &ppos, &pKey, &pValue)) {
-      std::string theKey=PyString_AsString(pKey);
+      std::string theKey;
       std::string theValue;
+      if(PyString_Check(pKey))
+        theKey=PyString_AsString(pKey);
+      else if(PyUnicode_Check(pKey))
+        theKey=PyString_AsString(PyUnicode_AsUTF8String(pKey));
+      else{
+        PyErr_SetString(PyExc_TypeError,"Expected a string.");
+        return NULL;
+      }
       if(PyList_Check(pValue)){
         for(Py_ssize_t i=0;i<PyList_Size(pValue);++i){
           PyObject *rValue;
           rValue=PyList_GetItem(pValue,i);
-          if(PyString_Check(rValue))
+          if (PyString_Check(rValue))
             theValue=PyString_AsString(rValue);
-          else if(rValue != Py_None)
-            theValue=PyString_AsString(PyObject_Repr(rValue));
+          else if (PyUnicode_Check(rValue))
+            theValue = PyString_AsString(PyUnicode_AsUTF8String(rValue));
+          else if(rValue != Py_None){
+            PyObject *tmp_obj = PyObject_Repr(rValue);
+            if (PyString_Check(tmp_obj))
+              theValue=PyString_AsString(tmp_obj);
+            else if (PyUnicode_Check(tmp_obj))
+              theValue=PyString_AsString(PyUnicode_AsUTF8String(tmp_obj));
+          }
+          else
+          {
+            PyErr_SetString(PyExc_TypeError,"Expected a string.");
+            return NULL;
+          }
           $1->pushLongOption(theKey,theValue);
         }
         continue;
       }
       else if(PyString_Check(pValue)){
         theValue=PyString_AsString(pValue);
+        $1->pushLongOption(theKey,theValue);
+      }
+      else if (PyUnicode_Check(pValue)){
+        theValue = PyString_AsString(PyUnicode_AsUTF8String(pValue));
         $1->pushLongOption(theKey,theValue);
       }
       else if(PyBool_Check(pValue)){
@@ -100,11 +124,16 @@ This file is part of jiplib
         }
       }
       else if(pValue != Py_None){
-        theValue=PyString_AsString(PyObject_Repr(pValue));
+        PyObject *tmp_obj = PyObject_Repr(pValue);
+        if (PyString_Check(tmp_obj))
+          theValue=PyString_AsString(tmp_obj);
+        else if (PyUnicode_Check(tmp_obj))
+          theValue=PyString_AsString(PyUnicode_AsUTF8String(tmp_obj));
         $1->pushLongOption(theKey,theValue);
       }
     }
-  } else {
+  }
+  else{
     PyObject* kwargs;
     static char *kwlist[] = {
       "theString",

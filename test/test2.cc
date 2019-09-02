@@ -1,8 +1,10 @@
 /**********************************************************************
 test2.cc: test app for jiblib
-History
-2016/10/15 - Created by Pieter Kempeneers
-Change log
+Author(s): Pieter.Kempeneers@ec.europa.eu
+Copyright (c) 2016-2019 European Union (Joint Research Centre)
+License EUPLv1.2
+
+This file is part of jiplib
 ***********************************************************************/
 #include <memory>
 #include "base/Optionjl.h"

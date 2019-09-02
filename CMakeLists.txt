@@ -1,7 +1,7 @@
-##############################################################################
+###############################################################################
 # CMakeLists build script for cmake
 # Author(s): Pieter.Kempeneers@ec.europa.eu
-# Copyright (c) 2016-2018 European Union (Joint Research Centre)
+# Copyright (c) 2016-2019 European Union (Joint Research Centre)
 # License EUPLv1.2
 
 # This file is part of jiplib
@@ -80,14 +80,15 @@ if(Boost_FOUND)
   add_definitions("-DBOOST_ALL_NO_LIB")
 endif()
 
-# Make sure Python libraries are found
-# set(Python_ADDITIONAL_VERSIONS 3.5)
-set(PYTHON_VERSION "2.7.13" CACHE STRING "Specify which Python version to use")
-#from https://github.com/InsightSoftwareConsortium/ITK/blob/master/Wrapping/Generators/Python/CMakeLists.txt#L1-18
-# if(PYTHON_VERSION_STRING VERSION_EQUAL PYTHONLIBS_VERSION_STRING)
-# if(PYTHON_VERSION_STRING VERSION_LESS 2.6)
-# if(PYTHON_VERSION_STRING VERSION_GREATER 3.0)
-FIND_PACKAGE(PythonLibs ${PYTHON_VERSION} EXACT)
+set(PYTHON3 ON CACHE BOOL "set ON for PYTHON3")
+if(PYTHON3)
+  FIND_PACKAGE( PythonInterp 3.5 REQUIRED )
+  FIND_PACKAGE( PythonLibs 3.5 REQUIRED )
+else(PYTHON3)
+  FIND_PACKAGE( PythonInterp 2.7 REQUIRED )
+  FIND_PACKAGE( PythonLibs 2.7 REQUIRED )
+endif(PYTHON3)
+
 if(PYTHONLIBS_FOUND)
   message(STATUS "Python version found: ${PYTHONLIBS_VERSION_STRING}")
   message(STATUS "Found Python library: ${PYTHON_LIBRARY}")
@@ -492,14 +493,18 @@ INCLUDE_DIRECTORIES(/usr/local/include)
 SET(CMAKE_SWIG_FLAGS "-keyword")
 SET(CMAKE_SWIG_FLAGS "-DMIALIB=${MIA_BOOL}")
 SET_PROPERTY(SOURCE ${JIPLIB_I} PROPERTY CPLUSPLUS ON)
-#deprecated, use SWIG_ADD_LIBRARY instead for newer versions of cmake
-SWIG_ADD_MODULE(jiplib python ${JIPLIB_I})
-# SWIG_ADD_LIBRARY(
-#   jiplib
-#   TYPE USE_BUILD_SHARED_LIBS
-#   LANGUAGE python
-#   SOURCES ${JIPLIB_I}
-#   )
+
+if(${CMAKE_VERSION} VERSION_LESS "3.8.0")
+  SWIG_ADD_MODULE(jiplib python ${JIPLIB_I})
+else(${CMAKE_VERSION} VERSION_LESS "3.8.0")
+SWIG_ADD_LIBRARY(
+  jiplib
+  TYPE USE_BUILD_SHARED_LIBS
+  LANGUAGE python
+  SOURCES ${JIPLIB_I}
+  )
+endif(${CMAKE_VERSION} VERSION_LESS "3.8.0")
+
 SET_SOURCE_FILES_PROPERTIES(${JIPLIB_I} PROPERTIES SWIG_FLAGS "-W2")
 SWIG_LINK_LIBRARIES(jiplib ${PYTHON_LIBRARIES} ${JIPLIB_LIB_NAME} ${BOOST_LIBRARIES})
 
@@ -519,6 +524,8 @@ INSTALL (FILES ${LASCLASS_H} DESTINATION include/jiplib/lasclasses)
 EXECUTE_PROCESS(COMMAND python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
 SET(PYTHON_INSTALL_DIR ${PYTHON_SITE_PACKAGES} CACHE PATH "Install directory for Python library")
 INSTALL(TARGETS ${SWIG_MODULE_jiplib_REAL_NAME} LIBRARY DESTINATION ${PYTHON_INSTALL_DIR})
+MESSAGE(STATUS "Python install directory: ${PYTHON_SITE_PACKAGES}")
+MESSAGE(STATUS "Python executable: ${PYTHON_EXECUTABLE}")
 INSTALL(FILES ${CMAKE_BINARY_DIR}/jiplib.py DESTINATION ${PYTHON_INSTALL_DIR})
-install (FILES "${CMAKE_CURRENT_BINARY_DIR}/config_jiplib.h" DESTINATION ${PROJECT_INCLUDE_DIR})
+INSTALL (FILES "${CMAKE_CURRENT_BINARY_DIR}/config_jiplib.h" DESTINATION ${PROJECT_INCLUDE_DIR})
 ###############################################################################

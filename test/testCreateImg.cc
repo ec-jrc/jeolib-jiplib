@@ -1,8 +1,10 @@
 /**********************************************************************
 testCreateImg.cc: test app creating random image for jiblib
-History
-2016/09/12 - Created by Pieter Kempeneers
-Change log
+Author(s): Pieter.Kempeneers@ec.europa.eu
+Copyright (c) 2016-2019 European Union (Joint Research Centre)
+License EUPLv1.2
+
+This file is part of jiplib
 ***********************************************************************/
 #include <memory>
 #include <string>

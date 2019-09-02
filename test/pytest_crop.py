@@ -1,4 +1,12 @@
+###############################################################################
 # pytest_crop.py: crop
+# Author(s): Pieter.Kempeneers@ec.europa.eu
+# Copyright (c) 2016-2019 European Union (Joint Research Centre)
+# License EUPLv1.2
+# 
+# This file is part of jiplib
+###############################################################################
+
 # History
 # 2018/03/01 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

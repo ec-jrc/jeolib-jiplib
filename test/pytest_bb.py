@@ -1,4 +1,12 @@
+###############################################################################
 # pytest_bb.py: Create a georeferenced image with bounding box
+# Author(s): Pieter.Kempeneers@ec.europa.eu
+# Copyright (c) 2016-2019 European Union (Joint Research Centre)
+# License EUPLv1.2
+# 
+# This file is part of jiplib
+###############################################################################
+
 # History
 # 2017/10/23 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log

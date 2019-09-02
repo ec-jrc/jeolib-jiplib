@@ -1,4 +1,12 @@
+###############################################################################
 # pytest_extractogr.py: extractogr
+# Author(s): Pieter.Kempeneers@ec.europa.eu
+# Copyright (c) 2016-2019 European Union (Joint Research Centre)
+# License EUPLv1.2
+# 
+# This file is part of jiplib
+###############################################################################
+
 # History
 # 2017/10/24 - Created by Pieter Kempeneers (pieter.kempeneers@ec.europa.eu)
 # Change log
@@ -58,8 +66,10 @@ if True:
 
     print(classDict)
 
-    classFrom=range(0,50)
+    classFrom=list(range(0,50))
     classTo=[50]*50
+    print("classFrom: {}".format(classFrom))
+    print("classTo: {}".format(classTo))
     for i in range(0,50):
         if i>=1 and i<10:
             classTo[i]=classDict['urban']
@@ -80,7 +90,7 @@ if True:
     for classname in classDict:
         print("class: ",classname)
         label=classDict[classname]
-        srcnodata=classDict.values()
+        srcnodata=list(classDict.values())
         srcnodata.remove(label)
         srcnodata.append(255)
         print(srcnodata)
