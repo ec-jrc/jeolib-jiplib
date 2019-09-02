@@ -82,12 +82,15 @@ endif()
 
 # Make sure Python libraries are found
 # set(Python_ADDITIONAL_VERSIONS 3.5)
-set(PYTHON_VERSION "2.7.13" CACHE STRING "Specify which Python version to use")
+#set(PYTHON_VERSION "2.7.13" CACHE STRING "Specify which Python version to use")
+set(PYTHON_VERSION "3.6.8" CACHE STRING "Specify which Python version to use")
 #from https://github.com/InsightSoftwareConsortium/ITK/blob/master/Wrapping/Generators/Python/CMakeLists.txt#L1-18
 # if(PYTHON_VERSION_STRING VERSION_EQUAL PYTHONLIBS_VERSION_STRING)
 # if(PYTHON_VERSION_STRING VERSION_LESS 2.6)
 # if(PYTHON_VERSION_STRING VERSION_GREATER 3.0)
-FIND_PACKAGE(PythonLibs ${PYTHON_VERSION} EXACT)
+# FIND_PACKAGE(PythonLibs ${PYTHON_VERSION} EXACT)
+FIND_PACKAGE( PythonInterp 3.6 REQUIRED )
+FIND_PACKAGE( PythonLibs 3.6 REQUIRED )
 if(PYTHONLIBS_FOUND)
   message(STATUS "Python version found: ${PYTHONLIBS_VERSION_STRING}")
   message(STATUS "Found Python library: ${PYTHON_LIBRARY}")
@@ -493,13 +496,13 @@ SET(CMAKE_SWIG_FLAGS "-keyword")
 SET(CMAKE_SWIG_FLAGS "-DMIALIB=${MIA_BOOL}")
 SET_PROPERTY(SOURCE ${JIPLIB_I} PROPERTY CPLUSPLUS ON)
 #deprecated, use SWIG_ADD_LIBRARY instead for newer versions of cmake
-SWIG_ADD_MODULE(jiplib python ${JIPLIB_I})
-# SWIG_ADD_LIBRARY(
-#   jiplib
-#   TYPE USE_BUILD_SHARED_LIBS
-#   LANGUAGE python
-#   SOURCES ${JIPLIB_I}
-#   )
+# SWIG_ADD_MODULE(jiplib python ${JIPLIB_I})
+ SWIG_ADD_LIBRARY(
+   jiplib
+   TYPE USE_BUILD_SHARED_LIBS
+   LANGUAGE python
+   SOURCES ${JIPLIB_I}
+   )
 SET_SOURCE_FILES_PROPERTIES(${JIPLIB_I} PROPERTIES SWIG_FLAGS "-W2")
 SWIG_LINK_LIBRARIES(jiplib ${PYTHON_LIBRARIES} ${JIPLIB_LIB_NAME} ${BOOST_LIBRARIES})
 
@@ -516,7 +519,7 @@ INSTALL (FILES ${BASE_H} DESTINATION include/jiplib/base)
 INSTALL (FILES ${ALGOR_H} DESTINATION include/jiplib/algorithms)
 INSTALL (FILES ${FILECLASS_H} DESTINATION include/jiplib/fileclasses)
 INSTALL (FILES ${LASCLASS_H} DESTINATION include/jiplib/lasclasses)
-EXECUTE_PROCESS(COMMAND python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
+EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
 SET(PYTHON_INSTALL_DIR ${PYTHON_SITE_PACKAGES} CACHE PATH "Install directory for Python library")
 INSTALL(TARGETS ${SWIG_MODULE_jiplib_REAL_NAME} LIBRARY DESTINATION ${PYTHON_INSTALL_DIR})
 INSTALL(FILES ${CMAKE_BINARY_DIR}/jiplib.py DESTINATION ${PYTHON_INSTALL_DIR})

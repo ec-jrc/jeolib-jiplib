@@ -73,16 +73,29 @@ This file is part of jiplib
     /* $1=new app::AppFactory(); */
     $1=&tempFactory;
     while (PyDict_Next($input, &ppos, &pKey, &pValue)) {
+
       std::string theKey=PyString_AsString(pKey);
       std::string theValue;
       if(PyList_Check(pValue)){
         for(Py_ssize_t i=0;i<PyList_Size(pValue);++i){
           PyObject *rValue;
           rValue=PyList_GetItem(pValue,i);
-          if(PyString_Check(rValue))
+          if (PyString_Check(rValue))
+          {
             theValue=PyString_AsString(rValue);
+          }
+          else if  (PyUnicode_Check(rValue))
+          {
+            char * aByte = (char *)PyUnicode_AsEncodedString(rValue, "utf-8", "Error ~");
+            theValue = static_cast<std::string> (PyBytes_AS_STRING(aByte));
+          }
           else if(rValue != Py_None)
             theValue=PyString_AsString(PyObject_Repr(rValue));
+          else
+          {
+            PyErr_SetString(PyExc_TypeError,"Expected a string.");
+            return NULL;
+          }
           $1->pushLongOption(theKey,theValue);
         }
         continue;
