@@ -204,20 +204,20 @@ static int getDataType(const std::string &typeString){
     return(GDT_Unknown);
 }
 
-static size_t getDataTypeSizeBytes(const std::string &typeString){
+static std::size_t getDataTypeSizeBytes(const std::string &typeString){
   int typeInt=getDataType(typeString);
   switch (typeInt){
   case JDT_UInt64:
   case JDT_Int64:
-    return(static_cast<size_t>(8));
+    return(static_cast<std::size_t>(8));
   case JDT_Word:
-    return(static_cast<size_t>(1));
+    return(static_cast<std::size_t>(1));
   default:{
     if(typeInt==GDT_Unknown){
       std::string errorString="Error: data type not supported";
       throw(errorString);
     }
-    return(static_cast<size_t>(GDALGetDataTypeSize(static_cast<GDALDataType>(typeInt))>>3));
+    return(static_cast<std::size_t>(GDALGetDataTypeSize(static_cast<GDALDataType>(typeInt))>>3));
   }
   }
 }
@@ -458,7 +458,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///Get the lower right corner y (georeferenced) coordinate of this dataset
   double getLry() const {double ulx, uly, lrx,lry;getBoundingBox(ulx,uly,lrx,lry);return(lry);};
   ///Get the scale for specific band
-  double getScale(size_t band=0){
+  double getScale(std::size_t band=0){
     if(m_scale.size()<=band)
       return(1.0);
     else
@@ -467,7 +467,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///Get the scale as a standard template library (stl) vector
   void getScale(std::vector<double>& scale) const {scale=m_scale;};
   ///Get the scale for specific band
-  double getOffset(size_t band=0){
+  double getOffset(std::size_t band=0){
     if(m_offset.size()<=band)
       return(0.0);
     else
@@ -552,7 +552,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///Get the internal datatype for this dataset
   int getDataType(int band=0) const;
   GDALDataType getGDALDataType(int band=0) const;
-  size_t getDataTypeSizeBytes(int band=0) const;
+  std::size_t getDataTypeSizeBytes(int band=0) const;
   //GDALDataType getDataType(int band=0) const;
   ///Get the datapointer
   void* getDataPointer(int band=0){return(m_data[band]);};
@@ -646,15 +646,15 @@ class Jim : public std::enable_shared_from_this<Jim>
   /* CPLErr readData(app::AppFactory &app); */
   ///Read a single pixel cell value at a specific column and row for a specific band (all indices start counting from 0)
   template<typename T> void readData(T& value, int col, int row, int band=0);
-  template<typename T> void readData3D(T& value, size_t col, size_t row, size_t plane, size_t band=0);
-  template<typename T> void readData3D(std::vector<T>& buffer, size_t minCol, size_t maxCol, size_t row, size_t plane, size_t band=0);
+  template<typename T> void readData3D(T& value, std::size_t col, std::size_t row, std::size_t plane, std::size_t band=0);
+  template<typename T> void readData3D(std::vector<T>& buffer, std::size_t minCol, std::size_t maxCol, std::size_t row, std::size_t plane, std::size_t band=0);
   ///Return a single pixel cell value at a specific column and row for a specific band (all indices start counting from 0)
   double readData(int col, int row, int band=0){
     double value;
     readData(value, col, row, band);
     return(value);
   };
-  double readData3D(size_t col, size_t row, size_t plane, size_t band=0){
+  double readData3D(std::size_t col, std::size_t row, std::size_t plane, std::size_t band=0){
     double value;
     readData3D(value, col, row, plane, band);
     return(value);
@@ -665,10 +665,10 @@ class Jim : public std::enable_shared_from_this<Jim>
   template<typename T> CPLErr readData(std::vector<T>& buffer, int minCol, int maxCol, double row, int band, RESAMPLE resample);
   ///Read pixel cell values for a range of columns and rows for a specific band (all indices start counting from 0). The buffer is a two dimensional vector (stl vector of stl vector) representing [row][col].
   template<typename T> CPLErr readDataBlock(Vector2d<T>& buffer2d, int minCol, int maxCol, int minRow, int maxRow, int band=0);
-  template<typename T> void readDataBlock3D(Vector2d<T>& buffer2d, size_t minCol, size_t maxCol, size_t minRow, size_t maxRow, size_t plane, size_t band=0);
+  template<typename T> void readDataBlock3D(Vector2d<T>& buffer2d, std::size_t minCol, std::size_t maxCol, std::size_t minRow, std::size_t maxRow, std::size_t plane, std::size_t band=0);
   ///Read pixel cell values for a range of columns and rows for a specific band (all indices start counting from 0). The buffer is a one dimensional stl vector representing all pixel values read starting from upper left to lower right.
   template<typename T> CPLErr readDataBlock(std::vector<T>& buffer , int minCol, int maxCol, int minRow, int maxRow, int band=0);
-  template<typename T> void readDataBlock3D(std::vector<T>& buffer , size_t minCol, size_t maxCol, size_t minRow, size_t maxRow, size_t plane, size_t band=0);
+  template<typename T> void readDataBlock3D(std::vector<T>& buffer , std::size_t minCol, std::size_t maxCol, std::size_t minRow, std::size_t maxRow, std::size_t plane, std::size_t band=0);
   ///Read pixel cell values for a range of columns, rows and bands for a specific band (all indices start counting from 0). The buffer is a one dimensional stl vector representing all pixel values read starting from upper left to lower right, band interleaved.
   template<typename T> CPLErr readData(std::vector<T>& buffer, int row, int band=0);
   ///Read pixel cell values for an entire row for a specific band (all indices start counting from 0). The row counter can be floating, in which case a resampling is applied at the row level. You still must apply the resampling at column level. This function will be deprecated, as the GDAL API now supports rasterIO resampling (see http://www.gdal.org/structGDALRasterIOExtraArg.html)
@@ -737,8 +737,8 @@ class Jim : public std::enable_shared_from_this<Jim>
   template<typename T> CPLErr writeData(std::vector<T>& buffer, int minCol, int maxCol, int row, int band=0);
   ///Write pixel cell values for an entire row for a specific band (all indices start counting from 0)
   template<typename T> CPLErr writeData(std::vector<T>& buffer, int row, int band=0);
-  /* template<typename T> void writeData3D(std::vector<T>& buffer, size_t minCol, size_t maxCol, size_t row, size_t plane, size_t band=0); */
-  /* template<typename T> void writeData3D(std::vector<T>& buffer, size_t row, size_t plane, size_t band=0){ */
+  /* template<typename T> void writeData3D(std::vector<T>& buffer, std::size_t minCol, std::size_t maxCol, std::size_t row, std::size_t plane, std::size_t band=0); */
+  /* template<typename T> void writeData3D(std::vector<T>& buffer, std::size_t row, std::size_t plane, std::size_t band=0){ */
   /*   writeData3D(buffer, row, 0, nrOfCol()-1, plane, band); */
   /* }; */
   // deprecated? Write an entire image from memory to file
@@ -1011,6 +1011,15 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///convert a MIA data type to GDAL data type
   int MIA2JIPLIBDataType(int aMIADataType);
 #endif
+
+  //test for MIA functions
+  template<typename T> void d_jlframebox_t(std::vector<int> box, T val, std::size_t band);
+  void d_jlframebox(std::vector<int> box, double val, std::size_t band);
+  template<typename T> void d_jldistanceGeodesic_t(Jim& reference, std::size_t graph, std::size_t band);
+  void d_jldistanceGeodesic(Jim& reference, std::size_t, std::size_t band);
+  std::shared_ptr<Jim> jldistanceGeodesic(Jim& reference, std::size_t graph, std::size_t band);
+  void testFunction(){std::cout << "Hello testFunction" << std::endl;};
+
   //start insert from fun2method_imagetype
   //end insert from fun2method_imagetype
   //start insert from fun2method_imagetype_multi
@@ -1186,7 +1195,7 @@ template<typename T> void Jim::readData(T& value, int col, int row, int band)
   }
 }
 
-template<typename T> void Jim::readData3D(T& value, size_t col, size_t row, size_t plane, size_t band)
+template<typename T> void Jim::readData3D(T& value, std::size_t col, std::size_t row, std::size_t plane, std::size_t band)
 {
   try{
     if(nrOfBand()<=band){
@@ -1270,7 +1279,7 @@ template<typename T> void Jim::readData3D(T& value, size_t col, size_t row, size
   }
 }
 
-template<typename T> void Jim::readData3D(std::vector<T>& buffer, size_t minCol, size_t maxCol, size_t row, size_t plane, size_t band)
+template<typename T> void Jim::readData3D(std::vector<T>& buffer, std::size_t minCol, std::size_t maxCol, std::size_t row, std::size_t plane, std::size_t band)
 {
   try{
     if(nrOfBand()<=band){
@@ -1563,7 +1572,7 @@ template<typename T> CPLErr Jim::readDataBlock(Vector2d<T>& buffer2d, int minCol
   return(returnValue);
 }
 
-template<typename T> void Jim::readDataBlock3D(Vector2d<T>& buffer2d, size_t minCol, size_t maxCol, size_t minRow, size_t maxRow, size_t plane, size_t band){
+template<typename T> void Jim::readDataBlock3D(Vector2d<T>& buffer2d, std::size_t minCol, std::size_t maxCol, std::size_t minRow, std::size_t maxRow, std::size_t plane, std::size_t band){
   buffer2d.resize(maxRow-minRow+1,maxCol-minCol+1);
   typename std::vector<T> buffer;
   readDataBlock3D(buffer,minCol,maxCol,minRow,maxRow,plane,band);
@@ -1677,7 +1686,7 @@ template<typename T> CPLErr Jim::readDataBlock(std::vector<T>& buffer, int minCo
   }
 }
 
-template<typename T> void Jim::readDataBlock3D(std::vector<T>& buffer, size_t minCol, size_t maxCol, size_t minRow, size_t maxRow, size_t plane, size_t band)
+template<typename T> void Jim::readDataBlock3D(std::vector<T>& buffer, std::size_t minCol, std::size_t maxCol, std::size_t minRow, std::size_t maxRow, std::size_t plane, std::size_t band)
 {
   try{
     double theScale=1;
@@ -1709,9 +1718,9 @@ template<typename T> void Jim::readDataBlock3D(std::vector<T>& buffer, size_t mi
             readNewBlock(irow,band);
         }
         /* int index=(irow-m_begin[band])*nrOfCol(); */
-        size_t index=(plane*nrOfRow()*nrOfCol())+(irow-m_begin[band])*nrOfCol();
-        size_t minindex=(index+minCol);//*(GDALGetDataTypeSize(getDataType())>>3);
-        size_t maxindex=(index+maxCol);//*(GDALGetDataTypeSize(getDataType())>>3);
+        std::size_t index=(plane*nrOfRow()*nrOfCol())+(irow-m_begin[band])*nrOfCol();
+        std::size_t minindex=(index+minCol);//*(GDALGetDataTypeSize(getDataType())>>3);
+        std::size_t maxindex=(index+maxCol);//*(GDALGetDataTypeSize(getDataType())>>3);
 
         for(index=minindex;index<=maxindex;++index,++bufit){
           double dvalue=0;
@@ -1975,7 +1984,7 @@ template<typename T> CPLErr Jim::writeData(std::vector<T>& buffer, int minCol, i
   return(returnValue);
 }
 
-/* template<typename T> void Jim::writeData3D(std::vector<T>& buffer, size_t minCol, size_t maxCol, size_t row, size_t plane, size_t band) */
+/* template<typename T> void Jim::writeData3D(std::vector<T>& buffer, std::size_t minCol, std::size_t maxCol, std::size_t row, std::size_t plane, std::size_t band) */
 /* { */
 /*   if(buffer.size()!=maxCol-minCol+1){ */
 /*     std::string errorstring="invalid size of buffer"; */
@@ -2332,40 +2341,5 @@ template<typename T> CPLErr Jim::writeDataBlock(T value, int minCol, int maxCol,
   }
   return(returnValue);
 }
-
-/* template<typename T> void Jim::d_setMask(Jim& mask, T value){ */
-/*   if(m_data.empty()){ */
-/*     std::ostringstream s; */
-/*     s << "Error: Jim not initialized, m_data is empty"; */
-/*     std::cerr << s.str() << std::endl; */
-/*     throw(s.str()); */
-/*   } */
-/*   if(nrOfRow()!=mask.nrOfRow()){ */
-/*     std::ostringstream s; */
-/*     s << "Error: number of rows do not match"; */
-/*     std::cerr << s.str() << std::endl; */
-/*     throw(s.str()); */
-/*   } */
-/*   if(nrOfCol()!=mask.nrOfCol()){ */
-/*     std::ostringstream s; */
-/*     s << "Error: number of cols do not match"; */
-/*     std::cerr << s.str() << std::endl; */
-/*     throw(s.str()); */
-/*   } */
-/*   for(size_t iband=0;iband<nrOfBand();++iband){ */
-/* #if JIPLIB_PROCESS_IN_PARALLEL == 1 */
-/* #pragma omp parallel for */
-/* #else */
-/* #endif */
-/*     for(int irow=0;irow<nrOfRow();++irow){ */
-/*       for(int icol=0;icol<nrOfCol();++icol){ */
-/*         if(mask.readData(icol,irow)>1) */
-/*           writeData(value,icol,irow,iband); */
-/*         else */
-/*           continue; */
-/*       } */
-/*     } */
-/*   } */
-/* } */
 
 #endif // _JIM_H_

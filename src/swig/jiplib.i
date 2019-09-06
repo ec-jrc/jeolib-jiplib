@@ -911,11 +911,5 @@ This file is part of jiplib
 %include "imageclasses/VectorOgr.h"
 %include "apps/AppFactory.h"
 %include "algorithms/Filter2d.h"
-
- /* %include "../../build/src/imageclasses/Jim.h" */
- /* %include "../../build/src/imageclasses/JimList.h" */
- /* %include "../../build/src/imageclasses/VectorOgr.h" */
- /* %include "../../src/apps/AppFactory.h" */
- /* %include "../../src/algorithms/Filter2d.h" */
 enum CPLErr {CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4};
 enum GDALDataType {GDT_Unknown = 0, GDT_Byte = 1, GDT_UInt16 = 2, GDT_Int16 = 3, GDT_UInt32 = 4, GDT_Int32 = 5, GDT_Float32 = 6, GDT_Float64 = 7, GDT_CInt16 = 8, GDT_CInt32 = 9, GDT_CFloat32 = 10, GDT_CFloat64 = 11, GDT_TypeCount = 12};
