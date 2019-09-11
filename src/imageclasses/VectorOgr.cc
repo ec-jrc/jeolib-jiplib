@@ -645,7 +645,9 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
     for(int ilayer=0;ilayer<getLayerCount();++ilayer){
       ogrWriter.pushLayer(getLayerName(ilayer),getProjection(ilayer),getGeometryType(ilayer),papszOptions);
       ogrWriter.copyFields(*this,std::vector<std::string>(),ilayer);
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
       ogrWriter.resize(getFeatureCount(ilayer),ilayer);
+#endif
 
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
@@ -660,10 +662,12 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
             if(verbose_opt[0]>1)
               std::cout << "write valid feature " << ifeature << endl;
             OGRFeature *writeFeature=ogrWriter.createFeature(ilayer);
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
             writeFeature->SetFrom(readFeature);
-            //todo: only set intersected features. check if NULL features are a problem when writing
-            // ogrWriter.pushFeature(writeFeature,ilayer);
             ogrWriter.setFeature(ifeature,writeFeature,ilayer);
+#else
+            ogrWriter.pushFeature(writeFeature,ilayer);
+#endif
           }
           else{
             if(verbose_opt[0]>1)
@@ -684,6 +688,9 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
     std::cerr << "Error: undefined" << std::endl;
     throw;
   }
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+  ogrWriter.destroyEmptyFeatures();
+#endif
 }
 
 std::shared_ptr<VectorOgr> VectorOgr::convexHull(app::AppFactory& app){

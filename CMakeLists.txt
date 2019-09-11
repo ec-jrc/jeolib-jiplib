@@ -267,8 +267,11 @@ set(IMGCLASS_H
   ${IMGCLASS_SRC_DIR}/Mia.h
   ${IMGCLASS_SRC_DIR}/JimList.h
   ${IMGCLASS_SRC_DIR}/VectorOgr.h
+  ${IMGCLASS_SRC_DIR}/jlfilter1d_lib.h
   ${IMGCLASS_SRC_DIR}/jlsml_lib.h
   ${IMGCLASS_SRC_DIR}/jlclassify_lib.h
+  ${IMGCLASS_SRC_DIR}/jlsetmask_lib.h
+  ${IMGCLASS_SRC_DIR}/jloperators_lib.h
   )
 
 set(IMGCLASS_CC
@@ -516,6 +519,7 @@ SWIG_LINK_LIBRARIES(jiplib ${PYTHON_LIBRARIES} ${JIPLIB_LIB_NAME} ${BOOST_LIBRAR
 # SWIG_LINK_LIBRARIES(jiplib ${PYTHON_LIBRARIES} ${JIPLIB_LIB_NAME} ${BOOST_LIBRARIES})
 
 ########## INSTALL ##########
+MESSAGE(STATUS "install library in: ${CMAKE_INSTALL_PREFIX}")
 INSTALL (TARGETS ${JIPLIB_LIB_NAME} LIBRARY DESTINATION lib)
 INSTALL (FILES ${IMGCLASS_H} DESTINATION include/jiplib/imageclasses)
 INSTALL (FILES ${APP_H} DESTINATION include/jiplib/apps)

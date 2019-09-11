@@ -813,6 +813,8 @@ class Jim : public std::enable_shared_from_this<Jim>
   std::shared_ptr<Jim> lt(double value);
   void lt(Jim& refJim, Jim& imgWriter);
   void lt(double value, Jim& imgWriter);
+  template<typename T> void lt_t(Jim& other, Jim& imgWriter);
+  template<typename T> void lt_t(double value, Jim& imgWriter);
   ///less than or equal operator
   std::shared_ptr<Jim> le(std::shared_ptr<Jim> refJim);
   std::shared_ptr<Jim> le(double value);
@@ -916,6 +918,16 @@ class Jim : public std::enable_shared_from_this<Jim>
   std::shared_ptr<Jim> filter1d(app::AppFactory& app);
   ///filter raster dataset in spatial domain only for in memory
   std::shared_ptr<Jim> filter2d(const app::AppFactory& app);
+  ///filter raster dataset in spectral/temporal domain
+  std::shared_ptr<Jim> filter3d(app::AppFactory& app);
+  ///filter raster dataset in spectral/temporal domain
+  void filter3d(Jim& imgWriter, app::AppFactory& app);
+  ///filter raster dataset in spectral/temporal domain
+  std::shared_ptr<Jim> savgolay(app::AppFactory& app);
+  ///filter raster dataset in spectral/temporal domain
+  void savgolay(Jim& imgWriter, app::AppFactory& app);
+  ///filter raster dataset in spectral/temporal domain
+  template<typename T> void filter3d_t(Jim& imgWriter, app::AppFactory& app);
   ///check the difference between two images (validate in case of classification image)
   CPLErr diff(Jim& imgReference, app::AppFactory& app);
   ///check the difference between two images (validate in case of classification image)
@@ -963,8 +975,10 @@ class Jim : public std::enable_shared_from_this<Jim>
   //simplified destructive version of reclass
   void d_reclass(app::AppFactory& app);
   ///set mask to raster dataset
+  //todo: create template function and make it work for 3D
   void setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app);
   ///set mask to raster dataset
+  //todo: create template function and make it work for 3D
   void setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app);
   /* CPLErr setMask(Jim& imgWriter, app::AppFactory& app); */
   ///setmask raster dataset only for in memory
@@ -974,8 +988,12 @@ class Jim : public std::enable_shared_from_this<Jim>
   /* std::shared_ptr<Jim> setMask(app::AppFactory& app); */
   ///setMask destructive version
   /* template<typename T> void d_setMask(Jim& mask, T value); */
+  void d_setMask2D(Jim& mask, double value);
   void d_setMask(Jim& mask, double value);
+  template<typename T> void d_setMask_t(Jim& mask, double value);
+  void d_setMask2D(Jim& mask, Jim& other);
   void d_setMask(Jim& mask, Jim& other);
+  template<typename T> void d_setMask_t(Jim& mask, Jim& other);
   ///get mask to raster dataset
   void getMask(Jim& imgWriter, app::AppFactory& app);
   ///getmask raster dataset only for in memory
@@ -988,13 +1006,13 @@ class Jim : public std::enable_shared_from_this<Jim>
   /* template<typename T> std::map<std::vector<T>,std::vector<std::pair<unsigned short,unsigned short> > > getUniquePixels(unsigned short start, unsigned short end); */
 
   /// convert single plane multiband image to single band image with multiple planes
-  CPLErr band2plane();
+  void d_band2plane();
   ///read data bands into planes
   CPLErr readDataPlanes(std::vector<int> bands);
   ///write data bands from planes
   CPLErr writeDataPlanes();
   /// convert single band multiple plane image to single plane multiband image
-  /* CPLErr plane2band(){};//not implemented yet */
+  /* void d_plane2band();//not implemented yet */
 #if MIALIB == 1
   ///get MIA representation for a particular band
   IMAGE* getMIA(int band=0);

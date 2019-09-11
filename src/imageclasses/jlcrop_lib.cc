@@ -1820,6 +1820,8 @@ void Jim::d_cropBand(AppFactory& app){
     if(find(vband.begin(),vband.end(),iband)==vband.end()){
         if(verbose_opt[0]>1)
           std::cout << "removing data for band " << iband << std::endl;
+        //free data to avoid memory leak
+        free(*data_it);
         m_data.erase(data_it);
     }
     else{
@@ -2000,6 +2002,9 @@ void Jim::d_cropPlane(AppFactory& app){
       for(size_t iplane=0;iplane<vplane.size();++iplane){
         memcpy(m_data[nrOfBand()]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*iplane,m_data[iband]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*vplane[iplane],getDataTypeSizeBytes()*nrOfCol()*nrOfRow());
       }
+      //free m_data[iband] and re-allocate to avoid memory leak
+      free(m_data[iband]);
+      m_data[iband]=(void *) calloc(static_cast<size_t>(nrOfCol()*nrOfRow())*vplane.size(),getDataTypeSizeBytes());
       memcpy(m_data[iband],m_data[nrOfBand()],getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*vplane.size());
     }
     free(m_data[nrOfBand()]);

@@ -21,6 +21,7 @@ This file is part of jiplib
 #include "algorithms/StatFactory.h"
 #include "algorithms/Filter.h"
 #include "apps/AppFactory.h"
+#include "jlfilter1d_lib.h"
 
 using namespace std;
 using namespace app;
@@ -57,7 +58,7 @@ shared_ptr<Jim> Jim::filter1d(app::AppFactory& app){
     filter1d(*imgWriter, app);
     return(imgWriter);
   }
-  catch(string helpString){
+  catch(std::string helpString){
     cerr << helpString << endl;
     throw;
   }
@@ -99,14 +100,14 @@ void Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
   Optionjl<double> threshold_opt("t", "threshold", "threshold value(s) to use for threshold filter (one for each class), or threshold to cut for dwt_cut (use 0 to keep all) or dwt_cut_from, or sigma for shift", 0);
   Optionjl<double> nodata_opt("nodata", "nodata", "nodata value(s) (e.g., used for smoothnodata filter)");
   Optionjl<double> tapz_opt("tapz", "tapz", "taps used for spectral filtering");
-  Optionjl<string> padding_opt("pad","pad", "Padding method for filtering (how to handle edge effects). Choose between: symmetric, replicate, circular, zero (pad with 0).", "symmetric");
+  Optionjl<std::string> padding_opt("pad","pad", "Padding method for filtering (how to handle edge effects). Choose between: symmetric, replicate, circular, zero (pad with 0).", "symmetric");
   Optionjl<double> fwhm_opt("fwhm", "fwhm", "list of full width half to apply spectral filtering (-fwhm band1 -fwhm band2 ...)");
   Optionjl<std::string> srf_opt("srf", "srf", "list of ASCII files containing spectral response functions (two columns: wavelength response)");
   Optionjl<double> wavelengthIn_opt("win", "wavelengthIn", "list of wavelengths in input spectrum (-win band1 -win band2 ...)");
   Optionjl<double> wavelengthOut_opt("wout", "wavelengthOut", "list of wavelengths in output spectrum (-wout band1 -wout band2 ...)");
   Optionjl<std::string> interpolationType_opt("interp", "interp", "type of interpolation for spectral filtering (see http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html)","akima");
   Optionjl<std::string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
-  Optionjl<string>  colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid). Use none to ommit color table");
+  Optionjl<std::string>  colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid). Use none to ommit color table");
   Optionjl<short> down_opt("d", "down", "down sampling factor. Use value 1 for no downsampling. Use value n>1 for downsampling (aggregation)", 1);
   Optionjl<short> verbose_opt("v", "verbose", "verbose mode if > 0", 0,2);
 
@@ -182,7 +183,7 @@ void Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
     if(verbose_opt[0])
       std::cout << "Output pixel type:  " << GDALGetDataTypeName(theType) << endl;
 
-    string errorString;
+    std::string errorString;
     unsigned int nband=this->nrOfBand();
 
     if(fwhm_opt.size())
@@ -538,7 +539,131 @@ void Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
       }
     }
   }
-  catch(string predefinedString){
+  catch(std::string predefinedString){
+    std::cout << predefinedString << std::endl;
+    throw;
+  }
+}
+
+std::shared_ptr<Jim> Jim::filter3d(app::AppFactory& app){
+  try{
+    shared_ptr<Jim> imgWriter=createImg();
+    filter3d(*imgWriter, app);
+    return(imgWriter);
+  }
+  catch(std::string helpString){
+    cerr << helpString << endl;
+    throw;
+  }
+}
+
+std::shared_ptr<Jim> Jim::savgolay(app::AppFactory& app){
+  try{
+    shared_ptr<Jim> imgWriter=createImg();
+    savgolay(*imgWriter, app);
+    return(imgWriter);
+  }
+  catch(std::string helpString){
+    cerr << helpString << endl;
+    throw;
+  }
+}
+
+void Jim::filter3d(Jim& imgWriter, app::AppFactory& app){
+  imgWriter.open(nrOfCol(),nrOfRow(),nrOfBand(),nrOfPlane(),GDT_Float64);
+  imgWriter.setProjection(this->getProjection());
+  double gt[6];
+  this->getGeoTransform(gt);
+  imgWriter.setGeoTransform(gt);
+  switch(getDataType()){
+  case(GDT_Byte):
+    filter3d_t<unsigned char>(imgWriter,app);
+    break;
+  case(GDT_Int16):
+    filter3d_t<short>(imgWriter,app);
+    break;
+  case(GDT_UInt16):
+    filter3d_t<unsigned short>(imgWriter,app);
+    break;
+  case(GDT_Int32):
+    filter3d_t<int>(imgWriter,app);
+    break;
+  case(GDT_UInt32):
+    filter3d_t<unsigned int>(imgWriter,app);
+    break;
+  case(GDT_Float32):
+    filter3d_t<float>(imgWriter,app);
+    break;
+  case(GDT_Float64):
+    filter3d_t<double>(imgWriter,app);
+    break;
+  default:
+    std::string errorString="Error: data type not supported";
+    throw(errorString);
+    break;
+  }
+}
+
+void Jim::savgolay(Jim& imgWriter, app::AppFactory& app){
+  Optionjl<int> savgolay_nl_opt("nl", "nl", "Number of leftward (past) data points used in Savitzky-Golay filter)", 2);
+  Optionjl<int> savgolay_nr_opt("nr", "nr", "Number of rightward (future) data points used in Savitzky-Golay filter)", 2);
+  Optionjl<int> savgolay_ld_opt("ld", "ld", "order of the derivative desired in Savitzky-Golay filter (e.g., ld=0 for smoothed function)", 0);
+  Optionjl<int> savgolay_m_opt("m", "m", "order of the smoothing polynomial in Savitzky-Golay filter, also equal to the highest conserved moment; usual values are m = 2 or m = 4)", 2);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=savgolay_nl_opt.retrieveOption(app);
+    savgolay_nr_opt.retrieveOption(app);
+    savgolay_ld_opt.retrieveOption(app);
+    savgolay_m_opt.retrieveOption(app);
+    if(!doProcess){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+
+    filter::Filter filter1d;
+    std::vector<double> taps_opt;
+    filter1d.getSavGolayCoefficients(taps_opt, this->nrOfPlane(), savgolay_nl_opt[0], savgolay_nr_opt[0], savgolay_ld_opt[0], savgolay_m_opt[0]);
+    std::vector<double>::iterator vit;
+    for(vit=taps_opt.begin();vit!=taps_opt.end();++vit)
+      app.pushLongOption("taps",type2string<double>(*vit));
+
+    imgWriter.open(nrOfCol(),nrOfRow(),nrOfBand(),nrOfPlane(),GDT_Float64);
+    imgWriter.setProjection(this->getProjection());
+    double gt[6];
+    this->getGeoTransform(gt);
+    imgWriter.setGeoTransform(gt);
+    switch(getDataType()){
+    case(GDT_Byte):
+      filter3d_t<unsigned char>(imgWriter,app);
+      break;
+    case(GDT_Int16):
+      filter3d_t<short>(imgWriter,app);
+      break;
+    case(GDT_UInt16):
+      filter3d_t<unsigned short>(imgWriter,app);
+      break;
+    case(GDT_Int32):
+      filter3d_t<int>(imgWriter,app);
+      break;
+    case(GDT_UInt32):
+      filter3d_t<unsigned int>(imgWriter,app);
+      break;
+    case(GDT_Float32):
+      filter3d_t<float>(imgWriter,app);
+      break;
+    case(GDT_Float64):
+      filter3d_t<double>(imgWriter,app);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
+  }
+  catch(std::string predefinedString ){
     std::cout << predefinedString << std::endl;
     throw;
   }

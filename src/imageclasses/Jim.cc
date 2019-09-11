@@ -74,7 +74,7 @@ size_t Jim::getDataTypeSizeBytes(int band) const {
 }
 
 /// convert single plane multiband image to single band image with multiple planes
-CPLErr Jim::band2plane(){
+void Jim::d_band2plane(){
   //temporary buffer
   m_data.resize(nrOfBand()+1);
   m_data[nrOfBand()]=(void *) calloc(static_cast<size_t>(nrOfCol()*m_blockSize),getDataTypeSizeBytes());

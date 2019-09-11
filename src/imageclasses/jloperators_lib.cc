@@ -8,6 +8,7 @@ This file is part of jiplib
 ***********************************************************************/
 #include <iostream>
 #include "Jim.h"
+#include "jloperators_lib.h"
 
 using namespace std;
 
@@ -237,6 +238,12 @@ void Jim::lt(Jim& other, Jim& imgWriter){
     std::cerr << s.str() << std::endl;
     throw(s.str());
   }
+  if(nrOfPlane()!=other.nrOfPlane()){
+    std::ostringstream s;
+    s << "Error: number of planes do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
   if(nrOfBand()!=other.nrOfBand()){
     std::ostringstream s;
     s << "Error: number of bands do not match";
@@ -255,22 +262,42 @@ void Jim::lt(Jim& other, Jim& imgWriter){
     std::cerr << s.str() << std::endl;
     throw(s.str());
   }
-  imgWriter.open(nrOfCol(),nrOfRow(),nrOfBand(),GDT_Byte);
+  if(getDataType()!=other.getDataType()){
+    std::ostringstream s;
+    s << "Error: data types do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  imgWriter.open(nrOfCol(),nrOfRow(),nrOfBand(),nrOfPlane(),GDT_Byte);
   imgWriter.copyGeoTransform(*this);
   imgWriter.setProjection(this->getProjection());
-  for(size_t iband=0;iband<nrOfBand();++iband){
-#if JIPLIB_PROCESS_IN_PARALLEL == 1
-#pragma omp parallel for
-#else
-#endif
-    for(int irow=0;irow<nrOfRow();++irow){
-      for(int icol=0;icol<nrOfCol();++icol){
-        if(readData(icol,irow,iband)<other.readData(icol,irow,iband))
-          imgWriter.writeData(1,icol,irow,iband);
-        else
-          imgWriter.writeData(0,icol,irow,iband);
-      }
-    }
+
+  switch(getDataType()){
+  case(GDT_Byte):
+    lt_t<unsigned char>(other,imgWriter);
+    break;
+  case(GDT_Int16):
+    lt_t<short>(other,imgWriter);
+    break;
+  case(GDT_UInt16):
+    lt_t<unsigned short>(other,imgWriter);
+    break;
+  case(GDT_Int32):
+    lt_t<int>(other,imgWriter);
+    break;
+  case(GDT_UInt32):
+    lt_t<unsigned int>(other,imgWriter);
+    break;
+  case(GDT_Float32):
+    lt_t<float>(other,imgWriter);
+    break;
+  case(GDT_Float64):
+    lt_t<double>(other,imgWriter);
+    break;
+  default:
+    std::string errorString="Error: data type not supported";
+    throw(errorString);
+    break;
   }
 }
 
@@ -281,24 +308,64 @@ void Jim::lt(double value, Jim& imgWriter){
     std::cerr << s.str() << std::endl;
     throw(s.str());
   }
-  imgWriter.open(nrOfCol(),nrOfRow(),nrOfBand(),GDT_Byte);
+  imgWriter.open(nrOfCol(),nrOfRow(),nrOfBand(),nrOfPlane(),GDT_Byte);
   imgWriter.copyGeoTransform(*this);
   imgWriter.setProjection(this->getProjection());
-  for(size_t iband=0;iband<nrOfBand();++iband){
-#if JIPLIB_PROCESS_IN_PARALLEL == 1
-#pragma omp parallel for
-#else
-#endif
-    for(int irow=0;irow<nrOfRow();++irow){
-      for(int icol=0;icol<nrOfCol();++icol){
-        if(readData(icol,irow,iband)<value)
-          imgWriter.writeData(1,icol,irow,iband);
-        else
-          imgWriter.writeData(0,icol,irow,iband);
-      }
-    }
+
+  switch(getDataType()){
+  case(GDT_Byte):
+    lt_t<unsigned char>(value,imgWriter);
+    break;
+  case(GDT_Int16):
+    lt_t<short>(value,imgWriter);
+    break;
+  case(GDT_UInt16):
+    lt_t<unsigned short>(value,imgWriter);
+    break;
+  case(GDT_Int32):
+    lt_t<int>(value,imgWriter);
+    break;
+  case(GDT_UInt32):
+    lt_t<unsigned int>(value,imgWriter);
+    break;
+  case(GDT_Float32):
+    lt_t<float>(value,imgWriter);
+    break;
+  case(GDT_Float64):
+    lt_t<double>(value,imgWriter);
+    break;
+  default:
+    std::string errorString="Error: data type not supported";
+    throw(errorString);
+    break;
   }
 }
+
+// void Jim::lt(double value, Jim& imgWriter){
+//   if(m_data.empty()){
+//     std::ostringstream s;
+//     s << "Error: Jim not initialized, m_data is empty";
+//     std::cerr << s.str() << std::endl;
+//     throw(s.str());
+//   }
+//   imgWriter.open(nrOfCol(),nrOfRow(),nrOfBand(),GDT_Byte);
+//   imgWriter.copyGeoTransform(*this);
+//   imgWriter.setProjection(this->getProjection());
+//   for(size_t iband=0;iband<nrOfBand();++iband){
+// #if JIPLIB_PROCESS_IN_PARALLEL == 1
+// #pragma omp parallel for
+// #else
+// #endif
+//     for(int irow=0;irow<nrOfRow();++irow){
+//       for(int icol=0;icol<nrOfCol();++icol){
+//         if(readData(icol,irow,iband)<value)
+//           imgWriter.writeData(1,icol,irow,iband);
+//         else
+//           imgWriter.writeData(0,icol,irow,iband);
+//       }
+//     }
+//   }
+// }
 
 std::shared_ptr<Jim> Jim::le(std::shared_ptr<Jim> refJim){
   shared_ptr<Jim> imgWriter=Jim::createImg();

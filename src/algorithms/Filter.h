@@ -89,6 +89,15 @@ namespace filter
     void dwtCut(std::vector<double>& data, const std::string& wavelet_type, int family, double cut);
     void dwtCutFrom(Jim& input, Jim& output, const std::string& wavelet_type, int family, int band);
 
+    static PADDING getPadding(const std::string& padString){
+      std::map<std::string, PADDING> padMap;
+      padMap["zero"]=filter::zero;
+      padMap["symmetric"]=filter::symmetric;
+      padMap["replicate"]=filter::replicate;
+      padMap["circular"]=filter::circular;
+      return(padMap[padString]);
+    };
+
   private:
 
     static void initFilterMap(std::map<std::string, FILTER_TYPE>& m_filterMap){
@@ -139,15 +148,6 @@ namespace filter
       m_filterMap["minindex"]=filter::minindex;
       m_filterMap["maxindex"]=filter::maxindex;
     }
-
-    static PADDING getPadding(const std::string& padString){
-      std::map<std::string, PADDING> padMap;
-      padMap["zero"]=filter::zero;
-      padMap["symmetric"]=filter::symmetric;
-      padMap["replicate"]=filter::replicate;
-      padMap["circular"]=filter::circular;
-      return(padMap[padString]);
-    };
 
     std::vector<double> m_taps;
     std::vector<short> m_class;
@@ -802,7 +802,7 @@ namespace filter
         //todo:introduce nodata
         output[i]=m_taps[m_taps.size()/2]*input[i];
 
-        for(int t=1;t<=m_taps.size()/2;++t){
+        for(int t=1;t<m_taps.size()/2;++t){
           output[i]+=m_taps[m_taps.size()/2+t]*input[i+t];
           if(i>=t)
             output[i]+=m_taps[m_taps.size()/2-t]*input[i-t];
@@ -839,7 +839,7 @@ namespace filter
         //todo:introduce nodata
         output[i]=m_taps[m_taps.size()/2]*input[i];
         //todo:introduce nodata
-        for(int t=1;t<=m_taps.size()/2;++t){
+        for(int t=1;t<m_taps.size()/2;++t){
           output[i]+=m_taps[m_taps.size()/2-t]*input[i-t];
           if(i+t<input.size())
             output[i]+=m_taps[m_taps.size()/2+t]*input[i+t];

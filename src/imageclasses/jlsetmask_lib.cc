@@ -12,6 +12,7 @@ This file is part of jiplib
 #include "imageclasses/VectorOgr.h"
 #include "base/Optionjl.h"
 #include "apps/AppFactory.h"
+#include "jlsetmask_lib.h"
 
 using namespace std;
 using namespace app;
@@ -555,7 +556,7 @@ void Jim::setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app){
   }
 }
 
-void Jim::d_setMask(Jim& mask, Jim& other){
+void Jim::d_setMask2D(Jim& mask, Jim& other){
   if(m_data.empty()){
     std::ostringstream s;
     s << "Error: Jim not initialized, m_data is empty";
@@ -574,9 +575,15 @@ void Jim::d_setMask(Jim& mask, Jim& other){
     std::cerr << s.str() << std::endl;
     throw(s.str());
   }
+  if(nrOfPlane()!=other.nrOfPlane()){
+    std::ostringstream s;
+    s << "Error: number of planes do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
   if(nrOfBand()!=other.nrOfBand()){
     std::ostringstream s;
-    s << "Error: mask must have single band";
+    s << "Error: number of bands do not match";
     std::cerr << s.str() << std::endl;
     throw(s.str());
   }
@@ -599,8 +606,9 @@ void Jim::d_setMask(Jim& mask, Jim& other){
 #endif
     for(int irow=0;irow<nrOfRow();++irow){
       for(int icol=0;icol<nrOfCol();++icol){
-        if(mask.readData(icol,irow)>0)
+        if(mask.readData(icol,irow)>0){
           writeData(other.readData(icol,irow,iband),icol,irow,iband);
+        }
         else
           continue;
       }
@@ -608,7 +616,79 @@ void Jim::d_setMask(Jim& mask, Jim& other){
   }
 }
 
-void Jim::d_setMask(Jim& mask, double value){
+void Jim::d_setMask(Jim& mask, Jim& other){
+  if(m_data.empty()){
+    std::ostringstream s;
+    s << "Error: Jim not initialized, m_data is empty";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(nrOfRow()!=mask.nrOfRow()){
+    std::ostringstream s;
+    s << "Error: number of rows do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(nrOfCol()!=mask.nrOfCol()){
+    std::ostringstream s;
+    s << "Error: number of cols do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(nrOfPlane()!=other.nrOfPlane()){
+    std::ostringstream s;
+    s << "Error: number of planes do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(nrOfBand()!=other.nrOfBand()){
+    std::ostringstream s;
+    s << "Error: number of bands do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(nrOfRow()!=other.nrOfRow()){
+    std::ostringstream s;
+    s << "Error: number of rows do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(nrOfCol()!=other.nrOfCol()){
+    std::ostringstream s;
+    s << "Error: number of cols do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  switch(getDataType()){
+  case(GDT_Byte):
+    d_setMask_t<unsigned char>(mask,other);
+    break;
+  case(GDT_Int16):
+    d_setMask_t<short>(mask,other);
+    break;
+  case(GDT_UInt16):
+    d_setMask_t<unsigned short>(mask,other);
+    break;
+  case(GDT_Int32):
+    d_setMask_t<int>(mask,other);
+    break;
+  case(GDT_UInt32):
+    d_setMask_t<unsigned int>(mask,other);
+    break;
+  case(GDT_Float32):
+    d_setMask_t<float>(mask,other);
+    break;
+  case(GDT_Float64):
+    d_setMask_t<double>(mask,other);
+    break;
+  default:
+    std::string errorString="Error: data type not supported";
+    throw(errorString);
+    break;
+  }
+}
+
+void Jim::d_setMask2D(Jim& mask, double value){
   if(m_data.empty()){
     std::ostringstream s;
     s << "Error: Jim not initialized, m_data is empty";
@@ -640,5 +720,53 @@ void Jim::d_setMask(Jim& mask, double value){
           continue;
       }
     }
+  }
+}
+
+void Jim::d_setMask(Jim& mask, double value){
+  if(m_data.empty()){
+    std::ostringstream s;
+    s << "Error: Jim not initialized, m_data is empty";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(nrOfRow()!=mask.nrOfRow()){
+    std::ostringstream s;
+    s << "Error: number of rows do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(nrOfCol()!=mask.nrOfCol()){
+    std::ostringstream s;
+    s << "Error: number of cols do not match";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  switch(getDataType()){
+  case(GDT_Byte):
+    d_setMask_t<unsigned char>(mask,value);
+    break;
+  case(GDT_Int16):
+    d_setMask_t<short>(mask,value);
+    break;
+  case(GDT_UInt16):
+    d_setMask_t<unsigned short>(mask,value);
+    break;
+  case(GDT_Int32):
+    d_setMask_t<int>(mask,value);
+    break;
+  case(GDT_UInt32):
+    d_setMask_t<unsigned int>(mask,value);
+    break;
+  case(GDT_Float32):
+    d_setMask_t<float>(mask,value);
+    break;
+  case(GDT_Float64):
+    d_setMask_t<double>(mask,value);
+    break;
+  default:
+    std::string errorString="Error: data type not supported";
+    throw(errorString);
+    break;
   }
 }
