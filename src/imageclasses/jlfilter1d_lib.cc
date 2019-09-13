@@ -15,6 +15,10 @@ This file is part of jiplib
 #include <cmath>
 #include <sys/types.h>
 #include <stdio.h>
+extern "C" {
+#include <gsl/gsl_sort.h>
+#include <gsl/gsl_wavelet.h>
+}
 #include "base/Optionjl.h"
 #include "fileclasses/FileReaderAscii.h"
 #include "imageclasses/Jim.h"
@@ -56,6 +60,18 @@ shared_ptr<Jim> Jim::filter1d(app::AppFactory& app){
   try{
     shared_ptr<Jim> imgWriter=createImg();
     filter1d(*imgWriter, app);
+    return(imgWriter);
+  }
+  catch(std::string helpString){
+    cerr << helpString << endl;
+    throw;
+  }
+}
+
+shared_ptr<Jim> Jim::dwtForward(app::AppFactory& app){
+  try{
+    shared_ptr<Jim> imgWriter=clone();
+    imgWriter->d_dwtForward(app);
     return(imgWriter);
   }
   catch(std::string helpString){
@@ -662,6 +678,61 @@ void Jim::savgolay(Jim& imgWriter, app::AppFactory& app){
       throw(errorString);
       break;
     }
+  }
+  catch(std::string predefinedString ){
+    std::cout << predefinedString << std::endl;
+    throw;
+  }
+}
+
+void Jim::d_dwtForward(app::AppFactory& app){
+  Optionjl<std::string> wavelet_type_opt("wt", "wavelet", "wavelet type: daubechies,daubechies_centered, haar, haar_centered, bspline, bspline_centered", "daubechies");
+  Optionjl<int> family_opt("wf", "family", "wavelet family (vanishing moment, see also http://www.gnu.org/software/gsl/manual/html_node/DWT-Initialization.html)", 4);
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=wavelet_type_opt.retrieveOption(app);
+    family_opt.retrieveOption(app);
+    if(!doProcess){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+
+    if(getDataType()!=GDT_Float64){
+      std::ostringstream errorStream;
+      errorStream << "Error: data type must be GDT_Float64" << std::endl;
+      throw(errorStream.str());
+    }
+    //make sure number of planes is power of 2 by adding extra planes
+    int origPlanes=nrOfPlane();
+    app::AppFactory capp;
+    capp.setLongOption("plane",nrOfPlane()-1);
+    std::shared_ptr<Jim> backPlane=cropPlane(capp);
+    while(nrOfPlane()&(nrOfPlane()-1))
+      d_stackPlane(*backPlane);
+    size_t nsize=nrOfPlane();
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+    for(size_t iband=0;iband<nrOfBand();++iband){
+      gsl_wavelet *w;
+      gsl_wavelet_workspace *work;
+      w=gsl_wavelet_alloc(Filter::getWaveletType(wavelet_type_opt[0]),family_opt[0]);
+      work=gsl_wavelet_workspace_alloc(nsize);
+      double* pin=static_cast<double*>(getDataPointer(iband));
+      for(size_t index=0;index<nrOfCol()*nrOfRow();++index){
+        gsl_wavelet_transform_forward(w,pin+index,nrOfCol()*nrOfRow(),nsize,work);
+      }
+      gsl_wavelet_free (w);
+      gsl_wavelet_workspace_free (work);
+      capp.clearOption("plane");
+    }
+    for(size_t iplane=origPlanes;iplane<nrOfPlane();++iplane)
+      capp.pushLongOption("plane",iplane);
+    d_cropPlane(app);
+    //todo: remove extra planes
   }
   catch(std::string predefinedString ){
     std::cout << predefinedString << std::endl;

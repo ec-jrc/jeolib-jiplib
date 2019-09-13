@@ -928,6 +928,9 @@ class Jim : public std::enable_shared_from_this<Jim>
   void savgolay(Jim& imgWriter, app::AppFactory& app);
   ///filter raster dataset in spectral/temporal domain
   template<typename T> void filter3d_t(Jim& imgWriter, app::AppFactory& app);
+  ///forward wavelet transform in spectral/temporal domain
+  void d_dwtForward(app::AppFactory& app);
+  std::shared_ptr<Jim> dwtForward(app::AppFactory& app);
   ///check the difference between two images (validate in case of classification image)
   CPLErr diff(Jim& imgReference, app::AppFactory& app);
   ///check the difference between two images (validate in case of classification image)
