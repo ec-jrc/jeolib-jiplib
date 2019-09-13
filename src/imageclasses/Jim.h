@@ -919,18 +919,27 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///filter raster dataset in spatial domain only for in memory
   std::shared_ptr<Jim> filter2d(const app::AppFactory& app);
   ///filter raster dataset in spectral/temporal domain
-  std::shared_ptr<Jim> filter3d(app::AppFactory& app);
+  std::shared_ptr<Jim> firfilter1d(app::AppFactory& app);
   ///filter raster dataset in spectral/temporal domain
-  void filter3d(Jim& imgWriter, app::AppFactory& app);
+  void firfilter1d(Jim& imgWriter, app::AppFactory& app);
   ///filter raster dataset in spectral/temporal domain
   std::shared_ptr<Jim> savgolay(app::AppFactory& app);
   ///filter raster dataset in spectral/temporal domain
   void savgolay(Jim& imgWriter, app::AppFactory& app);
   ///filter raster dataset in spectral/temporal domain
-  template<typename T> void filter3d_t(Jim& imgWriter, app::AppFactory& app);
+  template<typename T> void firfilter1d_t(Jim& imgWriter, app::AppFactory& app);
   ///forward wavelet transform in spectral/temporal domain
-  void d_dwtForward(app::AppFactory& app);
-  std::shared_ptr<Jim> dwtForward(app::AppFactory& app);
+  void d_dwt1d(app::AppFactory& app);
+  std::shared_ptr<Jim> dwt1d(app::AppFactory& app);
+  ///inverse wavelet transform in spectral/temporal domain
+  void d_dwti1d(app::AppFactory& app);
+  std::shared_ptr<Jim> dwti1d(app::AppFactory& app);
+  ///forward wavelet transform in spectral/temporal domain
+  void d_dwt2d(app::AppFactory& app);
+  std::shared_ptr<Jim> dwt2d(app::AppFactory& app);
+  ///inverse wavelet transform in spectral/temporal domain
+  void d_dwti2d(app::AppFactory& app);
+  std::shared_ptr<Jim> dwti2d(app::AppFactory& app);
   ///check the difference between two images (validate in case of classification image)
   CPLErr diff(Jim& imgReference, app::AppFactory& app);
   ///check the difference between two images (validate in case of classification image)

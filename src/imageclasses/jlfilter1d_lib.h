@@ -13,7 +13,7 @@ This file is part of jiplib
 #include "algorithms/Filter.h"
 #include "apps/AppFactory.h"
 
-template<typename T> void Jim::filter3d_t(Jim& imgWriter, app::AppFactory& app){
+template<typename T> void Jim::firfilter1d_t(Jim& imgWriter, app::AppFactory& app){
   Optionjl<double> taps_opt("taps", "taps", "taps used for spectral filtering");
   Optionjl<std::string> padding_opt("pad","pad", "Padding method for filtering (how to handle edge effects). Choose between: symmetric, replicate, circular, zero (pad with 0).", "symmetric");
   Optionjl<short> verbose_opt("v", "verbose", "verbose mode if > 0", 0,2);
