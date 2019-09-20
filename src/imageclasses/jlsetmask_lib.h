@@ -12,13 +12,17 @@ This file is part of jiplib
 #include "Jim.h"
 
 template<typename T> void Jim::d_setMask_t(Jim& mask, Jim& other){
+  unsigned char* pmask=0;
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
   for(size_t iband=0;iband<nrOfBand();++iband){
     T* pim=static_cast<T*>(getDataPointer(iband));
-    unsigned char* pmask=static_cast<unsigned char*>(mask.getDataPointer(iband));
+    if(mask.nrOfBand()<nrOfBand())
+      pmask=static_cast<unsigned char*>(mask.getDataPointer(0));
+    else
+      pmask=static_cast<unsigned char*>(mask.getDataPointer(iband));
     T* pother=static_cast<T*>(other.getDataPointer(iband));
     for(size_t index=0;index<nrOfCol()*nrOfRow()*nrOfPlane();++index){
       if(*pmask>0)
@@ -31,13 +35,17 @@ template<typename T> void Jim::d_setMask_t(Jim& mask, Jim& other){
 }
 
 template<typename T> void Jim::d_setMask_t(Jim& mask, double value){
+  unsigned char* pmask=0;
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
   for(size_t iband=0;iband<nrOfBand();++iband){
     T* pim=static_cast<T*>(getDataPointer(iband));
-    unsigned char* pmask=static_cast<unsigned char*>(mask.getDataPointer(iband));
+    if(mask.nrOfBand()<nrOfBand())
+      pmask=static_cast<unsigned char*>(mask.getDataPointer(0));
+    else
+      pmask=static_cast<unsigned char*>(mask.getDataPointer(iband));
     for(size_t index=0;index<nrOfCol()*nrOfRow()*nrOfPlane();++index){
       if(*pmask>0)
         *pim=static_cast<T>(value);

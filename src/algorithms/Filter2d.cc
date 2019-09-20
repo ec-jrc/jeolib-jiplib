@@ -93,7 +93,7 @@ void filter2d::Filter2d::filter(Jim& input, Jim& output, bool absolute, bool nor
 #pragma omp parallel for
 #else
 #endif
-  for(unsigned int iband=0;iband<input.nrOfBand();++iband){
+  for(size_t iband=0;iband<input.nrOfBand();++iband){
     switch(input.getDataType()){
     case(GDT_Byte):
       filter<unsigned char>(static_cast<unsigned char*>(input.getDataPointer(iband)),static_cast<unsigned char*>(output.getDataPointer(iband)), dimx, dimy, absolute,normalize);

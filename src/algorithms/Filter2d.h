@@ -220,13 +220,13 @@ private:
            //do not take masked values into account
            bool masked=false;
            for(int imask=0;imask<m_noDataValues.size();++imask){
-             if(inputVector[indexJ*dimy+indexI]==m_noDataValues[imask]){
+             if(inputVector[indexJ*dimx+indexI]==m_noDataValues[imask]){
                masked=true;
                break;
              }
            }
            if(!masked){
-             outputVector[y*dimx+x]+=(m_taps[(dimY-1)/2+j][(dimX-1)/2+i]*inputVector[indexJ*dimy+indexI]);
+             outputVector[y*dimx+x]+=(m_taps[(dimY-1)/2+j][(dimX-1)/2+i]*inputVector[indexJ*dimx+indexI]);
              norm+=abs(static_cast<double>(m_taps[(dimY-1)/2+j][(dimX-1)/2+i]));
            }
          }

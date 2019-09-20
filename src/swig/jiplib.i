@@ -98,8 +98,7 @@ This file is part of jiplib
             else if (PyUnicode_Check(tmp_obj))
               theValue=PyString_AsString(PyUnicode_AsUTF8String(tmp_obj));
           }
-          else
-          {
+          else{
             PyErr_SetString(PyExc_TypeError,"Expected a string.");
             return NULL;
           }
@@ -143,6 +142,8 @@ This file is part of jiplib
     PyArg_ParseTupleAndKeywords($input,kwargs,"S|i",kwlist);
     /* SWIG_exception(SWIG_TypeError, "Python dictionary expected"); */
   }
+  //test
+  /* $1->showOptions(); */
  }
 
 /* %ignore createJim(); */

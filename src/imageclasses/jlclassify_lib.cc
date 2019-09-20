@@ -142,8 +142,8 @@ void Jim::classify(Jim& imgWriter, app::AppFactory& app){
         // return(classifySML<double>(imgWriter, app));
       default:
         std::ostringstream errorStream;
-        errorStream << "Error: data type " << getDataType() << " not supported" << std::endl;
-        throw(errorStream.str());//help was invoked, stop processing
+      errorStream << "Error: data type " << getDataType() << " not supported" << std::endl;
+      throw(errorStream.str());//help was invoked, stop processing
       }
     default:
       std::ostringstream errorStream;
@@ -183,19 +183,19 @@ CPLErr Jim::train(JimList& referenceReader, app::AppFactory& app){
       std::ofstream outputStream(model_opt[0]);
       switch(getDataType()){
       case(GDT_Byte):
-        outputStream << trainSML<unsigned char>(referenceReader, app);
+        outputStream << trainSMLband<unsigned char>(referenceReader, app);
         break;
       case(GDT_Int16):
-        outputStream << trainSML<unsigned short>(referenceReader, app);
+        outputStream << trainSMLband<unsigned short>(referenceReader, app);
         break;
       case(GDT_UInt16):
-        outputStream << trainSML<short>(referenceReader, app);
+        outputStream << trainSMLband<short>(referenceReader, app);
         break;
       case(GDT_Int32):
-        outputStream << trainSML<int>(referenceReader, app);
+        outputStream << trainSMLband<int>(referenceReader, app);
         break;
       case(GDT_UInt32):
-        outputStream << trainSML<unsigned int>(referenceReader, app);
+        outputStream << trainSMLband<unsigned int>(referenceReader, app);
         break;
       case(GDT_Float32):
         // outputStream << trainSML<float>(referenceReader, app);

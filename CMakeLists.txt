@@ -268,8 +268,9 @@ set(IMGCLASS_H
   ${IMGCLASS_SRC_DIR}/JimList.h
   ${IMGCLASS_SRC_DIR}/VectorOgr.h
   ${IMGCLASS_SRC_DIR}/jlfilter1d_lib.h
-  ${IMGCLASS_SRC_DIR}/jlsml_lib.h
+  ${IMGCLASS_SRC_DIR}/jlfilter2d_lib.h
   ${IMGCLASS_SRC_DIR}/jlclassify_lib.h
+  ${IMGCLASS_SRC_DIR}/jlsml_lib.h
   ${IMGCLASS_SRC_DIR}/jlsetmask_lib.h
   ${IMGCLASS_SRC_DIR}/jloperators_lib.h
   )
@@ -289,6 +290,7 @@ set(IMGCLASS_CC
   ${IMGCLASS_SRC_DIR}/jlclassify_lib.cc
   ${IMGCLASS_SRC_DIR}/jlsvm_lib.cc
   ${IMGCLASS_SRC_DIR}/jlsvmogr_lib.cc
+  ${IMGCLASS_SRC_DIR}/jlsml_lib.cc
   ${IMGCLASS_SRC_DIR}/jldiff_lib.cc
   ${IMGCLASS_SRC_DIR}/jlvalidate_lib.cc
   ${IMGCLASS_SRC_DIR}/jlstretch_lib.cc

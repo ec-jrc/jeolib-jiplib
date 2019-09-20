@@ -1,5 +1,5 @@
 /**********************************************************************
-jlfilter2d_lib.cc: program to filter raster images: median, min/max, morphological, filtering
+jlfilter2d_lib.cc: program to filter raster images in spatial domain
 Author(s): Pieter.Kempeneers@ec.europa.eu
 Copyright (c) 2016-2019 European Union (Joint Research Centre)
 License EUPLv1.2
@@ -22,6 +22,7 @@ This file is part of jiplib
 #include "algorithms/Filter.h"
 #include "algorithms/Filter2d.h"
 #include "apps/AppFactory.h"
+#include "jlfilter2d_lib.h"
 
 using namespace std;
 using namespace app;
@@ -548,6 +549,53 @@ void Jim::filter2d(Jim& imgWriter, const app::AppFactory& app){
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
     throw;
+  }
+}
+
+std::shared_ptr<Jim> Jim::firfilter2d(app::AppFactory& app){
+  try{
+    shared_ptr<Jim> imgWriter=createImg();
+    firfilter2d(*imgWriter, app);
+    return(imgWriter);
+  }
+  catch(std::string helpString){
+    cerr << helpString << endl;
+    throw;
+  }
+}
+
+void Jim::firfilter2d(Jim& imgWriter, app::AppFactory& app){
+  imgWriter.open(nrOfCol(),nrOfRow(),nrOfBand(),nrOfPlane(),getGDALDataType());
+  imgWriter.setProjection(getProjection());
+  double gt[6];
+  this->getGeoTransform(gt);
+  imgWriter.setGeoTransform(gt);
+  switch(getDataType()){
+  case(GDT_Byte):
+    firfilter2d_t<unsigned char>(imgWriter,app);
+    break;
+  case(GDT_Int16):
+    firfilter2d_t<short>(imgWriter,app);
+    break;
+  case(GDT_UInt16):
+    firfilter2d_t<unsigned short>(imgWriter,app);
+    break;
+  case(GDT_Int32):
+    firfilter2d_t<int>(imgWriter,app);
+    break;
+  case(GDT_UInt32):
+    firfilter2d_t<unsigned int>(imgWriter,app);
+    break;
+  case(GDT_Float32):
+    firfilter2d_t<float>(imgWriter,app);
+    break;
+  case(GDT_Float64):
+    firfilter2d_t<double>(imgWriter,app);
+    break;
+  default:
+    std::string errorString="Error: data type not supported";
+    throw(errorString);
+    break;
   }
 }
 

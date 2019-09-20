@@ -27,7 +27,8 @@ parser.add_argument("-sampleSize","--sampleSize",help="Sample size used for trai
 parser.add_argument("-classifier","--classifier",help="classifier (sml, svm, ann)",dest="classifier",required=True,type=str,default="sml")
 args = parser.parse_args()
 
-try:
+# try:
+if True:
     jim=jl.createJim(args.input)
     #preparation of reference
     classDict={}
@@ -50,14 +51,19 @@ try:
         else:
             classTo[i]=classDict['rest']
 
+    print("jim.getProjection() {}".format(jim.getProjection()))
     jim_ref=jl.createJim(filename=args.reference,dx=jim.getDeltaX(),dy=jim.getDeltaY(),ulx=jim.getUlx(),uly=jim.getUly(),lrx=jim.getLrx(),lry=jim.getLry(),t_srs=jim.getProjection())
     jim_ref=jim_ref.reclass({'class':classFrom,'reclass':classTo})
 
     if args.classifier == "sml":
+        print("SML classifier")
         reflist=jl.JimList([jim_ref])
-        jim.train(reflist,{'method':'sml','model':args.model,'class':sorted(classDict.values())})
-        sml=jim.classify({'method':'sml','model':args.model})
-        #preparation of output
+        jim.d_band2plane();
+        # jim.train(reflist,{'method':'sml','model':args.model,'class':sorted(classDict.values()),'verbose':1})
+        # sml=jim.classify({'method':'sml','model':args.model,'verbose':1})
+        sml=jim.classifySML(reflist,{'class':sorted(classDict.values()),'verbose':1})
+        sml.write({'filename':'/tmp/sml_classes.tif'})
+        # #preparation of output
         sml_class=sml.statProfile({'function':'maxindex'}).reclass({'class':list(range(0,sml.nrOfBand())),'reclass':sorted(classDict.values())})
         if args.output:
             sml_class.write({'filename':args.output})
@@ -118,6 +124,8 @@ try:
 
     jim.close()
     print("Success: classify")
+try:
+    print("ok")
 except:
     print("Failed: classify")
     jim.close()

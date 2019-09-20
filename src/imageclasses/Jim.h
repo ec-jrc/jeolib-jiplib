@@ -934,10 +934,15 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///inverse wavelet transform in spectral/temporal domain
   void d_dwti1d(app::AppFactory& app);
   std::shared_ptr<Jim> dwti1d(app::AppFactory& app);
-  ///forward wavelet transform in spectral/temporal domain
+  ///filter raster dataset in spatial domain
+  std::shared_ptr<Jim> firfilter2d(app::AppFactory& app);
+  ///filter raster dataset in spatial domain
+  void firfilter2d(Jim& imgWriter, app::AppFactory& app);
+  template<typename T> void firfilter2d_t(Jim& imgWriter, app::AppFactory& app);
+  ///forward wavelet transform in spatial domain
   void d_dwt2d(app::AppFactory& app);
   std::shared_ptr<Jim> dwt2d(app::AppFactory& app);
-  ///inverse wavelet transform in spectral/temporal domain
+  ///inverse wavelet transform in spatial domain
   void d_dwti2d(app::AppFactory& app);
   std::shared_ptr<Jim> dwti2d(app::AppFactory& app);
   ///check the difference between two images (validate in case of classification image)
@@ -966,8 +971,13 @@ class Jim : public std::enable_shared_from_this<Jim>
   //CPLErr ann(Jim& imgWriter, app::AppFactory& app);
   ///ann raster dataset only for in memory
   //std::shared_ptr<Jim> ann(app::AppFactory& app);
+  ///sml train and classify
+  void classifySML(Jim& imgWriter, JimList& referenceReader, app::AppFactory& app);
+  template<typename T> void classifySML_t(Jim& imgWriter, JimList& referenceReader, app::AppFactory& app);
+  std::shared_ptr<Jim> classifySML(JimList& referenceReader, app::AppFactory& app);
   ///train sml raster dataset
   template<typename T> std::string trainSML(JimList& referenceReader, app::AppFactory& app);
+  template<typename T> std::string trainSMLband(JimList& referenceReader, app::AppFactory& app);
   ///train sml raster dataset in memory
   std::string trainMem(JimList& referenceReader, app::AppFactory& app);
   ///classify raster dataset using SML
