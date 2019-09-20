@@ -12,12 +12,12 @@ This file is part of jiplib
 #include "Jim.h"
 
 template<typename T> void Jim::d_setMask_t(Jim& mask, Jim& other){
-  unsigned char* pmask=0;
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
   for(size_t iband=0;iband<nrOfBand();++iband){
+    unsigned char* pmask=0;
     T* pim=static_cast<T*>(getDataPointer(iband));
     if(mask.nrOfBand()<nrOfBand())
       pmask=static_cast<unsigned char*>(mask.getDataPointer(0));
@@ -35,12 +35,12 @@ template<typename T> void Jim::d_setMask_t(Jim& mask, Jim& other){
 }
 
 template<typename T> void Jim::d_setMask_t(Jim& mask, double value){
-  unsigned char* pmask=0;
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
   for(size_t iband=0;iband<nrOfBand();++iband){
+    unsigned char* pmask=0;
     T* pim=static_cast<T*>(getDataPointer(iband));
     if(mask.nrOfBand()<nrOfBand())
       pmask=static_cast<unsigned char*>(mask.getDataPointer(0));
