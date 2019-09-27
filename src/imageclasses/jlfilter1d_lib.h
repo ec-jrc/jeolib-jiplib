@@ -127,4 +127,51 @@ template<typename T> void Jim::firfilter1d_t(Jim& imgWriter, app::AppFactory& ap
   }
 }
 
+template<typename T> void Jim::smoothNoData1d_t(Jim& imgWriter, app::AppFactory& app){
+  Optionjl<double> nodata_opt("nodata", "nodata", "nodata to interpolate",0);
+  Optionjl<std::string> interpolationType_opt("interp", "interp", "type of interpolation for spectral filtering (see http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html)","akima");
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=interpolationType_opt.retrieveOption(app);
+    nodata_opt.retrieveOption(app);
+    if(!doProcess){
+      std::cout << std::endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+    if(nrOfPlane()<2){
+      std::ostringstream errorStream;
+      errorStream << "Error: not a 3D object, consider band2plane" << std::endl;
+      throw(errorStream.str());
+    }
+    statfactory::StatFactory stat;
+    stat.setNoDataValues(nodata_opt);
+    std::vector<double> abscis(nrOfPlane());
+    for(int i=0;i<abscis.size();++i)
+      abscis[i]=i;
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+    for(size_t iband=0;iband<nrOfBand();++iband){
+      T* pin=static_cast<T*>(getDataPointer(iband));
+      T* pout=static_cast<T*>(imgWriter.getDataPointer(iband));
+      for(size_t index=0;index<nrOfCol()*nrOfRow();++index){
+        std::vector<double> input(nrOfPlane());
+        std::vector<double> output(imgWriter.nrOfPlane());
+        for(size_t iplane=0;iplane<nrOfPlane();++iplane)
+          input[iplane]=static_cast<double>(pin[index+iplane*nrOfCol()*nrOfRow()]);
+        stat.interpolateNoData(abscis,input,interpolationType_opt[0],output);
+        for(size_t iplane=0;iplane<nrOfPlane();++iplane)
+          pout[index+iplane*nrOfCol()*nrOfRow()]=static_cast<T>(output[iplane]);
+      }
+    }
+  }
+  catch(std::string predefinedString ){
+    std::cout << predefinedString << std::endl;
+    throw;
+  }
+}
 #endif // _JLFILTER1D_LIB_H_

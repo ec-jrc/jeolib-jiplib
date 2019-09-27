@@ -99,7 +99,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
   Optionjl<float> polythreshold_opt("tp", "thresholdPolygon", "(absolute) threshold for selecting samples in each polygon");
   Optionjl<short> buffer_opt("buf", "buffer", "Buffer for calculating statistics in geometric units of raster dataset");
   Optionjl<bool> disc_opt("circ", "circular", "Use a circular disc kernel buffer (for vector point sample datasets only, use in combination with buffer option)", false);
-  Optionjl<bool> allCovered_opt("ac", "all_covered", "Set this flag to include only those polygons that are entirely covered by the raster", false);
+  Optionjl<std::string> allCovered_opt("cover", "cover", "Which polygons to include based on coverage (ALL_TOUCHED, ALL_COVERED)", "ALL_TOUCHED");
   Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
   Optionjl<int> s_srs_opt("s_srs", "s_srs", "Spatial reference system of vector dataset (in EPSG)");
   Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
@@ -176,9 +176,9 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
     //   errorStream << std::endl;
     //   throw(errorStream.str());
     // }
-    std::map<std::string, rule::RULE_TYPE> ruleMap;
-    std::map<std::string, std::string> fieldMap;
+
     //initialize ruleMap
+    std::map<std::string, rule::RULE_TYPE> ruleMap;
     ruleMap["point"]=rule::point;
     ruleMap["centroid"]=rule::centroid;
     ruleMap["mean"]=rule::mean;
@@ -194,6 +194,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
     ruleMap["percentile"]=rule::percentile;
     ruleMap["allpoints"]=rule::allpoints;
 
+    //initialize fieldMap
+    std::map<std::string, std::string> fieldMap;
     fieldMap["point"]="point";
     fieldMap["centroid"]="cntrd";
     fieldMap["mean"]="mean";
@@ -328,7 +330,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       if(verbose_opt[0])
         std::cout<< std::setprecision(12) << "--ulx " << layer_ulx << " --uly " << layer_uly << " --lrx " << layer_lrx   << " --lry " << layer_lry << std::endl;
       if(verbose_opt[0])
-        std::cout << "all_covered: " << allCovered_opt[0] << std::endl;
+        std::cout << "covered: " << allCovered_opt[0] << std::endl;
       //check if rule contains allpoints
       if(find(rule_opt.begin(),rule_opt.end(),"allpoints")!=rule_opt.end()){
         rule_opt.clear();
@@ -670,7 +672,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
           std::cout << "blockSize " << getBlockSize() << " < " << layer_lrj-layer_ulj << std::endl;
       }
       if(maskReader.isInit()){//mask already read when random is set
-        if(maskReader.covers(layer_ulx,layer_uly,layer_lrx,layer_lry,true))
+        if(maskReader.covers(layer_ulx,layer_uly,layer_lrx,layer_lry,"ALL_COVERED"))
           maskReader.readDataBlock(maskBuffer,layer_uli,layer_lri,layer_ulj,layer_lrj,mskband_opt[0]);
         else{
           string errorString="Error: mask does not entirely cover the geographical layer boundaries";
@@ -2457,7 +2459,7 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
   Optionjl<float> polythreshold_opt("tp", "thresholdPolygon", "(absolute) threshold for selecting samples in each polygon");
   Optionjl<short> buffer_opt("buf", "buffer", "Buffer for calculating statistics for point features (in geometric units of raster dataset) ");
   Optionjl<bool> disc_opt("circ", "circular", "Use a circular disc kernel buffer (for vector point sample datasets only, use in combination with buffer option)", false);
-  Optionjl<bool> allCovered_opt("ac", "all_covered", "Set this flag to include only those polygons that are entirely covered by the raster", false);
+  Optionjl<std::string> allCovered_opt("cover", "cover", "Which polygons to include based on coverage (ALL_TOUCHED, ALL_COVERED)", "ALL_TOUCHED");
   Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
   Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
 
@@ -2528,9 +2530,9 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
     //   errorStream << std::endl;
     //   throw(errorStream.str());
     // }
-    std::map<std::string, rule::RULE_TYPE> ruleMap;
-    std::map<std::string, std::string> fieldMap;
+
     //initialize ruleMap
+    std::map<std::string, rule::RULE_TYPE> ruleMap;
     ruleMap["point"]=rule::point;
     ruleMap["centroid"]=rule::centroid;
     ruleMap["mean"]=rule::mean;
@@ -2546,6 +2548,8 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
     ruleMap["percentile"]=rule::percentile;
     ruleMap["allpoints"]=rule::allpoints;
 
+    //initialize fieldMap
+    std::map<std::string, std::string> fieldMap;
     fieldMap["point"]="point";
     fieldMap["centroid"]="cntrd";
     fieldMap["mean"]="mean";
@@ -2560,6 +2564,7 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
     fieldMap["sum"]="sum";
     fieldMap["percentile"]="perc";
     fieldMap["allpoints"]="allp";
+
     statfactory::StatFactory stat;
     if(srcnodata_opt.size()){
       while(srcnodata_opt.size()<bndnodata_opt.size())
@@ -3002,7 +3007,7 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
       }
     }
     if(maskReader.isInit()&&random_opt.empty()){//mask already read when random is set
-      if(maskReader.covers(layer_ulx,layer_uly,layer_lrx,layer_lry,true))
+      if(maskReader.covers(layer_ulx,layer_uly,layer_lrx,layer_lry,"ALL_COVERED"))
         maskReader.readDataBlock(maskBuffer,layer_uli,layer_lri,layer_ulj,layer_lrj,mskband_opt[0]);
       else{
         string errorString="Error: mask does not entirely cover the geographical layer boundaries";

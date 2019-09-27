@@ -79,7 +79,10 @@ namespace statfactory
         spline=gsl_spline_alloc(gsl_interp_linear,size);
         break;
       }
-      assert(spline);
+      if(!spline){
+        std::string errorString="Warning: could not get gsl spline";
+        throw(errorString);
+      }
     };
     static int initSpline(gsl_spline *spline, const double *x, const double *y, int size){
       return gsl_spline_init (spline, x, y, size);
@@ -1548,6 +1551,8 @@ namespace statfactory
       s<<"Error: wavelengthOut is empty";
       throw(s.str());
     }
+    gsl_set_error_handler_off();
+
     int nband=wavelengthIn.size();
     output.clear();
     gsl_interp_accel *acc;

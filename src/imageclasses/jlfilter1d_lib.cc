@@ -54,7 +54,7 @@ using namespace filter;
  * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
  * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid). Use none to ommit color table
  * @return shared pointer to image object
-**/
+ **/
 
 shared_ptr<Jim> Jim::filter1d(app::AppFactory& app){
   try{
@@ -90,7 +90,7 @@ shared_ptr<Jim> Jim::filter1d(app::AppFactory& app){
  * @param interp (type: std::string) (default: akima) type of interpolation for spectral filtering (see http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html)
  * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
  * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid). Use none to ommit color table
-**/
+ **/
 void Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
   Optionjl<std::string> method_opt("f", "filter", "filter function (nvalid, median, var, min, max, sum, mean, dilate, erode, close, open, mode (majority voting), only for classes), smoothnodata (smooth nodata values only) values, ismin, ismax, order (rank pixels in order), stdev, mrf, dwt, dwti, dwt_cut, dwt_cut_from, savgolay, percentile, proportion)");
   Optionjl<int> dimZ_opt("dz", "dz", "filter kernel size in z (spectral/temporal dimension), must be odd (example: 3).",3);
@@ -203,7 +203,7 @@ void Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
       }
       else if(verbose_opt[0])
         std::cout << "filter method: " << method_opt[0] << "=" << filter::Filter::getFilterType(method_opt[0]) << std::endl;
-        // std::cout << "filter method: "<< filter::Filter::getFilterType(method_opt[0]) << std::endl;
+      // std::cout << "filter method: "<< filter::Filter::getFilterType(method_opt[0]) << std::endl;
       switch(filter::Filter::getFilterType(method_opt[0])){
       case(filter::dilate):
       case(filter::erode):
@@ -233,7 +233,7 @@ void Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
           assert(threshold_opt.size());
         }
         break;
-      //implemented in spectral/temporal/spatial domain and nband 1 if dimZ>0
+        //implemented in spectral/temporal/spatial domain and nband 1 if dimZ>0
       case(filter::sum):
       case(filter::mean):
       case(filter::min):
@@ -537,7 +537,7 @@ void Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
             throw(errorString);
           }
           filter1d.filter(*this,imgWriter,method_opt[0],dimZ_opt[0]);
-          }
+        }
         break;
       }
       }
@@ -729,9 +729,9 @@ void Jim::d_dwt1d(app::AppFactory& app){
       gsl_wavelet_workspace_free (work);
     }
     capp.clearOption("plane");
-    for(size_t iplane=origPlanes;iplane<nrOfPlane();++iplane)
+    for(size_t iplane=0;iplane<origPlanes;++iplane)
       capp.pushLongOption("plane",iplane);
-    d_cropPlane(app);
+    d_cropPlane(capp);
   }
   catch(std::string predefinedString ){
     std::cout << predefinedString << std::endl;
@@ -795,12 +795,55 @@ void Jim::d_dwti1d(app::AppFactory& app){
       gsl_wavelet_workspace_free (work);
     }
     capp.clearOption("plane");
-    for(size_t iplane=origPlanes;iplane<nrOfPlane();++iplane)
+    for(size_t iplane=0;iplane<origPlanes;++iplane)
       capp.pushLongOption("plane",iplane);
-    d_cropPlane(app);
+    d_cropPlane(capp);
   }
   catch(std::string predefinedString ){
     std::cout << predefinedString << std::endl;
     throw;
+  }
+}
+
+shared_ptr<Jim> Jim::smoothNoData1d(app::AppFactory& app){
+  try{
+    shared_ptr<Jim> imgWriter=createImg();
+    smoothNoData1d(*imgWriter, app);
+    return(imgWriter);
+  }
+  catch(std::string helpString){
+    cerr << helpString << endl;
+    throw;
+  }
+}
+
+void Jim::smoothNoData1d(Jim& imgWriter, app::AppFactory& app){
+  imgWriter.open(*this,false);
+  switch(getDataType()){
+  case(GDT_Byte):
+    smoothNoData1d_t<unsigned char>(imgWriter,app);
+    break;
+  case(GDT_Int16):
+    smoothNoData1d_t<short>(imgWriter,app);
+    break;
+  case(GDT_UInt16):
+    smoothNoData1d_t<unsigned short>(imgWriter,app);
+    break;
+  case(GDT_Int32):
+    smoothNoData1d_t<int>(imgWriter,app);
+    break;
+  case(GDT_UInt32):
+    smoothNoData1d_t<unsigned int>(imgWriter,app);
+    break;
+  case(GDT_Float32):
+    smoothNoData1d_t<float>(imgWriter,app);
+    break;
+  case(GDT_Float64):
+    smoothNoData1d_t<double>(imgWriter,app);
+    break;
+  default:
+    std::string errorString="Error: data type not supported";
+    throw(errorString);
+    break;
   }
 }

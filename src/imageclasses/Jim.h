@@ -67,6 +67,10 @@ namespace app{
 enum JIPLIBDataType {JDT_Unknown=0, JDT_Int64=14, JDT_UInt64=15, JDT_Word=16};
 #endif
 
+namespace cover{
+  enum COVER_TYPE {ALL_TOUCHED=0, ALL_COVERED=1, ALL_CENTER=2};
+}
+
 enum DATA_ACCESS { READ_ONLY = 0, UPDATE = 1, WRITE = 3};
 enum RESAMPLE { NEAR = 0, BILINEAR = 1, BICUBIC = 2 };
 /* enum   GDALDataType { */
@@ -518,7 +522,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///Check if a geolocation is covered by this dataset. Only the bounding box is checked, irrespective of no data values.
   bool covers(double x, double y, OGRCoordinateTransformation *poCT=NULL) const;
   ///Check if a region of interest is (partially or all if all is set) covered by this dataset. Only the bounding box is checked, irrespective of no data values.
-  bool covers(double ulx, double  uly, double lrx, double lry, bool all=false, OGRCoordinateTransformation *poCT=NULL) const;
+  bool covers(double ulx, double  uly, double lrx, double lry, std::string coverType="ALL_TOUCHED", OGRCoordinateTransformation *poCT=NULL) const;
   ///Check if an image is (partially or all if all is set) covered by this dataset. Only the bounding box is checked, irrespective of no data values.
   bool covers(const std::shared_ptr<Jim> imgRaster, bool all=false) const{
     OGRSpatialReference thisSpatialRef(getProjectionRef().c_str());
@@ -934,6 +938,10 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///inverse wavelet transform in spectral/temporal domain
   void d_dwti1d(app::AppFactory& app);
   std::shared_ptr<Jim> dwti1d(app::AppFactory& app);
+  ///smooth no data in raster dataset in spectral/temporal domain
+  void smoothNoData1d(Jim& imgWriter, app::AppFactory& app);
+  template<typename T> void smoothNoData1d_t(Jim& imgWriter, app::AppFactory& app);
+  std::shared_ptr<Jim> smoothNoData1d(app::AppFactory& app);
   ///filter raster dataset in spatial domain
   std::shared_ptr<Jim> firfilter2d(app::AppFactory& app);
   ///filter raster dataset in spatial domain

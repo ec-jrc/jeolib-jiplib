@@ -1360,8 +1360,14 @@ bool Jim::covers(double x, double  y, OGRCoordinateTransformation *poCT) const
  * @param lry lower left coordinate in y
  * @return true if image (partially or all if all is set) covers the bounding box
  **/
-bool Jim::covers(double ulx, double  uly, double lrx, double lry, bool all, OGRCoordinateTransformation *poCT) const
+bool Jim::covers(double ulx, double  uly, double lrx, double lry, std::string coverType, OGRCoordinateTransformation *poCT) const
 {
+  //initialize coverMap
+  std::map<std::string, covere::COVER_TYPE> coverMap;
+  coverMap["ALL_TOUCHED"]=cover::ALL_TOUCHED;
+  coverMap["ALL_COVERED"]=cover::ALL_COVERED;
+  coverMap["ALL_CENTER"]=cover::ALL_CENTER;
+
   double theULX, theULY, theLRX, theLRY;
   getBoundingBox(theULX,theULY,theLRX,theLRY);
   double ulximg=ulx;
@@ -1389,10 +1395,16 @@ bool Jim::covers(double ulx, double  uly, double lrx, double lry, bool all, OGRC
     ulyimg=std::max(yvector[0],yvector[1]);
     lryimg=std::min(yvector[2],yvector[3]);
   }
-  if(all)
+
+  switch(coverType){
+  case(ALL_COVERED):
     return((theULX<ulximg)&&(theULY>ulyimg)&&(theLRX>lrximg)&&(theLRY<lryimg));
-  else
+  case(ALL_CENTER):
+    break;
+  case(ALL_TOUCHED):
+  default:
     return((ulximg < theLRX)&&(lrximg > theULX)&&(lryimg < theULY)&&(ulyimg > theLRY));
+  }
 }
 
 /**
