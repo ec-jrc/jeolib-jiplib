@@ -75,12 +75,16 @@ This file is part of jiplib
     while (PyDict_Next($input, &ppos, &pKey, &pValue)) {
       std::string theKey;
       std::string theValue;
-      if(PyString_Check(pKey))
+      if(PyString_Check(pKey)){
         theKey=PyString_AsString(pKey);
-      else if(PyUnicode_Check(pKey))
+      }
+      else if(PyUnicode_Check(pKey)){
         theKey=PyString_AsString(PyUnicode_AsUTF8String(pKey));
+      }
       else{
         PyErr_SetString(PyExc_TypeError,"Expected a string.");
+        std::string errorString="Error: Expected a string.";
+        throw(errorString);
         return NULL;
       }
       if(PyList_Check(pValue)){

@@ -1363,7 +1363,7 @@ bool Jim::covers(double x, double  y, OGRCoordinateTransformation *poCT) const
 bool Jim::covers(double ulx, double  uly, double lrx, double lry, std::string coverType, OGRCoordinateTransformation *poCT) const
 {
   //initialize coverMap
-  std::map<std::string, covere::COVER_TYPE> coverMap;
+  std::map<std::string, cover::COVER_TYPE> coverMap;
   coverMap["ALL_TOUCHED"]=cover::ALL_TOUCHED;
   coverMap["ALL_COVERED"]=cover::ALL_COVERED;
   coverMap["ALL_CENTER"]=cover::ALL_CENTER;
@@ -1396,12 +1396,12 @@ bool Jim::covers(double ulx, double  uly, double lrx, double lry, std::string co
     lryimg=std::min(yvector[2],yvector[3]);
   }
 
-  switch(coverType){
-  case(ALL_COVERED):
+  switch(coverMap[coverType]){
+  case(cover::ALL_COVERED):
     return((theULX<ulximg)&&(theULY>ulyimg)&&(theLRX>lrximg)&&(theLRY<lryimg));
-  case(ALL_CENTER):
+  case(cover::ALL_CENTER):
     break;
-  case(ALL_TOUCHED):
+  case(cover::ALL_TOUCHED):
   default:
     return((ulximg < theLRX)&&(lrximg > theULX)&&(lryimg < theULY)&&(ulyimg > theLRY));
   }

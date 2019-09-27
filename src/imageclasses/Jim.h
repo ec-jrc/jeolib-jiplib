@@ -524,7 +524,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///Check if a region of interest is (partially or all if all is set) covered by this dataset. Only the bounding box is checked, irrespective of no data values.
   bool covers(double ulx, double  uly, double lrx, double lry, std::string coverType="ALL_TOUCHED", OGRCoordinateTransformation *poCT=NULL) const;
   ///Check if an image is (partially or all if all is set) covered by this dataset. Only the bounding box is checked, irrespective of no data values.
-  bool covers(const std::shared_ptr<Jim> imgRaster, bool all=false) const{
+  bool covers(const std::shared_ptr<Jim> imgRaster, std::string coverType="ALL_TOUCHED") const{
     OGRSpatialReference thisSpatialRef(getProjectionRef().c_str());
     OGRSpatialReference thatSpatialRef(imgRaster->getProjectionRef().c_str());
     OGRCoordinateTransformation *that2this = OGRCreateCoordinateTransformation(&thatSpatialRef, &thisSpatialRef);
@@ -541,7 +541,7 @@ class Jim : public std::enable_shared_from_this<Jim>
     //image bounding box in SRS of the this
     double img_ulx,img_uly,img_lrx,img_lry;
     imgRaster->getBoundingBox(img_ulx,img_uly,img_lrx,img_lry,that2this);
-    return covers(img_ulx,img_uly,img_lrx,img_lry,all);
+    return covers(img_ulx,img_uly,img_lrx,img_lry,coverType);
   };
   ///Convert georeferenced coordinates (x and y) to image coordinates (column and row)
   bool geo2image(double x, double y, double& i, double& j, OGRCoordinateTransformation *poCT=NULL) const;
