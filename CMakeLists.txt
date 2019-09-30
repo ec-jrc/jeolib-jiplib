@@ -6,7 +6,7 @@
 
 # This file is part of jiplib
 ###############################################################################
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.5)
 
 # The project's name and version
 project(jiplib)
