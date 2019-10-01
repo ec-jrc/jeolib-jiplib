@@ -1830,7 +1830,6 @@ CPLErr Jim::open(app::AppFactory &app){
         setProjectionProj4(assignSRS_opt[0]);
     }
     else{
-      //test
       double gt[6];
       gt[0]=0;
       gt[1]=1;

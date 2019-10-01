@@ -146,6 +146,8 @@ This file is part of jiplib
     PyArg_ParseTupleAndKeywords($input,kwargs,"S|i",kwlist);
     /* SWIG_exception(SWIG_TypeError, "Python dictionary expected"); */
   }
+  if(!($1))
+    SWIG_exception(SWIG_TypeError, "Error: could not parse argument for " "$symname");
   //test
   /* $1->showOptions(); */
  }
