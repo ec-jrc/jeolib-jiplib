@@ -78,78 +78,96 @@ void Jim::polygonize(VectorOgr&ogrWriter, app::AppFactory &theApp, std::shared_p
   GDALRasterBand *poMaskBandMem = NULL;
   GDALDataset *poDatasetMem = NULL;
   GDALRasterBand *poBandMem = NULL;
-  if( poDriverMem ){
-    if(mask){
-      poDatasetMask = (GDALDataset *)poDriverMem->Create("memmask",mask->nrOfCol(),mask->nrOfRow(),1,mask->getGDALDataType(),NULL);
-      if(poDatasetMask){
-        if(verbose_opt[0])
-          cout << "get raster band from mask" << endl;
-        std::vector<double> maskGT(6);
-        getGeoTransform(maskGT);
-        poDatasetMask->SetGeoTransform(&maskGT[0]);
-        poMaskBandMem = poDatasetMask->GetRasterBand(1);
-        if( poMaskBandMem->RasterIO(GF_Write, 0, 0, mask->nrOfCol(), mask->nrOfRow(), mask->getDataPointer(0), mask->nrOfCol(), mask->nrOfRow(), mask->getGDALDataType(), 0, 0, NULL) != CE_None ){
-          cerr << CPLGetLastErrorMsg() << endl;
+  try{
+    if( poDriverMem ){
+      if(mask){
+        if(mask->nrOfCol()!=nrOfCol()){
+          std::string errorString="Error: number of cols in mask does not match input raster";
+          throw(errorString);
+        }
+        if(mask->nrOfRow()!=nrOfRow()){
+          std::string errorString="Error: number of rows in mask does not match input raster";
+          throw(errorString);
+        }
+        poDatasetMask = (GDALDataset *)poDriverMem->Create("memmask",mask->nrOfCol(),mask->nrOfRow(),1,mask->getGDALDataType(),NULL);
+        if(poDatasetMask){
+          if(verbose_opt[0])
+            cout << "get raster band from mask" << endl;
+          std::vector<double> maskGT(6);
+          getGeoTransform(maskGT);
+          poDatasetMask->SetGeoTransform(&maskGT[0]);
+          poMaskBandMem = poDatasetMask->GetRasterBand(1);
+          if( poMaskBandMem->RasterIO(GF_Write, 0, 0, mask->nrOfCol(), mask->nrOfRow(), mask->getDataPointer(0), mask->nrOfCol(), mask->nrOfRow(), mask->getGDALDataType(), 0, 0, NULL) != CE_None ){
+            cerr << CPLGetLastErrorMsg() << endl;
+          }
+        }
+        else{
+          std::string errorString="Error: clould not create memory dataset for mask datatset";
+          throw(errorString);
+        }
+      }
+      poDatasetMem = (GDALDataset *)poDriverMem->Create("memband",nrOfCol(),nrOfRow(),1,getGDALDataType(),NULL);
+      if(poDatasetMem){
+        //printf("Copy MemoryBand to memband\n"); fflush(stdout);
+        std::vector<double> sourceGT(6);
+        getGeoTransform(sourceGT);
+        poDatasetMem->SetGeoTransform(&sourceGT[0]);
+        poBandMem = poDatasetMem->GetRasterBand(1);
+        if( poBandMem->RasterIO(GF_Write, 0, 0, nrOfCol(), nrOfRow(), m_data[0], nrOfCol(), nrOfRow(), getGDALDataType(), 0, 0, NULL) == CE_None ){
+          // Quality parameters for warping operation
+          if(nodata_opt.size())
+            poBandMem->SetNoDataValue(nodata_opt[0]);
+
+          char **papszOptions=NULL;
+          for(std::vector<std::string>::const_iterator optionIt=option_opt.begin();optionIt!=option_opt.end();++optionIt)
+            papszOptions=CSLAddString(papszOptions,optionIt->c_str());
+
+          if(verbose_opt[0])
+            std::cout << "Opening ogrWriter: " << output_opt[0] << " in format " << ogrformat_opt[0] << endl;
+          ogrWriter.open(output_opt[0],ogrformat_opt[0]);
+          ogrWriter.pushLayer(layername_opt[0],getProjection(),wkbUnknown,papszOptions);
+
+          if(verbose_opt[0])
+            cout << "projection: " << getProjection() << endl;
+          ogrWriter.createField(fname_opt[0],OFTInteger);
+
+          if(verbose_opt[0])
+            cout << "GDALPolygonize started..." << endl;
+
+          int index=ogrWriter.getLayer()->GetLayerDefn()->GetFieldIndex(fname_opt[0].c_str());
+          double dfComplete=0.0;
+          const char* pszMessage;
+          void* pProgressArg=NULL;
+          GDALProgressFunc pfnProgress=GDALTermProgress;
+          pfnProgress(dfComplete,pszMessage,pProgressArg);
+          if(GDALPolygonize((GDALRasterBandH)poBandMem, (GDALRasterBandH)poMaskBandMem, (OGRLayerH)ogrWriter.getLayer(),index,NULL,pfnProgress,pProgressArg)!=CE_None){
+            std::string errorString=CPLGetLastErrorMsg();
+            throw(errorString);
+          }
+          else{
+            dfComplete=1.0;
+            pfnProgress(dfComplete,pszMessage,pProgressArg);
+          }
+          for(size_t ilayer=0;ilayer<ogrWriter.getLayerCount();++ilayer)
+            ogrWriter.readFeatures(ilayer);
         }
       }
       else{
-        std::cerr << "Error: clould not create memory dataset for mask datatset" << std::endl;
-        throw;
-      }
-    }
-    poDatasetMem = (GDALDataset *)poDriverMem->Create("memband",nrOfCol(),nrOfRow(),1,getGDALDataType(),NULL);
-    if(poDatasetMem){
-      //printf("Copy MemoryBand to memband\n"); fflush(stdout);
-      std::vector<double> sourceGT(6);
-      getGeoTransform(sourceGT);
-      poDatasetMem->SetGeoTransform(&sourceGT[0]);
-      poBandMem = poDatasetMem->GetRasterBand(1);
-      if( poBandMem->RasterIO(GF_Write, 0, 0, nrOfCol(), nrOfRow(), m_data[0], nrOfCol(), nrOfRow(), getGDALDataType(), 0, 0, NULL) == CE_None ){
-        // Quality parameters for warping operation
-        if(nodata_opt.size())
-          poBandMem->SetNoDataValue(nodata_opt[0]);
-
-        char **papszOptions=NULL;
-        for(std::vector<std::string>::const_iterator optionIt=option_opt.begin();optionIt!=option_opt.end();++optionIt)
-          papszOptions=CSLAddString(papszOptions,optionIt->c_str());
-
-        if(verbose_opt[0])
-          std::cout << "Opening ogrWriter: " << output_opt[0] << " in format " << ogrformat_opt[0] << endl;
-        ogrWriter.open(output_opt[0],ogrformat_opt[0]);
-        ogrWriter.pushLayer(layername_opt[0],getProjection(),wkbUnknown,papszOptions);
-
-        if(verbose_opt[0])
-          cout << "projection: " << getProjection() << endl;
-        ogrWriter.createField(fname_opt[0],OFTInteger);
-
-        if(verbose_opt[0])
-          cout << "GDALPolygonize started..." << endl;
-
-        int index=ogrWriter.getLayer()->GetLayerDefn()->GetFieldIndex(fname_opt[0].c_str());
-        double dfComplete=0.0;
-        const char* pszMessage;
-        void* pProgressArg=NULL;
-        GDALProgressFunc pfnProgress=GDALTermProgress;
-        pfnProgress(dfComplete,pszMessage,pProgressArg);
-        if(GDALPolygonize((GDALRasterBandH)poBandMem, (GDALRasterBandH)poMaskBandMem, (OGRLayerH)ogrWriter.getLayer(),index,NULL,pfnProgress,pProgressArg)!=CE_None){
-          cerr << CPLGetLastErrorMsg() << endl;
-          throw;
-        }
-        else{
-          dfComplete=1.0;
-          pfnProgress(dfComplete,pszMessage,pProgressArg);
-        }
-        for(size_t ilayer=0;ilayer<ogrWriter.getLayerCount();++ilayer)
-          ogrWriter.readFeatures(ilayer);
+        std::string errorString="Error: clould not create memory dataset for input datatset";
+        throw(errorString);
       }
     }
     else{
-      std::cerr << "Error: clould not create memory dataset for input datatset" << std::endl;
-      throw;
+      std::string errorString="Error: clould not create memory driver";
+      throw(errorString);
     }
   }
-  else{
-    std::cerr << "Error: clould not create memory driver" << std::endl;
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    throw;
+  }
+  catch(...){
+    std::cerr << "Error: clould not polygonize" << std::endl;
     throw;
   }
 }
