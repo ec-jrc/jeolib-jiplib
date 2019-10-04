@@ -847,3 +847,45 @@ void Jim::smoothNoData1d(Jim& imgWriter, app::AppFactory& app){
     break;
   }
 }
+
+shared_ptr<Jim> Jim::stats1d(app::AppFactory& app){
+  try{
+    shared_ptr<Jim> imgWriter=createImg();
+    stats1d(*imgWriter, app);
+    return(imgWriter);
+  }
+  catch(std::string helpString){
+    cerr << helpString << endl;
+    throw;
+  }
+}
+
+void Jim::stats1d(Jim& imgWriter, app::AppFactory& app){
+  switch(getDataType()){
+  case(GDT_Byte):
+    stats1d_t<unsigned char>(imgWriter,app);
+    break;
+  case(GDT_Int16):
+    stats1d_t<short>(imgWriter,app);
+    break;
+  case(GDT_UInt16):
+    stats1d_t<unsigned short>(imgWriter,app);
+    break;
+  case(GDT_Int32):
+    stats1d_t<int>(imgWriter,app);
+    break;
+  case(GDT_UInt32):
+    stats1d_t<unsigned int>(imgWriter,app);
+    break;
+  case(GDT_Float32):
+    stats1d_t<float>(imgWriter,app);
+    break;
+  case(GDT_Float64):
+    stats1d_t<double>(imgWriter,app);
+    break;
+  default:
+    std::string errorString="Error: data type not supported";
+    throw(errorString);
+    break;
+  }
+}

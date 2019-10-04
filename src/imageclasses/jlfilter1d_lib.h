@@ -13,6 +13,31 @@ This file is part of jiplib
 #include "algorithms/Filter.h"
 #include "apps/AppFactory.h"
 
+/* enum FILTER_TYPE { median=100, var=101 , min=102, max=103, sum=104, mean=105, minmax=106, dilate=107, erode=108, close=109, open=110, homog=111, sobelx=112, sobely=113, sobelxy=114, sobelyx=115, smooth=116, density=117, mode=118, mixed=119, threshold=120, ismin=121, ismax=122, heterog=123, order=124, stdev=125, mrf=126, dwt=127, dwti=128, dwt_cut=129, scramble=130, shift=131, linearfeature=132, smoothnodata=133, countid=134, dwt_cut_from=135, savgolay=136, percentile=137, proportion=138, nvalid=139, sauvola=140,first=141,last=142, minindex=143, maxindex=144}; */
+
+/* static FILTER_TYPE getFilterType(const std::string filterType){ */
+/*   std::map<std::string, filter::FILTER_TYPE> filterMap; */
+/*   filterMap["median"]=filter::median; */
+/*   filterMap["var"]=filter::var; */
+/*   filterMap["min"]=filter::min; */
+/*   filterMap["max"]=filter::max; */
+/*   filterMap["sum"]=filter::sum; */
+/*   filterMap["mean"]=filter::mean; */
+/*   filterMap["threshold"]=filter::threshold; */
+/*   filterMap["ismin"]=filter::ismin; */
+/*   filterMap["ismax"]=filter::ismax; */
+/*   filterMap["order"]=filter::order; */
+/*   filterMap["stdev"]=filter::stdev; */
+/*   filterMap["scramble"]=filter::scramble; */
+/*   filterMap["countid"]=filter::countid; */
+/*   filterMap["percentile"]=filter::percentile; */
+/*   filterMap["proportion"]=filter::proportion; */
+/*   filterMap["nvalid"]=filter::nvalid; */
+/*   filterMap["first"]=filter::first; */
+/*   filterMap["last"]=filter::last; */
+/*   return filterMap[filterType]; */
+/* }; */
+
 template<typename T> void Jim::firfilter1d_t(Jim& imgWriter, app::AppFactory& app){
   Optionjl<double> taps_opt("taps", "taps", "taps used for spectral filtering");
   Optionjl<std::string> padding_opt("pad","pad", "Padding method for filtering (how to handle edge effects). Choose between: symmetric, replicate, circular, zero (pad with 0).", "symmetric");
@@ -174,4 +199,110 @@ template<typename T> void Jim::smoothNoData1d_t(Jim& imgWriter, app::AppFactory&
     throw;
   }
 }
+
+template<typename T> void Jim::stats1d_t(Jim& imgWriter, app::AppFactory& app){
+  Optionjl<double> nodata_opt("nodata", "nodata", "nodata to interpolate",0);
+  Optionjl<std::string> methods_opt("methods", "methods", "statistical method");
+  Optionjl<double> threshold_opt("t", "threshold", "threshold value(s) to use for threshold filter (one for each class), or threshold to cut for dwt_cut (use 0 to keep all) or dwt_cut_from", 0);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=methods_opt.retrieveOption(app);
+    nodata_opt.retrieveOption(app);
+    threshold_opt.retrieveOption(app);
+    if(!doProcess){
+      std::cout << std::endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+    if(methods_opt.empty()){
+      std::ostringstream errorStream;
+      errorStream << "Error: no method provided" << std::endl;
+      throw(errorStream.str());
+    }
+    if(nrOfBand()>1){
+      std::ostringstream errorStream;
+      errorStream << "Error: multi-band input not supported"<< std::endl;
+      throw(errorStream.str());
+    }
+    if(nrOfPlane()<2){
+      std::ostringstream errorStream;
+      errorStream << "Error: not a 3D object, consider band2plane" << std::endl;
+      throw(errorStream.str());
+    }
+    imgWriter.open(nrOfCol(),nrOfRow(),methods_opt.size(),1,getGDALDataType());
+    imgWriter.setProjection(this->getProjection());
+    double gt[6];
+    this->getGeoTransform(gt);
+    imgWriter.setGeoTransform(gt);
+    statfactory::StatFactory stat;
+    stat.setNoDataValues(nodata_opt);
+    std::vector<double> abscis(nrOfPlane());
+    for(int i=0;i<abscis.size();++i)
+      abscis[i]=i;
+    T* pin=static_cast<T*>(getDataPointer(0));
+    std::vector<T*> pout(methods_opt.size());
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+    for(size_t imethod=0;imethod<methods_opt.size();++imethod){
+      pout[imethod]=static_cast<T*>(imgWriter.getDataPointer(imethod));
+      for(size_t index=0;index<nrOfCol()*nrOfRow();++index){
+        std::vector<double> input(nrOfPlane());
+        for(size_t iplane=0;iplane<nrOfPlane();++iplane)
+          input[iplane]=static_cast<double>(pin[index+iplane*nrOfCol()*nrOfRow()]);
+        for(int imethod=0;imethod<methods_opt.size();++imethod){
+          switch(filter::Filter::getFilterType(methods_opt[imethod])){
+          case(filter::first):
+            pout[imethod][index]=input[0];
+            break;
+          case(filter::last):
+            pout[imethod][index]=input.back();
+            break;
+          case(filter::nvalid):
+            pout[imethod][index]=stat.nvalid(input);
+            break;
+          case(filter::median):
+            pout[imethod][index]=stat.median(input);
+            break;
+          case(filter::min):
+            pout[imethod][index]=stat.mymin(input);
+            break;
+          case(filter::max):
+            pout[imethod][index]=stat.mymax(input);
+            break;
+          case(filter::sum):
+            pout[imethod][index]=stat.sum(input);
+            break;
+          case(filter::var):
+            pout[imethod][index]=stat.var(input);
+            break;
+          case(filter::stdev):
+            pout[imethod][index]=sqrt(stat.var(input));
+            break;
+          case(filter::mean):
+            pout[imethod][index]=stat.mean(input);
+            break;
+          case(filter::percentile):{
+            /* double threshold=(ithreshold<m_threshold.size())? m_threshold[ithreshold] : m_threshold[0]; */
+            pout[imethod][index]=stat.percentile(input,input.begin(),input.end(),threshold_opt[0]);
+            break;
+          }
+          default:
+            std::string errorString="method not supported";
+            throw(errorString);
+            break;
+          }
+        }
+      }
+    }
+  }
+  catch(std::string predefinedString ){
+    std::cout << predefinedString << std::endl;
+    throw;
+  }
+}
+
 #endif // _JLFILTER1D_LIB_H_

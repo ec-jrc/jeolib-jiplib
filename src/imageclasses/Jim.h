@@ -942,6 +942,10 @@ class Jim : public std::enable_shared_from_this<Jim>
   void smoothNoData1d(Jim& imgWriter, app::AppFactory& app);
   template<typename T> void smoothNoData1d_t(Jim& imgWriter, app::AppFactory& app);
   std::shared_ptr<Jim> smoothNoData1d(app::AppFactory& app);
+  ///create dataset with statistics based on 3D raster dataset in spectral/temporal domain
+  void stats1d(Jim& imgWriter, app::AppFactory& app);
+  template<typename T> void stats1d_t(Jim& imgWriter, app::AppFactory& app);
+  std::shared_ptr<Jim> stats1d(app::AppFactory& app);
   ///filter raster dataset in spatial domain
   std::shared_ptr<Jim> firfilter2d(app::AppFactory& app);
   ///filter raster dataset in spatial domain
