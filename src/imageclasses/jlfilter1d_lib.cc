@@ -613,6 +613,7 @@ void Jim::savgolay(Jim& imgWriter, app::AppFactory& app){
   Optionjl<int> savgolay_nr_opt("nr", "nr", "Number of rightward (future) data points used in Savitzky-Golay filter)", 2);
   Optionjl<int> savgolay_ld_opt("ld", "ld", "order of the derivative desired in Savitzky-Golay filter (e.g., ld=0 for smoothed function)", 0);
   Optionjl<int> savgolay_m_opt("m", "m", "order of the smoothing polynomial in Savitzky-Golay filter, also equal to the highest conserved moment; usual values are m = 2 or m = 4)", 2);
+  Optionjl<short> verbose_opt("v", "verbose", "verbose mode if > 0", 0,2);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
@@ -620,6 +621,7 @@ void Jim::savgolay(Jim& imgWriter, app::AppFactory& app){
     savgolay_nr_opt.retrieveOption(app);
     savgolay_ld_opt.retrieveOption(app);
     savgolay_m_opt.retrieveOption(app);
+    verbose_opt.retrieveOption(app);
     if(!doProcess){
       cout << endl;
       std::ostringstream helpStream;
@@ -631,9 +633,18 @@ void Jim::savgolay(Jim& imgWriter, app::AppFactory& app){
     std::vector<double> taps_opt;
     filter1d.getSavGolayCoefficients(taps_opt, this->nrOfPlane(), savgolay_nl_opt[0], savgolay_nr_opt[0], savgolay_ld_opt[0], savgolay_m_opt[0]);
     std::vector<double>::iterator vit;
-    for(vit=taps_opt.begin();vit!=taps_opt.end();++vit)
+    for(vit=taps_opt.begin();vit!=taps_opt.end();++vit){
+      if(verbose_opt[0]>0){
+        std::cout << type2string<double>(*vit) << " ";
+      }
       app.pushLongOption("taps",type2string<double>(*vit));
+    }
 
+    if(verbose_opt[0]>0)
+      std::cout << std::endl;
+
+    if(verbose_opt[0]>0)
+      std::cout << "opening imgWriter" << std::endl;
     imgWriter.open(nrOfCol(),nrOfRow(),nrOfBand(),nrOfPlane(),GDT_Float64);
     imgWriter.setProjection(this->getProjection());
     double gt[6];

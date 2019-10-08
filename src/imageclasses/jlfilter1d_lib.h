@@ -202,7 +202,7 @@ template<typename T> void Jim::smoothNoData1d_t(Jim& imgWriter, app::AppFactory&
 
 template<typename T> void Jim::stats1d_t(Jim& imgWriter, app::AppFactory& app){
   Optionjl<double> nodata_opt("nodata", "nodata", "nodata to interpolate",0);
-  Optionjl<std::string> methods_opt("methods", "methods", "statistical method");
+  Optionjl<std::string> methods_opt("method", "method", "statistical method");
   Optionjl<double> threshold_opt("t", "threshold", "threshold value(s) to use for threshold filter (one for each class), or threshold to cut for dwt_cut (use 0 to keep all) or dwt_cut_from", 0);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
@@ -253,48 +253,46 @@ template<typename T> void Jim::stats1d_t(Jim& imgWriter, app::AppFactory& app){
         std::vector<double> input(nrOfPlane());
         for(size_t iplane=0;iplane<nrOfPlane();++iplane)
           input[iplane]=static_cast<double>(pin[index+iplane*nrOfCol()*nrOfRow()]);
-        for(int imethod=0;imethod<methods_opt.size();++imethod){
-          switch(filter::Filter::getFilterType(methods_opt[imethod])){
-          case(filter::first):
-            pout[imethod][index]=input[0];
-            break;
-          case(filter::last):
-            pout[imethod][index]=input.back();
-            break;
-          case(filter::nvalid):
-            pout[imethod][index]=stat.nvalid(input);
-            break;
-          case(filter::median):
-            pout[imethod][index]=stat.median(input);
-            break;
-          case(filter::min):
-            pout[imethod][index]=stat.mymin(input);
-            break;
-          case(filter::max):
-            pout[imethod][index]=stat.mymax(input);
-            break;
-          case(filter::sum):
-            pout[imethod][index]=stat.sum(input);
-            break;
-          case(filter::var):
-            pout[imethod][index]=stat.var(input);
-            break;
-          case(filter::stdev):
-            pout[imethod][index]=sqrt(stat.var(input));
-            break;
-          case(filter::mean):
-            pout[imethod][index]=stat.mean(input);
-            break;
-          case(filter::percentile):{
-            /* double threshold=(ithreshold<m_threshold.size())? m_threshold[ithreshold] : m_threshold[0]; */
-            pout[imethod][index]=stat.percentile(input,input.begin(),input.end(),threshold_opt[0]);
-            break;
-          }
-          default:
-            std::string errorString="method not supported";
-            throw(errorString);
-            break;
-          }
+        switch(filter::Filter::getFilterType(methods_opt[imethod])){
+        case(filter::first):
+          pout[imethod][index]=input[0];
+          break;
+        case(filter::last):
+          pout[imethod][index]=input.back();
+          break;
+        case(filter::nvalid):
+          pout[imethod][index]=stat.nvalid(input);
+          break;
+        case(filter::median):
+          pout[imethod][index]=stat.median(input);
+          break;
+        case(filter::min):
+          pout[imethod][index]=stat.mymin(input);
+          break;
+        case(filter::max):
+          pout[imethod][index]=stat.mymax(input);
+          break;
+        case(filter::sum):
+          pout[imethod][index]=stat.sum(input);
+          break;
+        case(filter::var):
+          pout[imethod][index]=stat.var(input);
+          break;
+        case(filter::stdev):
+          pout[imethod][index]=sqrt(stat.var(input));
+          break;
+        case(filter::mean):
+          pout[imethod][index]=stat.mean(input);
+          break;
+        case(filter::percentile):{
+          /* double threshold=(ithreshold<m_threshold.size())? m_threshold[ithreshold] : m_threshold[0]; */
+          pout[imethod][index]=stat.percentile(input,input.begin(),input.end(),threshold_opt[0]);
+          break;
+        }
+        default:
+          std::string errorString="method not supported";
+          throw(errorString);
+          break;
         }
       }
     }
