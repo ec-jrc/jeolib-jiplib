@@ -546,8 +546,8 @@ void filter::Filter::getSavGolayCoefficients(vector<double> &tapz, int np, int n
   // c.resize(nl+1+nr);
   vector<double> tmpc(np);
   if(np < nl + nr + 1 || nl < 0 || nr < 0 || ld > m || nl + nr < m) {
-    cerr << "Error: could not get savgolay coefficients, inconsistent arguments (e.g., number of planes are insufficient to perform Savgolay filtering)" << endl;
-    return;
+    std::string errorString="Error: could not get savgolay coefficients, inconsistent arguments (e.g., number of planes are insufficient to perform Savgolay filtering)";
+    throw(errorString);
   }
   vector<int> indx(m + 1, 0);
   vector<double> a((m + 1) * (m + 1), 0.0);

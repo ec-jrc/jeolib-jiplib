@@ -617,6 +617,18 @@ void Jim::d_setMask2D(Jim& mask, Jim& other){
 }
 
 void Jim::d_setMask(Jim& mask, Jim& other){
+  if(mask.getGDALDataType()!=GDT_Byte){
+    std::ostringstream s;
+    s << "Error: mask not of type GDT_Byte";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
+  if(getGDALDataType()!=other.getGDALDataType()){
+    std::ostringstream s;
+    s << "Error: target not of same data type as source";
+    std::cerr << s.str() << std::endl;
+    throw(s.str());
+  }
   if(m_data.empty()){
     std::ostringstream s;
     s << "Error: Jim not initialized, m_data is empty";
