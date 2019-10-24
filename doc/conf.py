@@ -60,7 +60,7 @@ master_doc = 'index'
 # General information about the project.
 project = u'JIPlib'
 copyright = u'European Commission, 2016-2019'
-author = u'Pieter Kempeneers, Davide De Marchi, Pierre Soille'
+author = u'Pieter Kempeneers, Pierre Soille'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -167,7 +167,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'JIPlib.tex', u'JIPlib Documentation',
-     u'Pieter Kempeneers, Davide De Marchi, and Pierre Soille', 'manual'),
+     u'Pieter Kempeneers, and Pierre Soille', 'manual'),
 ]
 
 

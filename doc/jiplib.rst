@@ -2,7 +2,6 @@ MODULE
 Joint image processing library, developed for the JEODPP infrastructure, European Commission JRC - Ispra
 Developed by:
 Pieter Kempeneers: pieter.kempeneers@ec.europa.eu
-Davide De Marchi: davide.de-marchi@ec.europa.eu
 Pierre Soille: pierre.soille@ec.europa.eu
 END
 
