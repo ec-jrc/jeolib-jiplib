@@ -58,9 +58,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'JIPlib'
+project = u'JEOlib: JIPlib'
 copyright = u'European Commission, 2016-2019'
-author = u'Pieter Kempeneers, Pierre Soille'
+author = u'Pieter Kempeneers and Pierre Soille'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -166,8 +166,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'JIPlib.tex', u'JIPlib Documentation',
-     u'Pieter Kempeneers, and Pierre Soille', 'manual'),
+        (master_doc, 'JIPlib.tex', u'JEOlib: JIPlib Documentation',
+     u'Pieter Kempeneers and Pierre Soille', 'manual'),
 ]
 
 
