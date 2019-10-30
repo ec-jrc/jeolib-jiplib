@@ -33,6 +33,7 @@ cd build
 cmake -DPYTHON3=OFF ..
 make -j
 sudo make install
+sudo ldconfig
 ```
 
 # Test the installation
