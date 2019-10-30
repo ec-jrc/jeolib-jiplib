@@ -9,6 +9,21 @@ jiplib is released under an
 [LICENSE.txt](LICENSE.txt))
 
 # Dependencies
+ * libraries: 
+- g++ 
+- make
+- cmake
+- swig
+- libgsl-dev
+- libfann-dev
+- libgdal-dev
+- libjsoncpp-dev
+- libboost-serialization-dev
+- libboost-filesystem-dev
+- libpython3-dev
+- python3-numpy
+- libshp-dev
+- libfftw3-dev
 
  * mialib
 
