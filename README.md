@@ -9,7 +9,7 @@ jiplib is released under an
 [LICENSE.txt](LICENSE.txt))
 
 # Dependencies
- * libraries: 
+ ## libraries: 
 - g++ 
 - make
 - cmake
@@ -25,7 +25,7 @@ jiplib is released under an
 - libshp-dev
 - libfftw3-dev
 
- * mialib
+ ## mialib
 
 # Install
 ## Python3
