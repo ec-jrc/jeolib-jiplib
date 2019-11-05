@@ -163,11 +163,6 @@ template<typename T> void Jim::classifySML_t(Jim& imgWriter, JimList& referenceR
 
     if(verbose_opt[0]>=1)
       std::cout << "end of training" << std::endl;
-    /* std::ostringstream outputStream; */
-    /* boost::archive::text_oarchive oarch(outputStream); */
-    /* /\* std::ofstream ofs(model_opt[0], std::ios::binary); *\/ */
-    /* /\* boost::archive::binary_oarchive oarch(ofs); *\/ */
-    /* oarch << umap; */
 
     if(verbose_opt[0]){
       std::cout << "umap.size(): " << umap.size() << std::endl;
@@ -243,9 +238,10 @@ template<typename T> void Jim::classifySML_t(Jim& imgWriter, JimList& referenceR
   }
 }
 
-///train SML
-template<typename T> std::string Jim::trainSML(JimList& referenceReader, app::AppFactory& app){
-  /* Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier."); */
+///train SML with information in 3D
+//template<typename T> std::string Jim::trainSML_t(JimList& referenceReader, app::AppFactory& app){
+template<typename T> void Jim::trainSML_t(JimList& referenceReader, app::AppFactory& app){
+  Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
   Optionjl<unsigned short> class_opt("c", "class", "Class(es) to extract from reference. Leave empty to extract two classes only: 1 against rest",1);
   Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0);
   Optionjl<short> verbose_opt("v", "verbose", "Verbose level",0,2);
@@ -253,6 +249,7 @@ template<typename T> std::string Jim::trainSML(JimList& referenceReader, app::Ap
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
     doProcess=class_opt.retrieveOption(app);
+    model_opt.retrieveOption(app);
     srcnodata_opt.retrieveOption(app);
     verbose_opt.retrieveOption(app);
 
@@ -282,12 +279,6 @@ template<typename T> std::string Jim::trainSML(JimList& referenceReader, app::Ap
 
     int nrow=nrOfRow();
     int ncol=nrOfCol();
-    int nclass=class_opt.size()>1?class_opt.size():2;
-
-    if(verbose_opt[0]>=1){
-      std::cout << "number of classes: " << nclass << std::endl;
-      std::cout << "create vectors for training" << std::endl;
-    }
 
     //umap: [unique band information]->[index,class1,class2,...] (occurrence is always updated in last node!!!)
     std::map<std::vector<T>,std::vector<std::vector<size_t> > > umap;
@@ -303,8 +294,20 @@ template<typename T> std::string Jim::trainSML(JimList& referenceReader, app::Ap
     OGRCoordinateTransformation *img2ref=OGRCreateCoordinateTransformation(thisSpatialRef, referenceSpatialRef);
 
     std::vector<unsigned char*> pref(referenceReader.size());
+    unsigned short theMax=0;
     for(size_t iref=0;iref<referenceReader.size();++iref)
       pref[iref]=static_cast<unsigned char*>(referenceReader.getImage(iref)->getDataPointer(0));
+    unsigned short nclass=class_opt.size()>1?class_opt.size():2;
+    if(nclass<2){
+      std::ostringstream errorStream;
+      errorStream << "Error: number of classes should be at least 2" << std::endl;
+      throw(errorStream.str());
+    }
+
+    if(verbose_opt[0]>=1){
+      std::cout << "number of classes: " << nclass << std::endl;
+      std::cout << "create vectors for training" << std::endl;
+    }
 
     for(size_t y=0;y<nrow;++y){
       for(size_t x=0;x<ncol;++x){
@@ -340,48 +343,55 @@ template<typename T> std::string Jim::trainSML(JimList& referenceReader, app::Ap
           throw(errorStream.str());
         }
 
-        bool valid=false;
+        bool valid=true;
+        if(srcnodata_opt.size())
+          valid=false;
         for(size_t z=0;z<nrOfPlane();++z){
           pixel[z]=pin[index+z*ncol*nrow];
-          if(pixel[z]!=srcnodata_opt[0]){
-            valid=true;
+          if(srcnodata_opt.size()){
+            //invalid iff pixel has no data in all planes
+            if(pixel[z]!=srcnodata_opt[0])
+              valid=true;
           }
         }
-        /* if(!valid) */
-        /*   continue; */
         auto pit = umap.find(pixel);
-        for(size_t iref=0;iref<referenceReader.size();++iref){
-          bool notFound=true;
-          for(size_t iclass=0;iclass<class_opt.size();++iclass){
-            if(refpixel[iref]==class_opt[iclass]){
-              if(pit!=umap.end()){
-                posclass[1+iclass]=((pit->second).back())[1+iclass]+1;
-              }
-              else
-                posclass[1+iclass]=1;
-              notFound=false;
-              break;
-            }
+        for(size_t iclass=0;iclass<class_opt.size();++iclass){
+          size_t increment=0;
+          for(size_t iref=0;iref<referenceReader.size();++iref){
+            if(refpixel[iref]==class_opt[iclass])
+              ++increment;
           }
-          if(notFound){//for binary classes
-            if(class_opt.size()<2)
-              posclass[1+1]=((pit->second).back())[1+1]+1;
+          if(pit!=umap.end()){
+            posclass[1+iclass]=((pit->second).back())[1+iclass]+increment;
           }
+          else
+            posclass[1+iclass]=increment;
         }
-        if(pit!=umap.end())
-          (pit->second).push_back(posclass);
-        else
-          umap[pixel].push_back(posclass);
+        umap[pixel].push_back(posclass);
       }
     }
-
+    //todo: scale from 0 to 100
+    for(auto mapit = umap.begin(); mapit != umap.end(); ++mapit){
+      std::vector<double> fclass(nclass);
+      double maxValue=0;
+      for(size_t iclass=0;iclass<nclass;++iclass){
+        double value=((mapit->second).back())[1+iclass];
+        fclass[iclass]=value;
+        if(fclass[iclass]>maxValue)
+          maxValue=fclass[iclass];
+      }
+      double scale=(maxValue>0) ? 100.0/maxValue : 0;
+      for(size_t iclass=0;iclass<nclass;++iclass)
+        ((mapit->second).back())[1+iclass]*=scale;
+    }
     if(verbose_opt[0]>=1)
-      std::cout << "write to output" << std::endl;
-    std::ostringstream outputStream;
-    boost::archive::text_oarchive oarch(outputStream);
-    /* std::ofstream ofs(model_opt[0], std::ios::binary); */
-    /* boost::archive::binary_oarchive oarch(ofs); */
-    oarch << umap;
+      std::cout << "end of training, write to output" << std::endl;
+    /* std::ostringstream outputStream; */
+    /* boost::archive::text_oarchive oarch(outputStream); */
+    std::ofstream ofs(model_opt[0], std::ios::binary);
+    boost::archive::binary_oarchive oarch(ofs);
+    /* oarch << umap; */
+    oarch & umap;
 
     if(verbose_opt[0]){
       std::cout << "umap.size(): " << umap.size() << std::endl;
@@ -396,7 +406,7 @@ template<typename T> std::string Jim::trainSML(JimList& referenceReader, app::Ap
         }
       }
     }
-    return(outputStream.str());
+    //return(outputStream.str());
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
@@ -405,7 +415,7 @@ template<typename T> std::string Jim::trainSML(JimList& referenceReader, app::Ap
 }
 
 ///classify 3D raster dataset with SML
-template<typename T> void Jim::classifySML(Jim& imgWriter, app::AppFactory& app){
+template<typename T> void Jim::classifySML_t(Jim& imgWriter, app::AppFactory& app){
   Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
   Optionjl<unsigned short> class_opt("c", "class", "Class(es) to extract from reference. Leave empty to extract two classes only: 1 against rest",1);
   Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0);
@@ -437,16 +447,21 @@ template<typename T> void Jim::classifySML(Jim& imgWriter, app::AppFactory& app)
       throw(errorString);
     }
 
+    T* pin=static_cast<T*>(getDataPointer(0));
+
     if(verbose_opt[0]>=1)
       std::cout << "start SML classification" << std::endl;
 
-    //umap: [unique feature information]->[index,class1,class2,...]
+    //umap: [unique band information]->[index,class1,class2,...] (occurrence is always updated in last node!!!)
     std::map<std::vector<T>,std::vector<std::vector<size_t> > > umap;
+    std::vector<T> pixel(nrOfPlane());//pixel with plane information
 
-    std::ifstream ifs(model_opt[0]);
+    std::ifstream ifs(model_opt[0],std::ios::binary);
     umap.clear();
-    boost::archive::text_iarchive iarch(ifs);
-    iarch >> umap;
+    boost::archive::binary_iarchive iarch(ifs);
+    /* boost::archive::text_iarchive iarch(ifs); */
+    /* iarch >> umap; */
+    iarch & umap;
 
     int nclass=(umap.begin()->second).back().size()-1;
 
@@ -460,53 +475,38 @@ template<typename T> void Jim::classifySML(Jim& imgWriter, app::AppFactory& app)
       imgWriter.setNoData(dstnodata_opt);
       imgWriter.copyGeoTransform(*this);
       imgWriter.setProjection(this->getProjection());
+      //initialize imgWriter with dstnodata_opt[0]
+      imgWriter.setData(dstnodata_opt[0]);
     }
-    //initialize imgWriter with dstnodata_opt[0]
     std::vector<unsigned char*> pout(nclass);
-    for(size_t iclass=0;iclass<nclass;++iclass){
-      //imgWriter.setData(0,iclass);
+    for(size_t iclass=0;iclass<nclass;++iclass)
       pout[iclass]=static_cast<unsigned char*>(imgWriter.getDataPointer(iclass));
-    }
 
-    //loop through umap and assign pixel values based on occurrence
-    for(auto mapit = umap.begin(); mapit != umap.end(); ++mapit){
-      std::vector<double> fclass(nclass);
-      double maxValue=0;
-      for(size_t iclass=0;iclass<nclass;++iclass){
-        double value=((mapit->second).back())[1+iclass];
-        fclass[iclass]=value;
-        if(fclass[iclass]>maxValue)
-          maxValue=fclass[iclass];
-      }
-      double scale=255.0/maxValue;
-      for(size_t iclass=0;iclass<nclass;++iclass)
-        fclass[iclass]*=scale;
-      for(auto tupit = mapit->second.begin(); tupit != mapit->second.end(); ++tupit){
-        if(verbose_opt[0]>1)
-          std::cout << (*tupit)[0] << " = " << (*tupit)[0]/ncol << " " << (*tupit)[0]%ncol << ": ";
-        for(unsigned int iclass=0;iclass<nclass;++iclass){
-          if(static_cast<size_t>(((*tupit)[0]))/ncol<0){
-            std::ostringstream errorStream;
-            errorStream << "Error: not within rows: " << static_cast<size_t>(((*tupit)[0]))/ncol << std::endl;
-            throw(errorStream.str());
-          }
-          if(static_cast<size_t>(((*tupit)[0]))/ncol>nrow){
-            std::ostringstream errorStream;
-            errorStream << "Error: not within rows: " << static_cast<size_t>(((*tupit)[0]))/ncol << std::endl;
-            throw(errorStream.str());
-          }
-          if(static_cast<size_t>(((*tupit)[0]))%ncol<0){
-            std::ostringstream errorStream;
-            errorStream << "Error: not within cols: " << static_cast<size_t>(((*tupit)[0]))%ncol << std::endl;
-            throw(errorStream.str());
-          }
-          if(verbose_opt[0]>1)
-            std::cout << static_cast<unsigned short>(fclass[iclass]) << " ";
-          pout[iclass][(*tupit)[0]]=static_cast<unsigned char>(fclass[iclass]);
+    bool valid=true;
+    if(srcnodata_opt.size())
+      valid=false;
+    for(size_t index=0;index<nrow*ncol;++index){
+      for(size_t z=0;z<nrOfPlane();++z){
+        pixel[z]=pin[index+z*ncol*nrow];
+        if(srcnodata_opt.size()){
+          //invalid iff pixel has no data in all planes
+          if(pixel[z]!=srcnodata_opt[0])
+            valid=true;
         }
-        if(verbose_opt[0]>1)
-          std::cout << std::endl;
       }
+      if(!valid){
+        for(size_t iclass=0;iclass<nclass;++iclass)
+          pout[iclass][index]=static_cast<unsigned char>(dstnodata_opt[0]);
+        continue;
+      }
+      auto pit = umap.find(pixel);
+      if(pit==umap.end()){
+        for(size_t iclass=0;iclass<nclass;++iclass)
+          pout[iclass][index]=static_cast<unsigned char>(dstnodata_opt[0]);
+        continue;
+      }
+      for(size_t iclass=0;iclass<nclass;++iclass)
+        pout[iclass][index]=(pit->second.back())[1+iclass];
     }
   }
   catch(std::string errorString){
@@ -515,7 +515,119 @@ template<typename T> void Jim::classifySML(Jim& imgWriter, app::AppFactory& app)
   }
 }
 
-template<typename T> std::string Jim::trainSMLband(JimList& referenceReader, app::AppFactory& app){
+///classify 3D raster dataset with SML
+/* template<typename T> void Jim::classifySML_t(Jim& imgWriter, app::AppFactory& app){ */
+/*   Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier."); */
+/*   Optionjl<unsigned short> class_opt("c", "class", "Class(es) to extract from reference. Leave empty to extract two classes only: 1 against rest",1); */
+/*   Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0); */
+/*   Optionjl<double> dstnodata_opt("dstnodata", "dstnodata", "Nodata value to put where image is masked as nodata", 0); */
+/*   Optionjl<short> verbose_opt("v", "verbose", "Verbose level",0,2); */
+
+/*   bool doProcess;//stop process when program was invoked with help option (-h --help) */
+/*   try{ */
+/*     doProcess=model_opt.retrieveOption(app); */
+/*     class_opt.retrieveOption(app); */
+/*     srcnodata_opt.retrieveOption(app); */
+/*     dstnodata_opt.retrieveOption(app); */
+/*     verbose_opt.retrieveOption(app); */
+
+/*     if(!doProcess){ */
+/*       std::cout << std::endl; */
+/*       std::ostringstream helpStream; */
+/*       helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl; */
+/*       throw(helpStream.str());//help was invoked, stop processing */
+/*     } */
+
+/*     if(model_opt.empty()){ */
+/*       std::string errorString="Error: model option to write model not set"; */
+/*       throw(errorString); */
+/*     } */
+
+/*     if(nrOfBand()>1){ */
+/*       std::string errorString="Error: only single band (multi-plane) datasets are supported, consider band2plane"; */
+/*       throw(errorString); */
+/*     } */
+
+/*     if(verbose_opt[0]>=1) */
+/*       std::cout << "start SML classification" << std::endl; */
+
+/*     //umap: [unique band information]->[index,class1,class2,...] (occurrence is always updated in last node!!!) */
+/*     std::map<std::vector<T>,std::vector<std::vector<size_t> > > umap; */
+
+/*     std::ifstream ifs(model_opt[0]); */
+/*     umap.clear(); */
+/*     boost::archive::text_iarchive iarch(ifs); */
+/*     iarch >> umap; */
+
+/*     int nclass=(umap.begin()->second).back().size()-1; */
+
+/*     int nrow=nrOfRow(); */
+/*     int ncol=nrOfCol(); */
+/*     if(this->isInit()){ */
+/*       if(verbose_opt[0]>=1) */
+/*         std::cout << "We are in initialize" << std::endl; */
+/*       imgWriter.open(ncol,nrow,nclass,GDT_Byte); */
+/*       imgWriter.GDALSetNoDataValue(dstnodata_opt[0]); */
+/*       imgWriter.setNoData(dstnodata_opt); */
+/*       imgWriter.copyGeoTransform(*this); */
+/*       imgWriter.setProjection(this->getProjection()); */
+/*       //initialize imgWriter with dstnodata_opt[0] */
+/*       imgWriter.setData(dstnodata_opt[0]); */
+/*     } */
+/*     std::vector<unsigned char*> pout(nclass); */
+/*     for(size_t iclass=0;iclass<nclass;++iclass){ */
+/*       pout[iclass]=static_cast<unsigned char*>(imgWriter.getDataPointer(iclass)); */
+/*     } */
+
+/*     //loop through umap and assign pixel values based on occurrence */
+/*     for(auto mapit = umap.begin(); mapit != umap.end(); ++mapit){ */
+/*       std::vector<double> fclass(nclass); */
+/*       double maxValue=0; */
+/*       for(size_t iclass=0;iclass<nclass;++iclass){ */
+/*         double value=((mapit->second).back())[1+iclass]; */
+/*         fclass[iclass]=value; */
+/*         if(fclass[iclass]>maxValue) */
+/*           maxValue=fclass[iclass]; */
+/*       } */
+/*       double scale=(maxValue>0) ? 100.0/maxValue : 0; */
+/*       for(size_t iclass=0;iclass<nclass;++iclass) */
+/*         fclass[iclass]*=scale; */
+/*       for(auto tupit = mapit->second.begin(); tupit != mapit->second.end(); ++tupit){ */
+/*         if(verbose_opt[0]>1) */
+/*           std::cout << (*tupit)[0] << " = " << (*tupit)[0]/ncol << " " << (*tupit)[0]%ncol << ": "; */
+/*         for(unsigned int iclass=0;iclass<nclass;++iclass){ */
+/*           if(static_cast<size_t>(((*tupit)[0]))/ncol<0){ */
+/*             std::ostringstream errorStream; */
+/*             errorStream << "Error: not within rows: " << static_cast<size_t>(((*tupit)[0]))/ncol << std::endl; */
+/*             throw(errorStream.str()); */
+/*           } */
+/*           if(static_cast<size_t>(((*tupit)[0]))/ncol>nrow){ */
+/*             std::ostringstream errorStream; */
+/*             errorStream << "Error: not within rows: " << static_cast<size_t>(((*tupit)[0]))/ncol << std::endl; */
+/*             throw(errorStream.str()); */
+/*           } */
+/*           if(static_cast<size_t>(((*tupit)[0]))%ncol<0){ */
+/*             std::ostringstream errorStream; */
+/*             errorStream << "Error: not within cols: " << static_cast<size_t>(((*tupit)[0]))%ncol << std::endl; */
+/*             throw(errorStream.str()); */
+/*           } */
+/*           if(verbose_opt[0]>1) */
+/*             std::cout << static_cast<unsigned short>(fclass[iclass]) << " "; */
+/*           pout[iclass][(*tupit)[0]]=static_cast<unsigned char>(fclass[iclass]); */
+/*         } */
+/*         if(verbose_opt[0]>1) */
+/*           std::cout << std::endl; */
+/*       } */
+/*     } */
+/*   } */
+/*   catch(std::string errorString){ */
+/*     std::cerr << errorString << std::endl; */
+/*     throw; */
+/*   } */
+/* } */
+
+///train SML in 2D with information in bands
+template<typename T> std::string Jim::trainSML2d_t(JimList& referenceReader, app::AppFactory& app){
   /* Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier."); */
   Optionjl<unsigned int> band_opt("b", "band", "Band index (starting from 0, either use band option or use start to end)");
   Optionjl<unsigned int> bstart_opt("sband", "startband", "Start band sequence number");
@@ -1476,10 +1588,10 @@ template<typename T> std::string Jim::trainSMLband(JimList& referenceReader, app
  * @param app application specific option arguments
  * @return output classified raster dataset
  **/
-template<typename T> std::shared_ptr<Jim> Jim::classifySML(app::AppFactory& app){
+template<typename T> std::shared_ptr<Jim> Jim::classifySML_t(app::AppFactory& app){
   try{
     std::shared_ptr<Jim> imgWriter=createImg();
-    classifySML<T>(*imgWriter, app);
+    classifySML_t<T>(*imgWriter, app);
     return(imgWriter);
   }
   catch(std::string helpString){

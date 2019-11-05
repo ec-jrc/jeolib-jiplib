@@ -12,8 +12,11 @@ enum CLASSIFIER { NONE = 0, SVM = 1, ANN = 2, SML = 3};
 
 static CLASSIFIER getClassifier(const std::string &method){
   std::map<std::string,CLASSIFIER> methodMap;
+  methodMap["SVM"]=SVM;
   methodMap["svm"]=SVM;
+  methodMap["ANN"]=ANN;
   methodMap["ann"]=ANN;
+  methodMap["SML"]=SML;
   methodMap["sml"]=SML;
   if(methodMap.count(method))
     return(methodMap[method]);

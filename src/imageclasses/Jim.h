@@ -962,7 +962,8 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///check the difference between two images (validate in case of classification image)
   CPLErr validate(app::AppFactory& app);
   ///train raster dataset
-  CPLErr train(JimList& referenceReader, app::AppFactory& app);
+  /* void train(JimList& referenceReader, app::AppFactory& app); */
+  /* void train2d(JimList& referenceReader, app::AppFactory& app); */
   ///classify raster dataset
   void classify(Jim& imgWriter, app::AppFactory& app);
   ///classify raster dataset only for in memory
@@ -985,17 +986,21 @@ class Jim : public std::enable_shared_from_this<Jim>
   //std::shared_ptr<Jim> ann(app::AppFactory& app);
   ///sml train and classify
   void classifySML(Jim& imgWriter, JimList& referenceReader, app::AppFactory& app);
+  void classifySML(Jim& imgWriter, app::AppFactory& app);
   template<typename T> void classifySML_t(Jim& imgWriter, JimList& referenceReader, app::AppFactory& app);
   std::shared_ptr<Jim> classifySML(JimList& referenceReader, app::AppFactory& app);
+  std::shared_ptr<Jim> classifySML(app::AppFactory& app);
   ///train sml raster dataset
-  template<typename T> std::string trainSML(JimList& referenceReader, app::AppFactory& app);
-  template<typename T> std::string trainSMLband(JimList& referenceReader, app::AppFactory& app);
+  void trainSML(JimList& referenceReader, app::AppFactory& app);
+  void trainSML2d(JimList& referenceReader, app::AppFactory& app);
+  template<typename T> void trainSML_t(JimList& referenceReader, app::AppFactory& app);
+  template<typename T> std::string trainSML2d_t(JimList& referenceReader, app::AppFactory& app);
   ///train sml raster dataset in memory
-  std::string trainMem(JimList& referenceReader, app::AppFactory& app);
+  /* std::string trainMem(JimList& referenceReader, app::AppFactory& app); */
   ///classify raster dataset using SML
-  template<typename T> void classifySML(Jim& imgWriter, app::AppFactory& app);
+  template<typename T> void classifySML_t(Jim& imgWriter, app::AppFactory& app);
   ///sml raster dataset only for in memory
-  template<typename T> std::shared_ptr<Jim> classifySML(app::AppFactory& app);
+  template<typename T> std::shared_ptr<Jim> classifySML_t(app::AppFactory& app);
   ///sml raster dataset
   /* template<typename T> CPLErr classifySML(Jim& imgWriter, app::AppFactory& app); */
   ///stretch raster dataset

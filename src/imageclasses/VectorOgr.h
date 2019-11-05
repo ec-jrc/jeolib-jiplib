@@ -401,12 +401,9 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///sort features by label and store in map
   OGRErr sortByLabel(std::map<std::string,Vector2d<float> > &mapPixels, const std::string& label="label", const std::vector<std::string>& bandNames=std::vector<std::string>());
   ///train classifier
-#ifdef SWIG
-  %pythonprepend train(app::AppFactory&)  "\"\"\"HELP.METHOD.train(dict)\"\"\""
-#endif
-  OGRErr train(app::AppFactory& app);
+  void train(app::AppFactory& app);
   ///train in memory without writing to file
-  std::string trainMem(app::AppFactory& app);
+  /* std::string trainMem(app::AppFactory& app); */
   ///classify
   std::shared_ptr<VectorOgr> classify(app::AppFactory& app);
   ///classify
