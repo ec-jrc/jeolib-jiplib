@@ -403,7 +403,7 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///train classifier
   void train(app::AppFactory& app);
   ///train in memory without writing to file
-  /* std::string trainMem(app::AppFactory& app); */
+  std::string trainMem(app::AppFactory& app);
   ///classify
   std::shared_ptr<VectorOgr> classify(app::AppFactory& app);
   ///classify

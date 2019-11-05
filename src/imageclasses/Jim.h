@@ -996,7 +996,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   template<typename T> void trainSML_t(JimList& referenceReader, app::AppFactory& app);
   template<typename T> std::string trainSML2d_t(JimList& referenceReader, app::AppFactory& app);
   ///train sml raster dataset in memory
-  /* std::string trainMem(JimList& referenceReader, app::AppFactory& app); */
+  std::string trainMem(JimList& referenceReader, app::AppFactory& app);
   ///classify raster dataset using SML
   template<typename T> void classifySML_t(Jim& imgWriter, app::AppFactory& app);
   ///sml raster dataset only for in memory

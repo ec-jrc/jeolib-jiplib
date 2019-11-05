@@ -119,86 +119,86 @@ void VectorOgr::train(app::AppFactory& app){
   }
 }
 
-// std::string Jim::trainMem(JimList& referenceReader, app::AppFactory& app){
-//   //--------------------------- command line options ------------------------------------
-//   Optionjl<string> method_opt("m", "method", "classification method: 'svm' (support vector machine), 'ann' (artificial neural network)");
+std::string Jim::trainMem(JimList& referenceReader, app::AppFactory& app){
+  //--------------------------- command line options ------------------------------------
+  Optionjl<string> method_opt("m", "method", "classification method: 'svm' (support vector machine), 'ann' (artificial neural network)");
 
-//   bool doProcess;//stop process when program was invoked with help option (-h --help)
-//   try{
-//     doProcess=method_opt.retrieveOption(app);
-//     if(method_opt.empty()){
-//       cout << endl;
-//       std::ostringstream helpStream;
-//       helpStream << "Error: no classification method provided" << std::endl;
-//       throw(helpStream.str());//help was invoked, stop processing
-//     }
-//     switch(getClassifier(method_opt[0])){
-//     case(SML):
-//       switch(getDataType()){
-//       case(GDT_Byte):
-//         return(trainSML_t<unsigned char>(referenceReader, app));
-//       case(GDT_Int16):
-//         return(trainSML_t<unsigned short>(referenceReader, app));
-//       case(GDT_UInt16):
-//         return(trainSML_t<short>(referenceReader, app));
-//       case(GDT_Int32):
-//         return(trainSML_t<int>(referenceReader, app));
-//       case(GDT_UInt32):
-//         return(trainSML_t<unsigned int>(referenceReader, app));
-//       case(GDT_Float32):
-//         // return(trainSML<float>(referenceReader, app));
-//       case(GDT_Float64):
-//         // return(trainSML<double>(referenceReader, app));
-//       default:
-//         std::ostringstream errorStream;
-//         errorStream << "Error: data type " << getDataType() << " not supported" << std::endl;
-//         throw(errorStream.str());//help was invoked, stop processing
-//       }
-//     default:
-//       std::ostringstream errorStream;
-//       errorStream << "Error: classification method " << method_opt[0] << " not supported" << std::endl;
-//       throw(errorStream.str());//help was invoked, stop processing
-//     }
-//     return(std::string());
-//   }
-//   catch(string predefinedString){
-//     std::cerr << predefinedString << std::endl;
-//     throw;
-//   }
-// }
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=method_opt.retrieveOption(app);
+    if(method_opt.empty()){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "Error: no classification method provided" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+    switch(getClassifier(method_opt[0])){
+    // case(SML):
+    //   switch(getDataType()){
+    //   case(GDT_Byte):
+    //     return(trainSML_t<unsigned char>(referenceReader, app));
+    //   case(GDT_Int16):
+    //     return(trainSML_t<unsigned short>(referenceReader, app));
+    //   case(GDT_UInt16):
+    //     return(trainSML_t<short>(referenceReader, app));
+    //   case(GDT_Int32):
+    //     return(trainSML_t<int>(referenceReader, app));
+    //   case(GDT_UInt32):
+    //     return(trainSML_t<unsigned int>(referenceReader, app));
+    //   case(GDT_Float32):
+    //     // return(trainSML<float>(referenceReader, app));
+    //   case(GDT_Float64):
+    //     // return(trainSML<double>(referenceReader, app));
+    //   default:
+    //     std::ostringstream errorStream;
+    //     errorStream << "Error: data type " << getDataType() << " not supported" << std::endl;
+    //     throw(errorStream.str());//help was invoked, stop processing
+    //   }
+    default:
+      std::ostringstream errorStream;
+      errorStream << "Error: classification method " << method_opt[0] << " not supported" << std::endl;
+      throw(errorStream.str());//help was invoked, stop processing
+    }
+    return(std::string());
+  }
+  catch(string predefinedString){
+    std::cerr << predefinedString << std::endl;
+    throw;
+  }
+}
 
-// std::string VectorOgr::trainMem(app::AppFactory& app){
-//   //--------------------------- command line options ------------------------------------
-//   Optionjl<string> method_opt("m", "method", "classification method: 'svm' (support vector machine), 'ann' (artificial neural network)");
+std::string VectorOgr::trainMem(app::AppFactory& app){
+  //--------------------------- command line options ------------------------------------
+  Optionjl<string> method_opt("m", "method", "classification method: 'svm' (support vector machine), 'ann' (artificial neural network)");
 
-//   bool doProcess;//stop process when program was invoked with help option (-h --help)
-//   try{
-//     doProcess=method_opt.retrieveOption(app);
-//     if(method_opt.empty()){
-//       cout << endl;
-//       std::ostringstream helpStream;
-//       helpStream << "Error: no classification method provided" << std::endl;
-//       throw(helpStream.str());//help was invoked, stop processing
-//     }
-//     switch(getClassifier(method_opt[0])){
-//     case(SVM):
-//       return(trainSVM(app));
-//       break;
-//     case(ANN):
-//       return(trainANN(app));
-//       break;
-//     default:
-//       std::ostringstream errorStream;
-//       errorStream << "Error: classification method " << method_opt[0] << " not supported" << std::endl;
-//       throw(errorStream.str());//help was invoked, stop processing
-//     }
-//     return(std::string());
-//   }
-//   catch(string predefinedString){
-//     std::cerr << predefinedString << std::endl;
-//     throw;
-//   }
-// }
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=method_opt.retrieveOption(app);
+    if(method_opt.empty()){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "Error: no classification method provided" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+    switch(getClassifier(method_opt[0])){
+    case(SVM):
+      return(trainSVM(app));
+      break;
+    case(ANN):
+      return(trainANN(app));
+      break;
+    default:
+      std::ostringstream errorStream;
+      errorStream << "Error: classification method " << method_opt[0] << " not supported" << std::endl;
+      throw(errorStream.str());//help was invoked, stop processing
+    }
+    return(std::string());
+  }
+  catch(string predefinedString){
+    std::cerr << predefinedString << std::endl;
+    throw;
+  }
+}
 
 void VectorOgr::classify(VectorOgr& ogrWriter, app::AppFactory& app){
   //--------------------------- command line options ------------------------------------
