@@ -177,7 +177,7 @@ if (BUILD_WITH_FANN)
     include_directories(${FANN_INCLUDE_DIRS})
     add_definitions(-DFANN_DLL)
   else(FANN_FOUND)
-    message(STATUS "Error: could not find FANN packagei version >= 2.2")
+    message(STATUS "Error: could not find FANN package version >= 2.2")
   endif()
 endif(BUILD_WITH_FANN)
 

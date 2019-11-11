@@ -390,8 +390,20 @@ template<typename T> void Jim::trainSML_t(JimList& referenceReader, app::AppFact
     /* boost::archive::text_oarchive oarch(outputStream); */
     std::ofstream ofs(model_opt[0], std::ios::binary);
     boost::archive::binary_oarchive oarch(ofs);
+    try{
+      oarch & umap;
+    }
+    catch (const boost::archive::archive_exception &e) {
+      if (e.code != boost::archive::archive_exception::output_stream_error) {
+        std::cerr << "Error: could not write model 0" << std::endl;
+        throw;
+      }
+      else{
+        std::cerr << "Error: could not write model 1" << std::endl;
+        throw;
+      }
+    }
     /* oarch << umap; */
-    oarch & umap;
 
     if(verbose_opt[0]){
       std::cout << "umap.size(): " << umap.size() << std::endl;
@@ -417,7 +429,6 @@ template<typename T> void Jim::trainSML_t(JimList& referenceReader, app::AppFact
 ///classify 3D raster dataset with SML
 template<typename T> void Jim::classifySML_t(Jim& imgWriter, app::AppFactory& app){
   Optionjl<std::string> model_opt("model", "model", "Model filename to save trained classifier.");
-  Optionjl<unsigned short> class_opt("c", "class", "Class(es) to extract from reference. Leave empty to extract two classes only: 1 against rest",1);
   Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Nodata value in source",0);
   Optionjl<double> dstnodata_opt("dstnodata", "dstnodata", "Nodata value to put where image is masked as nodata", 0);
   Optionjl<short> verbose_opt("v", "verbose", "Verbose level",0,2);
@@ -425,7 +436,6 @@ template<typename T> void Jim::classifySML_t(Jim& imgWriter, app::AppFactory& ap
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
     doProcess=model_opt.retrieveOption(app);
-    class_opt.retrieveOption(app);
     srcnodata_opt.retrieveOption(app);
     dstnodata_opt.retrieveOption(app);
     verbose_opt.retrieveOption(app);
@@ -461,7 +471,19 @@ template<typename T> void Jim::classifySML_t(Jim& imgWriter, app::AppFactory& ap
     boost::archive::binary_iarchive iarch(ifs);
     /* boost::archive::text_iarchive iarch(ifs); */
     /* iarch >> umap; */
-    iarch & umap;
+    try{
+      iarch & umap;
+    }
+    catch (const boost::archive::archive_exception &e) {
+      if (e.code != boost::archive::archive_exception::input_stream_error) {
+        std::cerr << "Error: could not read model 0" << std::endl;
+        throw;
+      }
+      else{
+        std::cerr << "Error: could not read model 1" << std::endl;
+        throw;
+      }
+    }
 
     int nclass=(umap.begin()->second).back().size()-1;
 

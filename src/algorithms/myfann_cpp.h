@@ -4,7 +4,6 @@
 /*
  *
  *  Fast Artificial Neural Network (fann) C++ Wrapper
-Author(s): Pieter.Kempeneers@ec.europa.eu
  *  Copyright (C) 2004-2006 created by freegoldbar (at) yahoo dot com
  *
  *  This wrapper is free software; you can redistribute it and/or
@@ -32,7 +31,6 @@ Author(s): Pieter.Kempeneers@ec.europa.eu
  *  and <training_data>. To use the wrapper include
  *  doublefann.h, floatfann.h or fixedfann.h before the
  *  fann_cpp.h header file. To get started see xor_sample.cpp
-Author(s): Pieter.Kempeneers@ec.europa.eu
  *  in the examples directory. The license is LGPL. Copyright (C)
  *  2004-2006 created by <freegoldbar@yahoo.com>.
  *
@@ -63,6 +61,9 @@ Author(s): Pieter.Kempeneers@ec.europa.eu
  *
  *  Note: Changes
  *
+ *  Version myfann_cpp.h: Pieter.Kempeneers@ec.europa.eu
+ *     - support of stl::vector data type
+ *     - custom serialization of SVM model create_from_file and save
  *  Version 2.1.0:
  *     - General update to fann C library 2.1.0 with support for new functionality
  *     - Due to changes in the C API the C++ API is not fully backward compatible:
@@ -1067,7 +1068,7 @@ public:
         bool create_standard(unsigned int num_layers, ...)
         {
             va_list layers;
-      std::vector<unsigned int> arr(num_layers);//pk
+            std::vector<unsigned int> arr(num_layers);//pk
             //unsigned int arr[num_layers];
 
             va_start(layers, num_layers);
@@ -1124,7 +1125,7 @@ public:
         bool create_sparse(float connection_rate, unsigned int num_layers, ...)
         {
             va_list layers;
-      std::vector<unsigned int> arr(num_layers);//pk
+            std::vector<unsigned int> arr(num_layers);//pk
             //unsigned int arr[num_layers];
 
             va_start(layers, num_layers);
@@ -1180,7 +1181,7 @@ public:
         bool create_shortcut(unsigned int num_layers, ...)
         {
             va_list layers;
-      std::vector<unsigned int> arr(num_layers);//pk
+            std::vector<unsigned int> arr(num_layers);//pk
             //unsigned int arr[num_layers];
 
             va_start(layers, num_layers);
