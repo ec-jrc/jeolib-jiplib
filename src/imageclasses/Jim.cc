@@ -2073,8 +2073,24 @@ CPLErr Jim::open(app::AppFactory &app){
     m_nband=band_opt.size();
 
     GDALRasterBand *poBand;//we will fetch the first band to obtain the gds metadata
-    poBand = m_gds->GetRasterBand(band_opt[0]+1);//GDAL uses 1 based index
 
+    if(m_gds){
+      char **papszMetadata;
+      papszMetadata = m_gds->GetMetadata("SUBDATASETS");
+      vector<string> LayersAll;
+      if( papszMetadata ){
+        std::ostringstream errorStream;
+        errorStream << "Warning: dataset has subdatasets, please select a subdataset" << std::endl;
+        throw(errorStream.str());
+      }
+      else
+        poBand = m_gds->GetRasterBand(band_opt[0]+1);//GDAL uses 1 based index
+    }
+    else{
+      std::ostringstream errorStream;
+      errorStream << "Error: no GDAL dataset" << std::endl;
+      throw(errorStream.str());
+    }
     std::vector<double> gds_bb;
     getBoundingBox(gds_bb);
     if(dx_opt.empty()){
