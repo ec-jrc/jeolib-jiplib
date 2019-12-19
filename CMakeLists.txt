@@ -101,6 +101,8 @@ INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIR})
 
 find_package(GDAL 2.00 REQUIRED)
 if(GDAL_FOUND)
+  # set(GDAL_VERSION_MAJOR "2" CACHE STRING " ")
+  # message(STATUS "GDAL version found: ${GDAL_VERSION_MAJOR}")
   include_directories(${GDAL_INCLUDE_DIRS})
 endif()
 

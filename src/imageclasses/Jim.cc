@@ -1902,7 +1902,12 @@ CPLErr Jim::open(app::AppFactory &app){
     if(sourceSRS_opt.size())
       setProjectionProj4(sourceSRS_opt[0]);
     // OGRSpatialReference gdsSpatialRef(m_gds->GetProjectionRef());
-    OGRSpatialReference gdsSpatialRef(getProjectionRef().c_str());
+    OGRSpatialReference gdsSpatialRef;
+#if GDAL_VERSION_MAJOR < 3
+    gdsSpatialRef=(getSpatialRef());
+#else
+    gdsSpatialRef=*(getSpatialRef());
+#endif
     if(extent_opt.size()){
       double e_ulx;
       double e_uly;
