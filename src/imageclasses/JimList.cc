@@ -255,8 +255,15 @@ bool JimList::covers(const Jim& imgRaster, bool all) const{
   //image bounding box in SRS of the raster
   double img_ulx,img_uly,img_lrx,img_lry;
   imgRaster.getBoundingBox(img_ulx,img_uly,img_lrx,img_lry);
-  OGRSpatialReference listSpatialRef(getImage(0)->getProjectionRef().c_str());
-  OGRSpatialReference rasterSpatialRef(imgRaster.getProjectionRef().c_str());
+  OGRSpatialReference listSpatialRef;
+  OGRSpatialReference rasterSpatialRef;
+#if GDAL_VERSION_MAJOR < 3
+  listSpatialRef=(getImage(0)->getSpatialRef());
+  rasterSpatialRef=(imgRaster.getSpatialRef());
+#else
+  listSpatialRef=*(getImage(0)->getSpatialRef());
+  rasterSpatialRef=*(imgRaster.getSpatialRef());
+#endif
   OGRCoordinateTransformation *raster2list = OGRCreateCoordinateTransformation(&rasterSpatialRef, &listSpatialRef);
   if(listSpatialRef.IsSame(&rasterSpatialRef)){
     raster2list=0;

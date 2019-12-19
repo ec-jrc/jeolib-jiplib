@@ -272,12 +272,20 @@ CPLErr Jim::extractImg(Jim& classReader, VectorOgr& ogrWriter, app::AppFactory& 
     for(std::vector<std::string>::const_iterator optionIt=option_opt.begin();optionIt!=option_opt.end();++optionIt)
       papszOptions=CSLAddString(papszOptions,optionIt->c_str());
 
-    OGRSpatialReference classSRS(classReader.getProjectionRef().c_str());
-    OGRSpatialReference *classSpatialRef=&classSRS;
-    OGRSpatialReference thisSRS(getProjectionRef().c_str());
-    OGRSpatialReference *thisSpatialRef=&thisSRS;
-    OGRCoordinateTransformation *ref2img= OGRCreateCoordinateTransformation(classSpatialRef, thisSpatialRef);
-    if(thisSpatialRef->IsSame(classSpatialRef)){
+    // OGRSpatialReference classSRS(classReader.getProjectionRef().c_str());
+    OGRSpatialReference classSpatialRef;
+    OGRSpatialReference thisSpatialRef;
+    // OGRSpatialReference thisSRS;
+
+#if GDAL_VERSION_MAJOR < 3
+    classSpatialRef=(classReader.getSpatialRef());
+    thisSpatialRef=(getSpatialRef());
+#else
+    classSpatialRef=*(classReader.getSpatialRef());
+    thisSpatialRef=*(getSpatialRef());
+#endif
+    OGRCoordinateTransformation *ref2img= OGRCreateCoordinateTransformation(&classSpatialRef, &thisSpatialRef);
+    if(thisSpatialRef.IsSame(&classSpatialRef)){
       // img2ref=0;
       ref2img=0;
     }
@@ -480,7 +488,7 @@ CPLErr Jim::extractImg(Jim& classReader, VectorOgr& ogrWriter, app::AppFactory& 
             fs << "format: "<< ogrformat_opt[0] << std::endl;
             throw(fs.str());
           }
-          if(ogrWriter.pushLayer(layer_opt[0], this->getProjectionRef(),wkbPoint,papszOptions)!=OGRERR_NONE){
+          if(ogrWriter.pushLayer(layer_opt[0], this->getProjection(),wkbPoint,papszOptions)!=OGRERR_NONE){
             ostringstream fs;
             fs << "push layer to ogrWriter with points failed ";
             fs << "layer name: "<< layer_opt[0] << std::endl;

@@ -594,7 +594,12 @@ std::shared_ptr<VectorOgr> VectorOgr::intersect(const Jim& aJim, app::AppFactory
 OGRErr VectorOgr::intersect(const Jim& aJim, VectorOgr& ogrWriter, app::AppFactory& app){
   OGRErr result=OGRERR_NONE;
   OGRPolygon *pGeom = (OGRPolygon*) OGRGeometryFactory::createGeometry(wkbPolygon);
-  OGRSpatialReference imgSpatialRef(aJim.getProjectionRef().c_str());
+  OGRSpatialReference imgSpatialRef;
+#if GDAL_VERSION_MAJOR < 3
+  imgSpatialRef=aJim.getSpatialRef();
+#else
+  imgSpatialRef=*(aJim.getSpatialRef());
+#endif
   OGRSpatialReference *thisSpatialRef=getLayer()->GetSpatialRef();
   OGRCoordinateTransformation *img2vector = OGRCreateCoordinateTransformation(&imgSpatialRef, thisSpatialRef);
   aJim.getBoundingBox(pGeom,img2vector);

@@ -180,7 +180,8 @@ std::shared_ptr<Jim> Jim::warp(app::AppFactory& theApp){
 // }
 
 ///convert Jim image in memory returning Jim image (alias for crop)
-void Jim::warp(Jim& imgWriter, app::AppFactory &theApp){
+void Jim::warp(Jim& imgWriter, app::AppFactory &theApp)
+{
   Optionjl<std::string> sourceSRS_opt("s_srs", "s_srs", "Source spatial reference for the input file, e.g., epsg:3035 to use European projection and force to European grid");
   Optionjl<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference for the output file, e.g., epsg:3035 to use European projection and force to European grid");
   Optionjl<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
