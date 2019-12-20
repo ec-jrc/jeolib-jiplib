@@ -134,7 +134,7 @@ shared_ptr<Jim> Jim::stackBand(Jim& srcImg, AppFactory& app){
 //     memcpy(imgWriter.getDataPointer(),m_data[0],getDataTypeSizeBytes()*nrOfCol()*nrOfRow*nrOfPlane());
 //     free(m_data[0]);
 //     m_data[0]=(void *) calloc(static_cast<size_t>(nrOfPlane()*nrOfCol()*nrOfRow()),getDataTypeSizeBytes(otype_opt[0]));
-    
+
 //     for(size_t iband=0;iband<nrOfBand();++iband){
 //       memcpy(m_data[nrOfBand()],m_data[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize*oldnplane);
 //       //allocate memory
@@ -2221,14 +2221,16 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
         throw(ess.str());
       }
       OGRSpatialReference thisSpatialRef(getProjectionRef().c_str());
-      OGRSpatialReference *sampleSpatialRef=readLayer->GetSpatialRef();
-      OGRCoordinateTransformation *sample2img = OGRCreateCoordinateTransformation(sampleSpatialRef, &thisSpatialRef);
-      OGRCoordinateTransformation *img2sample = OGRCreateCoordinateTransformation(&thisSpatialRef, sampleSpatialRef);
-      if(!sampleSpatialRef){
-        sample2img=0;
-        img2sample=0;
-      }
-      else if(thisSpatialRef.IsSame(sampleSpatialRef)){
+      OGRSpatialReference sampleSpatialRef(sampleReader.getSpatialRef());
+
+      OGRCoordinateTransformation *sample2img = OGRCreateCoordinateTransformation(&sampleSpatialRef, &thisSpatialRef);
+      OGRCoordinateTransformation *img2sample = OGRCreateCoordinateTransformation(&thisSpatialRef, &sampleSpatialRef);
+//      if(!sampleSpatialRef){
+//        sample2img=0;
+//        img2sample=0;
+//      }
+//      else if(thisSpatialRef.IsSame(sampleSpatialRef)){
+      if(thisSpatialRef.IsSame(&sampleSpatialRef)){
         sample2img=0;
         img2sample=0;
       }
