@@ -520,6 +520,10 @@ OGRErr VectorOgr::pushLayer(const std::string& layername, OGRSpatialReference* t
 ///Create a layer
 OGRErr VectorOgr::pushLayer(const std::string& layername, const std::string& theProjection, const OGRwkbGeometryType& geometryType, char** papszOptions){
   OGRErr result=OGRERR_NONE;
+  if( !m_gds){
+    std::string errorString="pushLayer failed due to no associated GDAL dataset";
+    throw(errorString);
+  }
   if( !m_gds->TestCapability( ODsCCreateLayer ) ){
     // std::ostringstream errorStream;
     // errorStream << "Error: Test capability to create layer " << layername << " failed (2)" << std::endl;
@@ -594,14 +598,11 @@ std::shared_ptr<VectorOgr> VectorOgr::intersect(const Jim& aJim, app::AppFactory
 OGRErr VectorOgr::intersect(const Jim& aJim, VectorOgr& ogrWriter, app::AppFactory& app){
   OGRErr result=OGRERR_NONE;
   OGRPolygon *pGeom = (OGRPolygon*) OGRGeometryFactory::createGeometry(wkbPolygon);
-  OGRSpatialReference imgSpatialRef;
-#if GDAL_VERSION_MAJOR < 3
-  imgSpatialRef=aJim.getSpatialRef();
-#else
-  imgSpatialRef=aJim.getSpatialRef();
-#endif
-  OGRSpatialReference *thisSpatialRef=getLayer()->GetSpatialRef();
-  OGRCoordinateTransformation *img2vector = OGRCreateCoordinateTransformation(&imgSpatialRef, thisSpatialRef);
+  OGRSpatialReference imgSpatialRef=aJim.getSpatialRef();
+  // OGRSpatialReference *thisSpatialRef=getLayer()->GetSpatialRef();
+  OGRSpatialReference thisSpatialRef=this->getSpatialRef();
+
+  OGRCoordinateTransformation *img2vector = OGRCreateCoordinateTransformation(&imgSpatialRef, &thisSpatialRef);
   aJim.getBoundingBox(pGeom,img2vector);
   result=intersect(pGeom,ogrWriter,app);
   OGRGeometryFactory::destroyGeometry(pGeom );
@@ -744,7 +745,9 @@ OGRErr VectorOgr::convexHull(VectorOgr& ogrWriter, app::AppFactory& app){
 
     ogrWriter.open(output_opt[0],ogrformat_opt[0]);
     for(int ilayer=0;ilayer<getLayerCount();++ilayer){
-      ogrWriter.pushLayer(getLayerName(ilayer),getLayer(ilayer)->GetSpatialRef(),wkbPolygon,papszOptions);
+      OGRSpatialReference thisSpatialRef=this->getSpatialRef();
+      ogrWriter.pushLayer(getLayerName(ilayer),&thisSpatialRef,wkbPolygon,papszOptions);
+      // ogrWriter.pushLayer(getLayerName(ilayer),getLayer(ilayer)->GetSpatialRef(),wkbPolygon,papszOptions);
 // #if JIPLIB_PROCESS_IN_PARALLEL == 1
 // #pragma omp parallel for
 // #else
@@ -954,6 +957,7 @@ std::string VectorOgr::getProjection(size_t ilayer) const{
   char *wktString;
   OGRLayer* thisLayer=getLayer(ilayer);
   if(thisLayer){
+    // getSpatialRef().exportToWkt(&wktString);
     thisLayer->GetSpatialRef()->exportToWkt(&wktString);
   }
   else{
@@ -1358,14 +1362,19 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
         std::cout << "ilayer is: " << ilayer << std::endl;
       // if(output_opt.size()){
       if(initWriter){
-        if(verbose_opt[0])
+        if(verbose_opt[0]){
           std::cout << "push layer " << getLayerName(ilayer) << std::endl;
+          std::cout << "projection: " << getProjection(ilayer) << std::endl;
+          std::cout << "GeometryType: " << getGeometryType(ilayer) << std::endl;
+        }
         if(ogrWriter.pushLayer(getLayerName(ilayer),getProjection(ilayer),getGeometryType(ilayer),papszOptions)!=OGRERR_NONE){
           ostringstream fs;
           fs << "push layer to ogrWriter with polygons failed ";
           fs << "layer name: "<< getLayerName(ilayer) << std::endl;
           throw(fs.str());
         }
+        if(verbose_opt[0])
+          std::cout << "destroy features" << getLayerName(ilayer) << std::endl;
         ogrWriter.destroyFeatures(ilayer);
         // ogrWriter.pushLayer(getLayer()->GetName(),getProjection(),getGeometryType(),NULL);
         std::vector<std::string> thisfields;

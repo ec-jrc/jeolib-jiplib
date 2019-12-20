@@ -277,13 +277,8 @@ CPLErr Jim::extractImg(Jim& classReader, VectorOgr& ogrWriter, app::AppFactory& 
     OGRSpatialReference thisSpatialRef;
     // OGRSpatialReference thisSRS;
 
-#if GDAL_VERSION_MAJOR < 3
     classSpatialRef=(classReader.getSpatialRef());
-    thisSpatialRef=(getSpatialRef());
-#else
-    classSpatialRef=(classReader.getSpatialRef());
-    thisSpatialRef=(getSpatialRef());
-#endif
+    thisSpatialRef=getSpatialRef();
     OGRCoordinateTransformation *ref2img= OGRCreateCoordinateTransformation(&classSpatialRef, &thisSpatialRef);
     if(thisSpatialRef.IsSame(&classSpatialRef)){
       // img2ref=0;

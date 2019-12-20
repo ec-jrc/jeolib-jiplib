@@ -187,8 +187,11 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   void close(void);
   ///get projection
   std::string getProjection(size_t ilayer=0) const;
-  ///set projection
-  /* OGRErr setProjection(const std::string& theProjection); */
+  ///get the spatial reference based on the projection
+  const OGRSpatialReference getSpatialRef() const{
+    OGRSpatialReference thisSpatialRef(getProjection().c_str());
+    return thisSpatialRef;
+  }
   ///Get the filename of this dataset
   std::string getFileName() const {return m_filename;};
   ///Create a layer

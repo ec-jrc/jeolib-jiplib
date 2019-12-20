@@ -1703,10 +1703,11 @@ CPLErr Jim::open(app::AppFactory &app){
         layernames.clear();
         extentReader.open(extent_opt[iextent],layernames,true);
 
-        OGRSpatialReference *vectorSpatialRef=extentReader.getLayer(0)->GetSpatialRef();
+        // OGRSpatialReference *vectorSpatialRef=extentReader.getLayer(0)->GetSpatialRef();
+        OGRSpatialReference vectorSpatialRef=extentReader.getSpatialRef();
         OGRCoordinateTransformation *vector2assign=0;
-        vector2assign = OGRCreateCoordinateTransformation(vectorSpatialRef, &assignSpatialRef);
-        if(assignSpatialRef.IsSame(vectorSpatialRef)){
+        vector2assign = OGRCreateCoordinateTransformation(&vectorSpatialRef, &assignSpatialRef);
+        if(assignSpatialRef.IsSame(&vectorSpatialRef)){
           vector2assign=0;
         }
         else{
@@ -1902,12 +1903,7 @@ CPLErr Jim::open(app::AppFactory &app){
     if(sourceSRS_opt.size())
       setProjectionProj4(sourceSRS_opt[0]);
     // OGRSpatialReference gdsSpatialRef(m_gds->GetProjectionRef());
-    OGRSpatialReference gdsSpatialRef;
-#if GDAL_VERSION_MAJOR < 3
-    gdsSpatialRef=(getSpatialRef());
-#else
-    gdsSpatialRef=(getSpatialRef());
-#endif
+    OGRSpatialReference gdsSpatialRef=getSpatialRef();
     if(extent_opt.size()){
       double e_ulx;
       double e_uly;
@@ -1918,10 +1914,11 @@ CPLErr Jim::open(app::AppFactory &app){
         layernames.clear();
         extentReader.open(extent_opt[iextent],layernames,true);
 
-        OGRSpatialReference *vectorSpatialRef=extentReader.getLayer(0)->GetSpatialRef();
+        // OGRSpatialReference *vectorSpatialRef=extentReader.getLayer(0)->GetSpatialRef();
+        OGRSpatialReference vectorSpatialRef=extentReader.getSpatialRef();
         OGRCoordinateTransformation *vector2raster=0;
-        vector2raster = OGRCreateCoordinateTransformation(vectorSpatialRef, &gdsSpatialRef);
-        if(gdsSpatialRef.IsSame(vectorSpatialRef)){
+        vector2raster = OGRCreateCoordinateTransformation(&vectorSpatialRef, &gdsSpatialRef);
+        if(gdsSpatialRef.IsSame(&vectorSpatialRef)){
           vector2raster=0;
         }
         else{
