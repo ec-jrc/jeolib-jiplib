@@ -287,16 +287,16 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 
       OGRSpatialReference thisSpatialRef=getSpatialRef();
 
-      OGRSpatialReference *sampleSpatialRef=readLayer->GetSpatialRef();
-      OGRCoordinateTransformation *sample2img = OGRCreateCoordinateTransformation(sampleSpatialRef, &thisSpatialRef);
-      OGRCoordinateTransformation *img2sample = OGRCreateCoordinateTransformation(&thisSpatialRef, sampleSpatialRef);
+      OGRSpatialReference sampleSpatialRef(sampleReader.getSpatialRef());
+      OGRCoordinateTransformation *sample2img = OGRCreateCoordinateTransformation(&sampleSpatialRef, &thisSpatialRef);
+      OGRCoordinateTransformation *img2sample = OGRCreateCoordinateTransformation(&thisSpatialRef,&sampleSpatialRef);
       if(verbose_opt[0]){
         std::cout << "spatialref of raster: " << this->getFileName() << std::endl;
         thisSpatialRef.dumpReadable();
         std::cout << "spatialref of vector sample: " << std::endl;
-        sampleSpatialRef->dumpReadable();
+        sampleSpatialRef.dumpReadable();
       }
-      if(thisSpatialRef.IsSame(sampleSpatialRef)){
+      if(thisSpatialRef.IsSame(&sampleSpatialRef)){
         if(verbose_opt[0])
           std::cout << "spatial reference of vector sample is same as raster" << std::endl;
         sample2img=0;
