@@ -598,7 +598,7 @@ OGRErr VectorOgr::intersect(const Jim& aJim, VectorOgr& ogrWriter, app::AppFacto
 #if GDAL_VERSION_MAJOR < 3
   imgSpatialRef=aJim.getSpatialRef();
 #else
-  imgSpatialRef=*(aJim.getSpatialRef());
+  imgSpatialRef=aJim.getSpatialRef();
 #endif
   OGRSpatialReference *thisSpatialRef=getLayer()->GetSpatialRef();
   OGRCoordinateTransformation *img2vector = OGRCreateCoordinateTransformation(&imgSpatialRef, thisSpatialRef);

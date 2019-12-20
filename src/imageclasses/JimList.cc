@@ -261,8 +261,8 @@ bool JimList::covers(const Jim& imgRaster, bool all) const{
   listSpatialRef=(getImage(0)->getSpatialRef());
   rasterSpatialRef=(imgRaster.getSpatialRef());
 #else
-  listSpatialRef=*(getImage(0)->getSpatialRef());
-  rasterSpatialRef=*(imgRaster.getSpatialRef());
+  listSpatialRef=(getImage(0)->getSpatialRef());
+  rasterSpatialRef=(imgRaster.getSpatialRef());
 #endif
   OGRCoordinateTransformation *raster2list = OGRCreateCoordinateTransformation(&rasterSpatialRef, &listSpatialRef);
   if(listSpatialRef.IsSame(&rasterSpatialRef)){

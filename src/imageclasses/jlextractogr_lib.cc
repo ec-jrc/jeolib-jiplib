@@ -287,17 +287,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 
       OGRSpatialReference thisSpatialRef=getSpatialRef();
 
-      //dit werkt:
-      // std::string projectionRef=getProjectionRef();
-      // OGRSpatialReference thisSpatialRef(projectionRef.c_str());
-      //test
-      std::cout << "create SpatialRef from vector" << std::endl;
       OGRSpatialReference *sampleSpatialRef=readLayer->GetSpatialRef();
-      //test
-      std::cout << "create sample2img" << std::endl;
       OGRCoordinateTransformation *sample2img = OGRCreateCoordinateTransformation(sampleSpatialRef, &thisSpatialRef);
-      //test
-      std::cout << "create img2sample" << std::endl;
       OGRCoordinateTransformation *img2sample = OGRCreateCoordinateTransformation(&thisSpatialRef, sampleSpatialRef);
       if(verbose_opt[0]){
         std::cout << "spatialref of raster: " << this->getFileName() << std::endl;

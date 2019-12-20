@@ -1906,7 +1906,7 @@ CPLErr Jim::open(app::AppFactory &app){
 #if GDAL_VERSION_MAJOR < 3
     gdsSpatialRef=(getSpatialRef());
 #else
-    gdsSpatialRef=*(getSpatialRef());
+    gdsSpatialRef=(getSpatialRef());
 #endif
     if(extent_opt.size()){
       double e_ulx;

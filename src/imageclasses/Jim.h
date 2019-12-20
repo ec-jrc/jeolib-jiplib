@@ -432,12 +432,12 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///Get the geotransform data for this dataset as a list of doubles
 
 #if GDAL_VERSION_MAJOR < 3
-  OGRSpatialReference getSpatialRef() const{
+  const OGRSpatialReference getSpatialRef() const{
     OGRSpatialReference thisSpatialRef(getProjectionRef().c_str());
     return thisSpatialRef;
   }
 #else
-  OGRSpatialReference *getSpatialRef() const{return m_gds->GetSpatialRef();};
+  const OGRSpatialReference getSpatialRef() const{return *(m_gds->GetSpatialRef());};
 #endif
   void getGeoTransform(double& gt0, double& gt1, double& gt2, double& gt3, double& gt4, double& gt5) const{std::vector<double> gt(6); getGeoTransform(gt);if (gt.size()==6){gt0=gt[0];gt1=gt[1];gt2=gt[2];gt3=gt[3];gt4=gt[4];gt5=gt[5];}};
   /* std::string getGeoTransform() const; */
