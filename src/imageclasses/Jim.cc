@@ -76,31 +76,39 @@ size_t Jim::getDataTypeSizeBytes(int band) const {
 /// convert single plane multiband image to single band image with multiple planes
 void Jim::d_band2plane(){
   //temporary buffer
-  m_data.resize(nrOfBand()+1);
-  m_data[nrOfBand()]=(void *) calloc(static_cast<size_t>(nrOfCol()*m_blockSize),getDataTypeSizeBytes());
-  //copy first band
-  memcpy(m_data[nrOfBand()],m_data[0],getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
-  //allocate memory
-  m_data[0]=(void *) calloc(static_cast<size_t>(nrOfBand()*nrOfCol()*m_blockSize),getDataTypeSizeBytes());
-  memcpy(m_data[0],m_data[nrOfBand()],getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
-  //delete temporary buffer
-  free(m_data[nrOfBand()]);
-  //copy rest of the bands
-  for(size_t iband=1;iband<nrOfBand();++iband){
-    //memcp
-    // memcpy(static_cast<char*>(m_data[0])+iband*nrOfCol()*nrOfRow(),static_cast<char*>(m_data[iband]),getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
-    memcpy(m_data[0]+iband*nrOfCol()*nrOfRow()*getDataTypeSizeBytes(),m_data[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
-    // memcpy(m_data[0]+iband*nrOfCol()*nrOfRow(),m_data[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
+  // m_data.resize(nrOfBand()+1);
+  if(nrOfPlane()>1){
+    std::string errorString="Error: band2plane only supported for single plane image";
+    throw(errorString);
+  }
+  size_t oldnband=nrOfBand();
+  for(size_t iband=1;iband<oldnband;++iband){
+    m_nplane+=1;
+    void* newpointer=realloc(m_data[0],static_cast<size_t>(nrOfCol())*nrOfRow()*nrOfPlane()*getDataTypeSizeBytes());
+    if(! newpointer){
+      m_nplane-=1;
+      std::string errorString="Error: not sufficient memory for reallocation in d_band2plane";
+      throw(errorString);
+    }
+    m_data[0]=newpointer;
+    memcpy(m_data[0]+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*iband,m_data[iband],static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow());
     free(m_data[iband]);
     m_data[iband]=0;
+    m_nband-=1;
 #if MIALIB == 1
     if(m_mia.size()>iband)
       delete(m_mia[iband]);
 #endif
   }
   m_data.erase(m_data.begin()+1,m_data.end());
-  m_nplane=nrOfBand();
-  m_nband=1;
+  if(nrOfPlane()!=oldnband){
+    std::string errorString="Error: nrOfPlane()!=oldnband in d_band2plane";
+    throw(errorString);
+  }
+  if(nrOfBand()!=1){
+    std::string errorString="Error: nrOfBand()!=1 in d_band2plane";
+    throw(errorString);
+  }
   m_mia.clear();
 }
 
@@ -514,7 +522,7 @@ CPLErr Jim::initMem(unsigned int memory)
   if(memory<=0)
     m_blockSize=nrOfRow();
   else{
-    m_blockSize=static_cast<unsigned int>(memory*1000000/nrOfBand()/nrOfCol()/getDataTypeSizeBytes());
+    m_blockSize=static_cast<unsigned int>(memory)*1000000/nrOfBand()/nrOfCol()/getDataTypeSizeBytes();
     if(getBlockSizeY(0))
       m_blockSize-=m_blockSize%getBlockSizeY(0);
   }
@@ -528,7 +536,7 @@ CPLErr Jim::initMem(unsigned int memory)
   m_data.resize(nrOfBand());
   //todo check if needed when externalData is true
   for(int iband=0;iband<nrOfBand();++iband){
-    m_data[iband]=(void *) calloc(static_cast<size_t>(nrOfPlane()*nrOfCol()*m_blockSize),getDataTypeSizeBytes());
+    m_data[iband]=(void *) calloc(static_cast<size_t>(nrOfPlane())*nrOfCol()*m_blockSize,getDataTypeSizeBytes());
     if(!(m_data[iband])){
       std::string errorString="Error: could not allocate memory in initMem";
       throw(errorString);

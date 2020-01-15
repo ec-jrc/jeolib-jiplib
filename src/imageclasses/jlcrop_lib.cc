@@ -555,17 +555,18 @@ void Jim::crop(Jim& imgWriter, AppFactory& app){
     }
   }
   catch(string errorstring){
-    std::cerr << errorstring << std::endl;
-    throw;
+    std::string errorString="String exception";
+    std::cerr << errorString << errorstring << std::endl;
+    throw(errorString);
   }
   catch(BadConversion conversion){
-    std::string errorString="Bad conversion in arguments";
+    std::string errorString="Bad conversion in arguments exception";
     std::cerr << errorString << std::endl;
     app.showOptions();
     throw(errorString);
   }
   catch(...){
-    std::string errorString="Unknown error";
+    std::string errorString="Unknown exception";
     throw(errorString);
   }
 }
@@ -1996,19 +1997,17 @@ void Jim::d_cropPlane(AppFactory& app){
     }
   }
   if(nrOfPlane() > 1){
-    m_data.resize(nrOfBand()+1);
-    m_data[nrOfBand()]=(void *) calloc(static_cast<size_t>(nrOfCol()*nrOfRow()*vplane.size()),getDataTypeSizeBytes());
+    void* newpointer=(void *) calloc(static_cast<size_t>(nrOfCol())*nrOfRow()*vplane.size(),getDataTypeSizeBytes());
     for(size_t iband=0;iband<nrOfBand();++iband){
       for(size_t iplane=0;iplane<vplane.size();++iplane){
-        memcpy(m_data[nrOfBand()]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*iplane,m_data[iband]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*vplane[iplane],getDataTypeSizeBytes()*nrOfCol()*nrOfRow());
+        memcpy(newpointer+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*iplane,m_data[iband]+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*vplane[iplane],static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow());
       }
       //free m_data[iband] and re-allocate to avoid memory leak
       free(m_data[iband]);
       m_data[iband]=(void *) calloc(static_cast<size_t>(nrOfCol()*nrOfRow())*vplane.size(),getDataTypeSizeBytes());
-      memcpy(m_data[iband],m_data[nrOfBand()],getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*vplane.size());
+      memcpy(m_data[iband],newpointer,static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*vplane.size());
     }
-    free(m_data[nrOfBand()]);
-    m_data.resize(nrOfBand());
+    free(newpointer);
     m_nplane=vplane.size();
   }
 }
@@ -3599,7 +3598,7 @@ void Jim::d_stackBand(Jim& imgSrc, AppFactory& app){
   m_begin.resize(oldnband+vband.size());
   m_end.resize(oldnband+vband.size());
   for(size_t iband=0;iband<vband.size();++iband){
-    m_data[oldnband+iband]=(void *) calloc(static_cast<size_t>(imgSrc.nrOfPlane()*imgSrc.nrOfCol()*imgSrc.getBlockSize()),imgSrc.getDataTypeSizeBytes());
+    m_data[oldnband+iband]=(void *) calloc(static_cast<size_t>(imgSrc.nrOfPlane())*imgSrc.nrOfCol()*imgSrc.getBlockSize(),imgSrc.getDataTypeSizeBytes());
     imgSrc.copyData(getDataPointer(oldnband+iband),vband[iband]);
   }
 }
@@ -3773,18 +3772,16 @@ void Jim::d_stackPlane(Jim& imgSrc, AppFactory& app){
   }
   size_t oldnplane=nrOfPlane();
   m_nplane+=imgSrc.nrOfPlane();
-  m_data.resize(nrOfBand()+1);
-  m_data[nrOfBand()]=(void *) calloc(static_cast<size_t>(nrOfCol()*nrOfRow()*oldnplane),getDataTypeSizeBytes());
   for(size_t iband=0;iband<nrOfBand();++iband){
-    memcpy(m_data[nrOfBand()],m_data[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize*oldnplane);
-    //allocate memory
-    free(m_data[iband]);
-    m_data[iband]=(void *) calloc(static_cast<size_t>(nrOfCol()*nrOfRow()*nrOfPlane()),getDataTypeSizeBytes());
-    memcpy(m_data[iband],m_data[nrOfBand()],getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*oldnplane);
-    memcpy(m_data[iband]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*oldnplane,imgSrc.getDataPointer(iband),imgSrc.getDataTypeSizeBytes()*imgSrc.nrOfCol()*imgSrc.nrOfRow()*imgSrc.nrOfPlane());
+    void* newpointer=realloc(m_data[iband],static_cast<size_t>(nrOfCol())*nrOfRow()*nrOfPlane()*getDataTypeSizeBytes());
+    if(! newpointer){
+      m_nplane=oldnplane;
+      std::string errorString="Error: not sufficient memory for reallocation in stackPlane";
+      throw(errorString);
+    }
+    m_data[iband]=newpointer;
+    memcpy(m_data[iband]+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*oldnplane,imgSrc.getDataPointer(iband),static_cast<size_t>(imgSrc.getDataTypeSizeBytes())*imgSrc.nrOfCol()*imgSrc.nrOfRow()*imgSrc.nrOfPlane());
   }
-  free(m_data[nrOfBand()]);
-  m_data.resize(nrOfBand());
 }
 
 
