@@ -517,17 +517,19 @@ void Jim::crop(Jim& imgWriter, AppFactory& app){
       std::cout << "stridej: " << stridej << std::endl;
     }
     if(cropuli+stridei/2 < 0 || cropuli+(ncropcol-1)*stridei+stridei/2 >= nrOfCol()){
-      errorStream << "Warning: columns requested out of bounding box" << std::endl;
-      errorStream << "cropuli+stridei/2: " << cropuli+stridei/2 << std::endl;
-      errorStream << "cropuli+(ncropcol-1)*stridei+stridei/2: " << cropuli+(ncropcol-1)*stridei+stridei/2 << std::endl;
-      std::cerr << errorStream.str() << std::endl;
+        errorStream << "Warning: columns requested out of bounding box" << std::endl;
+        errorStream << "cropuli+stridei/2: " << cropuli+stridei/2 << std::endl;
+        errorStream << "cropuli+(ncropcol-1)*stridei+stridei/2: " << cropuli+(ncropcol-1)*stridei+stridei/2 << std::endl;
+        if(verbose_opt[0]>1)
+          std::cerr << errorStream.str() << std::endl;
       imgWriter.setNoDataValue(nodata_opt[0]);
     }
     if(cropulj+stridej/2<0 || cropulj+(ncroprow-1)*stridej+stridej/2 >= nrOfRow()){
       errorStream << "Warning: rows requested out of bounding box" << std::endl;
       errorStream << "cropulj+stridej/2: " << cropulj+stridej/2 << std::endl;
       errorStream << "cropulj+(ncroprow-1)*stridej+stridej/2: " << cropulj+(ncroprow-1)*stridej+stridej/2 << std::endl;
-      std::cerr << errorStream.str() << std::endl;
+      if(verbose_opt[0]>1)
+        std::cerr << errorStream.str() << std::endl;
       imgWriter.setNoDataValue(nodata_opt[0]);
     }
 
@@ -2159,7 +2161,8 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
       //image must be georeferenced
       if(!this->isGeoRef()){
         string errorstring="Warning: input image is not georeferenced using start and end band options";
-        std::cerr << errorstring << std::endl;
+        if(verbose_opt[0]>1)
+          std::cerr << errorstring << std::endl;
         // throw(errorstring);
       }
     }
@@ -2192,8 +2195,8 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
     GDALDataType theType=getGDALDataType();
     if(otype_opt.size()){
       theType=string2GDAL(otype_opt[0]);
-      if(theType==GDT_Unknown)
-        std::cout << "Warning: unknown output pixel type: " << otype_opt[0] << ", using input type as default" << std::endl;
+      if(theType==GDT_Unknown && verbose_opt[0]>1)
+        std::cerr << "Warning: unknown output pixel type: " << otype_opt[0] << ", using input type as default" << std::endl;
     }
     if(verbose_opt[0]>1)
       cout << "Output pixel type:  " << GDALGetDataTypeName(theType) << endl;
@@ -2869,7 +2872,8 @@ void Jim::cropDS(Jim& imgWriter, AppFactory& app){
       //image must be georeferenced
       if(!this->isGeoRef()){
         string errorstring="Warning: input image is not georeferenced in cropDS";
-        std::cerr << errorstring << std::endl;
+        if(verbose_opt[0])
+          std::cerr << errorstring << std::endl;
         // throw(errorstring);
       }
     }
@@ -2902,8 +2906,8 @@ void Jim::cropDS(Jim& imgWriter, AppFactory& app){
     GDALDataType theType=getGDALDataType();
     if(otype_opt.size()){
       theType=string2GDAL(otype_opt[0]);
-      if(theType==GDT_Unknown)
-        std::cout << "Warning: unknown output pixel type: " << otype_opt[0] << ", using input type as default" << std::endl;
+      if(theType==GDT_Unknown && verbose_opt[0])
+        std::cerr << "Warning: unknown output pixel type: " << otype_opt[0] << ", using input type as default" << std::endl;
     }
     if(verbose_opt[0])
       cout << "Output pixel type:  " << GDALGetDataTypeName(theType) << endl;
@@ -3397,7 +3401,8 @@ void Jim::createct(Jim& imgWriter, app::AppFactory& app){
     break;
   }
   case(GDT_Int16):{
-    cout << "Warning: copying short to unsigned short without conversion, use convert with -scale if needed..." << endl;
+    if(verbose_opt[0])
+      std::cerr << "Warning: copying short to unsigned short without conversion, use convert with -scale if needed..." << std::endl;
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
@@ -3422,7 +3427,8 @@ void Jim::createct(Jim& imgWriter, app::AppFactory& app){
     break;
   }
   default:
-    cerr << "data type " << getDataType() << " not supported for adding a colortable" << endl;
+    if(verbose_opt[0])
+      cerr << "data type " << getDataType() << " not supported for adding a colortable" << endl;
     break;
   }
 }
