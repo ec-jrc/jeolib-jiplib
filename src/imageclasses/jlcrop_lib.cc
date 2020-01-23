@@ -1757,83 +1757,68 @@ void Jim::d_cropBand(AppFactory& app){
       throw(errorStream.str());
     }
   }
-  std::vector<double>::iterator scale_it=m_scale.begin();
-  std::vector<double>::iterator offset_it=m_offset.begin();
-  std::vector<int>::iterator begin_it=m_begin.begin();
-  std::vector<int>::iterator end_it=m_end.begin();
-  std::vector<void*>::iterator data_it=m_data.begin();
-  size_t iband=0;
-  while(scale_it!=m_scale.end()){
-    if(find(vband.begin(),vband.end(),iband)==vband.end()){
-      if(verbose_opt[0]>1)
-        std::cout << "removing scale for band " << iband << std::endl;
-      if(m_scale.size()>1&&m_scale.size()>iband)
-        m_scale.erase(scale_it);
-      else
-        ++scale_it;
+  //re-order bands
+  std::vector<size_t> allbands(vband.begin(),vband.end());
+  for(int iband=0;iband<nrOfBand();++iband){
+    if(find(allbands.begin(),allbands.end(),iband)==allbands.end()){
+      allbands.push_back(iband);
     }
-    else
-      ++scale_it;
-    ++iband;
   }
-  iband=0;
-  while(offset_it!=m_offset.end()){
-    if(find(vband.begin(),vband.end(),iband)==vband.end()){
-      if(verbose_opt[0]>1)
-        std::cout << "removing offset for band " << iband << std::endl;
-      if(m_offset.size()>1&&m_offset.size()>iband)
-        m_offset.erase(offset_it);
-      else
-        ++offset_it;
+  // for all elements to put in place
+  for( size_t i = 0; i < m_data.size(); ++i ){
+    // while vOrder[i] is not yet in place
+    // every swap places at least one element in it's proper place
+    while(       allbands[i] !=   allbands[allbands[i]] ){
+      swap( m_data[allbands[i]], m_data[allbands[allbands[i]]] );
+      swap(    allbands[i],     allbands[allbands[i]] );
     }
-    else
-      ++offset_it;
-    ++iband;
   }
-  iband=0;
-  while(begin_it!=m_begin.end()){
-    if(find(vband.begin(),vband.end(),iband)==vband.end()){
-      if(verbose_opt[0]>1)
-        std::cout << "removing begin for band " << iband << std::endl;
-      if(m_begin.size()>1&&m_begin.size()>iband)
-        m_begin.erase(begin_it);
-      else
-        ++begin_it;
+  for( size_t i = 0; i < m_begin.size(); ++i ){
+    // while vOrder[i] is not yet in place
+    // every swap places at least one element in it's proper place
+    while(       allbands[i] !=   allbands[allbands[i]] ){
+      swap( m_begin[allbands[i]], m_begin[allbands[allbands[i]]] );
+      swap(    allbands[i],     allbands[allbands[i]] );
     }
-    else
-      ++begin_it;
-    ++iband;
   }
-  iband=0;
-  while(end_it!=m_end.end()){
-    if(find(vband.begin(),vband.end(),iband)==vband.end()){
-      if(verbose_opt[0]>1)
-        std::cout << "removing end for band " << iband << std::endl;
-      if(m_end.size()>1&&m_end.size()>iband)
-        m_end.erase(end_it);
-      else
-        ++end_it;
+  for( size_t i = 0; i < m_end.size(); ++i ){
+    // while vOrder[i] is not yet in place
+    // every swap places at least one element in it's proper place
+    while(       allbands[i] !=   allbands[allbands[i]] ){
+      swap( m_end[allbands[i]], m_end[allbands[allbands[i]]] );
+      swap(    allbands[i],     allbands[allbands[i]] );
     }
-    else
-      ++end_it;
-    ++iband;
   }
-  iband=0;
-  while(data_it!=m_data.end()){
-    if(find(vband.begin(),vband.end(),iband)==vband.end()){
-        if(verbose_opt[0]>1)
-          std::cout << "removing data for band " << iband << std::endl;
-        //free data to avoid memory leak
-        free(*data_it);
-        m_data.erase(data_it);
+  for( size_t i = 0; i < m_scale.size(); ++i ){
+    // while vOrder[i] is not yet in place
+    // every swap places at least one element in it's proper place
+    while(       allbands[i] !=   allbands[allbands[i]] ){
+      swap( m_scale[allbands[i]], m_scale[allbands[allbands[i]]] );
+      swap(    allbands[i],     allbands[allbands[i]] );
     }
-    else{
-      if(verbose_opt[0]>1)
-        std::cout << "keeping data for band " << iband << std::endl;
-      ++data_it;
+  }
+  for( size_t i = 0; i < m_offset.size(); ++i ){
+    // while vOrder[i] is not yet in place
+    // every swap places at least one element in it's proper place
+    while(       allbands[i] !=   allbands[allbands[i]] ){
+      swap( m_offset[allbands[i]], m_offset[allbands[allbands[i]]] );
+      swap(    allbands[i],     allbands[allbands[i]] );
     }
-    ++iband;
-   }
+  }
+  while(m_begin.size()>vband.size())
+    m_begin.pop_back();
+  while(m_end.size()>vband.size())
+    m_end.pop_back();
+  while(m_scale.size()>vband.size())
+    m_scale.pop_back();
+  while(m_offset.size()>vband.size())
+    m_offset.pop_back();
+  while(m_scale.size()>vband.size())
+    m_scale.pop_back();
+  while(m_data.size()>vband.size()){
+    free(m_data.back());
+    m_data.pop_back();
+  }
   m_nband=m_data.size();
 }
 
