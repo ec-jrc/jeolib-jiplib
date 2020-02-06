@@ -797,8 +797,15 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               }
             }
           }
-          if(verbose_opt[0])
+          if(verbose_opt[0]){
+            std::vector<std::string> fieldnames;
+            ogrWriter.getFieldNames(fieldnames,ilayer);
+            std::cout << "field names of ogrWriter" << std::endl;
+            for(size_t ifield=0;ifield<fieldnames.size();++ifield)
+              std::cout << fieldnames[ifield] << std::endl;
+            std::cout << endl;
             std::cout << "end of initWriter" << std::endl;
+          }
         }
         if(verbose_opt[0])
           std::cout << "after initWriter" << std::endl;
@@ -1072,8 +1079,6 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                 }
               }//if centroid
               if(find(rule_opt.begin(),rule_opt.end(),"point")!=rule_opt.end()){
-                if(verbose_opt[0]>1)
-                  std::cout << "get point on surface" << std::endl;
                 if(writePolygon.PointOnSurface(&readPoint)!=OGRERR_NONE)
                   writePolygon.Centroid(&readPoint);
                 double i,j;
@@ -1809,11 +1814,12 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               }
             }
             if(find(rule_opt.begin(),rule_opt.end(),"point")!=rule_opt.end()){
-              if(verbose_opt[0]>1)
-                std::cout << "get point on surface" << std::endl;
               if(wkbFlatten(poGeometry->getGeometryType()) == wkbPolygon){
-                if(readPolygon.PointOnSurface(&readPoint)!=OGRERR_NONE)
+                if(readPolygon.PointOnSurface(&readPoint)!=OGRERR_NONE){
+                  if(verbose_opt[0]>1)
+                    std::cout << "get centroid from readPolygon" << std::endl << std::flush;
                   readPolygon.Centroid(&readPoint);
+                }
               }
               else if(wkbFlatten(poGeometry->getGeometryType()) == wkbMultiPolygon){
                 // if(readMultiPolygon.PointOnSurface(&readPoint)!=OGRERR_NONE)
@@ -1876,10 +1882,12 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               }
               // if(valid){
               if(validFeature){//replace valid with validFeature!
-                if(label_opt.size())
+                if(label_opt.size()){
                   writePolygonFeature->SetField("label",label_opt[0]);
-                if(fid_opt.size())
+                }
+                if(fid_opt.size()){
                   writePolygonFeature->SetField(fid_opt[0].c_str(),static_cast<GIntBig>(ifeature));
+                }
                 for(size_t iplane=0;iplane<nplane;++iplane){
                   for(int iband=0;iband<nband;++iband){
                     int theBand=(band_opt.size()) ? band_opt[iband] : iband;
@@ -1907,7 +1915,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                       writePolygonFeature->SetField(fieldname.c_str(),static_cast<int>(((readValuesInt[iplane][iband])[indexJ])[indexI]));
                       break;
                     case OFTReal:
-                      writePolygonFeature->SetField(fieldname.c_str(),(readValuesReal[iband][iplane][indexJ])[indexI]);
+                      writePolygonFeature->SetField(fieldname.c_str(), ((readValuesReal[iplane][iband])[indexJ])[indexI]);
                       break;
                     default://not supported
                       std::string errorString="field type not supported";

@@ -668,8 +668,8 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
             if(verbose_opt[0]>1)
               std::cout << "write valid feature " << ifeature << endl;
             OGRFeature *writeFeature=ogrWriter.createFeature(ilayer);
-#if JIPLIB_PROCESS_IN_PARALLEL == 1
             writeFeature->SetFrom(readFeature);
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
             ogrWriter.setFeature(ifeature,writeFeature,ilayer);
 #else
             ogrWriter.pushFeature(writeFeature,ilayer);
