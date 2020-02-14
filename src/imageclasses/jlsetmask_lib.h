@@ -24,12 +24,21 @@ template<typename T> void Jim::d_setMask_t(Jim& mask, Jim& other){
     else
       pmask=static_cast<unsigned char*>(mask.getDataPointer(iband));
     T* pother=static_cast<T*>(other.getDataPointer(iband));
-    for(size_t index=0;index<nrOfCol()*nrOfRow()*nrOfPlane();++index){
-      if(*pmask>0)
-        *pim=*pother;
-      ++pim;
-      ++pmask;
-      ++pother;
+
+    for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+      for(size_t index=nrOfCol()*nrOfRow()*iplane;index<nrOfCol()*nrOfRow()*(iplane+1);++index){
+        if(*pmask>0)
+          *pim=*pother;
+        ++pim;
+        ++pother;
+        ++pmask;
+      }
+      if(mask.nrOfPlane()<nrOfPlane()){
+        if(mask.nrOfBand()<nrOfBand())
+          pmask=static_cast<unsigned char*>(mask.getDataPointer(0));
+        else
+          pmask=static_cast<unsigned char*>(mask.getDataPointer(iband));
+      }
     }
   }
 }
@@ -46,11 +55,19 @@ template<typename T> void Jim::d_setMask_t(Jim& mask, double value){
       pmask=static_cast<unsigned char*>(mask.getDataPointer(0));
     else
       pmask=static_cast<unsigned char*>(mask.getDataPointer(iband));
-    for(size_t index=0;index<nrOfCol()*nrOfRow()*nrOfPlane();++index){
-      if(*pmask>0)
-        *pim=static_cast<T>(value);
-      ++pim;
-      ++pmask;
+    for(size_t iplane=0;iplane<nrOfPlane();++iplane){
+      for(size_t index=nrOfCol()*nrOfRow()*iplane;index<nrOfCol()*nrOfRow()*(iplane+1);++index){
+        if(*pmask>0)
+          *pim=static_cast<T>(value);
+        ++pim;
+        ++pmask;
+      }
+      if(mask.nrOfPlane()<nrOfPlane()){
+        if(mask.nrOfBand()<nrOfBand())
+          pmask=static_cast<unsigned char*>(mask.getDataPointer(0));
+        else
+          pmask=static_cast<unsigned char*>(mask.getDataPointer(iband));
+      }
     }
   }
 }
