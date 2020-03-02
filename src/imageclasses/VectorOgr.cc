@@ -1877,6 +1877,7 @@ OGRErr VectorOgr::sortByLabel(std::map<std::string,Vector2d<float> > &mapPixels,
   //[classNr][pixelNr][bandNr]
   ///Warning: bands got ordered as they have been stored in this vector and not according to order bandNames have been provided in argument
   try{
+    bool labelFound=false;
     mapPixels.clear();
     for(size_t ilayer=0;ilayer<getLayerCount();++ilayer){
       for(unsigned int index=0;index<getFeatureCount(ilayer);++index){
@@ -1886,6 +1887,7 @@ OGRErr VectorOgr::sortByLabel(std::map<std::string,Vector2d<float> > &mapPixels,
           std::string fieldname=m_features[ilayer][index]->GetFieldDefnRef(iField)->GetNameRef();
           if(fieldname==label){
             theClass=m_features[ilayer][index]->GetFieldAsString(iField);
+            labelFound=true;
           }
           else if(bandNames.size()){
             if(find(bandNames.begin(),bandNames.end(),fieldname)!=bandNames.end()){
@@ -1897,6 +1899,11 @@ OGRErr VectorOgr::sortByLabel(std::map<std::string,Vector2d<float> > &mapPixels,
             double theValue=m_features[ilayer][index]->GetFieldAsDouble(iField);
             theFeature.push_back(theValue);
           }
+        }
+        if(!labelFound){
+          std::ostringstream errorStream;
+          errorStream << "Error: label " << label << "not found" << std::endl;
+          throw(errorStream.str());
         }
         mapPixels[theClass].push_back(theFeature);
       }
