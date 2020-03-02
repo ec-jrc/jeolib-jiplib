@@ -264,7 +264,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
     if(verbose_opt[0])
       std::cout << "Opening ogrWriter: " << output_opt[0] << " in format " << ogrformat_opt[0] << endl;
     try{
-      ogrWriter.open(output_opt[0],ogrformat_opt[0],access_opt[0]);
+      if(find(rule_opt.begin(),rule_opt.end(),"allpoints")==rule_opt.end())
+        ogrWriter.open(output_opt[0],ogrformat_opt[0],access_opt[0]);
     }
     catch(std::string errorString){
       if(verbose_opt[0])
