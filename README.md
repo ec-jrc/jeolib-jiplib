@@ -29,7 +29,16 @@ jiplib is released under an
 * Sphinx: BSD http://www.sphinx-doc.org/en/master/
 
 
+## install dependency libraries
+
+```
+apt install build-essential cmake
+apt install libboost-filesystem-dev libboost-serialization-dev
+```
+
  ## mialib
+
+See more infor at [mia](https://jeodpp.jrc.ec.europa.eu/apps/gitlab/jeodpp/JIPlib/mia)
 
 # Install
 ## Python3
