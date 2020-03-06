@@ -527,7 +527,7 @@ void Jim::classifySVM(Jim& imgWriter, app::AppFactory& app){
       maskReader.setProjection(this->getProjection());
       // vector<double> burnValues(1,1);//burn value is 1 (single band)
       // maskReader.rasterizeBuf(extentReader);
-      maskReader.rasterizeBuf(extentReader,dstnodata_opt[0],eoption_opt);
+      maskReader.d_rasterizeBuf(extentReader,dstnodata_opt[0],eoption_opt);
       maskReader.GDALSetNoDataValue(dstnodata_opt[0]);
       extentReader.close();
     }

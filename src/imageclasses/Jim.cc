@@ -3807,48 +3807,58 @@ CPLErr Jim::setColorTable(GDALColorTable* colorTable, int band)
 //   return(CE_None);
 // }
 
-CPLErr Jim::rasterizeBuf(const std::string& ogrFilename){
-  VectorOgr ogrReader;
-  std::vector<std::string> layernames;
-  layernames.clear();
-  ogrReader.open(ogrFilename,layernames,true);
-  CPLErr retValue=CE_None;
-  retValue=rasterizeBuf(ogrReader,1);
-  ogrReader.close();
-  return(retValue);
-}
+// CPLErr Jim::rasterizeBuf(const std::string& ogrFilename){
+//   VectorOgr ogrReader;
+//   std::vector<std::string> layernames;
+//   layernames.clear();
+//   ogrReader.open(ogrFilename,layernames,true);
+//   CPLErr retValue=CE_None;
+//   retValue=rasterizeBuf(ogrReader,1);
+//   ogrReader.close();
+//   return(retValue);
+// }
 
-/**
- * @param ogrReader Vector dataset as an instance of the ImgReaderOgr that must be rasterized
- * @param burnValue Value to burn into raster cells
- * @param eoption special options controlling rasterization (ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG)
- * "ATTRIBUTE":
- * Identifies an attribute field on the features to be used for a burn in value. The value will be burned into all output bands. If specified, padfLayerBurnValues will not be used and can be a NULL pointer.
- * "ALL_TOUCHED":
- * May be set to TRUE to set all pixels touched by the line or polygons, not just those whose center is within the polygon or that are selected by brezenhams line algorithm. Defaults to FALSE.
- "BURN_VALUE_FROM":
- * May be set to "Z" to use the Z values of the geometries. The value from padfLayerBurnValues or the attribute field value is added to this before burning. In default case dfBurnValue is burned as it is. This is implemented properly only for points and lines for now. Polygons will be burned using the Z value from the first point. The M value may be supported in the future.
- * "MERGE_ALG":
- * May be REPLACE (the default) or ADD. REPLACE results in overwriting of value, while ADD adds the new value to the existing raster, suitable for heatmaps for instance.
- * @param layernames Names of the vector dataset layers to process. Leave empty to process all layers
- **/
-// CPLErr Jim::rasterizeBuf(ImgReaderOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption, const std::vector<std::string>& layernames ){
+
+//todo: support transform
+///Warning: this function cannot be exported via SWIG to Python as such, as it is destructive
+
+// CPLErr Jim::rasterizeBuf(VectorOgr& ogrReader, app::AppFactory &app){
+// // CPLErr Jim::rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption, const std::vector<std::string>& layernames ){
+//   Optionjl<double> burn_opt("burn", "burn", "burn value", 1);
+//   Optionjl<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ALL_TOUCHED=TRUE");
+//   Optionjl<string> layernames_opt("ln", "ln", "Layer names");
+//   bool doProcess;//stop process when program was invoked with help option (-h --help)
+//   try{
+//     doProcess=burn_opt.retrieveOption(app);
+//     eoption_opt.retrieveOption(app);
+//     layernames_opt.retrieveOption(app);
+//   }
+//   catch(std::string predefinedString){
+//     std::cout << predefinedString << std::endl;
+//   }
+//   if(!doProcess){
+//     std::cout << std::endl;
+//     std::ostringstream helpStream;
+//     helpStream << "exception thrown due to help info";
+//     throw(helpStream.str());//help was invoked, stop processing
+//   }
+//   return rasterizeBuf(ogrReader, burn_opt[0], eoption_opt, layernames_opt);
+// }
+
+// CPLErr Jim::rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption, const std::vector<std::string>& layernames ){
 //   if(m_blockSize<nrOfRow()){
 //     std::ostringstream s;
 //     s << "Error: increase memory to perform rasterize in entirely in buffer (now at " << 100.0*m_blockSize/nrOfRow() << "%)";
 //     throw(s.str());
 //   }
 //   std::vector<OGRLayerH> layers;
-//   int nlayer=0;
-
-//   for(int ilayer=0;ilayer<ogrReader.getLayerCount();++ilayer){
-//     std::string currentLayername=ogrReader.getLayer(ilayer)->GetName();
-//     if(layernames.size())
-//       if(find(layernames.begin(),layernames.end(),currentLayername)==layernames.end())
-//         continue;
-//     std::cout << "processing layer " << currentLayername << std::endl;
-//     layers.push_back((OGRLayerH)ogrReader.getLayer(ilayer));
-//     ++nlayer;
+//   if(layernames.size()){
+//     for(std::vector<std::string>::const_iterator nit=layernames.begin();nit!=layernames.end();++nit)
+//       layers.push_back((OGRLayerH)ogrReader.getLayer(*nit));
+//   }
+//   else{
+//     for(size_t ilayer=0;ilayer<ogrReader.getLayerCount();++ilayer)
+//       layers.push_back((OGRLayerH)ogrReader.getLayer(ilayer));
 //   }
 //   void* pTransformArg=NULL;
 //   GDALProgressFunc pfnProgress=NULL;
@@ -3858,84 +3868,22 @@ CPLErr Jim::rasterizeBuf(const std::string& ogrFilename){
 //   for(std::vector<std::string>::const_iterator optionIt=eoption.begin();optionIt!=eoption.end();++optionIt)
 //     coptions=CSLAddString(coptions,optionIt->c_str());
 
+// // #if JIPLIB_PROCESS_IN_PARALLEL == 1
+// // #pragma omp parallel for
+// // #else
+// // #endif
 //   for(int iband=0;iband<nrOfBand();++iband){
 //     Vector2d<double> initBlock(nrOfRow(),nrOfCol());
 //     writeDataBlock(initBlock,0,nrOfCol()-1,0,nrOfRow()-1,iband);
-//     double gt[6];
+//     vector<double> gt(6);
 //     getGeoTransform(gt);
-//     if(GDALRasterizeLayersBuf(m_data[iband],nrOfCol(),nrOfRow(),getGDALDataType(),getDataTypeSizeBytes(),0,layers.size(),&(layers[0]), getProjectionRef().c_str(),gt,NULL, pTransformArg, burnValue, coptions,pfnProgress,pProgressArg)!=CE_None){
+//     if(GDALRasterizeLayersBuf(m_data[iband],nrOfCol(),nrOfRow(),getGDALDataType(),getDataTypeSizeBytes(),0,layers.size(),&(layers[0]), getProjectionRef().c_str(),&gt[0],NULL, pTransformArg, burnValue, coptions,pfnProgress,pProgressArg)!=CE_None){
 //       std::string errorString(CPLGetLastErrorMsg());
 //       throw(errorString);
 //     }
 //   }
 //   return(CE_None);
 // }
-
-//todo: support transform
-///Warning: this function cannot be exported via SWIG to Python as such, as it is destructive
-
-CPLErr Jim::rasterizeBuf(VectorOgr& ogrReader, app::AppFactory &app){
-// CPLErr Jim::rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption, const std::vector<std::string>& layernames ){
-  Optionjl<double> burn_opt("burn", "burn", "burn value", 1);
-  Optionjl<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ALL_TOUCHED=TRUE");
-  Optionjl<string> layernames_opt("ln", "ln", "Layer names");
-  bool doProcess;//stop process when program was invoked with help option (-h --help)
-  try{
-    doProcess=burn_opt.retrieveOption(app);
-    eoption_opt.retrieveOption(app);
-    layernames_opt.retrieveOption(app);
-  }
-  catch(std::string predefinedString){
-    std::cout << predefinedString << std::endl;
-  }
-  if(!doProcess){
-    std::cout << std::endl;
-    std::ostringstream helpStream;
-    helpStream << "exception thrown due to help info";
-    throw(helpStream.str());//help was invoked, stop processing
-  }
-  return rasterizeBuf(ogrReader, burn_opt[0], eoption_opt, layernames_opt);
-}
-
-CPLErr Jim::rasterizeBuf(VectorOgr& ogrReader, double burnValue, const std::vector<std::string>& eoption, const std::vector<std::string>& layernames ){
-  if(m_blockSize<nrOfRow()){
-    std::ostringstream s;
-    s << "Error: increase memory to perform rasterize in entirely in buffer (now at " << 100.0*m_blockSize/nrOfRow() << "%)";
-    throw(s.str());
-  }
-  std::vector<OGRLayerH> layers;
-  if(layernames.size()){
-    for(std::vector<std::string>::const_iterator nit=layernames.begin();nit!=layernames.end();++nit)
-      layers.push_back((OGRLayerH)ogrReader.getLayer(*nit));
-  }
-  else{
-    for(size_t ilayer=0;ilayer<ogrReader.getLayerCount();++ilayer)
-      layers.push_back((OGRLayerH)ogrReader.getLayer(ilayer));
-  }
-  void* pTransformArg=NULL;
-  GDALProgressFunc pfnProgress=NULL;
-  void* pProgressArg=NULL;
-
-  char **coptions=NULL;
-  for(std::vector<std::string>::const_iterator optionIt=eoption.begin();optionIt!=eoption.end();++optionIt)
-    coptions=CSLAddString(coptions,optionIt->c_str());
-
-// #if JIPLIB_PROCESS_IN_PARALLEL == 1
-// #pragma omp parallel for
-// #else
-// #endif
-  for(int iband=0;iband<nrOfBand();++iband){
-    Vector2d<double> initBlock(nrOfRow(),nrOfCol());
-    writeDataBlock(initBlock,0,nrOfCol()-1,0,nrOfRow()-1,iband);
-    vector<double> gt(6);
-    getGeoTransform(gt);
-    if(GDALRasterizeLayersBuf(m_data[iband],nrOfCol(),nrOfRow(),getGDALDataType(),getDataTypeSizeBytes(),0,layers.size(),&(layers[0]), getProjectionRef().c_str(),&gt[0],NULL, pTransformArg, burnValue, coptions,pfnProgress,pProgressArg)!=CE_None){
-      std::string errorString(CPLGetLastErrorMsg());
-      throw(errorString);
-    }
-  }
-  return(CE_None);
-}
 
 void Jim::d_rasterizeBuf(VectorOgr& ogrReader, app::AppFactory &app){
   Optionjl<double> burn_opt("burn", "burn", "burn value", 1);

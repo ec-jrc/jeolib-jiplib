@@ -516,7 +516,7 @@ void JimList::composite(Jim& imgWriter, AppFactory& app){
       }
       // vector<double> burnValues(1,1);//burn value is 1 (single band)
       // maskReader.rasterizeBuf(extentReader,burnValues,eoption_opt);
-      maskReader.rasterizeBuf(extentReader,msknodata_opt[0],eoption_opt,layer_opt);
+      maskReader.d_rasterizeBuf(extentReader,msknodata_opt[0],eoption_opt,layer_opt);
       // if(eoption_opt.size())
       //   maskReader.rasterizeBuf(extentReader,eoption_opt);
       // else

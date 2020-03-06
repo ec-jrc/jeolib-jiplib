@@ -2320,7 +2320,7 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
           maskReader.setProjection(projectionString);
 
         // maskReader.rasterizeBuf(sampleReader,msknodata_opt[0],eoption_opt,layer_opt);
-        maskReader.rasterizeBuf(sampleReader,1,eoption_opt,layer_opt);
+        maskReader.d_rasterizeBuf(sampleReader,1,eoption_opt,layer_opt);
       }
       catch(string error){
         cerr << error << std::endl;

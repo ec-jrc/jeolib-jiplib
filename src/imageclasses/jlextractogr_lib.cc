@@ -380,7 +380,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         // sampleMask->setFile("/vsimem/mask.tif","GTiff");
 
         //todo:handle projection transform when dealing with masks!
-        sampleMask.rasterizeBuf(sampleReader,burnValue);
+        sampleMask.d_rasterizeBuf(sampleReader,burnValue);
         sampleMask.pushNoDataValue(0);
         // sampleMask.setFile("/vsimem/mask.tif","GTiff");
         // app.clearOption("s");

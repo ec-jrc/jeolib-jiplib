@@ -166,7 +166,7 @@ void Jim::setMask(JimList& maskReader, Jim& imgWriter, app::AppFactory& app){
           VectorOgr ogrReader;
           int msknodata=(msknodata_opt.size()>=imask)? msknodata_opt[imask] : msknodata_opt[0];
           ogrReader.open(vectorMask_opt[imask],layernames_opt,true);
-          imgMask->rasterizeBuf(ogrReader,msknodata,eoption_opt,layernames_opt);
+          imgMask->d_rasterizeBuf(ogrReader,msknodata,eoption_opt,layernames_opt);
           maskReader.pushImage(imgMask);
         }
       }
@@ -449,7 +449,7 @@ void Jim::setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app){
       gt[5]=-getDeltaY();
       imgMask->setGeoTransform(gt);
       imgMask->setProjection(getProjectionRef());
-      imgMask->rasterizeBuf(ogrReader,1,eoption_opt,layernames_opt);
+      imgMask->d_rasterizeBuf(ogrReader,1,eoption_opt,layernames_opt);
       maskReader.pushImage(imgMask);
     }
     catch(string error){
@@ -549,6 +549,100 @@ void Jim::setMask(VectorOgr& ogrReader, Jim& imgWriter, app::AppFactory& app){
       MyProgressFunc(progress,pszMessage,pProgressArg);
     }
     maskReader.close();
+  }
+  catch(string predefinedString){
+    std::cout << predefinedString << std::endl;
+    throw;
+  }
+}
+
+void Jim::d_setMask(VectorOgr& ogrReader, app::AppFactory& app){
+  //command line options
+  Optionjl<double> nodata_opt("nodata", "nodata", "nodata value to put in image if not valid", 0);
+  Optionjl<string> eoption_opt("eo","eo", "special extent options controlling rasterization: ATTRIBUTE|CHUNKYSIZE|ALL_TOUCHED|BURN_VALUE_FROM|MERGE_ALG, e.g., -eo ALL_TOUCHED=TRUE");
+  Optionjl<string> layernames_opt("ln", "ln", "Layer names");
+  Optionjl<short> verbose_opt("v", "verbose", "verbose", 0,2);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    // doProcess=mask_opt.retrieveOption(app);
+    doProcess=nodata_opt.retrieveOption(app);
+    eoption_opt.retrieveOption(app);
+    layernames_opt.retrieveOption(app);
+    verbose_opt.retrieveOption(app);
+
+    if(!doProcess){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+
+    std::vector<std::string> badKeys;
+    app.badKeys(badKeys);
+    if(badKeys.size()){
+      std::ostringstream errorStream;
+      if(badKeys.size()>1)
+        errorStream << "Error: unknown keys: ";
+      else
+        errorStream << "Error: unknown key: ";
+      for(int ikey=0;ikey<badKeys.size();++ikey){
+        errorStream << badKeys[ikey] << " ";
+      }
+      errorStream << std::endl;
+      throw(errorStream.str());
+    }
+
+    try{
+      //todo: check if GDT_Float64 is needed (Float32 might be sufficient)
+      shared_ptr<Jim> imgMask=createImg();
+      // imgMask->open(nrOfCol(),nrOfRow(),1,GDT_Float64);
+      imgMask->open(nrOfCol(),nrOfRow(),1,GDT_Byte);
+      double gt[6];
+      gt[0]=getUlx();
+      gt[1]=getDeltaX();
+      gt[2]=0;
+      gt[3]=getUly();
+      gt[4]=0;
+      gt[5]=-getDeltaY();
+      imgMask->setGeoTransform(gt);
+      imgMask->setProjection(getProjectionRef());
+      imgMask->d_rasterizeBuf(ogrReader,1,eoption_opt,layernames_opt);
+
+      switch(getDataType()){
+      case(GDT_Byte):
+        d_setMask_t<unsigned char>(*imgMask,nodata_opt[0]);
+        break;
+      case(GDT_Int16):
+        d_setMask_t<short>(*imgMask,nodata_opt[0]);
+        break;
+      case(GDT_UInt16):
+        d_setMask_t<unsigned short>(*imgMask,nodata_opt[0]);
+        break;
+      case(GDT_Int32):
+        d_setMask_t<int>(*imgMask,nodata_opt[0]);
+        break;
+      case(GDT_UInt32):
+        d_setMask_t<unsigned int>(*imgMask,nodata_opt[0]);
+        break;
+      case(GDT_Float32):
+        d_setMask_t<float>(*imgMask,nodata_opt[0]);
+        break;
+      case(GDT_Float64):
+        d_setMask_t<double>(*imgMask,nodata_opt[0]);
+        break;
+      default:
+        std::string errorString="Error: data type not supported";
+        throw(errorString);
+        break;
+      }
+      imgMask->close();
+    }
+    catch(string error){
+      cerr << error << std::endl;
+      throw;
+    }
+
   }
   catch(string predefinedString){
     std::cout << predefinedString << std::endl;
