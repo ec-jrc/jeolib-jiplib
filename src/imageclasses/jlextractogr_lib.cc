@@ -74,10 +74,10 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
   // Optionjl<unsigned int> random_opt("rand", "random", "Create simple random sample of points. Provide number of points to generate");
   // Optionjl<double> grid_opt("grid", "grid", "Create systematic grid of points. Provide cell grid size (in projected units, e.g,. m)");
   Optionjl<string> output_opt("o", "output", "Output sample dataset");
-  Optionjl<int> label_opt("label", "label", "Create extra label field with this value");
+  Optionjl<int> label_opt("label", "label", "Create extra label field with value");
   Optionjl<std::string> fid_opt("fid", "fid", "Create extra field with field identifier (sequence in which the features have been read");
   Optionjl<string> copyFields_opt("copy", "copy", "Restrict these fields only to copy from input to output vector dataset (default is to copy all fields)");
-  Optionjl<int> class_opt("c", "class", "Class(es) in input raster dataset t take into account for the rules mode, proportion and count");
+  Optionjl<int> class_opt("c", "class", "Class(es) in input raster dataset to take into account for the rules mode, proportion and count");
   Optionjl<float> threshold_opt("t", "threshold", "Probability threshold for selecting samples (randomly). Provide probability in percentage (>0) or absolute (<0). Use a single threshold per vector sample layer.  Use value 100 to select all pixels for selected class(es)", 100);
   Optionjl<double> percentile_opt("perc","perc","Percentile value(s) used for rule percentile",95);
   Optionjl<string> ogrformat_opt("f", "oformat", "Output vector dataset format","SQLite");
@@ -335,6 +335,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         std::cout << "covered: " << allCovered_opt[0] << std::endl;
       //check if rule contains allpoints
       if(find(rule_opt.begin(),rule_opt.end(),"allpoints")!=rule_opt.end()){
+        if(verbose_opt[0]>1)
+          std::cout << "we are in allpoints" << std::endl;
         rule_opt.clear();
         rule_opt.push_back("allpoints");
         //allpoints should be the only rule
@@ -356,7 +358,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         if(layer_lry<this->getLry())
           layer_lry=this->getLry();
         // sampleMask->open(this->nrOfCol(),this->nrOfRow(),1,GDT_Float64);
-        sampleMask.open(this->nrOfCol(),this->nrOfRow(),1,GDT_Float64);
+        sampleMask.open(this->nrOfCol(),this->nrOfRow(),1,1,GDT_Byte);
         double gt[6];
         this->getGeoTransform(gt);
         // sampleMask->setGeoTransform(gt);
@@ -368,31 +370,67 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         anApp.pushLongOption("uly",layer_uly);
         anApp.pushLongOption("lrx",layer_lrx);
         anApp.pushLongOption("lry",layer_lry);
+        if(verbose_opt[0]>1)
+          std::cout << "crop sampleMask" << std::endl;
         sampleMask.crop(sampleMask,anApp);
         // sampleMask.crop(sampleMask,layer_ulx,layer_uly,layer_lrx,layer_lry);
         // vector<double> burnValues(1,1);//burn value is 1 (single band)
         // sampleMask.rasterizeBuf(sampleReader,burnValues,eoption_opt);
-        double burnValue=1;
-        if(label_opt.size())
-          burnValue=label_opt[0];
         // sampleMask->rasterizeBuf(sampleReader,burnValue,layer_opt);
         // sampleMask->pushNoDataValue(0);
         // sampleMask->setFile("/vsimem/mask.tif","GTiff");
 
         //todo:handle projection transform when dealing with masks!
-        sampleMask.d_rasterizeBuf(sampleReader,burnValue);
-        sampleMask.pushNoDataValue(0);
+        double burnValue=1;
+        int startband=0;
+        int endband=nrOfBand()-1;
+        if(copyFields_opt.size()){
+          if(verbose_opt[0]>1)
+            std::cout << "copyFields: " << copyFields_opt[0] << std::endl;
+          burnValue=0;
+          std::vector<std::string> eoption;
+          std::ostringstream eostream;
+          eostream << "ATTRIBUTE=" << copyFields_opt[0];
+          eoption.push_back(eostream.str());
+          sampleMask.d_rasterizeBuf(sampleReader,burnValue,eoption);
+          if(verbose_opt[0]>1)
+            std::cout << "sampleMask max: " << sampleMask.getMax() << std::endl << std::flush;
+          // d_stackBand(*(sampleMask.convertDataType(getGDALDataType())));
+          // endband=nrOfBand()-1;
+          app.clearOption("cname");
+          app.pushLongOption("cname","label");
+          // app.clearOption("bndnodata");
+          // app.pushLongOption("bndnodata",endband);
+          // app.pushLongOption("bandname","label");
+        }
+        else{
+          if(label_opt.size())
+            burnValue=label_opt[0];
+          sampleMask.d_rasterizeBuf(sampleReader,burnValue);
+          app.setLongOption("class",burnValue);
+        }
+          // ostringstream fs;
+          // fs << "push layer to ogrWriter with points failed ";
+        // sampleMask.pushNoDataValue(0);
         // sampleMask.setFile("/vsimem/mask.tif","GTiff");
         // app.clearOption("s");
         // app.clearOption("sample");
         // app.setLongOption("sample","/vsimem/mask.tif");
         // sampleReader.close();
-        app.setLongOption("mem","0");
-        app.setLongOption("class",burnValue);
-        app.setLongOption("verbose",verbose_opt[0]);
-        CPLErr retValue=extractImg(sampleMask,ogrWriter, app);
+        if(verbose_opt[0]>1)
+          std::cout << "calling extractImg" << std::endl;
+        extractImg(sampleMask,ogrWriter, app);
+        // if(copyFields_opt.size()){
+          // app.setLongOption("verbose",verbose_opt[0]);
+          // anApp.clearOptions();
+          // anApp.pushLongOption("startband",startband);
+          // endband=nrOfBand()-2;
+          // anApp.pushLongOption("endband",endband);
+          // anApp.pushLongOption("endband",nband-2);
+          // d_cropBand(anApp);
+        // }
         sampleMask.close();
-        return retValue;
+        return(CE_None);
       }
 
       //convert start and end band options to vector of band indexes

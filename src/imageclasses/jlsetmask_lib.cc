@@ -607,35 +607,38 @@ void Jim::d_setMask(VectorOgr& ogrReader, app::AppFactory& app){
       gt[5]=-getDeltaY();
       imgMask->setGeoTransform(gt);
       imgMask->setProjection(getProjectionRef());
-      imgMask->d_rasterizeBuf(ogrReader,1,eoption_opt,layernames_opt);
+      imgMask->d_rasterizeBuf(ogrReader,nodata_opt[0],eoption_opt,layernames_opt);
+      //test
+      std::cout << imgMask->getMax() << std::endl;
+      d_setMask(*imgMask,*imgMask);
 
-      switch(getDataType()){
-      case(GDT_Byte):
-        d_setMask_t<unsigned char>(*imgMask,nodata_opt[0]);
-        break;
-      case(GDT_Int16):
-        d_setMask_t<short>(*imgMask,nodata_opt[0]);
-        break;
-      case(GDT_UInt16):
-        d_setMask_t<unsigned short>(*imgMask,nodata_opt[0]);
-        break;
-      case(GDT_Int32):
-        d_setMask_t<int>(*imgMask,nodata_opt[0]);
-        break;
-      case(GDT_UInt32):
-        d_setMask_t<unsigned int>(*imgMask,nodata_opt[0]);
-        break;
-      case(GDT_Float32):
-        d_setMask_t<float>(*imgMask,nodata_opt[0]);
-        break;
-      case(GDT_Float64):
-        d_setMask_t<double>(*imgMask,nodata_opt[0]);
-        break;
-      default:
-        std::string errorString="Error: data type not supported";
-        throw(errorString);
-        break;
-      }
+      // switch(getDataType()){
+      // case(GDT_Byte):
+      //   d_setMask_t<unsigned char>(*imgMask,nodata_opt[0]);
+      //   break;
+      // case(GDT_Int16):
+      //   d_setMask_t<short>(*imgMask,nodata_opt[0]);
+      //   break;
+      // case(GDT_UInt16):
+      //   d_setMask_t<unsigned short>(*imgMask,nodata_opt[0]);
+      //   break;
+      // case(GDT_Int32):
+      //   d_setMask_t<int>(*imgMask,nodata_opt[0]);
+      //   break;
+      // case(GDT_UInt32):
+      //   d_setMask_t<unsigned int>(*imgMask,nodata_opt[0]);
+      //   break;
+      // case(GDT_Float32):
+      //   d_setMask_t<float>(*imgMask,nodata_opt[0]);
+      //   break;
+      // case(GDT_Float64):
+      //   d_setMask_t<double>(*imgMask,nodata_opt[0]);
+      //   break;
+      // default:
+      //   std::string errorString="Error: data type not supported";
+      //   throw(errorString);
+      //   break;
+      // }
       imgMask->close();
     }
     catch(string error){
@@ -717,12 +720,12 @@ void Jim::d_setMask(Jim& mask, Jim& other){
     std::cerr << s.str() << std::endl;
     throw(s.str());
   }
-  if(getGDALDataType()!=other.getGDALDataType()){
-    std::ostringstream s;
-    s << "Error: target not of same data type as source";
-    std::cerr << s.str() << std::endl;
-    throw(s.str());
-  }
+  // if(getGDALDataType()!=other.getGDALDataType()){
+  //   std::ostringstream s;
+  //   s << "Error: target not of same data type as source";
+  //   std::cerr << s.str() << std::endl;
+  //   throw(s.str());
+  // }
   if(m_data.empty()){
     std::ostringstream s;
     s << "Error: Jim not initialized, m_data is empty";
@@ -741,18 +744,6 @@ void Jim::d_setMask(Jim& mask, Jim& other){
     std::cerr << s.str() << std::endl;
     throw(s.str());
   }
-  if(nrOfPlane()!=other.nrOfPlane()){
-    std::ostringstream s;
-    s << "Error: number of planes do not match";
-    std::cerr << s.str() << std::endl;
-    throw(s.str());
-  }
-  if(nrOfBand()!=other.nrOfBand()){
-    std::ostringstream s;
-    s << "Error: number of bands do not match";
-    std::cerr << s.str() << std::endl;
-    throw(s.str());
-  }
   if(nrOfRow()!=other.nrOfRow()){
     std::ostringstream s;
     s << "Error: number of rows do not match";
@@ -767,25 +758,207 @@ void Jim::d_setMask(Jim& mask, Jim& other){
   }
   switch(getDataType()){
   case(GDT_Byte):
-    d_setMask_t<unsigned char>(mask,other);
+    switch(other.getDataType()){
+    case(GDT_Byte):
+      d_setMask_t<unsigned char,unsigned char>(mask, other);
+      break;
+    case(GDT_Int16):
+      d_setMask_t<unsigned char,short>(mask, other);
+      break;
+    case(GDT_UInt16):
+      d_setMask_t<unsigned char,unsigned short>(mask, other);
+      break;
+    case(GDT_Int32):
+      d_setMask_t<unsigned char,int>(mask, other);
+      break;
+    case(GDT_UInt32):
+      d_setMask_t<unsigned char,unsigned int>(mask, other);
+      break;
+    case(GDT_Float32):
+      d_setMask_t<unsigned char,float>(mask, other);
+      break;
+    case(GDT_Float64):
+      d_setMask_t<unsigned char,double>(mask, other);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
     break;
   case(GDT_Int16):
-    d_setMask_t<short>(mask,other);
+    switch(other.getDataType()){
+    case(GDT_Byte):
+      d_setMask_t<short,unsigned char>(mask, other);
+      break;
+    case(GDT_Int16):
+      d_setMask_t<short,short>(mask, other);
+      break;
+    case(GDT_UInt16):
+      d_setMask_t<short,unsigned short>(mask, other);
+      break;
+    case(GDT_Int32):
+      d_setMask_t<short,int>(mask, other);
+      break;
+    case(GDT_UInt32):
+      d_setMask_t<short,unsigned int>(mask, other);
+      break;
+    case(GDT_Float32):
+      d_setMask_t<short,float>(mask, other);
+      break;
+    case(GDT_Float64):
+      d_setMask_t<short,double>(mask, other);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
     break;
   case(GDT_UInt16):
-    d_setMask_t<unsigned short>(mask,other);
+    switch(other.getDataType()){
+    case(GDT_Byte):
+      d_setMask_t<unsigned short,unsigned char>(mask, other);
+      break;
+    case(GDT_Int16):
+      d_setMask_t<unsigned short,short>(mask, other);
+      break;
+    case(GDT_UInt16):
+      d_setMask_t<unsigned short,unsigned short>(mask, other);
+      break;
+    case(GDT_Int32):
+      d_setMask_t<unsigned short,int>(mask, other);
+      break;
+    case(GDT_UInt32):
+      d_setMask_t<unsigned short,unsigned int>(mask, other);
+      break;
+    case(GDT_Float32):
+      d_setMask_t<unsigned short,float>(mask, other);
+      break;
+    case(GDT_Float64):
+      d_setMask_t<unsigned short,double>(mask, other);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
     break;
   case(GDT_Int32):
-    d_setMask_t<int>(mask,other);
+    switch(other.getDataType()){
+    case(GDT_Byte):
+      d_setMask_t<int,unsigned char>(mask, other);
+      break;
+    case(GDT_Int16):
+      d_setMask_t<int,short>(mask, other);
+      break;
+    case(GDT_UInt16):
+      d_setMask_t<int,unsigned short>(mask, other);
+      break;
+    case(GDT_Int32):
+      d_setMask_t<int,int>(mask, other);
+      break;
+    case(GDT_UInt32):
+      d_setMask_t<int,unsigned int>(mask, other);
+      break;
+    case(GDT_Float32):
+      d_setMask_t<int,float>(mask, other);
+      break;
+    case(GDT_Float64):
+      d_setMask_t<int,double>(mask, other);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
     break;
   case(GDT_UInt32):
-    d_setMask_t<unsigned int>(mask,other);
+    switch(other.getDataType()){
+    case(GDT_Byte):
+      d_setMask_t<unsigned int,unsigned char>(mask, other);
+      break;
+    case(GDT_Int16):
+      d_setMask_t<unsigned int,short>(mask, other);
+      break;
+    case(GDT_UInt16):
+      d_setMask_t<unsigned int,unsigned short>(mask, other);
+      break;
+    case(GDT_Int32):
+      d_setMask_t<unsigned int,int>(mask, other);
+      break;
+    case(GDT_UInt32):
+      d_setMask_t<unsigned int,unsigned int>(mask, other);
+      break;
+    case(GDT_Float32):
+      d_setMask_t<unsigned int,float>(mask, other);
+      break;
+    case(GDT_Float64):
+      d_setMask_t<unsigned int,double>(mask, other);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
     break;
   case(GDT_Float32):
-    d_setMask_t<float>(mask,other);
+    switch(other.getDataType()){
+    case(GDT_Byte):
+      d_setMask_t<float,unsigned char>(mask, other);
+      break;
+    case(GDT_Int16):
+      d_setMask_t<float,short>(mask, other);
+      break;
+    case(GDT_UInt16):
+      d_setMask_t<float,unsigned short>(mask, other);
+      break;
+    case(GDT_Int32):
+      d_setMask_t<float,int>(mask, other);
+      break;
+    case(GDT_UInt32):
+      d_setMask_t<float,unsigned int>(mask, other);
+      break;
+    case(GDT_Float32):
+      d_setMask_t<float,float>(mask, other);
+      break;
+    case(GDT_Float64):
+      d_setMask_t<float,double>(mask, other);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
     break;
   case(GDT_Float64):
-    d_setMask_t<double>(mask,other);
+    switch(other.getDataType()){
+    case(GDT_Byte):
+      d_setMask_t<double,unsigned char>(mask, other);
+      break;
+    case(GDT_Int16):
+      d_setMask_t<double,short>(mask, other);
+      break;
+    case(GDT_UInt16):
+      d_setMask_t<double,unsigned short>(mask, other);
+      break;
+    case(GDT_Int32):
+      d_setMask_t<double,int>(mask, other);
+      break;
+    case(GDT_UInt32):
+      d_setMask_t<double,unsigned int>(mask, other);
+      break;
+    case(GDT_Float32):
+      d_setMask_t<double,float>(mask, other);
+      break;
+    case(GDT_Float64):
+      d_setMask_t<double,double>(mask, other);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
     break;
   default:
     std::string errorString="Error: data type not supported";

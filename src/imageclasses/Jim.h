@@ -856,6 +856,10 @@ class Jim : public std::enable_shared_from_this<Jim>
   void createct(Jim& imgWriter, app::AppFactory& app);
   ///convert image
   void convert(Jim& imgWriter, app::AppFactory& app);
+  std::shared_ptr<Jim> convertDataType(const GDALDataType& dataType);
+  std::shared_ptr<Jim> convertDataType(const std::string dataTypeString){return convertDataType(string2GDAL(dataTypeString));};
+  void convertDataType(Jim& imgWriter, const GDALDataType& dataType);
+  template<typename T1, typename T2> void convertDataType_t(Jim& imgWriter, const GDALDataType& dataType);
   ///crop image
   void crop(Jim& imgWriter, app::AppFactory& app);
   ///crop image
@@ -918,7 +922,8 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///extract pixel values from raster image with random or grid sampling
   std::shared_ptr<VectorOgr> extractSample(app::AppFactory& app);
   ///extract pixel values from raster image from a raster sample
-  CPLErr extractImg(Jim& classReader, VectorOgr& ogrWriter, app::AppFactory& app);
+  void extractImg(Jim& classReader, VectorOgr& ogrWriter, app::AppFactory& app);
+  template<typename T> void extractImg_t(Jim& classReader, VectorOgr& ogrWriter, app::AppFactory& app);
   ///extract pixel values from raster image from a raster sample
   std::shared_ptr<VectorOgr> extractImg(Jim& classReader, app::AppFactory& app);
   ///calculate statistics profile based on multiband raster dataset
@@ -1048,7 +1053,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   template<typename T> void d_setMask_t(Jim& mask, double value);
   void d_setMask2D(Jim& mask, Jim& other);
   void d_setMask(Jim& mask, Jim& other);
-  template<typename T> void d_setMask_t(Jim& mask, Jim& other);
+  template<typename T1, typename T2> void d_setMask_t(Jim& mask, Jim& other);
   ///get mask to raster dataset
   void getMask(Jim& imgWriter, app::AppFactory& app);
   ///getmask raster dataset only for in memory

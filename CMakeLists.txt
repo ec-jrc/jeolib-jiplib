@@ -82,8 +82,8 @@ endif()
 
 set(PYTHON3 ON CACHE BOOL "set ON for PYTHON3")
 if(PYTHON3)
-  FIND_PACKAGE( PythonInterp 3.6 REQUIRED )
-  FIND_PACKAGE( PythonLibs 3.6 REQUIRED )
+  FIND_PACKAGE( PythonInterp 3.5 REQUIRED )
+  FIND_PACKAGE( PythonLibs 3.5 REQUIRED )
 else(PYTHON3)
   FIND_PACKAGE( PythonInterp 2.7 REQUIRED )
   FIND_PACKAGE( PythonLibs 2.7 REQUIRED )
@@ -278,12 +278,14 @@ set(IMGCLASS_H
   ${IMGCLASS_SRC_DIR}/Mia.h
   ${IMGCLASS_SRC_DIR}/JimList.h
   ${IMGCLASS_SRC_DIR}/VectorOgr.h
+  ${IMGCLASS_SRC_DIR}/jlcrop_lib.h
   ${IMGCLASS_SRC_DIR}/jlfilter1d_lib.h
   ${IMGCLASS_SRC_DIR}/jlfilter2d_lib.h
   ${IMGCLASS_SRC_DIR}/jlclassify_lib.h
   ${IMGCLASS_SRC_DIR}/jlsml_lib.h
   ${IMGCLASS_SRC_DIR}/jlsetmask_lib.h
   ${IMGCLASS_SRC_DIR}/jloperators_lib.h
+  ${IMGCLASS_SRC_DIR}/jlextractimg_lib.h
   )
 
 set(IMGCLASS_CC

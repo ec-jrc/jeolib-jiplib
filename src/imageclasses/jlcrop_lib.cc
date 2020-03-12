@@ -18,6 +18,7 @@ This file is part of jiplib
 #include "algorithms/Egcs.h"
 #include "algorithms/StatFactory.h"
 #include "apps/AppFactory.h"
+#include "jlcrop_lib.h"
 
 using namespace std;
 using namespace app;
@@ -25,6 +26,12 @@ using namespace app;
 shared_ptr<Jim> Jim::convert(AppFactory& app){
   shared_ptr<Jim> imgWriter=Jim::createImg();
   convert(*imgWriter, app);
+  return(imgWriter);
+}
+
+shared_ptr<Jim> Jim::convertDataType(const GDALDataType& dataType){
+  shared_ptr<Jim> imgWriter=Jim::createImg();
+  convertDataType(*imgWriter, dataType);
   return(imgWriter);
 }
 
@@ -149,6 +156,221 @@ shared_ptr<Jim> Jim::stackBand(Jim& srcImg, AppFactory& app){
 //     throw;
 //   }
 // }
+
+void Jim::convertDataType(Jim& imgWriter, const GDALDataType& dataType){
+  imgWriter.open(nrOfCol(),nrOfRow(),nrOfBand(),nrOfPlane(),dataType);
+  imgWriter.copyGeoTransform(*this);
+  imgWriter.setProjection(this->getProjection());
+  switch(getDataType()){
+  case(GDT_Byte):
+    switch(dataType){
+    case(GDT_Byte):
+      convertDataType_t<unsigned char,unsigned char>(imgWriter, dataType);
+      break;
+    case(GDT_Int16):
+      convertDataType_t<unsigned char,short>(imgWriter, dataType);
+      break;
+    case(GDT_UInt16):
+      convertDataType_t<unsigned char,unsigned short>(imgWriter, dataType);
+      break;
+    case(GDT_Int32):
+      convertDataType_t<unsigned char,int>(imgWriter, dataType);
+      break;
+    case(GDT_UInt32):
+      convertDataType_t<unsigned char,unsigned int>(imgWriter, dataType);
+      break;
+    case(GDT_Float32):
+      convertDataType_t<unsigned char,float>(imgWriter, dataType);
+      break;
+    case(GDT_Float64):
+      convertDataType_t<unsigned char,double>(imgWriter, dataType);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
+    break;
+  case(GDT_Int16):
+    switch(dataType){
+    case(GDT_Byte):
+      convertDataType_t<short,unsigned char>(imgWriter, dataType);
+      break;
+    case(GDT_Int16):
+      convertDataType_t<short,short>(imgWriter, dataType);
+      break;
+    case(GDT_UInt16):
+      convertDataType_t<short,unsigned short>(imgWriter, dataType);
+      break;
+    case(GDT_Int32):
+      convertDataType_t<short,int>(imgWriter, dataType);
+      break;
+    case(GDT_UInt32):
+      convertDataType_t<short,unsigned int>(imgWriter, dataType);
+      break;
+    case(GDT_Float32):
+      convertDataType_t<short,float>(imgWriter, dataType);
+      break;
+    case(GDT_Float64):
+      convertDataType_t<short,double>(imgWriter, dataType);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
+    break;
+  case(GDT_UInt16):
+    switch(dataType){
+    case(GDT_Byte):
+      convertDataType_t<unsigned short,unsigned char>(imgWriter, dataType);
+      break;
+    case(GDT_Int16):
+      convertDataType_t<unsigned short,short>(imgWriter, dataType);
+      break;
+    case(GDT_UInt16):
+      convertDataType_t<unsigned short,unsigned short>(imgWriter, dataType);
+      break;
+    case(GDT_Int32):
+      convertDataType_t<unsigned short,int>(imgWriter, dataType);
+      break;
+    case(GDT_UInt32):
+      convertDataType_t<unsigned short,unsigned int>(imgWriter, dataType);
+      break;
+    case(GDT_Float32):
+      convertDataType_t<unsigned short,float>(imgWriter, dataType);
+      break;
+    case(GDT_Float64):
+      convertDataType_t<unsigned short,double>(imgWriter, dataType);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
+    break;
+  case(GDT_Int32):
+    switch(dataType){
+    case(GDT_Byte):
+      convertDataType_t<int,unsigned char>(imgWriter, dataType);
+      break;
+    case(GDT_Int16):
+      convertDataType_t<int,short>(imgWriter, dataType);
+      break;
+    case(GDT_UInt16):
+      convertDataType_t<int,unsigned short>(imgWriter, dataType);
+      break;
+    case(GDT_Int32):
+      convertDataType_t<int,int>(imgWriter, dataType);
+      break;
+    case(GDT_UInt32):
+      convertDataType_t<int,unsigned int>(imgWriter, dataType);
+      break;
+    case(GDT_Float32):
+      convertDataType_t<int,float>(imgWriter, dataType);
+      break;
+    case(GDT_Float64):
+      convertDataType_t<int,double>(imgWriter, dataType);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
+    break;
+  case(GDT_UInt32):
+    switch(dataType){
+    case(GDT_Byte):
+      convertDataType_t<unsigned int,unsigned char>(imgWriter, dataType);
+      break;
+    case(GDT_Int16):
+      convertDataType_t<unsigned int,short>(imgWriter, dataType);
+      break;
+    case(GDT_UInt16):
+      convertDataType_t<unsigned int,unsigned short>(imgWriter, dataType);
+      break;
+    case(GDT_Int32):
+      convertDataType_t<unsigned int,int>(imgWriter, dataType);
+      break;
+    case(GDT_UInt32):
+      convertDataType_t<unsigned int,unsigned int>(imgWriter, dataType);
+      break;
+    case(GDT_Float32):
+      convertDataType_t<unsigned int,float>(imgWriter, dataType);
+      break;
+    case(GDT_Float64):
+      convertDataType_t<unsigned int,double>(imgWriter, dataType);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
+    break;
+  case(GDT_Float32):
+    switch(dataType){
+    case(GDT_Byte):
+      convertDataType_t<float,unsigned char>(imgWriter, dataType);
+      break;
+    case(GDT_Int16):
+      convertDataType_t<float,short>(imgWriter, dataType);
+      break;
+    case(GDT_UInt16):
+      convertDataType_t<float,unsigned short>(imgWriter, dataType);
+      break;
+    case(GDT_Int32):
+      convertDataType_t<float,int>(imgWriter, dataType);
+      break;
+    case(GDT_UInt32):
+      convertDataType_t<float,unsigned int>(imgWriter, dataType);
+      break;
+    case(GDT_Float32):
+      convertDataType_t<float,float>(imgWriter, dataType);
+      break;
+    case(GDT_Float64):
+      convertDataType_t<float,double>(imgWriter, dataType);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
+    break;
+  case(GDT_Float64):
+    switch(dataType){
+    case(GDT_Byte):
+      convertDataType_t<double,unsigned char>(imgWriter, dataType);
+      break;
+    case(GDT_Int16):
+      convertDataType_t<double,short>(imgWriter, dataType);
+      break;
+    case(GDT_UInt16):
+      convertDataType_t<double,unsigned short>(imgWriter, dataType);
+      break;
+    case(GDT_Int32):
+      convertDataType_t<double,int>(imgWriter, dataType);
+      break;
+    case(GDT_UInt32):
+      convertDataType_t<double,unsigned int>(imgWriter, dataType);
+      break;
+    case(GDT_Float32):
+      convertDataType_t<double,float>(imgWriter, dataType);
+      break;
+    case(GDT_Float64):
+      convertDataType_t<double,double>(imgWriter, dataType);
+      break;
+    default:
+      std::string errorString="Error: data type not supported";
+      throw(errorString);
+      break;
+    }
+    break;
+  default:
+    std::string errorString="Error: data type not supported";
+    throw(errorString);
+    break;
+  }
+}
 
 void Jim::convert(Jim& imgWriter, AppFactory& app){
   Optionjl<string>  projection_opt("a_srs", "a_srs", "Override the projection for the output file (leave blank to copy from input file, use epsg:3035 to use European projection and force to European grid");
