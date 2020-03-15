@@ -73,7 +73,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 
 # Make sure Boost libraries are found
 set(Boost_DEBUG 0)
-find_package(Boost COMPONENTS filesystem system serialization)
+find_package(Boost COMPONENTS filesystem system serialization REQUIRED)
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
   # add_definitions("-DBOOST_ALL")

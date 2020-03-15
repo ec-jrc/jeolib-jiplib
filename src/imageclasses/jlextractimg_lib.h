@@ -10,6 +10,7 @@ This file is part of jiplib
 #define _JLEXTRACTIMG_LIB_H_
 
 #include "imageclasses/Jim.h"
+#include "imageclasses/VectorOgr.h"
 #include "apps/AppFactory.h"
 
 template<typename T> void Jim::extractImg_t(Jim& classReader, VectorOgr& ogrWriter, app::AppFactory& app){
@@ -182,7 +183,7 @@ template<typename T> void Jim::extractImg_t(Jim& classReader, VectorOgr& ogrWrit
     srand(time(NULL));
 
     size_t index=0;
-    unsigned short nclass=255;
+    unsigned short nclass=256;
     std::vector< std::vector<size_t> > sample(nclass);//[class][index]
     if(verbose_opt[0]>1)
       std::cout << "extracting sample from image..." << std::endl;
@@ -193,6 +194,7 @@ template<typename T> void Jim::extractImg_t(Jim& classReader, VectorOgr& ogrWrit
     double x=0;//geo x coordinate
     double y=0;//geo y coordinate
     T* pim=0;
+
     unsigned char* pmask=0;
     for(size_t irow=0;irow<nrOfRow();++irow){
       for(size_t icol=0;icol<nrOfCol();++icol){
@@ -227,17 +229,12 @@ template<typename T> void Jim::extractImg_t(Jim& classReader, VectorOgr& ogrWrit
     char **papszOptions=NULL;
     for(std::vector<std::string>::const_iterator optionIt=option_opt.begin();optionIt!=option_opt.end();++optionIt)
       papszOptions=CSLAddString(papszOptions,optionIt->c_str());
-    if(ogrWriter.open(output_opt[0],ogrformat_opt[0])!=OGRERR_NONE){
+
+    if(ogrWriter.open(output_opt[0], layer_opt, ogrformat_opt[0], VectorOgr::string2geotype("wkbPoint"), this->getProjection(),papszOptions)!=OGRERR_NONE){
       std::ostringstream fs;
       fs << "open ogrWriter failed ";
       fs << "output name: " << output_opt[0] << ", ";
       fs << "format: "<< ogrformat_opt[0] << std::endl;
-      throw(fs.str());
-    }
-    if(ogrWriter.pushLayer(layer_opt[0], this->getProjection(),wkbPoint,papszOptions)!=OGRERR_NONE){
-      std::ostringstream fs;
-      fs << "push layer to ogrWriter with points failed ";
-      fs << "layer name: "<< layer_opt[0] << std::endl;
       throw(fs.str());
     }
     std::map<std::string,double> pointAttributes;
@@ -334,7 +331,7 @@ template<typename T> void Jim::extractImg_t(Jim& classReader, VectorOgr& ogrWrit
     }
   }
   catch(std::string predefinedString){
-    std::cout << predefinedString << std::endl;
+    std::cerr << predefinedString << std::endl;
     throw;
   }
 }

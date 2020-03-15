@@ -394,15 +394,20 @@ OGRErr VectorOgr::open(app::AppFactory& app){
     setAccess(GDAL_OF_UPDATE);
   }
   if(getAccess()==GDAL_OF_UPDATE){
+
+    char **papszOptions=NULL;
+    for(std::vector<std::string>::const_iterator optionIt=options_opt.begin();optionIt!=options_opt.end();++optionIt){
+      papszOptions=CSLAddString(papszOptions,optionIt->c_str());
+    }
     if(verbose_opt[0])
       std::cout << "open in update mode" << std::endl;
     if(layer_opt.size()){
       if(projection_opt.size()){
-        return(open(filename_opt[0], layer_opt, ogrformat_opt[0], geometryType_opt[0], projection_opt[0]));
+        return(open(filename_opt[0], layer_opt, ogrformat_opt[0], geometryType_opt[0], projection_opt[0],papszOptions));
       }
       else{
         OGRwkbGeometryType gType=string2geotype(geometryType_opt[0]);
-        return(open(filename_opt[0], layer_opt, ogrformat_opt[0], gType, NULL));
+        return(open(filename_opt[0], layer_opt, ogrformat_opt[0], gType, NULL, papszOptions));
       }
     }
     else{

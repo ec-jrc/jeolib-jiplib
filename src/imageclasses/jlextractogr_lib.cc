@@ -76,6 +76,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
   Optionjl<string> output_opt("o", "output", "Output sample dataset");
   Optionjl<int> label_opt("label", "label", "Create extra label field with value");
   Optionjl<std::string> fid_opt("fid", "fid", "Create extra field with field identifier (sequence in which the features have been read");
+  Optionjl<string> attribute_opt("attribute", "attribute", "use this field to rasterize when selecting extraction rule allpoints");
   Optionjl<string> copyFields_opt("copy", "copy", "Restrict these fields only to copy from input to output vector dataset (default is to copy all fields)");
   Optionjl<int> class_opt("c", "class", "Class(es) in input raster dataset to take into account for the rules mode, proportion and count");
   Optionjl<float> threshold_opt("t", "threshold", "Probability threshold for selecting samples (randomly). Provide probability in percentage (>0) or absolute (<0). Use a single threshold per vector sample layer.  Use value 100 to select all pixels for selected class(es)", 100);
@@ -130,6 +131,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
     label_opt.retrieveOption(app);
     fid_opt.retrieveOption(app);
     copyFields_opt.retrieveOption(app);
+    attribute_opt.retrieveOption(app);
     threshold_opt.retrieveOption(app);
     percentile_opt.retrieveOption(app);
     ogrformat_opt.retrieveOption(app);
@@ -161,21 +163,6 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
       throw(helpStream.str());//help was invoked, stop processing
     }
-
-    // std::vector<std::string> badKeys;
-    // app.badKeys(badKeys);
-    // if(badKeys.size()){
-    //   std::ostringstream errorStream;
-    //   if(badKeys.size()>1)
-    //     errorStream << "Error: unknown keys: ";
-    //   else
-    //     errorStream << "Error: unknown key: ";
-    //   for(int ikey=0;ikey<badKeys.size();++ikey){
-    //     errorStream << badKeys[ikey] << " ";
-    //   }
-    //   errorStream << std::endl;
-    //   throw(errorStream.str());
-    // }
 
     //initialize ruleMap
     std::map<std::string, rule::RULE_TYPE> ruleMap;
@@ -261,11 +248,12 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       papszOptions=CSLAddString(papszOptions,optionIt->c_str());
 
     bool initWriter=true;
-    if(verbose_opt[0])
-      std::cout << "Opening ogrWriter: " << output_opt[0] << " in format " << ogrformat_opt[0] << endl;
     try{
-      if(find(rule_opt.begin(),rule_opt.end(),"allpoints")==rule_opt.end())
+      if(find(rule_opt.begin(),rule_opt.end(),"allpoints")==rule_opt.end()){
+        if(verbose_opt[0])
+          std::cout << "Opening ogrWriter: " << output_opt[0] << " in format " << ogrformat_opt[0] << endl;
         ogrWriter.open(output_opt[0],ogrformat_opt[0],access_opt[0]);
+      }
     }
     catch(std::string errorString){
       if(verbose_opt[0])
@@ -339,16 +327,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
           std::cout << "we are in allpoints" << std::endl;
         rule_opt.clear();
         rule_opt.push_back("allpoints");
-        //allpoints should be the only rule
-        //rasterize vector sample
-        // ImgReaderOgr sampleReader;
-        // VectorOgr sampleReader;
-        // std::shared_ptr<Jim> sampleMask=Jim::createImg();
         Jim sampleMask;
-        // sampleReader.open(sample_opt[0]);
-        //layer bounding box in SRS of this image raster
-        // double ulx,uly,lrx,lry;
-        // sampleReader.getExtent(layer_ulx,layer_uly,layer_lrx,layer_lry,sample2img,ilayer);
         if(layer_ulx<this->getUlx())
           layer_ulx=this->getUlx();
         if(layer_uly>this->getUly())
@@ -357,51 +336,27 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
           layer_lrx=this->getLrx();
         if(layer_lry<this->getLry())
           layer_lry=this->getLry();
-        // sampleMask->open(this->nrOfCol(),this->nrOfRow(),1,GDT_Float64);
         sampleMask.open(this->nrOfCol(),this->nrOfRow(),1,1,GDT_Byte);
         double gt[6];
         this->getGeoTransform(gt);
-        // sampleMask->setGeoTransform(gt);
-        // sampleMask->setProjection(this->getProjection());
         sampleMask.setGeoTransform(gt);
         sampleMask.setProjection(this->getProjection());
-        AppFactory anApp;
-        anApp.pushLongOption("ulx",layer_ulx);
-        anApp.pushLongOption("uly",layer_uly);
-        anApp.pushLongOption("lrx",layer_lrx);
-        anApp.pushLongOption("lry",layer_lry);
-        if(verbose_opt[0]>1)
-          std::cout << "crop sampleMask" << std::endl;
-        sampleMask.crop(sampleMask,anApp);
-        // sampleMask.crop(sampleMask,layer_ulx,layer_uly,layer_lrx,layer_lry);
-        // vector<double> burnValues(1,1);//burn value is 1 (single band)
-        // sampleMask.rasterizeBuf(sampleReader,burnValues,eoption_opt);
-        // sampleMask->rasterizeBuf(sampleReader,burnValue,layer_opt);
-        // sampleMask->pushNoDataValue(0);
-        // sampleMask->setFile("/vsimem/mask.tif","GTiff");
-
-        //todo:handle projection transform when dealing with masks!
         double burnValue=1;
         int startband=0;
         int endband=nrOfBand()-1;
-        if(copyFields_opt.size()){
+        if(attribute_opt.size()){
           if(verbose_opt[0]>1)
-            std::cout << "copyFields: " << copyFields_opt[0] << std::endl;
+            std::cout << "copyFields: " << attribute_opt[0] << std::endl;
           burnValue=0;
           std::vector<std::string> eoption;
           std::ostringstream eostream;
-          eostream << "ATTRIBUTE=" << copyFields_opt[0];
+          eostream << "ATTRIBUTE=" << attribute_opt[0];
           eoption.push_back(eostream.str());
           sampleMask.d_rasterizeBuf(sampleReader,burnValue,eoption);
           if(verbose_opt[0]>1)
             std::cout << "sampleMask max: " << sampleMask.getMax() << std::endl << std::flush;
-          // d_stackBand(*(sampleMask.convertDataType(getGDALDataType())));
-          // endband=nrOfBand()-1;
           app.clearOption("cname");
-          app.pushLongOption("cname","label");
-          // app.clearOption("bndnodata");
-          // app.pushLongOption("bndnodata",endband);
-          // app.pushLongOption("bandname","label");
+          app.pushLongOption("cname",attribute_opt[0]);
         }
         else{
           if(label_opt.size())
@@ -409,27 +364,14 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
           sampleMask.d_rasterizeBuf(sampleReader,burnValue);
           app.setLongOption("class",burnValue);
         }
-          // ostringstream fs;
-          // fs << "push layer to ogrWriter with points failed ";
-        // sampleMask.pushNoDataValue(0);
-        // sampleMask.setFile("/vsimem/mask.tif","GTiff");
-        // app.clearOption("s");
-        // app.clearOption("sample");
-        // app.setLongOption("sample","/vsimem/mask.tif");
-        // sampleReader.close();
         if(verbose_opt[0]>1)
           std::cout << "calling extractImg" << std::endl;
         extractImg(sampleMask,ogrWriter, app);
-        // if(copyFields_opt.size()){
-          // app.setLongOption("verbose",verbose_opt[0]);
-          // anApp.clearOptions();
-          // anApp.pushLongOption("startband",startband);
-          // endband=nrOfBand()-2;
-          // anApp.pushLongOption("endband",endband);
-          // anApp.pushLongOption("endband",nband-2);
-          // d_cropBand(anApp);
-        // }
+        if(verbose_opt[0]>1)
+          std::cout << "closing mask" << std::endl;
         sampleMask.close();
+        if(verbose_opt[0]>1)
+          std::cout << "return from extractOgr" << std::endl;
         return(CE_None);
       }
 
@@ -495,36 +437,20 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       }
 
       const char* pszMessage;
-      // void* pProgressArg=NULL;
-      // GDALProgressFunc pfnProgress=GDALTermProgress;
-      // double progress=0;
       srand(time(NULL));
 
       bool sampleIsRaster=false;
 
-      // VectorOgr sampleReaderOgr;
-      // ImgWriterOgr sampleWriterOgr;
       VectorOgr sampleWriterOgr;
 
       Vector2d<int> maskBuffer;
-      // if(sample_opt.empty()){
-      //   string errorString="Error: no sample dataset provided (use option -s). Use --help for help information";
-      //   throw(errorString);
-      // }
 
-
-      // ImgWriterOgr ogrWriter;
-      // VectorOgr ogrWriter;
       double vectords_ulx;
       double vectords_uly;
       double vectords_lrx;
       double vectords_lry;
       bool calculateSpatialStatistics=false;
 
-      // if(verbose_opt[0])
-      //   std::cout << "opening " << output_opt[0] << " for writing output vector dataset" << std::endl;
-      // ogrWriter.open(output_opt[0],ogrformat_opt[0]);
-      //if class_opt not set, get number of classes from input image for these rules
       for(int irule=0;irule<rule_opt.size();++irule){
         switch(ruleMap[rule_opt[irule]]){
         case(rule::point):
