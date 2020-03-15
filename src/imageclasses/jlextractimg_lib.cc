@@ -47,6 +47,16 @@ void Jim::extractImg(Jim& classReader, VectorOgr& ogrWriter, app::AppFactory& ap
     errorStream << "Error: data type must be GDT_Byte" << std::endl;
     throw(errorStream.str());
   }
+  if(classReader.nrOfCol()!=nrOfCol()){
+    std::ostringstream errorStream;
+    errorStream << "Error: number of columns of image and classReader do not match" << std::endl;
+    throw(errorStream.str());
+  }
+  if(classReader.nrOfRow()!=nrOfRow()){
+    std::ostringstream errorStream;
+    errorStream << "Error: number of rows of image and classReader do not match" << std::endl;
+    throw(errorStream.str());
+  }
   switch(getDataType()){
   case(GDT_Byte):
     extractImg_t<unsigned char>(classReader, ogrWriter, app);
