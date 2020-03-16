@@ -570,13 +570,6 @@ This file is part of jiplib
       SWIG_exception_fail(SWIG_ArgError(res2), "in method " "$symname");
   }
 
-  %typemap(out) std::vector<double> {
-    PyObject *l = PyList_New($1.size());
-    for(int index=0;index<$1.size();++index)
-      PyList_SetItem(l,index,PyFloat_FromDouble($1.at(index)));
-    $result=l;
-  }
-
   //convert multimap to PyDict
   %typemap(out) std::multimap<std::string,std::string> getStats {
     PyObject *d = PyDict_New();
@@ -849,6 +842,43 @@ This file is part of jiplib
           return(0);
       }
     }
+
+  PyObject* np(std::shared_ptr<VectorOgr> aJimVect) {
+    size_t ntotalfeatures=0;
+    size_t nfields=0;
+    int npDataType=NPY_FLOAT64;
+    //todo: destroy empty features?
+    std::vector<OGRFieldDefn*> fields;
+    for(size_t ilayer=0;ilayer<aJimVect->getLayerCount();++ilayer){
+      ntotalfeatures+=aJimVect->getFeatureCount(ilayer);
+      aJimVect->getFields(fields,ilayer);
+      if(!ilayer)
+        nfields=fields.size();
+      else if(nfields!=fields.size()){
+        std::string errorString="Error: number of fields must be the same for all vector layers";
+        std::cerr << errorString << std::endl;
+        throw(errorString);
+      }
+    }
+    int ndim=2;
+    npy_intp dims[2]{ntotalfeatures,nfields};
+    PyArrayObject *npArray =(PyArrayObject*) PyArray_SimpleNew(ndim, dims, npDataType);
+	  double *ad = (double *) PyArray_DATA((PyArrayObject *) npArray);
+    for(size_t ilayer=0;ilayer<aJimVect->getLayerCount();++ilayer){
+      OGRFeatureDefn *poFDefn = aJimVect->getLayer(ilayer)->GetLayerDefn();
+      for(size_t ifeature = 0; ifeature < aJimVect->getFeatureCount(ilayer); ++ifeature) {
+        OGRFeature *thisFeature=aJimVect->getFeatureRef(ifeature,ilayer);
+        for(int iField=0;iField<poFDefn->GetFieldCount();++iField)
+          *ad++=thisFeature->GetFieldAsDouble(iField);
+      }
+      if(npArray){
+        return(PyArray_Return(npArray));
+      }
+      else{
+        return(0);
+      }
+    }
+  }
 
   //todo: return multi-plane/band images according to: http://scikit-image.org/docs/dev/user_guide/numpy_images.html
   PyObject* np(std::shared_ptr<Jim> aJim, size_t band=0) {
