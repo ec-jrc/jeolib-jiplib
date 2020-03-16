@@ -78,7 +78,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
   Optionjl<std::string> fid_opt("fid", "fid", "Create extra field with field identifier (sequence in which the features have been read");
   Optionjl<string> attribute_opt("attribute", "attribute", "use this field to rasterize when selecting extraction rule allpoints");
   Optionjl<string> copyFields_opt("copy", "copy", "Restrict these fields only to copy from input to output vector dataset (default is to copy all fields)");
-  Optionjl<int> class_opt("c", "class", "Class(es) in input raster dataset to take into account for the rules mode, proportion and count");
+  Optionjl<int> class_opt("c", "class", "Class(es) to take into account for the rules mode, proportion and count");
   Optionjl<float> threshold_opt("t", "threshold", "Probability threshold for selecting samples (randomly). Provide probability in percentage (>0) or absolute (<0). Use a single threshold per vector sample layer.  Use value 100 to select all pixels for selected class(es)", 100);
   Optionjl<double> percentile_opt("perc","perc","Percentile value(s) used for rule percentile",95);
   Optionjl<string> ogrformat_opt("f", "oformat", "Output vector dataset format","SQLite");
@@ -366,6 +366,10 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         }
         if(verbose_opt[0]>1)
           std::cout << "calling extractImg" << std::endl;
+        if(class_opt.empty()){
+          string errorstring="Error: classes to extract must be set";
+          throw(errorstring);
+        }
         extractImg(sampleMask,ogrWriter, app);
         if(verbose_opt[0]>1)
           std::cout << "closing mask" << std::endl;
@@ -2394,7 +2398,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
     return(CE_None);
   }
   catch(string predefinedString){
-    std::cout << predefinedString << std::endl;
+    std::cerr << predefinedString << std::endl;
     throw;
   }
 }
@@ -4493,7 +4497,7 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
     return(CE_None);
   }
   catch(string predefinedString){
-    std::cout << predefinedString << std::endl;
+    std::cerr << predefinedString << std::endl;
     throw;
   }
 }
@@ -4608,7 +4612,7 @@ CPLErr JimList::extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, AppFac
         }
       }
       catch(string errorString){
-        std::cout << errorString << ", continuing with next image"<< std::endl;
+        std::cerr << errorString << ", continuing with next image"<< std::endl;
         ++imit;
         continue;
       }
@@ -4617,7 +4621,7 @@ CPLErr JimList::extractOgr(VectorOgr& sampleReader, VectorOgr& ogrWriter, AppFac
     return(CE_None);
   }
   catch(string errorString){
-    std::cout << errorString << std::endl;
+    std::cerr << errorString << std::endl;
     throw;
   }
 }
@@ -4663,7 +4667,7 @@ size_t JimList::extractOgrMem(VectorOgr& sampleReader, vector<unsigned char> &vb
     return(ogrWriter.serialize(vbytes));
   }
   catch(string errorString){
-    std::cout << errorString << std::endl;
+    std::cerr << errorString << std::endl;
     throw;
   }
 }

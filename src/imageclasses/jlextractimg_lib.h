@@ -261,23 +261,25 @@ template<typename T> void Jim::extractImg_t(Jim& classReader, VectorOgr& ogrWrit
         ogrWriter.createField(fieldname,fieldType);
       }
     }
+    if(threshold_opt[0]!=100){
+      //todo (optimization): if selection is small, better select random sample than shuffle all...
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
 #endif
-    for(unsigned short iclass=0;iclass<nclass;++iclass){
-      //todo (optimization): if selection is small, better select random sample than shuffle all...
-      if(verbose_opt[0]){
-        if(nvalid[iclass]){
-          std::cout << "nvalid[" << iclass << "]: " << nvalid[iclass] << std::endl;
-          std::cout << "ninvalid[" << iclass << "]: " << ninvalid[iclass] << std::endl;
-        }
-      }
-      if(sample[iclass].size()){
+      for(unsigned short iclass=0;iclass<nclass;++iclass){
         if(verbose_opt[0]){
-          std::cout << "random shuffle class " << iclass << " with size " << sample[iclass].size() << std::endl;
+          if(nvalid[iclass]){
+            std::cout << "nvalid[" << iclass << "]: " << nvalid[iclass] << std::endl;
+            std::cout << "ninvalid[" << iclass << "]: " << ninvalid[iclass] << std::endl;
+          }
         }
-        std::random_shuffle(sample[iclass].begin(), sample[iclass].end());
+        if(sample[iclass].size()){
+          if(verbose_opt[0]){
+            std::cout << "random shuffle class " << iclass << " with size " << sample[iclass].size() << std::endl;
+          }
+          std::random_shuffle(sample[iclass].begin(), sample[iclass].end());
+        }
       }
     }
 
