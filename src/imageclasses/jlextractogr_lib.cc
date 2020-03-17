@@ -355,8 +355,6 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
           sampleMask.d_rasterizeBuf(sampleReader,burnValue,eoption);
           if(verbose_opt[0]>1)
             std::cout << "sampleMask max: " << sampleMask.getMax() << std::endl << std::flush;
-          app.clearOption("cname");
-          app.pushLongOption("cname",attribute_opt[0]);
         }
         else{
           if(label_opt.size())
