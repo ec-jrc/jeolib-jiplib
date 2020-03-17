@@ -346,7 +346,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         int endband=nrOfBand()-1;
         if(attribute_opt.size()){
           if(verbose_opt[0]>1)
-            std::cout << "copyFields: " << attribute_opt[0] << std::endl;
+            std::cout << "attribute: " << attribute_opt[0] << std::endl;
           burnValue=0;
           std::vector<std::string> eoption;
           std::ostringstream eostream;

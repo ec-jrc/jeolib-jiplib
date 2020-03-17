@@ -26,13 +26,13 @@ template<typename T> void Jim::extractImg_t(Jim& classReader, VectorOgr& ogrWrit
   Optionjl<std::string> planeNames_opt("bn", "planename", "Plane name(s) corresponding to plane index(es).");
   Optionjl<double> srcnodata_opt("srcnodata", "srcnodata", "Invalid value for input image");
   Optionjl<unsigned int> bndnodata_opt("bndnodata", "bndnodata", "Band in input image to check if pixel is valid (used for srcnodata)", 0);
-  Optionjl<std::string> label_opt("cn", "cname", "Name of the class label in the output vector dataset", "label");
+  Optionjl<std::string> attribute_opt("attribute", "attribute", "Name of the class label in the output vector dataset", "label");
   Optionjl<std::string> fid_opt("fid", "fid", "Create extra field with field identifier (sequence in which the features have been read");
   Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
 
   bndnodata_opt.setHide(1);
   srcnodata_opt.setHide(1);
-  label_opt.setHide(1);
+  attribute_opt.setHide(1);
   option_opt.setHide(1);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
@@ -50,7 +50,7 @@ template<typename T> void Jim::extractImg_t(Jim& classReader, VectorOgr& ogrWrit
     bandNames_opt.retrieveOption(app);
     bndnodata_opt.retrieveOption(app);
     srcnodata_opt.retrieveOption(app);
-    label_opt.retrieveOption(app);
+    attribute_opt.retrieveOption(app);
     fid_opt.retrieveOption(app);
     verbose_opt.retrieveOption(app);
     if(!doProcess){
@@ -238,7 +238,7 @@ template<typename T> void Jim::extractImg_t(Jim& classReader, VectorOgr& ogrWrit
       throw(fs.str());
     }
     std::map<std::string,double> pointAttributes;
-    ogrWriter.createField(label_opt[0],labelType);
+    ogrWriter.createField(attribute_opt[0],labelType);
     if(fid_opt.size())
       ogrWriter.createField(fid_opt[0],OFTInteger64);
     for(size_t iplane=0;iplane<nplane;++iplane){
@@ -302,7 +302,7 @@ template<typename T> void Jim::extractImg_t(Jim& classReader, VectorOgr& ogrWrit
         int icol=static_cast<int>(index%nrOfCol());
         int irow=static_cast<int>(index/nrOfCol());
         image2geo(icol,irow,x,y);
-        pointAttributes[label_opt[0]]=iclass;
+        pointAttributes[attribute_opt[0]]=iclass;
         if(fid_opt.size())
           pointAttributes[fid_opt[0]]=fid++;
 
