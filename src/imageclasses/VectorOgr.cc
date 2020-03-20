@@ -655,7 +655,7 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
 
     for(int ilayer=0;ilayer<getLayerCount();++ilayer){
       ogrWriter.pushLayer(getLayerName(ilayer),getProjection(ilayer),getGeometryType(ilayer),papszOptions);
-      ogrWriter.copyFields(*this,std::vector<std::string>(),ilayer);
+      ogrWriter.copyFields(*this,std::vector<std::string>(),ilayer, ilayer);
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
       ogrWriter.resize(getFeatureCount(ilayer),ilayer);
 #endif
@@ -804,7 +804,7 @@ OGRErr VectorOgr::convexHull(VectorOgr& ogrWriter, app::AppFactory& app){
   }
 
 ///copy fields from other VectorOgr instance
- OGRErr VectorOgr::copyFields(const VectorOgr& vectorOgr,const vector<std::string>& fieldnames, size_t ilayer){
+OGRErr VectorOgr::copyFields(const VectorOgr& vectorOgr,const vector<std::string>& fieldnames, size_t fromLayer, size_t toLayer){
   try{
     if(!m_gds){
       std::string errorString="Error: no GDAL dataset";
@@ -812,16 +812,16 @@ OGRErr VectorOgr::convexHull(VectorOgr& ogrWriter, app::AppFactory& app){
     }
     //get fields from vectorOgr
     std::vector<OGRFieldDefn*> fields;
-    vectorOgr.getFields(fields,ilayer);
+    vectorOgr.getFields(fields,fromLayer);
 
     for(unsigned int iField=0;iField<fields.size();++iField){
       if(fieldnames.size()){
         std::string fieldname=fields[iField]->GetNameRef();
         std::vector<std::string>::const_iterator fit = std::find(fieldnames.begin(), fieldnames.end(), fieldname);
         if(fit!=fieldnames.end()){
-          if(!m_gds->GetLayer(ilayer))
+          if(!m_gds->GetLayer(toLayer))
             std::cerr << "Warning: could not get layer" << std::endl;
-          if(createField(fields[iField],ilayer)!=OGRERR_NONE){
+          if(createField(fields[iField],toLayer)!=OGRERR_NONE){
             std::string errorString="Error: could not create field";
             throw(errorString);
           }
@@ -830,7 +830,7 @@ OGRErr VectorOgr::convexHull(VectorOgr& ogrWriter, app::AppFactory& app){
           continue;
       }
       else{
-        if(createField(fields[iField],ilayer)!=OGRERR_NONE){
+        if(createField(fields[iField],toLayer)!=OGRERR_NONE){
           std::string errorString="Error: could not create field";
           throw(errorString);
         }
@@ -846,15 +846,19 @@ OGRErr VectorOgr::convexHull(VectorOgr& ogrWriter, app::AppFactory& app){
 
 ///perform a deep copy, including layers and features
 OGRErr VectorOgr::copy(VectorOgr& other, app::AppFactory &app){
-  char **papszOptions=NULL;
   Optionjl<std::string> options_opt("co", "co", "format dependent options controlling creation of the output file");
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
+
   options_opt.retrieveOption(app);
+  verbose_opt.retrieveOption(app);
+
+  char **papszOptions=NULL;
   for(std::vector<std::string>::const_iterator optionIt=options_opt.begin();optionIt!=options_opt.end();++optionIt)
     papszOptions=CSLAddString(papszOptions,optionIt->c_str());
   for(size_t ilayer=0;ilayer<other.getLayerCount();++ilayer){
     pushLayer(other.getLayerName(ilayer),other.getProjection(ilayer),other.getGeometryType(ilayer),papszOptions);
     destroyFeatures(ilayer);
-    copyFields(other,std::vector<std::string>(),ilayer);
+    copyFields(other,std::vector<std::string>(),ilayer,ilayer);
     m_features[ilayer].resize(other.getFeatureCount(ilayer));
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
@@ -1207,16 +1211,6 @@ OGRErr VectorOgr::addPoint(double x, double y, const std::map<std::string,double
 }
 
 
-/**
- * @param app application specific option arguments
- * @return output Vector
- **/
-shared_ptr<VectorOgr> VectorOgr::join(VectorOgr &ogrReader, app::AppFactory& app){
-  std::shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
-  join(ogrReader, *ogrWriter, app);
-  return(ogrWriter);
-}
-
 ///serialize vector in vector of unsigned chars
 size_t VectorOgr::serialize(vector<unsigned char> &vbytes){
   VSIStatBufL statbuf;
@@ -1301,7 +1295,12 @@ void VectorOgr::dumpOgr(app::AppFactory& app){
   }
 }
 
-///joins two VectorOgr based on key value
+shared_ptr<VectorOgr> VectorOgr::join(VectorOgr &ogrReader, app::AppFactory& app){
+  std::shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
+  join(ogrReader, *ogrWriter, app);
+  return(ogrWriter);
+}
+
 OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFactory& app){
   Optionjl<string> output_opt("o", "output", "Filename of joined vector dataset");
   Optionjl<string> ogrformat_opt("f", "oformat", "Output ogr format for joined vector dataset","SQLite");
@@ -1401,7 +1400,7 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
         if(verbose_opt[0])
           std::cout << "copyFields from this" << std::endl;
 
-        ogrWriter.copyFields(*this,thisfields,ilayer);
+        ogrWriter.copyFields(*this,thisfields,ilayer,ilayer);
         if(verbose_opt[0]){
           cout << "Fields in ogrWriter after copy from this are: ";
           std::vector<OGRFieldDefn*> fields;
@@ -1429,7 +1428,7 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
               std::cout << " " << thatfields[iField];
             std::cout << std::endl;
           }
-          ogrWriter.copyFields(ogrReader,thatfields,ilayer);
+          ogrWriter.copyFields(ogrReader,thatfields,ilayer,ilayer);
         }
       }
       if(verbose_opt[0]){
@@ -1803,32 +1802,122 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
     throw;
   }
 }
-///append two VectorOgr objects (append to first layer)
-// void VectorOgr::append(VectorOgr &ogrReader){
-//   size_t ilayer=0;
-//   size_t currentSize=getFeatureCount(ilayer);
-//   resize(currentSize+ogrReader.getFeatureCount(ilayer),ilayer);
-// #if JIPLIB_PROCESS_IN_PARALLEL == 1
-// #pragma omp parallel for
-// #else
-// #endif
-//   for(size_t ifeature = 0; ifeature < ogrReader.getFeatureCount(ilayer); ++ifeature) {
-//     try{
-//       OGRFeature *thatFeature=ogrReader.getFeatureRef(ifeature,ilayer);
-//       if(!thatFeature){
-//         // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
-//         continue;
-//       }
-//       OGRFeature *writeFeature=createFeature(ilayer);
-//       writeFeature->SetFrom(thatFeature);
-//       setFeature(currentSize+ifeature,writeFeature,ilayer);
-//     }
-//     catch(std::string errorString){
-//       std::cerr << errorString << std::endl;
-//       continue;
-//     }
-//   }
-// }
+
+shared_ptr<VectorOgr> VectorOgr::merge(VectorOgr &ogrReader, app::AppFactory& app){
+  std::shared_ptr<VectorOgr> ogrWriter=VectorOgr::createVector();
+  merge(ogrReader, *ogrWriter, app);
+  return(ogrWriter);
+}
+
+void VectorOgr::merge(VectorOgr &ogrReader, VectorOgr &ogrWriter,app::AppFactory& app){
+  Optionjl<string> output_opt("o", "output", "Filename of joined vector dataset");
+  Optionjl<string> ogrformat_opt("f", "oformat", "Output ogr format for joined vector dataset","SQLite");
+  Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
+  Optionjl<bool> single_opt("single", "single", "If specified, all input vector layers will be merged into a single one.",false);
+  Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
+
+  bool doProcess;//stop process when program was invoked with help option (-h --help)
+  try{
+    doProcess=output_opt.retrieveOption(app);
+    ogrformat_opt.retrieveOption(app);
+    option_opt.retrieveOption(app);
+    single_opt.retrieveOption(app);
+    verbose_opt.retrieveOption(app);
+
+    if(!doProcess||output_opt.empty()){
+      cout << endl;
+      std::ostringstream helpStream;
+      helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
+      throw(helpStream.str());//help was invoked, stop processing
+    }
+    OGRErr result=OGRERR_NONE;
+    char **papszOptions=NULL;
+    for(std::vector<std::string>::const_iterator optionIt=option_opt.begin();optionIt!=option_opt.end();++optionIt)
+      papszOptions=CSLAddString(papszOptions,optionIt->c_str());
+    bool initWriter=true;
+
+    // if(ogrWriter.open(output_opt[0],ogrformat_opt[0],access_opt[0])!=OGRERR_NONE)
+    if(ogrWriter.open(output_opt[0],ogrformat_opt[0])!=OGRERR_NONE)
+      initWriter=false;
+    if(isEmpty() || ogrReader.isEmpty()){
+      ostringstream errorStream;
+      errorStream << "Error: features are empty";
+      throw(errorStream.str());
+    }
+    if(verbose_opt[0]){
+      if(initWriter)
+        std::cout << "initWriter is true" << std::endl;
+      else
+        std::cout << "initWriter is false" << std::endl;
+    }
+    size_t nlayer1=getLayerCount();
+    if(verbose_opt[0])
+      std::cout << "copy from this" << std::endl;
+
+    ogrWriter.copy(*this,app);
+    if(verbose_opt[0])
+      std::cout << "copy from other" << std::endl;
+    for(size_t ilayer=0;ilayer<ogrReader.getLayerCount();++ilayer){
+      std::ostringstream layerstream;
+      layerstream << ogrReader.getLayerName(ilayer) << getLayerCount();
+      if(verbose_opt[0])
+        std::cout << "layer: " << layerstream.str() << std::endl;
+
+      OGRSpatialReference *thatSpatialRef=ogrReader.getLayer(ilayer)->GetSpatialRef();
+      OGRwkbGeometryType thatGeometryType=ogrReader.getGeometryType(ilayer);
+      size_t currentSize=0;
+      if(!single_opt[0]){
+        if(verbose_opt[0])
+          std::cout << "push layer " << layerstream.str() << std::endl;
+        // char **papszOptions=NULL;
+        if(ogrWriter.pushLayer(layerstream.str(),thatSpatialRef,thatGeometryType,papszOptions)!=OGRERR_NONE){
+          std::string errorString="Open failed";
+          throw(errorString);
+        }
+      }
+      else
+        currentSize=ogrWriter.getFeatureCount();
+
+      if(verbose_opt[0])
+        std::cout << "resize to " << currentSize+ogrReader.getFeatureCount(ilayer) << std::endl;
+      ogrWriter.copyFields(ogrReader,std::vector<std::string>(),ilayer,nlayer1+ilayer);
+      ogrWriter.resize(currentSize+ogrReader.getFeatureCount(ilayer),nlayer1+ilayer);
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+#pragma omp parallel for
+#else
+#endif
+      for(size_t ifeature = 0; ifeature < ogrReader.getFeatureCount(ilayer); ++ifeature) {
+        if(verbose_opt[0])
+          std::cout << "ifeature: " << ifeature << std::endl;
+        try{
+          OGRFeature *thatFeature=ogrReader.getFeatureRef(ifeature,ilayer);
+          if(!thatFeature){
+            if(verbose_opt[0])
+              std::cout << "skip empty feature" << std::endl;
+            continue;
+          }
+          if(verbose_opt[0])
+            std::cout << "create new feature" << std::endl;
+          OGRFeature *writeFeature=ogrWriter.createFeature(nlayer1+ilayer);
+          if(verbose_opt[0])
+            std::cout << "setFrom" << std::endl;
+          writeFeature->SetFrom(thatFeature);
+          if(verbose_opt[0])
+            std::cout << "setFeature" << std::endl;
+          ogrWriter.setFeature(currentSize+ifeature,writeFeature,nlayer1+ilayer);
+        }
+        catch(std::string errorString){
+          std::cerr << errorString << std::endl;
+          continue;
+        }
+      }
+    }
+  }
+  catch(std::string errorString){
+    std::cerr << errorString << std::endl;
+    throw;
+  }
+}
 
 // OGRErr VectorOgr::sortByLabel(std::map<std::string,Vector2d<float> > &mapPixels, const std::string& label, std::vector<std::string>& bandNames){
 //   //[classNr][pixelNr][bandNr]

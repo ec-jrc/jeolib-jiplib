@@ -188,8 +188,8 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///get projection
   std::string getProjection(size_t ilayer=0) const;
   ///get the spatial reference based on the projection
-  const OGRSpatialReference getSpatialRef() const{
-    OGRSpatialReference thisSpatialRef(getProjection().c_str());
+  const OGRSpatialReference getSpatialRef(size_t ilayer=0) const{
+    OGRSpatialReference thisSpatialRef(getProjection(ilayer).c_str());
     return thisSpatialRef;
   }
   ///Get the filename of this dataset
@@ -327,9 +327,7 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
     ///create field
   OGRErr createField(OGRFieldDefn*	poField,size_t ilayer=0);
   ///copy fields from other VectorOgr instance
-  OGRErr copyFields(const VectorOgr& vectorOgr,const std::vector<std::string>& fieldnames=std::vector<std::string>(),size_t ilayer=0);
-  ///merge another vector
-  /* OGRErr merge(VectorOgr& vectorOgr); */
+  OGRErr copyFields(const VectorOgr& vectorOgr,const std::vector<std::string>& fieldnames=std::vector<std::string>(),size_t fromLayer=0, size_t toLayer=0);
   ///write all features (default to m_gds dataset already defined when opened, but optionally to another filename
   OGRErr write(const std::string& filename=std::string());
   ///write all features to a new vector dataset
@@ -395,7 +393,8 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   OGRErr addPoint(double x, double y, const std::map<std::string,double>& pointAttributes, size_t ilayer=0);
   size_t serialize(std::vector<unsigned char> &vbytes);
   void dumpOgr(app::AppFactory& app);
-  ///append two VectorOgr
+  std::shared_ptr<VectorOgr> merge(VectorOgr &ogrReader, app::AppFactory& app);
+  void merge(VectorOgr &ogrReader, VectorOgr &ogrWriter,app::AppFactory& app);
   /* void append(VectorOgr &ogrReader); */
   ///joins two VectorOgr based on key value
   std::shared_ptr<VectorOgr> join(VectorOgr &ogrReader, app::AppFactory& app);

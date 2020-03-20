@@ -224,7 +224,7 @@ void VectorOgr::classifySVM(VectorOgr& ogrWriter, app::AppFactory& app){
           if(copyFields_opt.size()){
             if(verbose_opt[0])
               std::cout << "copy fields" << std::endl;
-            ogrWriter.copyFields(*this,copyFields_opt,ilayer);
+            ogrWriter.copyFields(*this,copyFields_opt,ilayer,ilayer);
           }
           if(verbose_opt[0])
             std::cout << "creating field class" << std::endl;

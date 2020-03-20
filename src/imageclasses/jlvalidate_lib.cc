@@ -238,7 +238,7 @@ JimList& JimList::validate(app::AppFactory& app){
               cout << "created layer" << endl;
               cout << "copy fields from " << reference_opt[iref] << endl;
             }
-            ogrWriter.copyFields(referenceReaderOgr,std::vector<std::string>(),ilayer);
+            ogrWriter.copyFields(referenceReaderOgr,std::vector<std::string>(),ilayer,ilayer);
             //create extra field for classified label
             short theDim=boundary_opt[0];
             for(int windowJ=-theDim/2;windowJ<(theDim+1)/2;++windowJ){

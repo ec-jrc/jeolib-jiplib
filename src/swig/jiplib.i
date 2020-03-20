@@ -675,6 +675,7 @@ This file is part of jiplib
 
 %{
   // #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <limits>
 #include "Python.h"
 #include "numpy/arrayobject.h"
 #include "config_jiplib.h"
@@ -843,42 +844,107 @@ This file is part of jiplib
       }
     }
 
-  PyObject* np(std::shared_ptr<VectorOgr> aJimVect) {
+
+  PyObject* np(std::shared_ptr<VectorOgr> aJimVect, size_t ilayer) {
     size_t ntotalfeatures=0;
+    size_t nfeatures=0;
     size_t nfields=0;
     int npDataType=NPY_FLOAT64;
+    if(aJimVect->isEmpty())
+      return(0);
+    if(ilayer>=aJimVect->getLayerCount())
+      return(0);
     //todo: destroy empty features?
     std::vector<OGRFieldDefn*> fields;
-    for(size_t ilayer=0;ilayer<aJimVect->getLayerCount();++ilayer){
-      ntotalfeatures+=aJimVect->getFeatureCount(ilayer);
-      aJimVect->getFields(fields,ilayer);
-      if(!ilayer)
-        nfields=fields.size();
-      else if(nfields!=fields.size()){
-        std::string errorString="Error: number of fields must be the same for all vector layers";
-        std::cerr << errorString << std::endl;
-        throw(errorString);
-      }
-    }
+    ntotalfeatures=aJimVect->getFeatureCount(ilayer);
+    aJimVect->getFields(fields,ilayer);
+    nfields=fields.size();
     int ndim=2;
     npy_intp dims[2]{ntotalfeatures,nfields};
     PyArrayObject *npArray =(PyArrayObject*) PyArray_SimpleNew(ndim, dims, npDataType);
-	  double *ad = (double *) PyArray_DATA((PyArrayObject *) npArray);
-    for(size_t ilayer=0;ilayer<aJimVect->getLayerCount();++ilayer){
-      OGRFeatureDefn *poFDefn = aJimVect->getLayer(ilayer)->GetLayerDefn();
-      for(size_t ifeature = 0; ifeature < aJimVect->getFeatureCount(ilayer); ++ifeature) {
-        OGRFeature *thisFeature=aJimVect->getFeatureRef(ifeature,ilayer);
-        for(int iField=0;iField<poFDefn->GetFieldCount();++iField)
-          *ad++=thisFeature->GetFieldAsDouble(iField);
-      }
-      if(npArray){
-        return(PyArray_Return(npArray));
-      }
-      else{
-        return(0);
-      }
+    double *ad = (double *) PyArray_DATA((PyArrayObject *) npArray);
+    OGRFeatureDefn *poFDefn = aJimVect->getLayer(ilayer)->GetLayerDefn();
+    for(size_t ifeature = 0; ifeature < aJimVect->getFeatureCount(ilayer); ++ifeature) {
+      OGRFeature *thisFeature=aJimVect->getFeatureRef(ifeature,ilayer);
+      for(int iField=0;iField<nfields;++iField)
+        *ad++=thisFeature->GetFieldAsDouble(iField);
+    }
+    if(npArray){
+      return(PyArray_Return(npArray));
+    }
+    else{
+      return(0);
     }
   }
+
+  /* PyObject* np(std::shared_ptr<VectorOgr> aJimVect) { */
+  /*   size_t ntotalfeatures=0; */
+  /*   size_t nfeatures=0; */
+  /*   size_t nfields=0; */
+  /*   int npDataType=NPY_FLOAT64; */
+  /*   if(aJimVect->isEmpty()) */
+  /*     return(0); */
+  /*   //todo: destroy empty features? */
+  /*   std::vector<OGRFieldDefn*> fields; */
+  /*   for(size_t ilayer=0;ilayer<aJimVect->getLayerCount();++ilayer){ */
+  /*     ntotalfeatures+=aJimVect->getFeatureCount(ilayer); */
+  /*     if(aJimVect->getFeatureCount(ilayer)>nfeatures) */
+  /*       nfeatures=aJimVect->getFeatureCount(ilayer); */
+  /*     aJimVect->getFields(fields,ilayer); */
+  /*     if(fields.size()>nfields) */
+  /*       nfields=fields.size(); */
+  /*   } */
+  /*   if(aJimVect->getLayerCount()>1){ */
+  /*     int ndim=3; */
+  /*     npy_intp dims[3]{aJimVect->getLayerCount(),nfeatures,nfields}; */
+  /*     PyArrayObject *npArray =(PyArrayObject*) PyArray_SimpleNew(ndim, dims, npDataType); */
+  /*     double *ad = (double *) PyArray_DATA((PyArrayObject *) npArray); */
+  /*     for(size_t ilayer=0;ilayer<aJimVect->getLayerCount();++ilayer){ */
+  /*       OGRFeatureDefn *poFDefn = aJimVect->getLayer(ilayer)->GetLayerDefn(); */
+  /*       for(size_t ifeature = 0; ifeature < nfeatures; ++ifeature) { */
+  /*         OGRFeature *thisFeature=0; */
+  /*         if(ifeature < aJimVect->getFeatureCount(ilayer)) */
+  /*           thisFeature=aJimVect->getFeatureRef(ifeature,ilayer); */
+  /*         for(int iField=0;iField<nfields;++iField){ */
+  /*           if(iField<poFDefn->GetFieldCount()) */
+  /*             *ad++=thisFeature->GetFieldAsDouble(iField); */
+  /*           else */
+  /*             *ad++=std::numeric_limits<double>::quiet_NaN(); */
+  /*         } */
+  /*       } */
+  /*       if(npArray){ */
+  /*         return(PyArray_Return(npArray)); */
+  /*       } */
+  /*       else{ */
+  /*         return(0); */
+  /*       } */
+  /*     } */
+  /*   } */
+  /*   else{ */
+  /*     int ndim=2; */
+  /*     npy_intp dims[2]{ntotalfeatures,nfields}; */
+  /*     PyArrayObject *npArray =(PyArrayObject*) PyArray_SimpleNew(ndim, dims, npDataType); */
+  /*     double *ad = (double *) PyArray_DATA((PyArrayObject *) npArray); */
+  /*     for(size_t ilayer=0;ilayer<aJimVect->getLayerCount();++ilayer){ */
+  /*       OGRFeatureDefn *poFDefn = aJimVect->getLayer(ilayer)->GetLayerDefn(); */
+  /*       for(size_t ifeature = 0; ifeature < aJimVect->getFeatureCount(ilayer); ++ifeature) { */
+  /*         OGRFeature *thisFeature=aJimVect->getFeatureRef(ifeature,ilayer); */
+  /*         for(int iField=0;iField<nfields;++iField){ */
+  /*           if(iField>=poFDefn->GetFieldCount()) */
+  /*             *ad++=0;//todo: replace with static const double NaN = numeric_limits<double>::quiet_NaN() */
+  /*           else */
+  /*             *ad++=thisFeature->GetFieldAsDouble(iField); */
+  /*         } */
+  /*       } */
+  /*       if(npArray){ */
+  /*         return(PyArray_Return(npArray)); */
+  /*       } */
+  /*       else{ */
+  /*         return(0); */
+  /*       } */
+  /*     } */
+  /*   } */
+  /* } */
 
   //todo: return multi-plane/band images according to: http://scikit-image.org/docs/dev/user_guide/numpy_images.html
   PyObject* np(std::shared_ptr<Jim> aJim, size_t band=0) {

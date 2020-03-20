@@ -696,7 +696,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
             for(size_t ifield=0;ifield<copyFields_opt.size();++ifield)
               std::cout << "field " << ifield << ": " << copyFields_opt[ifield] << std::endl;
           }
-          ogrWriter.copyFields(sampleReader,copyFields_opt,ilayer);
+          ogrWriter.copyFields(sampleReader,copyFields_opt,ilayer,ilayer);
 
           if(verbose_opt[0])
             std::cout << "create new fields" << std::endl;
