@@ -327,6 +327,17 @@ This file is part of jiplib
   %append_output(PyFloat_FromDouble(*$1));
  }
 
+%typemap(in,numinputs=0) double& refX (double temp) "$1 = &temp;"
+%typemap(in,numinputs=0) double& refY (double temp) "$1 = &temp;"
+
+%typemap(argout) double& refX {
+  %append_output(PyFloat_FromDouble(*$1));
+ }
+
+%typemap(argout) double& refY {
+  %append_output(PyFloat_FromDouble(*$1));
+ }
+
 /* Set the input argument to point to a temporary variable */
 /* %typemap(in, numinputs=0) double *gt (double temp) { */
 /*   $1 = &temp; */

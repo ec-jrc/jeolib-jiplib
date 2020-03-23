@@ -29,11 +29,19 @@ jiplib is released under an
 * Sphinx: BSD http://www.sphinx-doc.org/en/master/
 
 
-## install dependency libraries
+## install dependency libraries in Debian
 
 ```
+g++ make cmake swig libgsl-dev libfann-dev libgdal-dev libjsoncpp-dev libboost-serialization-dev libboost-filesystem-dev libpython3-dev python3-numpy  
 apt install build-essential cmake
+apt install libgsl-dev
+apt install libfann-dev
+apt install libgdal-dev
+apt install libjsoncpp-dev
+apt install libpython3-dev
+apt install python3-numpy
 apt install libboost-filesystem-dev libboost-serialization-dev
+apt install swig
 ```
 
  ## mialib
