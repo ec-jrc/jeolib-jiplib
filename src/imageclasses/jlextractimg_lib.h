@@ -291,9 +291,14 @@ template<typename T> void Jim::extractImg_t(Jim& classReader, VectorOgr& ogrWrit
       //select random indices for iclass
       size_t nsample=sample[iclass].size();
       double absThreshold=(threshold_opt.size()>iclass)?threshold_opt[iclass]:threshold_opt[0];
-      if(absThreshold<0)
+      if(absThreshold<0){
         absThreshold=-absThreshold;
+        if(absThreshold > sample[iclass].size())
+          absThreshold=sample[iclass].size();
+      }
       else{
+        if(absThreshold > 100)
+          absThreshold=100;
         absThreshold/=100;
         absThreshold*=nsample;
       }
