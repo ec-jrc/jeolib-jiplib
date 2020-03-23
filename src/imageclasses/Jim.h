@@ -453,6 +453,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   CPLErr setGeoTransform(const std::vector<double>& gt);
   CPLErr setGeoTransform(double* gt);
   ///Copy geotransform information from another georeferenced image
+  CPLErr copyGeoReference(const Jim& imgSrc);
   CPLErr copyGeoTransform(const Jim& imgSrc);
   ///Set the projection for this dataset in well known text (wkt) format
   void setProjection(const std::string& projection){setProjectionProj4(projection);};

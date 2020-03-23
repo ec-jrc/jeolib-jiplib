@@ -953,6 +953,14 @@ CPLErr Jim::copyGeoTransform(const Jim& imgSrc)
   return(setGeoTransform(gt));
 }
 
+CPLErr Jim::copyGeoReference(const Jim& imgSrc)
+{
+  vector<double> gt;
+  imgSrc.getGeoTransform(gt);
+  setGeoTransform(gt);
+  setProjection(imgSrc.getProjection());
+}
+
 /**
  * @param imgSrc Use this pointer to source image as a template to copy geotranform information
  **/
