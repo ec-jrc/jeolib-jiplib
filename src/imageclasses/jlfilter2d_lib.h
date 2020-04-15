@@ -41,7 +41,8 @@ template<typename T> void Jim::firfilter2d_t(Jim& imgWriter, app::AppFactory& ap
     }
 
     std::vector<double> taps(taps_opt.begin(),taps_opt.end());
-    if(norm_opt[0]){
+
+    if(norm_opt[0]&&nodata_opt.empty()){
       if(verbose_opt[0])
         std::cout << "normalizing taps" << std::endl;
       double norm=0;
@@ -88,6 +89,7 @@ template<typename T> void Jim::firfilter2d_t(Jim& imgWriter, app::AppFactory& ap
       if(nodata_opt.size()){
         for(int y=0;y<nrow;++y){
           for(int x=0;x<ncol;++x){
+            double norm=0;
             for(int j=-(dimY-1)/2;j<=dimY/2;++j){
               for(int i=-(dimX-1)/2;i<=dimX/2;++i){
                 indexI=x+i;
@@ -110,12 +112,13 @@ template<typename T> void Jim::firfilter2d_t(Jim& imgWriter, app::AppFactory& ap
                   }
                 }
                 if(!masked){
+                  norm+=abs(taps[((dimY-1)/2+j)*dimX+(dimX-1)/2+i]);
                   pout[y*ncol+x]+=(taps[((dimY-1)/2+j)*dimX+(dimX-1)/2+i]*pin[indexJ*ncol+indexI]);
                 }
               }
             }
-            /* if(abs_opt[0]) */
-            /*   pout[y*ncol+x]= static_cast<T>(abs(static_cast<double>(pout[y*ncol+x]))); */
+            if(norm>0)
+              pout[y*ncol+x]/=norm;
           }
         }
       }
