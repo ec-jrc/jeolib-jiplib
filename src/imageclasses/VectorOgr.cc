@@ -539,6 +539,9 @@ OGRErr VectorOgr::pushLayer(const std::string& layername, const std::string& the
   //if no constraints on the types geometry to be written: use wkbUnknown
   if(theProjection.size()){
     OGRSpatialReference* poSRS = new OGRSpatialReference();
+#if GDAL_VERSION_MAJOR > 2
+    poSRS->SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
     // OGRSpatialReference oSRS;
     poSRS->SetFromUserInput(theProjection.c_str());
     result=pushLayer(layername.c_str(), poSRS, geometryType, papszOptions);
@@ -566,6 +569,9 @@ OGRErr VectorOgr::pushLayer(const std::string& layername, const std::string& the
 
   if(theProjection.size()){
     OGRSpatialReference* poSRS = new OGRSpatialReference();
+#if GDAL_VERSION_MAJOR > 2
+    poSRS->SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
     // OGRSpatialReference oSRS;
     poSRS->SetFromUserInput(theProjection.c_str());
     result=pushLayer(layername.c_str(), poSRS, eGType, papszOptions);
@@ -604,8 +610,14 @@ OGRErr VectorOgr::intersect(const Jim& aJim, VectorOgr& ogrWriter, app::AppFacto
   OGRErr result=OGRERR_NONE;
   OGRPolygon *pGeom = (OGRPolygon*) OGRGeometryFactory::createGeometry(wkbPolygon);
   OGRSpatialReference imgSpatialRef=aJim.getSpatialRef();
+#if GDAL_VERSION_MAJOR > 2
+  imgSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
   // OGRSpatialReference *thisSpatialRef=getLayer()->GetSpatialRef();
   OGRSpatialReference thisSpatialRef=this->getSpatialRef();
+#if GDAL_VERSION_MAJOR > 2
+ thisSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
 
   OGRCoordinateTransformation *img2vector = OGRCreateCoordinateTransformation(&imgSpatialRef, &thisSpatialRef);
   aJim.getBoundingBox(pGeom,img2vector);
@@ -751,6 +763,9 @@ OGRErr VectorOgr::convexHull(VectorOgr& ogrWriter, app::AppFactory& app){
     ogrWriter.open(output_opt[0],ogrformat_opt[0]);
     for(int ilayer=0;ilayer<getLayerCount();++ilayer){
       OGRSpatialReference thisSpatialRef=this->getSpatialRef();
+#if GDAL_VERSION_MAJOR > 2
+      thisSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
       ogrWriter.pushLayer(getLayerName(ilayer),&thisSpatialRef,wkbPolygon,papszOptions);
       // ogrWriter.pushLayer(getLayerName(ilayer),getLayer(ilayer)->GetSpatialRef(),wkbPolygon,papszOptions);
 // #if JIPLIB_PROCESS_IN_PARALLEL == 1
@@ -1864,6 +1879,9 @@ void VectorOgr::merge(VectorOgr &ogrReader, VectorOgr &ogrWriter,app::AppFactory
         std::cout << "layer: " << layerstream.str() << std::endl;
 
       OGRSpatialReference *thatSpatialRef=ogrReader.getLayer(ilayer)->GetSpatialRef();
+#if GDAL_VERSION_MAJOR > 2
+      thatSpatialRef->SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
       OGRwkbGeometryType thatGeometryType=ogrReader.getGeometryType(ilayer);
       size_t currentSize=0;
       if(!single_opt[0]){

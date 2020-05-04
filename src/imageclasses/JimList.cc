@@ -256,7 +256,13 @@ bool JimList::covers(const Jim& imgRaster, bool all) const{
   double img_ulx,img_uly,img_lrx,img_lry;
   imgRaster.getBoundingBox(img_ulx,img_uly,img_lrx,img_lry);
   OGRSpatialReference listSpatialRef=getImage(0)->getSpatialRef();
+#if GDAL_VERSION_MAJOR > 2
+  listSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
   OGRSpatialReference rasterSpatialRef=imgRaster.getSpatialRef();
+#if GDAL_VERSION_MAJOR > 2
+  rasterSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
   OGRCoordinateTransformation *raster2list = OGRCreateCoordinateTransformation(&rasterSpatialRef, &listSpatialRef);
   if(listSpatialRef.IsSame(&rasterSpatialRef)){
     raster2list=0;

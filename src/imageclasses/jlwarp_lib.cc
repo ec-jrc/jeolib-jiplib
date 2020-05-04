@@ -236,6 +236,11 @@ void Jim::warp(Jim& imgWriter, app::AppFactory &theApp)
 
   OGRSpatialReference sourceSpatialRef;
   OGRSpatialReference targetSpatialRef;
+#if GDAL_VERSION_MAJOR > 2
+  sourceSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+  targetSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
+
   sourceSpatialRef.SetFromUserInput(getProjectionRef().c_str());
   targetSpatialRef.SetFromUserInput(targetSRS_opt[0].c_str());
   if(sourceSpatialRef.IsSame(&targetSpatialRef)){

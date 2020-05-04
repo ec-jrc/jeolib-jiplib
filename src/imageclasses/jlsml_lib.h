@@ -76,11 +76,23 @@ template<typename T> void Jim::classifySML_t(Jim& imgWriter, JimList& referenceR
     std::vector<unsigned char> refpixel(referenceReader.size());//pixel with reference information
 
     OGRSpatialReference thisSRS(getProjectionRef().c_str());
+#if GDAL_VERSION_MAJOR > 2
+    thisSRS.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
     OGRSpatialReference *thisSpatialRef=&thisSRS;
+#if GDAL_VERSION_MAJOR > 2
+    thisSpatialRef->SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
     //currently only a single SRS for all images in reference collection supported
     OGRSpatialReference referenceSRS(referenceReader.getImage(0)->getProjectionRef().c_str());
+#if GDAL_VERSION_MAJOR > 2
+    referenceSRS.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
 
     OGRSpatialReference *referenceSpatialRef=&referenceSRS;
+#if GDAL_VERSION_MAJOR > 2
+    referenceSpatialRef->SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
     OGRCoordinateTransformation *img2ref=OGRCreateCoordinateTransformation(thisSpatialRef, referenceSpatialRef);
 
     std::vector<unsigned char*> pref(referenceReader.size());
@@ -286,11 +298,23 @@ template<typename T> void Jim::trainSML_t(JimList& referenceReader, app::AppFact
     std::vector<unsigned char> refpixel(referenceReader.size());//pixel with reference information
 
     OGRSpatialReference thisSRS(getProjectionRef().c_str());
+#if GDAL_VERSION_MAJOR > 2
+    thisSRS.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
     OGRSpatialReference *thisSpatialRef=&thisSRS;
+#if GDAL_VERSION_MAJOR > 2
+    thisSpatialRef->SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
     //currently only a single SRS for all images in reference collection supported
     OGRSpatialReference referenceSRS(referenceReader.getImage(0)->getProjectionRef().c_str());
+#if GDAL_VERSION_MAJOR > 2
+    referenceSRS.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
 
     OGRSpatialReference *referenceSpatialRef=&referenceSRS;
+#if GDAL_VERSION_MAJOR > 2
+    referenceSpatialRef->SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
     OGRCoordinateTransformation *img2ref=OGRCreateCoordinateTransformation(thisSpatialRef, referenceSpatialRef);
 
     std::vector<unsigned char*> pref(referenceReader.size());
@@ -729,11 +753,23 @@ template<typename T> std::string Jim::trainSML2d_t(JimList& referenceReader, app
     std::vector<T> refpixel(referenceReader.size());//pixel with reference information
 
     OGRSpatialReference thisSRS(getProjectionRef().c_str());
+#if GDAL_VERSION_MAJOR > 2
+    thisSRS.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
     OGRSpatialReference *thisSpatialRef=&thisSRS;
+#if GDAL_VERSION_MAJOR > 2
+    thisSpatialRef->SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
     //currently only a single SRS for all images in reference collection supported
     OGRSpatialReference referenceSRS(referenceReader.getImage(0)->getProjectionRef().c_str());
+#if GDAL_VERSION_MAJOR > 2
+    referenceSRS.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
 
     OGRSpatialReference *referenceSpatialRef=&referenceSRS;
+#if GDAL_VERSION_MAJOR > 2
+    referenceSpatialRef->SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
     OGRCoordinateTransformation *img2ref=OGRCreateCoordinateTransformation(thisSpatialRef, referenceSpatialRef);
 
     std::vector<double> oldRowReference(referenceReader.size());

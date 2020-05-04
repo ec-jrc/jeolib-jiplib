@@ -2430,7 +2430,13 @@ void Jim::cropOgr(VectorOgr& sampleReader, Jim& imgWriter, AppFactory& app){
         throw(ess.str());
       }
       OGRSpatialReference thisSpatialRef(getProjectionRef().c_str());
+#if GDAL_VERSION_MAJOR > 2
+      thisSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
       OGRSpatialReference sampleSpatialRef(sampleReader.getSpatialRef());
+#if GDAL_VERSION_MAJOR > 2
+      sampleSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
 
       OGRCoordinateTransformation *sample2img = OGRCreateCoordinateTransformation(&sampleSpatialRef, &thisSpatialRef);
       OGRCoordinateTransformation *img2sample = OGRCreateCoordinateTransformation(&thisSpatialRef, &sampleSpatialRef);
