@@ -210,77 +210,38 @@ OGRErr VectorOgr::open(const std::string& ogrFilename, const std::vector<std::st
 
 ///open a GDAL vector dataset for writing with layers to be pushed later
 OGRErr VectorOgr::open(const std::string& filename, const std::string& imageType, unsigned int access){
-  try{
-    setAccess(access);
-    m_filename = filename;
-    setCodec(filename,imageType);
-    if( m_gds == NULL ){
-      std::string errorString="Open failed (1)";
-      throw(errorString);
-    }
-    return(OGRERR_NONE);
+  setAccess(access);
+  m_filename = filename;
+  setCodec(filename,imageType);
+  if( m_gds == NULL ){
+    std::string errorString="Open failed (1)";
+    throw(errorString);
   }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    throw;
-  }
+  return(OGRERR_NONE);
 }
 
 ///open a GDAL vector dataset for writing
 OGRErr VectorOgr::open(const std::string& filename, const std::vector<std::string>& layernames, const std::string& imageType, const OGRwkbGeometryType& geometryType, OGRSpatialReference* theSRS, char** options){
-  try{
-    if(open(filename,imageType)!=OGRERR_NONE)
-      return(OGRERR_FAILURE);
-    for(size_t ilayer=0;ilayer<layernames.size();++ilayer){
-      if(pushLayer(layernames[ilayer],theSRS,geometryType,options)!=OGRERR_NONE){
-        std::string errorString="Open failed";
-        throw(errorString);
-      }
-    }
-    return(OGRERR_NONE);
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    throw;
-  }
+  open(filename,imageType);
+  for(size_t ilayer=0;ilayer<layernames.size();++ilayer)
+    pushLayer(layernames[ilayer],theSRS,geometryType,options);
+  return(OGRERR_NONE);
 }
 
 ///open a GDAL vector dataset for writing
 OGRErr VectorOgr::open(const std::string& filename, const std::vector<std::string>& layernames, const std::string& imageType, const OGRwkbGeometryType& geometryType, const std::string& theProjection, char** options){
-  try{
-    if(open(filename,imageType)!=OGRERR_NONE)
-      return(OGRERR_FAILURE);
-    for(size_t ilayer=0;ilayer<layernames.size();++ilayer){
-      if(pushLayer(layernames[ilayer],theProjection,geometryType,options)!=OGRERR_NONE){
-        std::string errorString="Open failed";
-        throw(errorString);
-      }
-    }
-    return(OGRERR_NONE);
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    throw;
-  }
+  open(filename,imageType);
+  for(size_t ilayer=0;ilayer<layernames.size();++ilayer)
+    pushLayer(layernames[ilayer],theProjection,geometryType,options);
+  return(OGRERR_NONE);
 }
 
 ///open a GDAL vector dataset for writing
 OGRErr VectorOgr::open(const std::string& filename, const std::vector<std::string>& layernames, const std::string& imageType, const std::string& geometryType, const std::string& theProjection, char** options){
-  try{
-    if(open(filename,imageType)!=OGRERR_NONE)
-      return(OGRERR_FAILURE);
-    for(size_t ilayer=0;ilayer<layernames.size();++ilayer){
-      if(pushLayer(layernames[ilayer],theProjection,geometryType,options)!=OGRERR_NONE){
-        std::string errorString="Open failed";
-        throw(errorString);
-      }
-    }
-    return(OGRERR_NONE);
-  }
-  catch(std::string errorString){
-    std::cerr << errorString << std::endl;
-    throw;
-  }
+  open(filename,imageType);
+  for(size_t ilayer=0;ilayer<layernames.size();++ilayer)
+    pushLayer(layernames[ilayer],theProjection,geometryType,options);
+  return(OGRERR_NONE);
 }
 
 ///open vector dataset for reading/writing
@@ -510,7 +471,8 @@ OGRErr VectorOgr::pushLayer(const std::string& layername, OGRSpatialReference* t
     // errorStream << "Error: Test capability to create layer " << layername << " failed (1)" << std::endl;
     // throw(errorStream.str());
     std::cerr << "Error: Test capability to create layer " << layername << " failed (1)" << std::endl;
-    return(OGRERR_FAILURE);
+    std::string errorString="pushLayer failed, file already exists?";
+    throw(errorString);
   }
   //if no constraints on the types geometry to be written: use wkbUnknown
   m_layer.push_back(m_gds->CreateLayer(layername.c_str(), theSRS, geometryType ,papszOptions));
@@ -534,7 +496,8 @@ OGRErr VectorOgr::pushLayer(const std::string& layername, const std::string& the
     // errorStream << "Error: Test capability to create layer " << layername << " failed (2)" << std::endl;
     // throw(errorStream.str());
     std::cerr << "Error: Test capability to create layer " << layername << " failed (2)" << std::endl;
-    return(OGRERR_FAILURE);
+    std::string errorString="pushLayer failed, file already exists?";
+    throw(errorString);
   }
   //if no constraints on the types geometry to be written: use wkbUnknown
   if(theProjection.size()){
@@ -560,7 +523,8 @@ OGRErr VectorOgr::pushLayer(const std::string& layername, const std::string& the
     // errorStream << "Error: Test capability to create layer " << layername << " failed (3)" << std::endl;
     // throw(errorStream.str());
     std::cerr << "Error: Test capability to create layer " << layername << " failed (3)" << std::endl;
-    return(OGRERR_FAILURE);
+    std::string errorString="pushLayer failed, file already exists?";
+    throw(errorString);
   }
   //if no constraints on the types geometry to be written: use wkbUnknown
   OGRwkbGeometryType eGType=wkbUnknown;
@@ -812,10 +776,14 @@ OGRErr VectorOgr::convexHull(VectorOgr& ogrWriter, app::AppFactory& app){
 
   ///create field
  OGRErr VectorOgr::createField(OGRFieldDefn*	poField, size_t ilayer){
-    if(m_gds)
-      return(m_gds->GetLayer(ilayer)->CreateField(poField));
-    else
-      return(OGRERR_FAILURE);
+   if(! m_gds){
+      std::cerr << "Error: createField failed, no dataset" << std::endl;
+      std::string errorString="createField failed, no dataset";
+      throw(errorString);
+      // return(OGRERR_FAILURE);
+    }
+    m_gds->GetLayer(ilayer)->CreateField(poField);
+    return(OGRERR_NONE);
   }
 
 ///copy fields from other VectorOgr instance
@@ -1100,8 +1068,11 @@ bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, si
    if(index>=0&&index<m_features[ilayer].size()){
      m_features[ilayer][index]=poFeature;
    }
-   else
-     return(OGRERR_FAILURE);
+   else{
+     std::cerr << "Error: setFeature failed" << std::endl;
+     std::string errorString="setFeature failed";
+     throw(errorString);
+   }
    return(OGRERR_NONE);
 }
 
@@ -1109,8 +1080,11 @@ bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, si
  OGRErr VectorOgr::pushFeature(OGRFeature *poFeature, size_t ilayer){
    if(ilayer<m_features.size())
      m_features[ilayer].push_back(poFeature);
-   else
-     return(OGRERR_FAILURE);
+   else{
+     std::string errorString="Error: pushFeature failed";
+     std::cerr << errorString << std::endl;
+     throw(errorString);
+   }
    return(OGRERR_NONE);
  }
 
@@ -1792,11 +1766,7 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
             }
             if(verbose_opt[0]>1)
               std::cout << "pushing feature" << std::endl;
-            if(ogrWriter.pushFeature(writeFeature,ilayer)!=OGRERR_NONE){
-              std::ostringstream errorStream;
-              errorStream << "Error: could not pushFeature, OGRERR_FAILURE " << std::endl;
-              throw(errorStream.str());
-            }
+            ogrWriter.pushFeature(writeFeature,ilayer);
             if(verbose_opt[0]>1)
               std::cout << "pushed feature" << std::endl;
           }
