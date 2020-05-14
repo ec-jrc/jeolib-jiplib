@@ -3989,21 +3989,31 @@ void Jim::d_stackPlane(Jim& imgSrc, AppFactory& app){
     std::string errorString="Error: data types do not match";
     throw(errorString);
   }
-  if(m_data[0]==imgSrc.getDataPointer(0)){
-    std::string errorString="Error: cannot stack planes of identical images";
-    throw(errorString);
-  }
   size_t oldnplane=nrOfPlane();
   m_nplane+=imgSrc.nrOfPlane();
   for(size_t iband=0;iband<nrOfBand();++iband){
-    void* newpointer=realloc(m_data[iband],static_cast<size_t>(nrOfCol())*nrOfRow()*nrOfPlane()*getDataTypeSizeBytes());
-    if(! newpointer){
-      m_nplane=oldnplane;
-      std::string errorString="Error: not sufficient memory for reallocation in stackPlane";
-      throw(errorString);
+    void* newpointer=0;
+    if(m_data[iband]==imgSrc.getDataPointer(iband)){
+      newpointer=malloc(static_cast<size_t>(nrOfCol())*nrOfRow()*nrOfPlane()*getDataTypeSizeBytes());
+      if(! newpointer){
+        m_nplane=oldnplane;
+        std::string errorString="Error: not sufficient memory for reallocation in stackPlane";
+        throw(errorString);
+      }
+      memcpy(newpointer,m_data[iband],static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*oldnplane);
+      memcpy(newpointer+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*oldnplane,imgSrc.getDataPointer(iband),static_cast<size_t>(imgSrc.getDataTypeSizeBytes())*imgSrc.nrOfCol()*imgSrc.nrOfRow()*oldnplane);
+      m_data[iband]=newpointer;
     }
-    m_data[iband]=newpointer;
-    memcpy(m_data[iband]+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*oldnplane,imgSrc.getDataPointer(iband),static_cast<size_t>(imgSrc.getDataTypeSizeBytes())*imgSrc.nrOfCol()*imgSrc.nrOfRow()*imgSrc.nrOfPlane());
+    else{
+      newpointer=realloc(m_data[iband],static_cast<size_t>(nrOfCol())*nrOfRow()*nrOfPlane()*getDataTypeSizeBytes());
+      if(! newpointer){
+        m_nplane=oldnplane;
+        std::string errorString="Error: not sufficient memory for reallocation in stackPlane";
+        throw(errorString);
+      }
+      m_data[iband]=newpointer;
+      memcpy(m_data[iband]+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*oldnplane,imgSrc.getDataPointer(iband),static_cast<size_t>(imgSrc.getDataTypeSizeBytes())*imgSrc.nrOfCol()*imgSrc.nrOfRow()*imgSrc.nrOfPlane());
+    }
   }
 }
 
