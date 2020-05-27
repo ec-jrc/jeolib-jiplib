@@ -13,6 +13,7 @@ This file is part of jiplib
 #include <algorithm>
 #include <ctime>
 #include <vector>
+#include <set>
 #include <memory>
 // #include <boost/filesystem.hpp>
 #include <ogr_geometry.h>
@@ -76,7 +77,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
   Optionjl<string> output_opt("o", "output", "Output sample dataset");
   Optionjl<int> label_opt("label", "label", "Create extra label field with value");
   Optionjl<std::string> fid_opt("fid", "fid", "Create extra field with field identifier (sequence in which the features have been read");
-  Optionjl<string> attribute_opt("attribute", "attribute", "use this field to rasterize when selecting extraction rule allpoints");
+  // Optionjl<string> attribute_opt("attribute", "attribute", "use this field to rasterize when selecting extraction rule allpoints");
   Optionjl<string> copyFields_opt("copy", "copy", "Restrict these fields only to copy from input to output vector dataset (default is to copy all fields)");
   Optionjl<int> class_opt("c", "class", "Class(es) to take into account for the rules mode, proportion and count");
   Optionjl<float> threshold_opt("t", "threshold", "Probability threshold for selecting samples (randomly). Provide probability in percentage (>0) or absolute (<0). Use a single threshold per vector sample layer.  Use value 100 to select all pixels for selected class(es)", 100);
@@ -131,7 +132,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
     label_opt.retrieveOption(app);
     fid_opt.retrieveOption(app);
     copyFields_opt.retrieveOption(app);
-    attribute_opt.retrieveOption(app);
+    // attribute_opt.retrieveOption(app);
     threshold_opt.retrieveOption(app);
     percentile_opt.retrieveOption(app);
     ogrformat_opt.retrieveOption(app);
@@ -350,17 +351,38 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         double burnValue=1;
         int startband=0;
         int endband=nrOfBand()-1;
-        if(attribute_opt.size()){
+        if(copyFields_opt.size()){
           if(verbose_opt[0]>1)
-            std::cout << "attribute: " << attribute_opt[0] << std::endl;
+            std::cout << "copy: " << copyFields_opt[0] << std::endl;
           burnValue=0;
           std::vector<std::string> eoption;
           std::ostringstream eostream;
-          eostream << "ATTRIBUTE=" << attribute_opt[0];
+          eostream << "ATTRIBUTE=" << copyFields_opt[0];
           eoption.push_back(eostream.str());
           sampleMask.d_rasterizeBuf(sampleReader,burnValue,eoption);
           if(verbose_opt[0]>1)
             std::cout << "sampleMask max: " << sampleMask.getMax() << std::endl << std::flush;
+          if(class_opt.empty()){
+            //todo: get list of unique values in field copy
+            std::vector<OGRFieldDefn*> fields;
+            size_t fieldindex;
+            sampleReader.getFields(fields,ilayer);
+            for(unsigned int ifield=0;ifield<fields.size();++ifield){
+                if(fields[ifield]->GetNameRef()==copyFields_opt[0])
+                  fieldindex=ifield;
+            }
+            std::set<int> copySet;//contains unique values in field copyFields_opt[0]
+            for(size_t ifeature = 0; ifeature < sampleReader.getFeatureCount(ilayer); ++ifeature) {
+              OGRFeature *thisFeature=sampleReader.getFeatureRef(ifeature,ilayer);
+              if(!thisFeature)
+                continue;
+              copySet.insert(thisFeature->GetFieldAsInteger(fieldindex));
+            }
+            app.clearOption("class");
+            std::set<int>::iterator setit;
+            for(setit=copySet.begin();setit!=copySet.end();++setit)
+              app.pushLongOption("class",*setit);
+          }
         }
         else{
           if(label_opt.size())
@@ -370,10 +392,10 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         }
         if(verbose_opt[0]>1)
           std::cout << "calling extractImg" << std::endl;
-        if(class_opt.empty()){
-          string errorstring="Error: classes to extract must be set";
-          throw(errorstring);
-        }
+        // if(class_opt.empty()){
+        //   string errorstring="Error: classes to extract must be set";
+        //   throw(errorstring);
+        // }
         extractImg(sampleMask,ogrWriter, app);
         if(verbose_opt[0]>1)
           std::cout << "closing mask" << std::endl;

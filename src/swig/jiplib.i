@@ -450,6 +450,10 @@ This file is part of jiplib
   $result = pyList;
  }
 
+/* %typemap(in, numinputs=0) std::vector<double>& field (std::vector<double> temp) { */
+/*   $1 = &temp; */
+/*  } */
+
 %typemap(in, numinputs=0) (double& i, double& j) (double i, double j){
   $1 = &i;
   $2 = &j;
@@ -673,6 +677,7 @@ This file is part of jiplib
 %template(ImgVectorJim) std::vector< std::shared_ptr< Jim > >;
 %template(JimListJim) std::list< std::shared_ptr< Jim > >;
 %template(VectorDouble) std::vector<double>;
+%template(VectorString) std::vector<std::string>;
 /* %template(ImgVectorJim) std::vector< std::shared_ptr< jiplib::Jim > >; */
 /* %template(JimListJim) std::list< std::shared_ptr< jiplib::Jim > >; */
 /* %template(VectorDouble) std::vector<double>; */
@@ -856,7 +861,7 @@ This file is part of jiplib
     }
 
 
-  PyObject* np(std::shared_ptr<VectorOgr> aJimVect, size_t ilayer) {
+  PyObject* np(std::shared_ptr<VectorOgr> aJimVect, std::vector<std::string> fname, size_t ilayer) {
     size_t ntotalfeatures=0;
     size_t nfeatures=0;
     size_t nfields=0;
@@ -866,10 +871,20 @@ This file is part of jiplib
     if(ilayer>=aJimVect->getLayerCount())
       return(0);
     //todo: destroy empty features?
-    std::vector<OGRFieldDefn*> fields;
+
     ntotalfeatures=aJimVect->getFeatureCount(ilayer);
+    std::vector<OGRFieldDefn*> fields;
+    std::vector<size_t> fieldindexes;
     aJimVect->getFields(fields,ilayer);
-    nfields=fields.size();
+    for(unsigned int ifield=0;ifield<fields.size();++ifield){
+      if(fname.size()){
+        if(std::find(fname.begin(),fname.end(),fields[ifield]->GetNameRef())!=fname.end())
+          fieldindexes.push_back(ifield);
+      }
+      else
+        fieldindexes.push_back(ifield);
+    }
+    nfields=fieldindexes.size();
     int ndim=2;
     npy_intp dims[2]{ntotalfeatures,nfields};
     PyArrayObject *npArray =(PyArrayObject*) PyArray_SimpleNew(ndim, dims, npDataType);
@@ -877,8 +892,12 @@ This file is part of jiplib
     OGRFeatureDefn *poFDefn = aJimVect->getLayer(ilayer)->GetLayerDefn();
     for(size_t ifeature = 0; ifeature < aJimVect->getFeatureCount(ilayer); ++ifeature) {
       OGRFeature *thisFeature=aJimVect->getFeatureRef(ifeature,ilayer);
-      for(int iField=0;iField<nfields;++iField)
-        *ad++=thisFeature->GetFieldAsDouble(iField);
+      if(!thisFeature){
+        // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+        continue;
+      }
+      for(std::vector<size_t>::const_iterator fit=fieldindexes.begin();fit!=fieldindexes.end();++fit)
+        *ad++=thisFeature->GetFieldAsDouble(*fit);
     }
     if(npArray){
       return(PyArray_Return(npArray));

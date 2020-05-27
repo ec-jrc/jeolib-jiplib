@@ -570,26 +570,6 @@ std::shared_ptr<VectorOgr> VectorOgr::intersect(const Jim& aJim, app::AppFactory
   return(ogrWriter);
 }
 
-OGRErr VectorOgr::intersect(const Jim& aJim, VectorOgr& ogrWriter, app::AppFactory& app){
-  OGRErr result=OGRERR_NONE;
-  OGRPolygon *pGeom = (OGRPolygon*) OGRGeometryFactory::createGeometry(wkbPolygon);
-  OGRSpatialReference imgSpatialRef=aJim.getSpatialRef();
-#if GDAL_VERSION_MAJOR > 2
-  imgSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
-#endif
-  // OGRSpatialReference *thisSpatialRef=getLayer()->GetSpatialRef();
-  OGRSpatialReference thisSpatialRef=this->getSpatialRef();
-#if GDAL_VERSION_MAJOR > 2
- thisSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
-#endif
-
-  OGRCoordinateTransformation *img2vector = OGRCreateCoordinateTransformation(&imgSpatialRef, &thisSpatialRef);
-  aJim.getBoundingBox(pGeom,img2vector);
-  result=intersect(pGeom,ogrWriter,app);
-  OGRGeometryFactory::destroyGeometry(pGeom );
-  return(result);
-}
-
 OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFactory& app){
   Optionjl<string> output_opt("o", "output", "Output sample dataset");
   Optionjl<string> ogrformat_opt("f", "oformat", "Output vector dataset format","SQLite");
@@ -678,6 +658,26 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
   ogrWriter.destroyEmptyFeatures();
 #endif
+}
+
+OGRErr VectorOgr::intersect(const Jim& aJim, VectorOgr& ogrWriter, app::AppFactory& app){
+  OGRErr result=OGRERR_NONE;
+  OGRPolygon *pGeom = (OGRPolygon*) OGRGeometryFactory::createGeometry(wkbPolygon);
+  OGRSpatialReference imgSpatialRef=aJim.getSpatialRef();
+#if GDAL_VERSION_MAJOR > 2
+  imgSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
+  // OGRSpatialReference *thisSpatialRef=getLayer()->GetSpatialRef();
+  OGRSpatialReference thisSpatialRef=this->getSpatialRef();
+#if GDAL_VERSION_MAJOR > 2
+  thisSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
+
+  OGRCoordinateTransformation *img2vector = OGRCreateCoordinateTransformation(&imgSpatialRef, &thisSpatialRef);
+  aJim.getBoundingBox(pGeom,img2vector);
+  result=intersect(pGeom,ogrWriter,app);
+  OGRGeometryFactory::destroyGeometry(pGeom );
+  return(result);
 }
 
 std::shared_ptr<VectorOgr> VectorOgr::convexHull(app::AppFactory& app){
