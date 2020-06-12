@@ -830,33 +830,101 @@ OGRErr VectorOgr::copyFields(const VectorOgr& vectorOgr,const vector<std::string
 ///perform a deep copy, including layers and features
 OGRErr VectorOgr::copy(VectorOgr& other, app::AppFactory &app){
   Optionjl<std::string> options_opt("co", "co", "format dependent options controlling creation of the output file");
+  Optionjl<std::string> newfield_opt("newfield", "newfield", "create new field(s)");
+  Optionjl<std::string> ftype_opt("newtype", "newtype", "Field type (only Inter, Real, or String)", "Integer");
+  Optionjl<std::string> newvalue_opt("newvalue", "newvalue", "value(s) to set for new field(s)");
   Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
 
   options_opt.retrieveOption(app);
+  newfield_opt.retrieveOption(app);
+  ftype_opt.retrieveOption(app);
+  newvalue_opt.retrieveOption(app);
   verbose_opt.retrieveOption(app);
+
+  OGRFieldType fieldType;
+  int ogr_typecount=11;//hard coded for now!
+  if(verbose_opt[0]>1)
+    std::cout << "field and label types can be: ";
+  for(int iType = 0; iType < ogr_typecount; ++iType){
+    if(verbose_opt[0]>1)
+      std::cout << " " << OGRFieldDefn::GetFieldTypeName((OGRFieldType)iType);
+    if( OGRFieldDefn::GetFieldTypeName((OGRFieldType)iType) != NULL
+        && EQUAL(OGRFieldDefn::GetFieldTypeName((OGRFieldType)iType),
+                 ftype_opt[0].c_str()))
+      fieldType=(OGRFieldType) iType;
+  }
+  switch( fieldType ){
+  case OFTInteger:
+  case OFTReal:
+  case OFTRealList:
+  case OFTString:
+    if(verbose_opt[0]>1)
+      std::cout << std::endl << "field type is: " << OGRFieldDefn::GetFieldTypeName(fieldType) << std::endl;
+    break;
+  default:
+    cerr << "field type " << OGRFieldDefn::GetFieldTypeName(fieldType) << " not supported" << std::endl;
+    std::ostringstream errorStream;
+    errorStream << "field type " << OGRFieldDefn::GetFieldTypeName(fieldType) << " not supported";
+    std::cerr << errorStream.str();
+    throw(errorStream.str());
+  }
 
   char **papszOptions=NULL;
   for(std::vector<std::string>::const_iterator optionIt=options_opt.begin();optionIt!=options_opt.end();++optionIt)
     papszOptions=CSLAddString(papszOptions,optionIt->c_str());
+  if(newfield_opt.size() && newvalue_opt.size()){
+      while(newvalue_opt.size()<newfield_opt.size())
+        newvalue_opt.push_back(newvalue_opt.back());
+  }
   for(size_t ilayer=0;ilayer<other.getLayerCount();++ilayer){
     pushLayer(other.getLayerName(ilayer),other.getProjection(ilayer),other.getGeometryType(ilayer),papszOptions);
     destroyFeatures(ilayer);
     copyFields(other,std::vector<std::string>(),ilayer,ilayer);
+    for(std::vector<std::string>::const_iterator fieldit=newfield_opt.begin();fieldit!=newfield_opt.end();++fieldit)
+      createField(*fieldit,fieldType,ilayer);
     m_features[ilayer].resize(other.getFeatureCount(ilayer));
-#if JIPLIB_PROCESS_IN_PARALLEL == 1
-#pragma omp parallel for
-#else
-#endif
+// #if JIPLIB_PROCESS_IN_PARALLEL == 1
+// #pragma omp parallel for
+// #else
+// #endif
     for(size_t ifeature=0;ifeature<other.getFeatureCount(ilayer);++ifeature){
       OGRFeature *writeFeature=createFeature(ilayer);
       OGRFeature *otherFeature=other.getFeatureRef(ifeature,ilayer);
-      if(otherFeature)
+      if(otherFeature){
         writeFeature->SetFrom(otherFeature);
+        for(size_t ifield=0;ifield<newfield_opt.size();++ifield){
+          if(newvalue_opt.size()){
+            switch( fieldType ){
+            case OFTInteger:
+              writeFeature->SetField(newfield_opt[ifield].c_str(),string2type<GIntBig>(newvalue_opt[ifield]));
+              // writeFeature->SetField(newfield_opt[ifield].c_str(),string2type<size_t>(newvalue_opt[ifield]));
+              break;
+            case OFTReal:
+            case OFTRealList:
+              writeFeature->SetField(newfield_opt[ifield].c_str(),string2type<double>(newvalue_opt[ifield]));
+              break;
+            case OFTString:
+              writeFeature->SetField(newfield_opt[ifield].c_str(),newvalue_opt[ifield].c_str());
+              break;
+            default:
+              cerr << "field type " << OGRFieldDefn::GetFieldTypeName(fieldType) << " not supported" << std::endl;
+              std::ostringstream errorStream;
+              errorStream << "field type " << OGRFieldDefn::GetFieldTypeName(fieldType) << " not supported";
+              std::cerr << errorStream.str();
+              throw(errorStream.str());
+            }
+          }
+          else{
+            writeFeature->SetField(newfield_opt[ifield].c_str(),static_cast<GIntBig>(ifeature));
+          }
+        }
+      }
       // else
       //   std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
       m_features[ilayer][ifeature]=writeFeature;
     }
   }
+  write();
   return(OGRERR_NONE);
 }
 
@@ -961,7 +1029,7 @@ std::string VectorOgr::getProjection(size_t ilayer) const{
   return(projectionString);
 };
 
-///get extent of the layer
+///get extent of all layers
 bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT) const{
   bool result=true;
   for(size_t ilayer=0;ilayer<getLayerCount();++ilayer){
