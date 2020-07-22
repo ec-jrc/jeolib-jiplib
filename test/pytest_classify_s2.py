@@ -82,7 +82,7 @@ if True:
         sampleSize=-args.sampleSize #use negative values for absolute and positive values for percentage values
         dict.update({'threshold':sampleSize})
         dict.update({'bandname':['B02','B03','B04','B08']})
-        dict.update({'band':[0,1,2,3]})
+        # dict.update({'band':[0,1,2,3]})
         # dict.update({'verbose':2})
         sample=jim.extractImg(jim_ref,dict)
         if args.classifier == "svm":
