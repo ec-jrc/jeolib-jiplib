@@ -1,3 +1,0 @@
-Authors: {Pieter.Kempeneers,Pierre.Soille}@ec.europa.eu
-(c) European Commission
-License: to be defined
