@@ -44,7 +44,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 #include "apps/AppFactory.h"
 #include "config_jiplib.h"
 
-#if MIALIB == 1
+#if MIALLIB == 1
 extern "C" {
 #include "miallib/miallib_swig.h"
 #include "miallib/miallib_convolve.h"
@@ -75,7 +75,7 @@ namespace app{
   class AppFactory;
 }
 
-#if MIALIB
+#if MIALLIB
 enum JIPLIBDataType {JDT_Unknown=0, JDT_Int64=14, JDT_UInt64=15, JDT_Word=16};
 #endif
 
@@ -282,7 +282,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   Jim(void* dataPointer, int ncol, int nrow, int nplane, const GDALDataType& dataType);
   Jim(std::vector<void*> dataPointers, int ncol, int nrow, int nplane, const GDALDataType& dataType);
     ///constructor input image
-#if MIALIB == 1
+#if MIALLIB == 1
   Jim(IMAGE *mia);
 #endif
     ///constructor input image
@@ -826,7 +826,7 @@ class Jim : public std::enable_shared_from_this<Jim>
 
   ///assignment operator
   /* Jim& operator=(Jim& imgSrc); */
-#if MIALIB == 1
+#if MIALLIB == 1
   bool isEqual(std::shared_ptr<Jim> refImg);
 #endif
   ///equal operator
@@ -1085,7 +1085,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   CPLErr writeDataPlanes();
   /// convert single band multiple plane image to single plane multiband image
   /* void d_plane2band();//not implemented yet */
-#if MIALIB == 1
+#if MIALLIB == 1
   ///get MIA representation for a particular band
   IMAGE* getMIA(int band=0);
   ///set memory from internal MIA representation for particular band
@@ -1197,7 +1197,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   std::shared_ptr<Jim> cloneImpl(bool copyData) {
     return(std::make_shared<Jim>(*this,copyData));
   };
-#if MIALIB == 1
+#if MIALLIB == 1
   std::vector<IMAGE*> m_mia;
 #endif
 };

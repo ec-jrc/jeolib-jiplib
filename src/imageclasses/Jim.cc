@@ -58,7 +58,7 @@ Jim::Jim(){
 }
 
 size_t Jim::getDataTypeSizeBytes(int band) const {
-#if MIALIB == 1
+#if MIALLIB == 1
   switch (getDataType()){
   case JDT_UInt64:
   case JDT_Int64:
@@ -106,7 +106,7 @@ void Jim::d_band2plane(){
     free(m_data[iband]);
     m_data[iband]=0;
     m_nband-=1;
-#if MIALIB == 1
+#if MIALLIB == 1
     if(m_mia.size()>iband)
       delete(m_mia[iband]);
 #endif
@@ -123,7 +123,7 @@ void Jim::d_band2plane(){
   m_mia.clear();
 }
 
-#if MIALIB == 1
+#if MIALLIB == 1
 IMAGE* Jim::getMIA(int band){
   try{
     if(getBlockSize()!=nrOfRow()){
@@ -379,7 +379,7 @@ void Jim::reset()
   // m_data.clear();
   //is there any reason why we cannot set external data to false?
   m_externalData=false;
-#if MIALIB == 1
+#if MIALLIB == 1
   for(int iband=0;iband<m_mia.size();++iband)
     delete(m_mia[iband]);
   m_mia.clear();
@@ -468,7 +468,7 @@ Jim::Jim(const std::string& filename, const Jim& imgSrc, unsigned int memory, co
   open(filename,imgSrc,memory,options);
 }
 
-#if MIALIB == 1
+#if MIALLIB == 1
 ///constructor input image
 Jim::Jim(IMAGE *mia) : m_nplane(1){
   reset();
@@ -514,7 +514,7 @@ Jim::Jim(app::AppFactory &theApp){
 
 ///destructor
 Jim::~Jim(void){
-#if MIALIB == 1
+#if MIALLIB == 1
   if(m_mia.size()){
     for(int iband=0;iband<m_mia.size();++iband)
       if(m_mia[iband])
@@ -2184,7 +2184,7 @@ CPLErr Jim::open(app::AppFactory &app){
     }
     //we initialize memory using class member variables instead of those read from GDAL dataset
     if(band2plane_opt[0]){
-#if MIALIB == 1
+#if MIALLIB == 1
       m_nplane=m_nband;
       m_nband=1;
       initMem(memory_opt[0]);
@@ -2195,7 +2195,7 @@ CPLErr Jim::open(app::AppFactory &app){
       }
 #else
       std::ostringstream errorStream;
-      errorStream << "Warning: planes not supported, please compile with MIALIB" << std::endl;
+      errorStream << "Warning: planes not supported, please compile with MIALLIB" << std::endl;
       throw(errorStream.str());
 #endif
     }
@@ -2490,7 +2490,7 @@ CPLErr Jim::readNewBlockDS(int row, int iband, int ds_band){
 //   return(returnValue);//new block was read
 // }
 
-#if MIALIB == 1
+#if MIALLIB == 1
 CPLErr Jim::readDataPlanes(std::vector<int> bands){
   CPLErr returnValue=CE_None;
   if(m_gds == NULL){

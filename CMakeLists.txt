@@ -52,11 +52,11 @@ set (PROJECT_TEST_DIR test)
 
 set(CMAKE_COLOR_MAKEFILE ON)
 
-if(BUILD_WITH_MIALIB)
+if(BUILD_WITH_MIALLIB)
   set(MIA_BOOL 1)
-else(BUILD_WITH_MIALIB)
+else(BUILD_WITH_MIALLIB)
   set(MIA_BOOL 0)
-endif(BUILD_WITH_MIALIB)
+endif(BUILD_WITH_MIALLIB)
 
 
 
@@ -185,7 +185,7 @@ configure_file ( "cmake.pc.in" "jiplib.pc"  @ONLY)
 # Name of C++ library
 set(JIPLIB_LIB_NAME jiplib)
 
-set(BUILD_WITH_MIALIB TRUE CACHE BOOL "JIPlib needs to be built with mialiab")
+set(BUILD_WITH_MIALLIB TRUE CACHE BOOL "JIPlib needs to be built with mialiab")
 
 # Include directories
 ###############################################################################
@@ -214,7 +214,7 @@ endif(BUILD_WITH_FANN)
 
 ###############################################################################
 
-#we will use a copy of the imageclasses in the binary build directory, where we can change the content (for MIALIB)
+#we will use a copy of the imageclasses in the binary build directory, where we can change the content (for MIALLIB)
 
 message(STATUS "cmake_current_binary_dir: ${CMAKE_CURRENT_BINARY_DIR}")
 file(COPY ${PROJECT_SOURCE_DIR}/src DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -344,7 +344,7 @@ if(BUILD_WITH_FANN)
   )
 endif(BUILD_WITH_FANN)
 
-if(BUILD_WITH_MIALIB)
+if(BUILD_WITH_MIALLIB)
   set(MIA_BOOL 1)
   message(STATUS "build with miallib: ${MIA_BOOL}")
   set(MIA_LIB_NAME miallib_generic)
@@ -353,10 +353,10 @@ if(BUILD_WITH_MIALIB)
 
   INCLUDE_DIRECTORIES(${MIA_INCLUDE_DIR})
   LINK_DIRECTORIES(${MIA_LIB_PATH})
-else(BUILD_WITH_MIALIB)
+else(BUILD_WITH_MIALLIB)
   set(MIA_BOOL 0)
   message(STATUS "build with miallib: ${MIA_BOOL}")
-endif(BUILD_WITH_MIALIB)
+endif(BUILD_WITH_MIALLIB)
 
 ###############################################################################
 
@@ -369,7 +369,7 @@ if(PYTHONINTERP_FOUND)
   # long int thresholdRegion_Size
   # long int thresholdRegion_Contrast
   # double julian_date
-  if(BUILD_WITH_MIALIB)
+  if(BUILD_WITH_MIALLIB)
     MESSAGE(STATUS "PythonInterp was found")
 
     file(GLOB MIA_HEADER_FILES ${MIA_INCLUDE_DIR}/miallib_*.h)
@@ -462,7 +462,7 @@ if(PYTHONINTERP_FOUND)
     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_nm.cc\"\n")
     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_d_nm.cc\"\n")
     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/JimList.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype_jimlist.cc\"\n")
-  endif(BUILD_WITH_MIALIB)
+  endif(BUILD_WITH_MIALLIB)
 else(PYTHONINTERP_FOUND)
     MESSAGE(STATUS "Error: PythonInterp not found")
 endif(PYTHONINTERP_FOUND)
@@ -492,12 +492,12 @@ target_link_libraries(
   ${BOOST_ARCHIVE_LIBRARY}
   )
 
-if(BUILD_WITH_MIALIB)
+if(BUILD_WITH_MIALLIB)
   target_link_libraries(
     ${JIPLIB_LIB_NAME}
     ${MIA_LIB_NAME}
     )
-endif(BUILD_WITH_MIALIB)
+endif(BUILD_WITH_MIALLIB)
 
 target_link_libraries(
   ${JIPLIB_LIB_NAME}
@@ -533,7 +533,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(/usr/local/include)
 
 SET(CMAKE_SWIG_FLAGS "-keyword")
-SET(CMAKE_SWIG_FLAGS "-DMIALIB=${MIA_BOOL}")
+SET(CMAKE_SWIG_FLAGS "-DMIALLIB=${MIA_BOOL}")
 SET_PROPERTY(SOURCE ${JIPLIB_I} PROPERTY CPLUSPLUS ON)
 
 if(${CMAKE_VERSION} VERSION_LESS "3.8.0")

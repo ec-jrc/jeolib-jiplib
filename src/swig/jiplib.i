@@ -527,7 +527,7 @@ This file is part of jiplib
 /* #include "../../build/src/imageclasses/VectorOgr.h" */
 #include "apps/AppFactory.h"
 #include "algorithms/Filter2d.h"
-#if MIALIB == 1
+#if MIALLIB == 1
 #include "miallib_swig.h"
 #include "op.h"
 #endif

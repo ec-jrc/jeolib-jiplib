@@ -33,7 +33,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "config_jiplib.h"
 
-#if MIALIB == 1
+#if MIALLIB == 1
 extern "C" {
 #include "miallib/miallib_swig.h"
 #include "miallib/miallib_convolve.h"

@@ -41,7 +41,7 @@ using namespace std;
  * @param refImg Use this as the reference image
  * @return true if image is equal to reference image
  **/
-#if MIALIB == 1
+#if MIALLIB == 1
 bool Jim::isEqual(std::shared_ptr<Jim> refImg){
   bool isEqual=true;
   if(nrOfBand()!=refImg->nrOfBand())
