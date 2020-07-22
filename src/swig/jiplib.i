@@ -61,7 +61,7 @@ This file is part of jiplib
  /* %apply double &INOUT{ double &max }; */
  /* %apply Float64Vector &INOUT{ std::vector<double>& }; */
 
- /* to resolve naming conflicts with mialib library: rename(to) from*/
+ /* to resolve naming conflicts with miallib library: rename(to) from*/
 %rename(filter2d_erode) filter2d::erode;
 %rename(filter2d_dilate) filter2d::dilate;
 %rename(filter2d_shift) filter2d::shift;
@@ -528,7 +528,7 @@ This file is part of jiplib
 #include "apps/AppFactory.h"
 #include "algorithms/Filter2d.h"
 #if MIALIB == 1
-#include "mialib_swig.h"
+#include "miallib_swig.h"
 #include "op.h"
 #endif
 #include <cpl_error.h>
@@ -684,9 +684,9 @@ This file is part of jiplib
 
 //Parse the header file
 //%include "swig/pktools.i"
-%include "swig/mialib_tmp.i"
+%include "swig/miallib_tmp.i"
 
-%include "mialib/op.h"
+%include "miallib/op.h"
 /* %include "swig/jiplib_python.i" */
 
 %{

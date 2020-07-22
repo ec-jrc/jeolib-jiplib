@@ -177,7 +177,7 @@ def fun2method(inputfile, outputfile_basename):
 import sys, getopt
 
 def main(argv):
-   inputfile="mialib_imagetype"
+   inputfile="miallib_imagetype"
    outputfile="fun2method_imagetype_jimlist"
    try:
       opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
@@ -201,7 +201,7 @@ if __name__ == "__main__":
    main(sys.argv[1:])
 
 
-# cat /usr/local/include/mialib/mialib_*.h | grep '^extern IMAGE \*[^\*]'  > mialib_image_type
-# python fun2method_imagetype.py  -i mialib_image_type -o fun2method_imagetype
+# cat /usr/local/include/miallib/miallib_*.h | grep '^extern IMAGE \*[^\*]'  > miallib_image_type
+# python fun2method_imagetype.py  -i miallib_image_type -o fun2method_imagetype
 # to automatically insert content of fun2method in jim.h within placeholder //start insert from fun2method -> //end insert from fun2method
 # sed -i -ne '/\/\/start insert from fun2method_imagetype/ {p; r fun2method_imagetype.h' -e ':a; n; /\/\/end insert from fun2method_imagetype/ {p; b}; ba}; p' jim.h

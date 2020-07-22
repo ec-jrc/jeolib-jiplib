@@ -44,7 +44,7 @@ apt install libboost-filesystem-dev libboost-serialization-dev
 apt install swig
 ```
 
- ## mialib
+ ## miallib
 
 See more infor at [mia](https://jeodpp.jrc.ec.europa.eu/apps/gitlab/jeodpp/JIPlib/mia)
 

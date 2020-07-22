@@ -195,7 +195,7 @@ def fun2method(inputfile, outputfile_basename):
 import sys, getopt
 
 def main(argv):
-   inputfile="mialib_errortype"
+   inputfile="miallib_errortype"
    outputfile="fun2method_errortype"
    try:
       opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
@@ -221,8 +221,8 @@ if __name__ == "__main__":
 
 
 
-# cat /home/soillpi/workstation/jip/mia//core/c/mialib_*.h | grep '^extern ERROR'  > mialib_error_type
-# cat /home/soillpi/work/jip20170201/mia//core/c/mialib_*.h | grep '^extern ERROR'  > mialib_error_type
-# python fun2method_errortype.py  -i mialib_error_type -o fun2method_errortype
+# cat /home/soillpi/workstation/jip/mia//core/c/miallib_*.h | grep '^extern ERROR'  > miallib_error_type
+# cat /home/soillpi/work/jip20170201/mia//core/c/miallib_*.h | grep '^extern ERROR'  > miallib_error_type
+# python fun2method_errortype.py  -i miallib_error_type -o fun2method_errortype
 # to automatically insert content of fun2method in jim.h within placeholder //start insert from fun2method -> //end insert from fun2method
 # sed -i -ne '/\/\/start insert from fun2method_errortype/ {p; r fun2method_errortype.h' -e ':a; n; /\/\/end insert from fun2method_errortype/ {p; b}; ba}; p' jim.h

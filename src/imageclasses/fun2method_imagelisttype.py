@@ -96,7 +96,7 @@ def fun2method(inputfile, outputfile_basename):
         f.write(methodDeclaration+'{')
         f.write('\n\tJimList listout;')
         f.write('\n\ttry{')
-        f.write('\n\t\tint noutput=2;//todo: depends on mialib function')
+        f.write('\n\t\tint noutput=2;//todo: depends on miallib function')
         f.write('\n\t\tif(nrOfBand()<=iband){')
         f.write('\n\t\t\tstd::string errorString=\"Error: band number exceeds number of bands in input image\";')
         f.write('\n\t\t\tthrow(errorString);')
@@ -177,7 +177,7 @@ def fun2method(inputfile, outputfile_basename):
 import sys, getopt
 
 def main(argv):
-   inputfile="mialib_imagelisttype"
+   inputfile="miallib_imagelisttype"
    outputfile="fun2method_imagelisttype"
    try:
       opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
@@ -201,7 +201,7 @@ if __name__ == "__main__":
    main(sys.argv[1:])
 
 
-# cat /usr/local/include/mialib/mialib_*.h | grep '^extern IMAGE \*\*[^\*]'  > mialib_imagelist_type
-# python fun2method_imagelisttype.py  -i mialib_imagelist_type -o fun2method_imagelisttype
+# cat /usr/local/include/miallib/miallib_*.h | grep '^extern IMAGE \*\*[^\*]'  > miallib_imagelist_type
+# python fun2method_imagelisttype.py  -i miallib_imagelist_type -o fun2method_imagelisttype
 # to automatically insert content of fun2method in jim.h within placeholder //start insert from fun2method -> //end insert from fun2method
 # sed -i -ne '/\/\/start insert from fun2method_imagelisttype/ {p; r fun2method_imagelisttype.h' -e ':a; n; /\/\/end insert from fun2method_imagelisttype/ {p; b}; ba}; p' jim.h

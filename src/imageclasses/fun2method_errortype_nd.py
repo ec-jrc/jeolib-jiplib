@@ -171,7 +171,7 @@ def fun2method(inputfile, outputfile_basename):
 import sys, getopt
 
 def main(argv):
-   inputfile="mialib_errortype_nd"
+   inputfile="miallib_errortype_nd"
    outputfile="fun2method_errortype_nd"
    try:
       opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
