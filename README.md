@@ -72,6 +72,11 @@ sudo make install
 sudo ldconfig
 ```
 
+## Create wheel
+
+After `make`, go to directory `utils` and run the bash script
+`create_wheel.sh`.  The wheel will be created in the `build` directory.
+
 # Test the installation
 
 From the directory of the repository, run:
