@@ -72,6 +72,21 @@ sudo make install
 sudo ldconfig
 ```
 
+## Create wheel
+
+After `make`, go to directory `utils` and run the bash script in the following
+syntax:
+
+```bash
+bash create_wheel.sh path_to_your_libmialib_generic.so
+```
+
+The wheel will be created in the `build` directory and will contain also
+`mialib` necessary tools inside (no need for the user to install `mialib`
+when installing the `jiplib` wheel).
+
+> NOTE: The common path to `libmialib_generic.so` is `/usr/local/lib`
+
 # Test the installation
 
 From the directory of the repository, run:
