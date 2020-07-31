@@ -35,8 +35,7 @@ setup(
     url='https://cidportal.jrc.ec.europa.eu/apps/gitlab/JIPlib/jiplib',
     license='GPLv3',
     packages=find_packages(),
-    package_data={'jiplib': ['_jiplib.so', 'libjiplib.so.1',
-                                  'libjiplib.so',
-                             'libjiplib.so.1.0.0']},
+    package_data={'jiplib': ['_jiplib.so', 'libjiplib.so.1', 'libjiplib.so',
+                             'libjiplib.so.1.0.0', 'libmialib_generic.so']},
     include_package_data=True
 )
