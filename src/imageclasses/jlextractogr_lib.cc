@@ -1417,7 +1417,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                           }
                         }
                         else{
-                          polyValues[iplane][iband].push_back(value);
+                          if(class_opt.empty())
+                            polyValues[iplane][iband].push_back(value);
                         }
                       }//iband
                     }
@@ -2218,7 +2219,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                         }
                       }
                       else{
-                        polyValues[iplane][iband].push_back(value);
+                        if(class_opt.empty())
+                          polyValues[iplane][iband].push_back(value);
                       }
                     }//iband
                   }//iplane

@@ -383,7 +383,7 @@ if(PYTHONINTERP_FOUND)
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype_nd)
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype_nm)
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype)
-    #Mialib functions have been designed as destructive. We will therefore create a copy to avoid the destructive behaviour. The destructive method will still be available with the prefix d_
+    #Miallib functions have been designed as destructive. We will therefore create a copy to avoid the destructive behaviour. The destructive method will still be available with the prefix d_
     #The following functions F_ND from miallib do not modify the input image and should therefore not create a copy. They will be treated in the same way as the destructive functions (without the prefix d_)
     SET(F_ND "dumpxyz|szcompat|szgeocompat|iminfo|tiffinfo|writeGnuPlot3D|vectorizeImage|IsPartitionEqual|IsPartitionFiner|dendro|getfirstmaxpos|volume|imequalp|getmax|getminmax")
     #The following functions F_NM from miallib are not compatible for multi-band processing
@@ -562,7 +562,7 @@ if(BUILD_WITH_PYTHON)
 
   if(CREATE_WHEEL)
     MESSAGE(STATUS "creating python wheel: ${CREATE_WHEEL}")
-    MESSAGE(STATUS "mialib generic library: ${MIA_LIB_PATH}/lib${MIA_LIB_NAME}.so")
+    MESSAGE(STATUS "miallib generic library: ${MIA_LIB_PATH}/lib${MIA_LIB_NAME}.so")
     MESSAGE(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
     MESSAGE(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
     MESSAGE(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
