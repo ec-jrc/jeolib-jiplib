@@ -551,6 +551,7 @@ void Jim::crop(Jim& imgWriter, AppFactory& app){
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
     doProcess=ulx_opt.retrieveOption(app);
+    ulx_opt.retrieveOption(app);
     uly_opt.retrieveOption(app);
     lrx_opt.retrieveOption(app);
     lry_opt.retrieveOption(app);
