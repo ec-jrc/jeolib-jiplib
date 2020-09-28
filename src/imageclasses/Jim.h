@@ -38,6 +38,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 #include <memory>
 #include <assert.h>
 #include "gdal_priv.h"
+#include "gdalwarper.h"
 #include "gdal_version.h"
 #include "base/Vector2d.h"
 #include "JimList.h"
@@ -238,17 +239,18 @@ static std::size_t getDataTypeSizeBytes(const std::string &typeString){
   }
 }
 
-static GDALRIOResampleAlg getGDALResample(const std::string &resampleString){
+static GDALRIOResampleAlg getGDALResampleIO(const std::string &resampleString){
   //initialize selMap
   std::map<std::string,GDALRIOResampleAlg> resampleMap;
-  resampleMap["NearestNeighbour"]=GRIORA_NearestNeighbour;
-  resampleMap["Bilinear"] = GRIORA_Bilinear;
-  resampleMap["Cubic"]=GRIORA_Cubic;
-  resampleMap["CubicSpline"]=GRIORA_CubicSpline;
-  resampleMap["Lanczos"]=GRIORA_Lanczos;
-  resampleMap["Average"]=GRIORA_Average;
-  resampleMap["Mode"]=GRIORA_Mode;
-  resampleMap["Gauss"]=GRIORA_Gauss;
+  //for IO (from https://gdal.org/doxygen/gdal_8h.html#a640ada511cbddeefac67c548e009d5ac)
+  resampleMap["NearestNeighbour"]=GRIORA_NearestNeighbour; //Nearest neighbour
+  resampleMap["Bilinear"] = GRIORA_Bilinear; //Bilinear (2x2 kernel)
+  resampleMap["Cubic"]=GRIORA_Cubic; //Cubic Convolution Approximation (4x4 kernel)
+  resampleMap["CubicSpline"]=GRIORA_CubicSpline; //Cubic B-Spline Approximation (4x4 kernel)
+  resampleMap["Lanczos"]=GRIORA_Lanczos; //Lanczos windowed sinc interpolation (6x6 kernel)
+  resampleMap["Average"]=GRIORA_Average; //Average
+  resampleMap["Mode"]=GRIORA_Mode; //Mode (selects the value which appears most often of all the sampled points)
+  resampleMap["Gauss"]=GRIORA_Gauss; //Gauss blurring
   resampleMap["GRIORA_NearestNeighbour"]=GRIORA_NearestNeighbour;
   resampleMap["GRIORA_Bilinear"] = GRIORA_Bilinear;
   resampleMap["GRIORA_Cubic"]=GRIORA_Cubic;
@@ -261,6 +263,31 @@ static GDALRIOResampleAlg getGDALResample(const std::string &resampleString){
     return(resampleMap[resampleString]);
   else
     return(GRIORA_NearestNeighbour);
+}
+
+static GDALResampleAlg getGDALResampleAlg(const std::string &resampleString){
+  //initialize selMap
+  std::map<std::string,GDALResampleAlg> resampleMap;
+  //for warping (from https://gdal.org/doxygen/gdalwarper_8h.html#a4775b029869df1f9270ad554c0633843)
+  resampleMap["near"]=GRA_NearestNeighbour;// nearest neighbour resampling (default, fastest algorithm, worst interpolation quality).
+  resampleMap["bilinear"]=GRA_Bilinear;// bilinear resampling.
+  resampleMap["cubic"]=GRA_Cubic;// cubic resampling.
+  resampleMap["cubicspline"]=GRA_CubicSpline;// cubic spline resampling.
+  resampleMap["lanczos"]=GRA_Lanczos;// Lanczos windowed sinc resampling.
+  resampleMap["average"]=GRA_Average;// average resampling, computes the weighted average of all non-NODATA contributing pixels.
+  resampleMap["mode"]=GRA_Mode;// mode resampling, selects the value which appears most often of all the sampled points.
+  resampleMap["max"]=GRA_Max;// maximum resampling, selects the maximum value from all non-NODATA contributing pixels.
+  resampleMap["min"]=GRA_Min;// minimum resampling, selects the minimum value from all non-NODATA contributing pixels.
+  resampleMap["med"]=GRA_Med;// median resampling, selects the median value of all non-NODATA contributing pixels.
+  resampleMap["q1"]=GRA_Q1;// first quartile resampling, selects the first quartile value of all non-NODATA contributing pixels.
+  resampleMap["q3"]=GRA_Q3;// third quartile resampling, selects the third quartile value of all non-NODATA contributing pixels.
+#if GDAL_VERSION_MAJOR > 2
+  resampleMap["sum"]=GRA_Sum;// compute the weighted sum of all non-NODATA contributing pixels (since GDAL 3.1)
+#endif
+  if(resampleMap.count(resampleString))
+    return(resampleMap[resampleString]);
+  else
+    return(GRA_NearestNeighbour);
 }
 
 class JimList;

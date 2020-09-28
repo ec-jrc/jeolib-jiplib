@@ -196,7 +196,7 @@ void Jim::warp(Jim& imgWriter, app::AppFactory &theApp)
 {
   Optionjl<std::string> sourceSRS_opt("s_srs", "s_srs", "Source spatial reference for the input file, e.g., epsg:3035 to use European projection and force to European grid");
   Optionjl<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference for the output file, e.g., epsg:3035 to use European projection and force to European grid");
-  Optionjl<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
+  Optionjl<std::string> resample_opt("r", "resample", "resample: near, bilinear, cubic, cubicspline, lanczos, average, mode, max, min, med, q1, q3, sum (check https://gdal.org/doxygen/gdalwarper_8h.html#a4775b029869df1f9270ad554c0633843)","near");
   Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.",0);
   Optionjl<std::string> warp_opt("wo", "wo", "Warp option(s). Multiple options can be specified.");
   Optionjl<std::string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
@@ -299,8 +299,8 @@ void Jim::warp(Jim& imgWriter, app::AppFactory &theApp)
     }
   }
   // Quality parameters for warping operation
-  m_resample=getGDALResample(resample_opt[0]);
-  GDALResampleAlg eResampleAlg = (GDALResampleAlg)m_resample;
+  GDALResampleAlg eResampleAlg=getGDALResampleAlg(resample_opt[0]);
+  // GDALResampleAlg eResampleAlg = (GDALResampleAlg)resample;
   double dfWarpMemoryLimit = 0.0;
   double dfMaxError = 0.0;
   GDALProgressFunc pfnProgress = NULL;
@@ -324,7 +324,7 @@ void Jim::warp(Jim& imgWriter, app::AppFactory &theApp)
         poDatasetOut->SetGeoTransform(&targetGT[0]);
 
         psOptions->papszWarpOptions = CSLSetNameValue(psOptions->papszWarpOptions,"INIT_DEST",type2string<double>(nodata_opt[0]).c_str());
-        psOptions->papszWarpOptions = CSLSetNameValue(psOptions->papszWarpOptions,"eResampleAlg",resample_opt[0].c_str());
+        // psOptions->papszWarpOptions = CSLSetNameValue(psOptions->papszWarpOptions,"eResampleAlg",resample_opt[0].c_str());
         //test
         // psOptions->nOvLevel = -1;
 

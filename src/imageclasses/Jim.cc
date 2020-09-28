@@ -1606,7 +1606,7 @@ CPLErr Jim::registerDriver()
 CPLErr Jim::open(app::AppFactory &app){
   //input
   Optionjl<std::string> input_opt("fn", "filename", "filename");
-  Optionjl<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check http://www.gdal.org/gdal_8h.html#a640ada511cbddeefac67c548e009d5a)","GRIORA_NearestNeighbour");
+  Optionjl<std::string> resample_opt("r", "resample", "resample: GRIORA_NearestNeighbour|GRIORA_Bilinear|GRIORA_Cubic|GRIORA_CubicSpline|GRIORA_Lanczos|GRIORA_Average|GRIORA_Average|GRIORA_Gauss (check https://gdal.org/doxygen/gdal_8h.html#a640ada511cbddeefac67c548e009d5ac)","GRIORA_NearestNeighbour");
   // Optionjl<std::string> extra_opt("extra", "extra", "RGDALRasterIOExtraArg (check http://www.gdal.org/structGDALRasterIOExtraArg.html)");
   // Optionjl<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference system in EPSG format (e.g., epsg:3035)");//todo
   //output
@@ -2171,7 +2171,7 @@ CPLErr Jim::open(app::AppFactory &app){
     gt[4]=0;//todo: $-sin(\alpha)\cdot\textrm{Yres}$
     gt[5]=-dy_opt[0];//todo: a$-cos(\alpha)\cdot\textrm{Yres}
     setGeoTransform(gt);
-    m_resample=getGDALResample(resample_opt[0]);
+    m_resample=getGDALResampleIO(resample_opt[0]);
     int nBufXSize=static_cast<unsigned int>(ceil((lrx_opt[0]-ulx_opt[0])/dx_opt[0]-FLT_EPSILON));
     int nBufYSize=static_cast<unsigned int>(ceil((uly_opt[0]-lry_opt[0])/dy_opt[0]-FLT_EPSILON));
     m_ncol=nBufXSize;
