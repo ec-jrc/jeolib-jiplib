@@ -797,82 +797,80 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
     }
   }
 
-  PyObject* jim2np(std::shared_ptr<Jim> aJim, int band=0, bool copyData=true) {
-    /* return aJim.jim2np(band,copyData); */
-      if(band>=aJim->nrOfBand()){
-        std::string errorString="Error: band out of range";
-        throw(errorString);
-      }
-      int npDataType;
-      switch (aJim->getDataType()){
-      case GDT_Byte:
-        npDataType=NPY_UINT8;
-        break;
-      case GDT_UInt16:
-        npDataType=NPY_UINT16;
-        break;
-      case GDT_Int16:
-        npDataType=NPY_INT16;
-        break;
-      case GDT_UInt32:
-        npDataType=NPY_UINT32;
-        break;
-      case GDT_Int32:
-        npDataType=NPY_INT32;
-        break;
-      case GDT_Float32:
-        npDataType=NPY_FLOAT32;
-        break;
-      case GDT_Float64:
-        npDataType=NPY_FLOAT64;
-        break;
-      case JDT_UInt64:
-        npDataType=NPY_UINT64;
-        break;
-      case JDT_Int64:
-        npDataType=NPY_INT64;
-        break;
-      case GDT_Unknown:
-      default:
-        std::string errorString="Error: Unknown data type";
-        throw(errorString);
-      }
-      void *npdata=0;
-      if(copyData){
-        //alllocate memory for npdata
-        npdata=(void *) calloc(static_cast<size_t>(aJim->nrOfPlane()*aJim->nrOfCol()*aJim->nrOfRow()),aJim->getDataTypeSizeBytes());
-        //copy data from jim to npdata
-        aJim->copyData(npdata,band);
-      }
-      else
-        npdata=(void*)(aJim->getDataPointer(band));
-      int ndim=(aJim->nrOfPlane()>1)? 3 : 2;
-      if(aJim->nrOfPlane()>1){
-        npy_intp dims[3];
-        dims[0]=aJim->nrOfPlane();
-        dims[1]=aJim->nrOfRow();
-        dims[2]=aJim->nrOfCol();
-        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(ndim,dims,npDataType,npdata);
-        if(npArray)
-          return(PyArray_Return(npArray));
-        else
-          return(0);
-      }
-      else{
-        npy_intp dims[2];
-        dims[0]=aJim->nrOfRow();
-        dims[1]=aJim->nrOfCol();
-        /* PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(dim,dims,npDataType,(void*)aJim->getDataPointer(band)); */
-        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(ndim,dims,npDataType,npdata);
-        if(npArray)
-          return(PyArray_Return(npArray));
-        else
-          return(0);
-      }
+  //todo: return multi-plane/band images according to: http://scikit-image.org/docs/dev/user_guide/numpy_images.html
+  PyObject* jim2np(std::shared_ptr<Jim> aJim, size_t band=0, bool copyData=true) {
+    if(band>=aJim->nrOfBand()){
+      std::string errorString="Error: band out of range";
+      throw(errorString);
     }
+    int npDataType;
+    switch (aJim->getDataType()){
+    case GDT_Byte:
+      npDataType=NPY_UINT8;
+      break;
+    case GDT_UInt16:
+      npDataType=NPY_UINT16;
+      break;
+    case GDT_Int16:
+      npDataType=NPY_INT16;
+      break;
+    case GDT_UInt32:
+      npDataType=NPY_UINT32;
+      break;
+    case GDT_Int32:
+      npDataType=NPY_INT32;
+      break;
+    case GDT_Float32:
+      npDataType=NPY_FLOAT32;
+      break;
+    case GDT_Float64:
+      npDataType=NPY_FLOAT64;
+      break;
+    case JDT_UInt64:
+      npDataType=NPY_UINT64;
+      break;
+    case JDT_Int64:
+      npDataType=NPY_INT64;
+      break;
+    case GDT_Unknown:
+    default:
+      std::string errorString="Error: Unknown data type";
+      throw(errorString);
+    }
+    void *npdata=0;
+    if(copyData){
+      //alllocate memory for npdata
+      npdata=(void *) calloc(static_cast<size_t>(aJim->nrOfPlane()*aJim->nrOfCol()*aJim->nrOfRow()),aJim->getDataTypeSizeBytes());
+      //copy data from jim to npdata
+      aJim->copyData(npdata,band);
+    }
+    else
+      npdata=(void*)(aJim->getDataPointer(band));
+    int ndim=(aJim->nrOfPlane()>1)? 3 : 2;
+    if(aJim->nrOfPlane()>1){
+      npy_intp dims[3];
+      dims[0]=aJim->nrOfPlane();
+      dims[1]=aJim->nrOfRow();
+      dims[2]=aJim->nrOfCol();
+      PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(ndim,dims,npDataType,npdata);
+      if(npArray)
+        return(PyArray_Return(npArray));
+      else
+        return(0);
+    }
+    else{
+      npy_intp dims[2];
+      dims[0]=aJim->nrOfRow();
+      dims[1]=aJim->nrOfCol();
+      PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(ndim,dims,npDataType,npdata);
+      if(npArray)
+        return(PyArray_Return(npArray));
+      else
+        return(0);
+    }
+  }
 
-
-  PyObject* np(std::shared_ptr<VectorOgr> aJimVect, std::vector<std::string> fname, size_t ilayer) {
+  PyObject* jimvect2np(std::shared_ptr<VectorOgr> aJimVect, std::vector<std::string> fname, size_t ilayer) {
     size_t ntotalfeatures=0;
     size_t nfeatures=0;
     size_t nfields=0;
@@ -918,136 +916,88 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
     }
   }
 
-  /* PyObject* np(std::shared_ptr<VectorOgr> aJimVect) { */
-  /*   size_t ntotalfeatures=0; */
-  /*   size_t nfeatures=0; */
-  /*   size_t nfields=0; */
-  /*   int npDataType=NPY_FLOAT64; */
-  /*   if(aJimVect->isEmpty()) */
-  /*     return(0); */
-  /*   //todo: destroy empty features? */
-  /*   std::vector<OGRFieldDefn*> fields; */
-  /*   for(size_t ilayer=0;ilayer<aJimVect->getLayerCount();++ilayer){ */
-  /*     ntotalfeatures+=aJimVect->getFeatureCount(ilayer); */
-  /*     if(aJimVect->getFeatureCount(ilayer)>nfeatures) */
-  /*       nfeatures=aJimVect->getFeatureCount(ilayer); */
-  /*     aJimVect->getFields(fields,ilayer); */
-  /*     if(fields.size()>nfields) */
-  /*       nfields=fields.size(); */
-  /*   } */
-  /*   if(aJimVect->getLayerCount()>1){ */
-  /*     int ndim=3; */
-  /*     npy_intp dims[3]{aJimVect->getLayerCount(),nfeatures,nfields}; */
-  /*     PyArrayObject *npArray =(PyArrayObject*) PyArray_SimpleNew(ndim, dims, npDataType); */
-  /*     double *ad = (double *) PyArray_DATA((PyArrayObject *) npArray); */
-  /*     for(size_t ilayer=0;ilayer<aJimVect->getLayerCount();++ilayer){ */
-  /*       OGRFeatureDefn *poFDefn = aJimVect->getLayer(ilayer)->GetLayerDefn(); */
-  /*       for(size_t ifeature = 0; ifeature < nfeatures; ++ifeature) { */
-  /*         OGRFeature *thisFeature=0; */
-  /*         if(ifeature < aJimVect->getFeatureCount(ilayer)) */
-  /*           thisFeature=aJimVect->getFeatureRef(ifeature,ilayer); */
-  /*         for(int iField=0;iField<nfields;++iField){ */
-  /*           if(iField<poFDefn->GetFieldCount()) */
-  /*             *ad++=thisFeature->GetFieldAsDouble(iField); */
-  /*           else */
-  /*             *ad++=std::numeric_limits<double>::quiet_NaN(); */
-  /*         } */
-  /*       } */
-  /*       if(npArray){ */
-  /*         return(PyArray_Return(npArray)); */
-  /*       } */
-  /*       else{ */
-  /*         return(0); */
-  /*       } */
-  /*     } */
-  /*   } */
-  /*   else{ */
-  /*     int ndim=2; */
-  /*     npy_intp dims[2]{ntotalfeatures,nfields}; */
-  /*     PyArrayObject *npArray =(PyArrayObject*) PyArray_SimpleNew(ndim, dims, npDataType); */
-  /*     double *ad = (double *) PyArray_DATA((PyArrayObject *) npArray); */
-  /*     for(size_t ilayer=0;ilayer<aJimVect->getLayerCount();++ilayer){ */
-  /*       OGRFeatureDefn *poFDefn = aJimVect->getLayer(ilayer)->GetLayerDefn(); */
-  /*       for(size_t ifeature = 0; ifeature < aJimVect->getFeatureCount(ilayer); ++ifeature) { */
-  /*         OGRFeature *thisFeature=aJimVect->getFeatureRef(ifeature,ilayer); */
-  /*         for(int iField=0;iField<nfields;++iField){ */
-  /*           if(iField>=poFDefn->GetFieldCount()) */
-  /*             *ad++=0;//todo: replace with static const double NaN = numeric_limits<double>::quiet_NaN() */
-  /*           else */
-  /*             *ad++=thisFeature->GetFieldAsDouble(iField); */
-  /*         } */
-  /*       } */
-  /*       if(npArray){ */
-  /*         return(PyArray_Return(npArray)); */
-  /*       } */
-  /*       else{ */
-  /*         return(0); */
-  /*       } */
-  /*     } */
-  /*   } */
-  /* } */
+  PyObject* dict(std::shared_ptr<VectorOgr> aJimVect, std::vector<std::string> fname, size_t ilayer) {
+    size_t ntotalfeatures=0;
+    size_t nfeatures=0;
+    size_t nfields=0;
+    int npDataType=NPY_FLOAT64;
+    if(aJimVect->isEmpty())
+      return(0);
+    if(ilayer>=aJimVect->getLayerCount())
+      return(0);
+    //todo: destroy empty features?
 
-  //todo: return multi-plane/band images according to: http://scikit-image.org/docs/dev/user_guide/numpy_images.html
-  PyObject* np(std::shared_ptr<Jim> aJim, size_t band=0) {
-      int npDataType;
-      switch (aJim->getDataType()){
-      case GDT_Byte:
-        npDataType=NPY_UINT8;
-        break;
-      case GDT_UInt16:
-        npDataType=NPY_UINT16;
-        break;
-      case GDT_Int16:
-        npDataType=NPY_INT16;
-        break;
-      case GDT_UInt32:
-        npDataType=NPY_UINT32;
-        break;
-      case GDT_Int32:
-        npDataType=NPY_INT32;
-        break;
-      case GDT_Float32:
-        npDataType=NPY_FLOAT32;
-        break;
-      case GDT_Float64:
-        npDataType=NPY_FLOAT64;
-        break;
-      case JDT_UInt64:
-        npDataType=NPY_UINT64;
-        break;
-      case JDT_Int64:
-        npDataType=NPY_INT64;
-        break;
-      case GDT_Unknown:
-      default:
-        std::string errorString="Error: Unknown data type";
-        throw(errorString);
+    ntotalfeatures=aJimVect->getFeatureCount(ilayer);
+    std::vector<OGRFieldDefn*> fields;
+    std::vector<size_t> fieldindexes;
+    aJimVect->getFields(fields,ilayer);
+    std::vector<PyObject*> pyListVector;
+    for(unsigned int ifield=0;ifield<fields.size();++ifield){
+      if(fname.size()){
+        if(std::find(fname.begin(),fname.end(),fields[ifield]->GetNameRef())==fname.end())
+          continue;
       }
-      void *npdata=0;
-      npdata=(void*)(aJim->getDataPointer(band));
-      int ndim=(aJim->nrOfPlane()>1)? 3 : 2;
-      if(aJim->nrOfPlane()>1){
-        npy_intp dims[3];
-        dims[0]=aJim->nrOfPlane();
-        dims[1]=aJim->nrOfRow();
-        dims[2]=aJim->nrOfCol();
-        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(ndim,dims,npDataType,npdata);
-        if(npArray)
-          return(PyArray_Return(npArray));
-        else
-          return(0);
+      fieldindexes.push_back(ifield);
+      pyListVector.push_back(PyList_New(ntotalfeatures));
+    }
+    nfields=fieldindexes.size();
+
+    size_t ifield=0;
+    for(size_t ifeature = 0; ifeature < ntotalfeatures; ++ifeature) {
+      OGRFeature *thisFeature=aJimVect->getFeatureRef(ifeature,ilayer);
+      if(!thisFeature){
+        // std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
+        continue;
       }
-      else{
-        npy_intp dims[2];
-        dims[0]=aJim->nrOfRow();
-        dims[1]=aJim->nrOfCol();
-        PyArrayObject *npArray=(PyArrayObject*)PyArray_SimpleNewFromData(ndim,dims,npDataType,npdata);
-        if(npArray)
-          return(PyArray_Return(npArray));
-        else
-          return(0);
+      ifield=0;
+      for(std::vector<size_t>::const_iterator fit=fieldindexes.begin();fit!=fieldindexes.end();++fit){
+        //get field type
+        switch(fields[*fit]->GetType()){
+        case(OFTReal):
+          PyList_SET_ITEM(pyListVector[ifield], ifeature, PyFloat_FromDouble(thisFeature->GetFieldAsDouble(*fit)));
+          break;
+        case(OFTString):
+          PyList_SET_ITEM(pyListVector[ifield], ifeature, PyString_FromString(thisFeature->GetFieldAsString(*fit)));
+          break;
+        case(OFTInteger):
+        case(OFTInteger64):
+          PyList_SET_ITEM(pyListVector[ifield], ifeature, PyLong_FromLong(thisFeature->GetFieldAsInteger64(*fit)));
+          break;
+        case(OFTBinary):
+        case(OFTTime):
+        case(OFTDateTime):
+        case(OFTWideString):
+        case(OFTDate):
+        case(OFTRealList):
+        case(OFTIntegerList):
+        case(OFTStringList):
+        case(OFTWideStringList):
+        case(OFTInteger64List):
+        default:{
+          std::ostringstream errorStringStream;
+          std::string ftypename = OGRFieldDefn::GetFieldTypeName(fields[*fit]->GetType());
+          errorStringStream << "Error: field type " << ftypename << " not supported";
+          throw(errorStringStream.str());
+          break;
+        }
+        }
+        ++ifield;
       }
     }
+
+    ifield=0;
+    PyObject *returnDict = PyDict_New();
+    for(std::vector<size_t>::const_iterator fit=fieldindexes.begin();fit!=fieldindexes.end();++fit){
+      std::string key = fields[*fit]->GetNameRef();
+      PyDict_SetItem(returnDict, PyString_FromString(key.c_str()), pyListVector[ifield]);
+      ++ifield;
+    }
+    if(returnDict)
+      return returnDict;
+    else
+      return(0);
+  }
+
 %}
 
 %include "imageclasses/Jim.h"
