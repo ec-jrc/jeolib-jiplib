@@ -1,8 +1,6 @@
 """
 Install the jiplib package.
 Author(s): Pieter.Kempeneers@ec.europa.eu,
-           Ondrej Pesek,
-           Pierre.Soille@ec.europa.eu
 Copyright (C) 2018-2020 European Union (Joint Research Centre)
 
 This file is part of jiplib.
@@ -32,7 +30,7 @@ setup(
     name='jiplib',
     version='0.6.0',
     author_email='pieter.kempeneers@.ec.europa.eu',
-    url='https://cidportal.jrc.ec.europa.eu/apps/gitlab/JIPlib/jiplib',
+    url='https://jeodpp.jrc.ec.europa.eu/apps/gitlab/JIPlib/jiplib',
     license='GPLv3',
     packages=find_packages(),
     package_data={'jiplib': ['_jiplib.so', 'libjiplib.so.1', 'libjiplib.so',
