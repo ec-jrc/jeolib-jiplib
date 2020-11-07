@@ -1716,9 +1716,12 @@ CPLErr Jim::open(app::AppFactory &app){
 
   if(input_opt.empty()){
     OGRSpatialReference assignSpatialRef;
-    if(assignSRS_opt.size())
+    if(assignSRS_opt.size()){
       assignSpatialRef.SetFromUserInput(assignSRS_opt[0].c_str());
-
+#if GDAL_VERSION_MAJOR > 2
+      assignSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
+    }
     //get bounding box from extentReader if defined
     if(extent_opt.size()){
       double e_ulx;
@@ -1732,6 +1735,9 @@ CPLErr Jim::open(app::AppFactory &app){
 
         // OGRSpatialReference *vectorSpatialRef=extentReader.getLayer(0)->GetSpatialRef();
         OGRSpatialReference vectorSpatialRef=extentReader.getSpatialRef();
+#if GDAL_VERSION_MAJOR > 2
+        vectorSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
         OGRCoordinateTransformation *vector2assign=0;
         vector2assign = OGRCreateCoordinateTransformation(&vectorSpatialRef, &assignSpatialRef);
         if(assignSpatialRef.IsSame(&vectorSpatialRef)){
@@ -1931,6 +1937,9 @@ CPLErr Jim::open(app::AppFactory &app){
       setProjectionProj4(sourceSRS_opt[0]);
     // OGRSpatialReference gdsSpatialRef(m_gds->GetProjectionRef());
     OGRSpatialReference gdsSpatialRef=getSpatialRef();
+#if GDAL_VERSION_MAJOR > 2
+    gdsSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
     if(extent_opt.size()){
       double e_ulx;
       double e_uly;
@@ -1943,6 +1952,9 @@ CPLErr Jim::open(app::AppFactory &app){
 
         // OGRSpatialReference *vectorSpatialRef=extentReader.getLayer(0)->GetSpatialRef();
         OGRSpatialReference vectorSpatialRef=extentReader.getSpatialRef();
+#if GDAL_VERSION_MAJOR > 2
+        vectorSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
         OGRCoordinateTransformation *vector2raster=0;
         vector2raster = OGRCreateCoordinateTransformation(&vectorSpatialRef, &gdsSpatialRef);
         if(gdsSpatialRef.IsSame(&vectorSpatialRef)){
@@ -1979,6 +1991,9 @@ CPLErr Jim::open(app::AppFactory &app){
       if(targetSRS_opt.size()){
         OGRSpatialReference targetSpatialRef;
         targetSpatialRef.SetFromUserInput(targetSRS_opt[0].c_str());
+#if GDAL_VERSION_MAJOR > 2
+        targetSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
 
         char *wktString;
         targetSpatialRef.exportToWkt(&wktString);
