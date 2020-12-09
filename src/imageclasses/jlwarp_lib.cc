@@ -199,7 +199,15 @@ void Jim::warp(Jim& imgWriter, app::AppFactory &theApp)
   Optionjl<std::string> resample_opt("r", "resample", "resample: near, bilinear, cubic, cubicspline, lanczos, average, mode, max, min, med, q1, q3, sum (check https://gdal.org/doxygen/gdalwarper_8h.html#a4775b029869df1f9270ad554c0633843)","near");
   Optionjl<double> nodata_opt("nodata", "nodata", "Nodata value to put in image.",0);
   Optionjl<std::string> warp_opt("wo", "wo", "Warp option(s). Multiple options can be specified.");
-  Optionjl<std::string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
+  Optionjl<std::string> otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
+  Optionjl<double> ulx_opt("ulx", "ulx", "Target upper left x value bounding box");
+  Optionjl<double> uly_opt("uly", "uly", "Target upper left y value bounding box");
+  Optionjl<double> lrx_opt("lrx", "lrx", "Target lower right x value bounding box");
+  Optionjl<double> lry_opt("lry", "lry", "Target lower right y value bounding box");
+  Optionjl<int> ncol_opt("ncol", "ncol", "force output to be this number of columns");
+  Optionjl<int> nrow_opt("nrow", "nrow", "force output to be this number of rows");
+  Optionjl<double> dx_opt("dx", "dx", "Output resolution in x (in meter)");
+  Optionjl<double> dy_opt("dy", "dy", "Output resolution in y (in meter)");
   Optionjl<short> verbose_opt("verbose", "verbose", "verbose output",0,2);
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
@@ -210,6 +218,12 @@ void Jim::warp(Jim& imgWriter, app::AppFactory &theApp)
     nodata_opt.retrieveOption(theApp);
     warp_opt.retrieveOption(theApp);
     otype_opt.retrieveOption(theApp);
+    ulx_opt.retrieveOption(theApp);
+    uly_opt.retrieveOption(theApp);
+    lrx_opt.retrieveOption(theApp);
+    lry_opt.retrieveOption(theApp);
+    dx_opt.retrieveOption(theApp);
+    dy_opt.retrieveOption(theApp);
     verbose_opt.retrieveOption(theApp);
   }
   catch(std::string predefinedString){
@@ -314,7 +328,65 @@ void Jim::warp(Jim& imgWriter, app::AppFactory &theApp)
     // Get approximate output definition
     int nPixels, nLines;
     if( GDALSuggestedWarpOutput(poDatasetMem, GDALGenImgProjTransform, hTransformArg, &targetGT[0], &nPixels, &nLines) == CE_None ){
+      double dfMinX;
+      double dfMaxX;
+      double dfMinY;
+      double dfMaxY;
       GDALDestroyGenImgProjTransformer(hTransformArg);
+      if(dx_opt.size() && dy_opt.size()){
+        if((ulx_opt.size() && uly_opt.size() && lrx_opt.size() && lry_opt.size())){
+          dfMinX = ulx_opt[0];
+          dfMaxX = lrx_opt[0];
+          dfMinY = lry_opt[0];
+          dfMaxY = uly_opt[0];
+        }
+        else{
+          dfMinX = targetGT[0];
+          dfMaxX = targetGT[0] + targetGT[1] * nPixels;
+          dfMaxY = targetGT[3];
+          dfMinY = targetGT[3] + targetGT[5] * nLines;
+        }
+        nPixels = (int) ((dfMaxX - dfMinX + (dx_opt[0]/2.0)) / dx_opt[0]);
+        nLines = (int) ((dfMaxY - dfMinY + (dy_opt[0]/2.0)) / dy_opt[0]);
+        targetGT[0] = dfMinX;
+        targetGT[3] = dfMaxY;
+        targetGT[1] = dx_opt[0];
+        targetGT[5] = -dy_opt[0];
+      }
+      else if(ncol_opt.size() && nrow_opt.size()){
+        if((ulx_opt.size() && uly_opt.size() && lrx_opt.size() && lry_opt.size())){
+          dfMinX = ulx_opt[0];
+          dfMaxX = lrx_opt[0];
+          dfMinY = lry_opt[0];
+          dfMaxY = uly_opt[0];
+        }
+        else{
+          dfMinX = targetGT[0];
+          dfMaxX = targetGT[0] + targetGT[1] * nPixels;
+          dfMaxY = targetGT[3];
+          dfMinY = targetGT[3] + targetGT[5] * nLines;
+        }
+        double dfXRes = (dfMaxX - dfMinX) / ncol_opt[0];
+        double dfYRes = (dfMaxY - dfMinY) / nrow_opt[0];
+
+        targetGT[0] = dfMinX;
+        targetGT[3] = dfMaxY;
+        targetGT[1] = dfXRes;
+        targetGT[5] = -dfYRes;
+        nPixels = ncol_opt[0];
+        nLines = nrow_opt[0];
+      }
+      else if((ulx_opt.size() && uly_opt.size() && lrx_opt.size() && lry_opt.size())){
+        double dfXRes = targetGT[1];
+        double dfYRes = fabs(targetGT[5]);
+
+        nPixels = (int) ((lrx_opt[0] - ulx_opt[0] + (dfXRes/2.0)) / dfXRes);
+        nLines = (int) ((uly_opt[0] - lry_opt[0] + (dfYRes/2.0)) / dfYRes);
+
+        targetGT[0] = ulx_opt[0];
+        targetGT[3] = uly_opt[0];
+      }
+
 
       // Create the output memory band
       GDALDataset *poDatasetOut = (GDALDataset *)poDriverMem->Create("outband",nPixels,nLines,nrOfBand(),theType,NULL);
