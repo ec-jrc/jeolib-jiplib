@@ -281,7 +281,8 @@ static GDALResampleAlg getGDALResampleAlg(const std::string &resampleString){
   resampleMap["med"]=GRA_Med;// median resampling, selects the median value of all non-NODATA contributing pixels.
   resampleMap["q1"]=GRA_Q1;// first quartile resampling, selects the first quartile value of all non-NODATA contributing pixels.
   resampleMap["q3"]=GRA_Q3;// third quartile resampling, selects the third quartile value of all non-NODATA contributing pixels.
-#if GDAL_VERSION_MAJOR >= 3 && GDAL_VERSION_MINOR >= 1
+  //#if GDAL_VERSION_MAJOR >= 3 && GDAL_VERSION_MINOR >= 1
+#if GDAL_VERSION_MAJOR > 3
   resampleMap["sum"]=GRA_Sum;// compute the weighted sum of all non-NODATA contributing pixels (since GDAL 3.1)
 #endif
   if(resampleMap.count(resampleString))
