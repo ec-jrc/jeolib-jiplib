@@ -1,12 +1,10 @@
 # jiplib
 
-jiplib is a library for image processing for geospatial data implemented in JRC Ispra. 
+jiplib is a C++ library with a Python wrapper for image processing for geospatial data implemented in JRC Ispra. Python users are encouraged to use [pyjeo](https://github.com/ec-jrc/jeolib-pyjeo) that is built upon this library.
 
 # License
 
-jiplib is released under an
-[EUPL](https://joinup.ec.europa.eu/collection/eupl) license (see
-[LICENSE.txt](LICENSE.txt))
+jiplib is released under the [GPLv3](https://www.gnu.org/licenses) license.
 
 # Dependencies
  ## libraries: 
@@ -29,10 +27,9 @@ jiplib is released under an
 * Sphinx: BSD http://www.sphinx-doc.org/en/master/
 
 
-## install dependency libraries in Debian
+## Install dependency libraries (example for Debian based system using apt)
 
 ```
-g++ make cmake swig libgsl-dev libfann-dev libgdal-dev libjsoncpp-dev libboost-serialization-dev libboost-filesystem-dev libpython3-dev python3-numpy  
 apt install build-essential cmake
 apt install libgsl-dev
 apt install libfann-dev
@@ -40,18 +37,17 @@ apt install libgdal-dev
 apt install libjsoncpp-dev
 apt install libpython3-dev
 apt install python3-numpy
-apt install libboost-filesystem-dev libboost-serialization-dev
+apt install libboost-filesystem-dev 
+apt install libboost-serialization-dev
 apt install swig
 ```
 
  ## miallib
 
-See more infor at [mia](https://jeodpp.jrc.ec.europa.eu/apps/gitlab/jeodpp/JIPlib/mia)
+See more information at [miallib](https://github.com/ec-jrc/jeolib-miallib)
 
 # Install
-## Python3
 
-From the directory of the repository, run:
 ```
 mkdir build
 cd build
@@ -60,41 +56,14 @@ make -j
 sudo make install
 ```
 
-## Python2
-
-From the directory of the repository, run:
-```
-mkdir build
-cd build
-cmake -DPYTHON3=OFF ..
-make -j
-sudo make install
-sudo ldconfig
-```
-
-## Create wheel
-
-After `make`, go to directory `utils` and run the bash script in the following
-syntax:
-
-```bash
-bash create_wheel.sh path_to_your_libmialib_generic.so
-```
-
-The wheel will be created in the `build` directory and will contain also
-`mialib` necessary tools inside (no need for the user to install `mialib`
-when installing the `jiplib` wheel).
-
-> NOTE: The common path to `libmialib_generic.so` is `/usr/local/lib`
-
 # Test the installation
 
-From the directory of the repository, run:
+From the build directory, run:
 ```
 ctest
 ```
 
-# Build documentation
+# Build documentation (deprecated, users are encouraged to use pyjeo documentation)
 
 Go to directory `doc` and run `make html`.
 ```
