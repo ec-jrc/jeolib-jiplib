@@ -21,3 +21,6 @@ You should have received a copy of the GNU General Public License
 """
 from __future__ import absolute_import
 from .jiplib import *
+
+
+__version__ = '1.0.2'
