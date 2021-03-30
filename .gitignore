@@ -7,7 +7,7 @@ test/config_jiplib.h
 #SWIG
 *_wrap.cxx
 #CMake
-*.cmake
+#*.cmake
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
