@@ -697,7 +697,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 //%include "swig/pktools.i"
 %include "swig/miallib_tmp.i"
 
-%include "miallib/op.h"
+%include "op.h"
 /* %include "swig/jiplib_python.i" */
 
 %{

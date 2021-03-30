@@ -53,9 +53,9 @@ set (PROJECT_TEST_DIR test)
 set(CMAKE_COLOR_MAKEFILE ON)
 
 if(BUILD_WITH_MIALLIB)
-  set(MIA_BOOL 1)
+  set(MIAL_BOOL 1)
 else(BUILD_WITH_MIALLIB)
-  set(MIA_BOOL 0)
+  set(MIAL_BOOL 0)
 endif(BUILD_WITH_MIALLIB)
 
 
@@ -411,17 +411,24 @@ if(BUILD_WITH_FANN)
 endif(BUILD_WITH_FANN)
 
 if(BUILD_WITH_MIALLIB)
-  set(MIA_BOOL 1)
-  message(STATUS "build with miallib: ${MIA_BOOL}")
-  set(MIA_LIB_NAME miallib_generic)
-  set(MIA_INCLUDE_DIR /usr/local/include/miallib CACHE PATH "Include PATH for MIA")
-  set(MIA_LIB_PATH /usr/local/lib CACHE PATH "Library PATH for MIA")
+  find_package(MIAL REQUIRED)
+  if(MIAL_FOUND)
+    message(STATUS "Found MIAL library: ${MIAL_LIBRARY}")
+    message(STATUS "Found MIAL include dir: ${MIAL_INCLUDE_DIR}")
+    include_directories(${MIAL_INCLUDE_DIR})
+    add_definitions(-DMIAL_DLL)
+  endif()
 
-  INCLUDE_DIRECTORIES(${MIA_INCLUDE_DIR})
-  LINK_DIRECTORIES(${MIA_LIB_PATH})
+  set(MIAL_BOOL 1)
+  message(STATUS "build with miallib: ${MIAL_BOOL}")
+  # include_directories(${MIAL_INCLUDE_DIRS})
+  # set(MIA_LIB_NAME miallib_generic)
+  # set(MIA_INCLUDE_DIR /usr/local/include/miallib CACHE PATH "Include PATH for MIA")
+  # set(MIA_LIB_PATH /usr/local/lib CACHE PATH "Library PATH for MIA")
+
 else(BUILD_WITH_MIALLIB)
-  set(MIA_BOOL 0)
-  message(STATUS "build with miallib: ${MIA_BOOL}")
+  set(MIAL_BOOL 0)
+  message(STATUS "build with miallib: ${MIAL_BOOL}")
 endif(BUILD_WITH_MIALLIB)
 
 ###############################################################################
@@ -438,12 +445,11 @@ if(PYTHONINTERP_FOUND)
   if(BUILD_WITH_MIALLIB)
     MESSAGE(STATUS "PythonInterp was found")
 
-    file(GLOB MIA_HEADER_FILES ${MIA_INCLUDE_DIR}/miallib_*.h)
-    MESSAGE(STATUS "MIA_INCLUDE_DIR: ${MIA_INCLUDE_DIR}")
-    MESSAGE(STATUS "MIA_HEADER_FILES: ${MIA_HEADER_FILES}")
-    IF("${MIA_HEADER_FILES}" STREQUAL "")
+    file(GLOB MIAL_HEADER_FILES ${MIAL_INCLUDE_DIR}/miallib_*.h)
+    MESSAGE(STATUS "MIAL_HEADER_FILES: ${MIAL_HEADER_FILES}")
+    IF("${MIAL_HEADER_FILES}" STREQUAL "")
       MESSAGE(FATAL_ERROR "Error: no header files found for miallib")
-    ENDIF("${MIA_HEADER_FILES}" STREQUAL "")
+    ENDIF("${MIAL_HEADER_FILES}" STREQUAL "")
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_imagetype)
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_imagelisttype)
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype_nd)
@@ -456,8 +462,8 @@ if(PYTHONINTERP_FOUND)
     SET(F_NM "addframebox|subframebox")
     #These functions must only be included if MCISRG is set
     SET(F_MCISRG "labelImage|segmentImage")
-    #Create a text file with the list of headers to MIA functions, e.g., miallib_imagetype for functions returning IMAGE *
-    FOREACH(infileName ${MIA_HEADER_FILES})
+    #Create a text file with the list of headers to MIAL functions, e.g., miallib_imagetype for functions returning IMAGE *
+    FOREACH(infileName ${MIAL_HEADER_FILES})
       MESSAGE(STATUS "Process file: ${infileName}")
       file(STRINGS ${infileName} FUN_IMAGETYPE REGEX "^extern IMAGE \\*[^*]")
       FOREACH(fun ${FUN_IMAGETYPE})
@@ -559,9 +565,12 @@ target_link_libraries(
   )
 
 if(BUILD_WITH_MIALLIB)
+  target_include_directories(${JIPLIB_LIB_NAME} PUBLIC
+    $<BUILD_INTERFACE:${MIAL_INCLUDE_DIR}
+    )
   target_link_libraries(
     ${JIPLIB_LIB_NAME}
-    ${MIA_LIB_NAME}
+    mial::mial
     )
 endif(BUILD_WITH_MIALLIB)
 
@@ -596,10 +605,10 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/src)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 #test
-INCLUDE_DIRECTORIES(/usr/local/include)
+# INCLUDE_DIRECTORIES(/usr/local/include)
 
 SET(CMAKE_SWIG_FLAGS "-keyword")
-SET(CMAKE_SWIG_FLAGS "-DMIALLIB=${MIA_BOOL}")
+SET(CMAKE_SWIG_FLAGS "-DMIALLIB=${MIAL_BOOL}")
 SET_PROPERTY(SOURCE ${JIPLIB_I} PROPERTY CPLUSPLUS ON)
 
 if(${CMAKE_VERSION} VERSION_LESS "3.8.0")
@@ -628,7 +637,6 @@ if(BUILD_WITH_PYTHON)
 
   if(CREATE_WHEEL)
     MESSAGE(STATUS "creating python wheel: ${CREATE_WHEEL}")
-    MESSAGE(STATUS "miallib generic library: ${MIA_LIB_PATH}/lib${MIA_LIB_NAME}.so")
     MESSAGE(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
     MESSAGE(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
     MESSAGE(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
@@ -645,7 +653,8 @@ if(BUILD_WITH_PYTHON)
       COMMAND cp ${CMAKE_BINARY_DIR}/${JIPLIB_LIB_NAME}.py ${WHEEL_DIR}
       COMMAND cp ${CMAKE_BINARY_DIR}/_${JIPLIB_LIB_NAME}.so ${WHEEL_DIR}
       COMMAND cp ${CMAKE_BINARY_DIR}/lib${JIPLIB_LIB_NAME}.so* ${WHEEL_DIR}
-      COMMAND cp ${MIA_LIB_PATH}/lib${MIA_LIB_NAME}.so ${WHEEL_DIR}
+      # COMMAND cp ${MIA_LIB_PATH}/lib${MIA_LIB_NAME}.so ${WHEEL_DIR}
+      COMMAND cp ${MIAL_LIBRARY} ${WHEEL_DIR}
       COMMAND pip3 wheel ${CMAKE_CURRENT_BINARY_DIR}
       COMMAND rm -rf ${WHEEL_DIR}
       COMMENT "create wheel directory"
