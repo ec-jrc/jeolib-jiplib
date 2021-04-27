@@ -1,7 +1,7 @@
 /**********************************************************************
 Jim.cc: class to read raster files using GDAL API library
 Author(s): Pieter.Kempeneers@ec.europa.eu
-Copyright (C) 2016-2020 European Union (Joint Research Centre)
+Copyright (C) 2016-2021 European Union (Joint Research Centre)
 
 This file is part of jiplib.
 
@@ -2216,11 +2216,18 @@ CPLErr Jim::open(app::AppFactory &app){
     }
     else{
       if(!noread_opt[0]){
-        if(!covers(ulx_opt[0],uly_opt[0],lrx_opt[0],lry_opt[0])){
-          std::ostringstream errorStream;
-          errorStream << "Warning: raster dataset does not cover required bounding box" << std::endl;
-          throw(errorStream.str());
+        if(getDeltaY() > 0){
+          if(!covers(ulx_opt[0],uly_opt[0],lrx_opt[0],lry_opt[0])){
+            std::ostringstream errorStream;
+            errorStream << "Warning: raster dataset does not cover required bounding box" << std::endl;
+            throw(errorStream.str());
+          }
         }
+        else{
+          //test
+          std::cout << "skipping test on bounding box for non-georeferenced image" << std::endl;
+        }
+
         //we initialize memory using class member variables instead of those read from GDAL dataset
         initMem(memory_opt[0]);
         for(int iband=0;iband<nrOfBand();++iband){

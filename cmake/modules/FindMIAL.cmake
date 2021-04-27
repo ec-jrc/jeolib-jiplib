@@ -4,12 +4,12 @@ MESSAGE(STATUS "PROJECT_BINARY_DIR: ${PROJECT_BINARY_DIR}")
 find_library(
     MIAL_LIBRARY
     NAMES miallib_generic
-    HINTS ${PROJECT_BINARY_DIR}/../../mial/core/build/lib ${CMAKE_INSTALL_INCLUDEDIR}
+    HINTS ${PROJECT_BINARY_DIR}/../../jeolib-miallib/core/build/lib ${CMAKE_INSTALL_INCLUDEDIR}
     PATH_SUFFIXES mial/native-linux-x64/)
 
 find_path(MIAL_INCLUDE_DIR
   NAMES mialtypes.h
-  HINTS ${PROJECT_BINARY_DIR}/../../mial/core/c ${CMAKE_INSTALL_INCLUDEDIR}
+  HINTS ${PROJECT_BINARY_DIR}/../../jeolib-miallib/core/c ${CMAKE_INSTALL_INCLUDEDIR}
   PATH_SUFFIXES native-linux-api/miallib/ miallib)
 
 include(FindPackageHandleStandardArgs)
