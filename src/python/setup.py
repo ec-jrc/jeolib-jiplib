@@ -28,7 +28,7 @@ from setuptools import find_packages
 
 setup(
     name='jiplib',
-    version='1.0.2',
+    version='1.0.4',
     author_email='pieter.kempeneers@.ec.europa.eu',
     url='https://jeodpp.jrc.ec.europa.eu/apps/gitlab/JIPlib/jiplib',
     license='GPLv3',
