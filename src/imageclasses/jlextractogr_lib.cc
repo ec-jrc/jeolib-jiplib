@@ -991,9 +991,11 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                 int indexI=static_cast<int>(i-layer_uli);
                 bool valid=true;
                 valid=valid&&(indexJ>=0);
-                valid=valid&&(indexJ<this->nrOfRow());
+                // valid=valid&&(indexJ<this->nrOfRow());
                 valid=valid&&(indexI>=0);
-                valid=valid&&(indexI<this->nrOfCol());
+                // valid=valid&&(indexI<this->nrOfCol());
+                valid=valid&&(j<=layer_lrj);
+                valid=valid&&(i<=layer_lri);
 
                 if(valid){
                   if(maskReader.isInit()){
@@ -1094,9 +1096,11 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                 int indexI=static_cast<int>(i-layer_uli);
                 bool valid=true;
                 valid=valid&&(indexJ>=0);
-                valid=valid&&(indexJ<this->nrOfRow());
+                // valid=valid&&(indexJ<this->nrOfRow());
                 valid=valid&&(indexI>=0);
-                valid=valid&&(indexI<this->nrOfCol());
+                // valid=valid&&(indexI<this->nrOfCol());
+                valid=valid&&(j<=layer_lrj);
+                valid=valid&&(i<=layer_lri);
 
                 if(valid){
                   if(maskReader.isInit()){
@@ -1727,10 +1731,13 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               //   int indexI-=polygon_uli;
               // }
               bool valid=true;
+
               valid=valid&&(indexJ>=0);
-              valid=valid&&(indexJ<this->nrOfRow());
+              // valid=valid&&(indexJ<this->nrOfRow());
               valid=valid&&(indexI>=0);
-              valid=valid&&(indexI<this->nrOfCol());
+              // valid=valid&&(indexI<this->nrOfCol());
+              valid=valid&&(j<=layer_lrj);
+              valid=valid&&(i<=layer_lri);
               if(valid){
                 if(maskReader.isInit()){
                   double maskI,maskJ;
@@ -1839,9 +1846,11 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               int indexI=static_cast<int>(i-layer_uli);
               bool valid=true;
               valid=valid&&(indexJ>=0);
-              valid=valid&&(indexJ<this->nrOfRow());
+              // valid=valid&&(indexJ<this->nrOfRow());
               valid=valid&&(indexI>=0);
-              valid=valid&&(indexI<this->nrOfCol());
+              // valid=valid&&(indexI<this->nrOfCol());
+              valid=valid&&(j<=layer_lrj);
+              valid=valid&&(i<=layer_lri);
               if(valid){
                 if(maskReader.isInit()){
                   double maskI,maskJ;
@@ -3278,9 +3287,11 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
               int indexI=static_cast<int>(i-layer_uli);
               bool valid=true;
               valid=valid&&(indexJ>=0);
-              valid=valid&&(indexJ<this->nrOfRow());
+              // valid=valid&&(indexJ<this->nrOfRow());
               valid=valid&&(indexI>=0);
-              valid=valid&&(indexI<this->nrOfCol());
+              // valid=valid&&(indexI<this->nrOfCol());
+              valid=valid&&(j<=layer_lrj);
+              valid=valid&&(i<=layer_lri);
 
               if(valid){
                 if(maskReader.isInit()){
@@ -3374,9 +3385,11 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
               int indexI=static_cast<int>(i-layer_uli);
               bool valid=true;
               valid=valid&&(indexJ>=0);
-              valid=valid&&(indexJ<this->nrOfRow());
+              // valid=valid&&(indexJ<this->nrOfRow());
               valid=valid&&(indexI>=0);
-              valid=valid&&(indexI<this->nrOfCol());
+              // valid=valid&&(indexI<this->nrOfCol());
+              valid=valid&&(j<=layer_lrj);
+              valid=valid&&(i<=layer_lri);
 
               if(valid){
                 if(maskReader.isInit()){
@@ -3895,9 +3908,11 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
             int indexI=static_cast<int>(i-layer_uli);
             bool valid=true;
             valid=valid&&(indexJ>=0);
-            valid=valid&&(indexJ<this->nrOfRow());
+            // valid=valid&&(indexJ<this->nrOfRow());
             valid=valid&&(indexI>=0);
-            valid=valid&&(indexI<this->nrOfCol());
+            // valid=valid&&(indexI<this->nrOfCol());
+            valid=valid&&(j<=layer_lrj);
+            valid=valid&&(i<=layer_lri);
             if(valid){
               if(maskReader.isInit()){
                 double maskI,maskJ;
@@ -3996,9 +4011,11 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
             int indexI=static_cast<int>(i-layer_uli);
             bool valid=true;
             valid=valid&&(indexJ>=0);
-            valid=valid&&(indexJ<this->nrOfRow());
+            // valid=valid&&(indexJ<this->nrOfRow());
             valid=valid&&(indexI>=0);
-            valid=valid&&(indexI<this->nrOfCol());
+            // valid=valid&&(indexI<this->nrOfCol());
+            valid=valid&&(j<=layer_lrj);
+            valid=valid&&(i<=layer_lri);
             if(valid){
               if(maskReader.isInit()){
                 double maskI,maskJ;
