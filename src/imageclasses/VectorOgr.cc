@@ -264,7 +264,7 @@ OGRErr VectorOgr::open(app::AppFactory& app){
   Optionjl<std::string> projection_opt("a_srs", "a_srs", "Assign projection");
   Optionjl<std::string> geometryType_opt("gtype", "gtype", "Geometry type","wkbUnknown");
   Optionjl<std::string> options_opt("co", "co", "format dependent options controlling creation of the output file");
-  Optionjl<std::string> ogrformat_opt("f", "oformat", "Output sample dataset format","SQLite");
+  Optionjl<std::string> ogrformat_opt("f", "oformat", "Output sample dataset format");
   Optionjl<unsigned int> access_opt("access", "access", "Access (0: GDAL_OF_READ_ONLY, 1: GDAL_OF_UPDATE)",0);
   Optionjl<bool> noread_opt("noread", "noread", "do not read features when opening)",false);
   Optionjl<std::string> attributeFilter_opt("af", "attributeFilter", "attribute filter");
@@ -321,7 +321,7 @@ OGRErr VectorOgr::open(app::AppFactory& app){
     throw(helpStream.str());//help was invoked, stop processing
   }
   setAccess(access_opt[0]);
-  if(getAccess()==GDAL_OF_READONLY){
+  if(getAccess()==GDAL_OF_READONLY && ogrformat_opt.empty()){
     if(verbose_opt[0])
       std::cout << "open in read access mode" << std::endl;
     bool noread=true;
@@ -368,7 +368,8 @@ OGRErr VectorOgr::open(app::AppFactory& app){
     setAccess(GDAL_OF_UPDATE);
   }
   if(getAccess()==GDAL_OF_UPDATE){
-
+    if(ogrformat_opt.empty())
+      ogrformat_opt.push_back("SQLite");
     char **papszOptions=NULL;
     for(std::vector<std::string>::const_iterator optionIt=options_opt.begin();optionIt!=options_opt.end();++optionIt){
       papszOptions=CSLAddString(papszOptions,optionIt->c_str());
@@ -978,10 +979,9 @@ OGRErr VectorOgr::write(const std::string& filename){
       while(fit!=m_features[ilayer].end()){
         if(*fit){
           if(getLayer(ilayer)->CreateFeature(*fit)!=OGRERR_NONE){
-            std::ostringstream errorStream;
-            errorStream << "Warning: could not create feature " << ifeature << std::endl;
-            std::cerr << errorStream.str();
-            // throw(errorStream.str());
+            // std::ostringstream errorStream;
+            // errorStream << "Warning: could not create feature " << ifeature << std::endl;
+            // std::cerr << errorStream.str();
           }
           ++ifeature;
           ++fit;
