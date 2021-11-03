@@ -3831,6 +3831,8 @@ void Jim::d_stackBand(Jim& imgSrc, AppFactory& app){
   m_end.resize(oldnband+vband.size());
   for(size_t iband=0;iband<vband.size();++iband){
     m_data[oldnband+iband]=(void *) calloc(static_cast<size_t>(imgSrc.nrOfPlane())*imgSrc.nrOfCol()*imgSrc.getBlockSize(),imgSrc.getDataTypeSizeBytes());
+    m_begin[oldnband+iband]=0;
+    m_end[oldnband+iband]=nrOfRow();
     imgSrc.copyData(getDataPointer(oldnband+iband),vband[iband]);
   }
 }

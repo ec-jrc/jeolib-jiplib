@@ -2734,6 +2734,7 @@ void Jim::getMinMax(double& minValue, double& maxValue, int band)
   double maxConstraint=maxValue;
   std::vector<double> lineBuffer(nrOfCol());
   bool isValid=false;
+
   for(int irow=0;irow<nrOfRow();++irow){
     readData(lineBuffer,irow,band);
     for(int icol=0;icol<nrOfCol();++icol){
@@ -3610,6 +3611,8 @@ CPLErr Jim::setFile(const std::string& filename, const std::string& imageType, u
 ///Copy data
 CPLErr Jim::copyData(void* data, int band){
   memcpy(data,m_data[band],getDataTypeSizeBytes()*nrOfCol()*m_blockSize*nrOfPlane());
+  m_begin[band]=0;
+  m_end[band]=nrOfRow();
   // memcpy(data,m_data[band],(GDALGetDataTypeSize(getDataType())>>3)*nrOfCol()*m_blockSize);
   return(CE_None);
 };
