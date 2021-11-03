@@ -238,8 +238,14 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
       std::vector<std::string> mins;
       std::vector<std::string> maxs;
       for(int iband=0;iband<nband;++iband){
-        minValue=(src_min_opt.size()>iband)? src_min_opt[iband] : 0;
-        maxValue=(src_max_opt.size()>iband)? src_max_opt[iband] : 0;
+        if(src_min_opt.size())
+          minValue=(src_min_opt.size()>iband)? src_min_opt[iband] : src_min_opt[0];
+        else
+          minValue= 0;
+        if(src_max_opt.size())
+          maxValue=(src_max_opt.size()>iband)? src_max_opt[iband] : src_max_opt[0];
+        else
+          maxValue= 0;
         for(size_t inodata=0;inodata<nodata_opt.size();++inodata){
           if(!inodata)
             (*imit)->GDALSetNoDataValue(nodata_opt[0],band_opt[iband]);//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
@@ -280,9 +286,11 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
           // }
           stat.setNoDataValues(nodata_opt);
           if(src_min_opt.size())
-            stat.eraseBelow(readBuffer,src_min_opt[band_opt[iband]]);
+            stat.eraseBelow(readBuffer,src_min_opt[iband]);
+            // stat.eraseBelow(readBuffer,src_min_opt[band_opt[iband]]);
           if(src_max_opt.size())
-            stat.eraseAbove(readBuffer,src_max_opt[band_opt[iband]]);
+            stat.eraseAbove(readBuffer,src_max_opt[iband]);
+            // stat.eraseAbove(readBuffer,src_max_opt[band_opt[iband]]);
           stat.eraseNoData(readBuffer);
           // stat.meanVar(readBuffer,meanValue,varValue);
           // medianValue=stat.median(readBuffer);
