@@ -30,7 +30,7 @@ case $1 in
       echo @JIPLIB_PACKAGE_VERSION@
      ;;
     --cflags)
-      echo -I@CMAKE_INSTALL_PREFIX@/include 
+      echo -I@CMAKE_INSTALL_PREFIX@/include
       ;;
     --libs)
       echo -L@CMAKE_INSTALL_PREFIX@/@PROJECT_LIBRARY_DIR@
