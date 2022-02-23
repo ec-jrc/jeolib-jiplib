@@ -43,6 +43,11 @@ set(BUILD_WITH_FANN TRUE CACHE BOOL "Choose if jiplib is to be built with fann")
 set(BUILD_WITH_PYTHON TRUE CACHE BOOL "Choose if jiplib is to be built with PYTHON support")
 set(PROCESS_IN_PARALLEL TRUE CACHE BOOL "Choose if jiplib should be run in parallel")
 set(BUILD_WITH_MIALLIB TRUE CACHE BOOL "Choose if jiplib should be compiled with miallib")
+#from https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
+#By default if you don't change any RPATH related settings, CMake will
+# link the executables and shared libraries with full RPATH to all used
+# libraries in the build tree. When installing, it will clear the RPATH of
+# these targets so they are installed with an empty RPATH
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 SET(CMAKE_INSTALL_RPATH "$\{ORIGIN\}:${CMAKE_CURRENT_BINARY_DIR}")
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -413,10 +418,13 @@ endif(BUILD_WITH_FANN)
 if(BUILD_WITH_MIALLIB)
   find_package(MIAL REQUIRED)
   if(MIAL_FOUND)
-    message(STATUS "Found MIAL library: ${MIAL_LIBRARY}")
-    message(STATUS "Found MIAL include dir: ${MIAL_INCLUDE_DIR}")
-    include_directories(${MIAL_INCLUDE_DIR})
+    # message(STATUS "Found MIAL library: ${MIAL_LIBRARY}")
+    message(STATUS "Found MIAL libraries: ${MIAL_LIBRARIES}")
+    message(STATUS "Found MIAL include dir: ${MIAL_INCLUDE_DIRS}")
+    include_directories(${MIAL_INCLUDE_DIRS})
     add_definitions(-DMIAL_DLL)
+  # find_package(FFTW REQUIRED)
+  #   message(STATUS "Found FFTW include dir: ${FFTW_INCLUDE_DIRS}")
   endif()
 
   set(MIAL_BOOL 1)
@@ -570,6 +578,7 @@ if(BUILD_WITH_MIALLIB)
     )
   target_link_libraries(
     ${JIPLIB_LIB_NAME}
+    ${MIAL_LIBRARIES}
     mial::mial
     )
 endif(BUILD_WITH_MIALLIB)
@@ -654,7 +663,7 @@ if(BUILD_WITH_PYTHON)
       COMMAND cp ${CMAKE_BINARY_DIR}/_${JIPLIB_LIB_NAME}.so ${WHEEL_DIR}
       COMMAND cp ${CMAKE_BINARY_DIR}/lib${JIPLIB_LIB_NAME}.so* ${WHEEL_DIR}
       # COMMAND cp ${MIA_LIB_PATH}/lib${MIA_LIB_NAME}.so ${WHEEL_DIR}
-      COMMAND cp ${MIAL_LIBRARY} ${WHEEL_DIR}
+      COMMAND cp ${MIAL_LIBRARIES} ${WHEEL_DIR}
       COMMAND pip3 wheel ${CMAKE_CURRENT_BINARY_DIR}
       COMMAND rm -rf ${WHEEL_DIR}
       COMMENT "create wheel directory"

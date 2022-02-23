@@ -171,4 +171,4 @@ template<typename T> void Jim::d_jldistanceGeodesic_t(Jim& reference, std::size_
   }
 }
 
-#endif _JMIA_H_
+#endif // _JMIA_H_
