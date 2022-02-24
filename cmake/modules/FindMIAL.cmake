@@ -3,12 +3,12 @@ include(GNUInstallDirs)
 find_library(
     MIAL_LIBRARY
     miallib_generic
-    HINTS ${PROJECT_BINARY_DIR}/../../jeolib-miallib/core/build/lib ${CMAKE_INSTALL_FULL_LIBDIR}
+    HINTS ${CMAKE_INSTALL_FULL_LIBDIR}
     PATH_SUFFIXES mial/native-linux-x64/)
 
 find_path(MIAL_INCLUDE_DIR
   NAMES mialtypes.h
-  HINTS ${PROJECT_BINARY_DIR}/../../jeolib-miallib/core/c ${CMAKE_INSTALL_INCLUDEDIR}
+  HINTS ${CMAKE_INSTALL_INCLUDEDIR}
   PATH_SUFFIXES native-linux-api/miallib/ miallib)
 
 include(FindPackageHandleStandardArgs)
