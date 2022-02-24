@@ -423,8 +423,7 @@ if(BUILD_WITH_MIALLIB)
     message(STATUS "Found MIAL include dir: ${MIAL_INCLUDE_DIRS}")
     include_directories(${MIAL_INCLUDE_DIRS})
     add_definitions(-DMIAL_DLL)
-  # find_package(FFTW REQUIRED)
-  #   message(STATUS "Found FFTW include dir: ${FFTW_INCLUDE_DIRS}")
+    find_package(FFTW REQUIRED)
   endif()
 
   set(MIAL_BOOL 1)
@@ -579,6 +578,7 @@ if(BUILD_WITH_MIALLIB)
   target_link_libraries(
     ${JIPLIB_LIB_NAME}
     ${MIAL_LIBRARIES}
+    ${FFTW_LIBRARIES}
     mial::mial
     )
 endif(BUILD_WITH_MIALLIB)
