@@ -899,7 +899,11 @@ class Jim : public std::enable_shared_from_this<Jim>
   std::shared_ptr<Jim> convertDataType(const GDALDataType& dataType);
   std::shared_ptr<Jim> convertDataType(const std::string dataTypeString){return convertDataType(string2GDAL(dataTypeString));};
   void convertDataType(Jim& imgWriter, const GDALDataType& dataType);
-  template<typename T1, typename T2> void convertDataType_t(Jim& imgWriter, const GDALDataType& dataType);
+  template<typename T1, typename T2> void convertDataType_t(Jim& imgWriter);
+  ///hillShade
+  std::shared_ptr<Jim> hillShade(Jim& sza, Jim& saa);
+  void hillShade(Jim& imgWriter, Jim& sza, Jim& saa);
+  template<typename T1, typename T2> void hillShade_t(Jim& imgWriter, Jim& sza, Jim& saa);
   ///crop image
   void crop(Jim& imgWriter, app::AppFactory& app);
   ///crop image

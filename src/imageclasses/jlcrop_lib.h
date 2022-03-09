@@ -22,7 +22,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 #define _JLCROP_LIB_H_
 #include "imageclasses/Jim.h"
 
-template<typename T1, typename T2> void Jim::convertDataType_t(Jim& imgWriter, const GDALDataType& dataType){
+template<typename T1, typename T2> void Jim::convertDataType_t(Jim& imgWriter){
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else

@@ -177,25 +177,25 @@ void Jim::convertDataType(Jim& imgWriter, const GDALDataType& dataType){
   case(GDT_Byte):
     switch(dataType){
     case(GDT_Byte):
-      convertDataType_t<unsigned char,unsigned char>(imgWriter, dataType);
+      convertDataType_t<unsigned char,unsigned char>(imgWriter);
       break;
     case(GDT_Int16):
-      convertDataType_t<unsigned char,short>(imgWriter, dataType);
+      convertDataType_t<unsigned char,short>(imgWriter);
       break;
     case(GDT_UInt16):
-      convertDataType_t<unsigned char,unsigned short>(imgWriter, dataType);
+      convertDataType_t<unsigned char,unsigned short>(imgWriter);
       break;
     case(GDT_Int32):
-      convertDataType_t<unsigned char,int>(imgWriter, dataType);
+      convertDataType_t<unsigned char,int>(imgWriter);
       break;
     case(GDT_UInt32):
-      convertDataType_t<unsigned char,unsigned int>(imgWriter, dataType);
+      convertDataType_t<unsigned char,unsigned int>(imgWriter);
       break;
     case(GDT_Float32):
-      convertDataType_t<unsigned char,float>(imgWriter, dataType);
+      convertDataType_t<unsigned char,float>(imgWriter);
       break;
     case(GDT_Float64):
-      convertDataType_t<unsigned char,double>(imgWriter, dataType);
+      convertDataType_t<unsigned char,double>(imgWriter);
       break;
     default:
       std::string errorString="Error: data type not supported";
@@ -206,25 +206,25 @@ void Jim::convertDataType(Jim& imgWriter, const GDALDataType& dataType){
   case(GDT_Int16):
     switch(dataType){
     case(GDT_Byte):
-      convertDataType_t<short,unsigned char>(imgWriter, dataType);
+      convertDataType_t<short,unsigned char>(imgWriter);
       break;
     case(GDT_Int16):
-      convertDataType_t<short,short>(imgWriter, dataType);
+      convertDataType_t<short,short>(imgWriter);
       break;
     case(GDT_UInt16):
-      convertDataType_t<short,unsigned short>(imgWriter, dataType);
+      convertDataType_t<short,unsigned short>(imgWriter);
       break;
     case(GDT_Int32):
-      convertDataType_t<short,int>(imgWriter, dataType);
+      convertDataType_t<short,int>(imgWriter);
       break;
     case(GDT_UInt32):
-      convertDataType_t<short,unsigned int>(imgWriter, dataType);
+      convertDataType_t<short,unsigned int>(imgWriter);
       break;
     case(GDT_Float32):
-      convertDataType_t<short,float>(imgWriter, dataType);
+      convertDataType_t<short,float>(imgWriter);
       break;
     case(GDT_Float64):
-      convertDataType_t<short,double>(imgWriter, dataType);
+      convertDataType_t<short,double>(imgWriter);
       break;
     default:
       std::string errorString="Error: data type not supported";
@@ -235,25 +235,25 @@ void Jim::convertDataType(Jim& imgWriter, const GDALDataType& dataType){
   case(GDT_UInt16):
     switch(dataType){
     case(GDT_Byte):
-      convertDataType_t<unsigned short,unsigned char>(imgWriter, dataType);
+      convertDataType_t<unsigned short,unsigned char>(imgWriter);
       break;
     case(GDT_Int16):
-      convertDataType_t<unsigned short,short>(imgWriter, dataType);
+      convertDataType_t<unsigned short,short>(imgWriter);
       break;
     case(GDT_UInt16):
-      convertDataType_t<unsigned short,unsigned short>(imgWriter, dataType);
+      convertDataType_t<unsigned short,unsigned short>(imgWriter);
       break;
     case(GDT_Int32):
-      convertDataType_t<unsigned short,int>(imgWriter, dataType);
+      convertDataType_t<unsigned short,int>(imgWriter);
       break;
     case(GDT_UInt32):
-      convertDataType_t<unsigned short,unsigned int>(imgWriter, dataType);
+      convertDataType_t<unsigned short,unsigned int>(imgWriter);
       break;
     case(GDT_Float32):
-      convertDataType_t<unsigned short,float>(imgWriter, dataType);
+      convertDataType_t<unsigned short,float>(imgWriter);
       break;
     case(GDT_Float64):
-      convertDataType_t<unsigned short,double>(imgWriter, dataType);
+      convertDataType_t<unsigned short,double>(imgWriter);
       break;
     default:
       std::string errorString="Error: data type not supported";
@@ -264,25 +264,25 @@ void Jim::convertDataType(Jim& imgWriter, const GDALDataType& dataType){
   case(GDT_Int32):
     switch(dataType){
     case(GDT_Byte):
-      convertDataType_t<int,unsigned char>(imgWriter, dataType);
+      convertDataType_t<int,unsigned char>(imgWriter);
       break;
     case(GDT_Int16):
-      convertDataType_t<int,short>(imgWriter, dataType);
+      convertDataType_t<int,short>(imgWriter);
       break;
     case(GDT_UInt16):
-      convertDataType_t<int,unsigned short>(imgWriter, dataType);
+      convertDataType_t<int,unsigned short>(imgWriter);
       break;
     case(GDT_Int32):
-      convertDataType_t<int,int>(imgWriter, dataType);
+      convertDataType_t<int,int>(imgWriter);
       break;
     case(GDT_UInt32):
-      convertDataType_t<int,unsigned int>(imgWriter, dataType);
+      convertDataType_t<int,unsigned int>(imgWriter);
       break;
     case(GDT_Float32):
-      convertDataType_t<int,float>(imgWriter, dataType);
+      convertDataType_t<int,float>(imgWriter);
       break;
     case(GDT_Float64):
-      convertDataType_t<int,double>(imgWriter, dataType);
+      convertDataType_t<int,double>(imgWriter);
       break;
     default:
       std::string errorString="Error: data type not supported";
@@ -293,25 +293,25 @@ void Jim::convertDataType(Jim& imgWriter, const GDALDataType& dataType){
   case(GDT_UInt32):
     switch(dataType){
     case(GDT_Byte):
-      convertDataType_t<unsigned int,unsigned char>(imgWriter, dataType);
+      convertDataType_t<unsigned int,unsigned char>(imgWriter);
       break;
     case(GDT_Int16):
-      convertDataType_t<unsigned int,short>(imgWriter, dataType);
+      convertDataType_t<unsigned int,short>(imgWriter);
       break;
     case(GDT_UInt16):
-      convertDataType_t<unsigned int,unsigned short>(imgWriter, dataType);
+      convertDataType_t<unsigned int,unsigned short>(imgWriter);
       break;
     case(GDT_Int32):
-      convertDataType_t<unsigned int,int>(imgWriter, dataType);
+      convertDataType_t<unsigned int,int>(imgWriter);
       break;
     case(GDT_UInt32):
-      convertDataType_t<unsigned int,unsigned int>(imgWriter, dataType);
+      convertDataType_t<unsigned int,unsigned int>(imgWriter);
       break;
     case(GDT_Float32):
-      convertDataType_t<unsigned int,float>(imgWriter, dataType);
+      convertDataType_t<unsigned int,float>(imgWriter);
       break;
     case(GDT_Float64):
-      convertDataType_t<unsigned int,double>(imgWriter, dataType);
+      convertDataType_t<unsigned int,double>(imgWriter);
       break;
     default:
       std::string errorString="Error: data type not supported";
@@ -322,25 +322,25 @@ void Jim::convertDataType(Jim& imgWriter, const GDALDataType& dataType){
   case(GDT_Float32):
     switch(dataType){
     case(GDT_Byte):
-      convertDataType_t<float,unsigned char>(imgWriter, dataType);
+      convertDataType_t<float,unsigned char>(imgWriter);
       break;
     case(GDT_Int16):
-      convertDataType_t<float,short>(imgWriter, dataType);
+      convertDataType_t<float,short>(imgWriter);
       break;
     case(GDT_UInt16):
-      convertDataType_t<float,unsigned short>(imgWriter, dataType);
+      convertDataType_t<float,unsigned short>(imgWriter);
       break;
     case(GDT_Int32):
-      convertDataType_t<float,int>(imgWriter, dataType);
+      convertDataType_t<float,int>(imgWriter);
       break;
     case(GDT_UInt32):
-      convertDataType_t<float,unsigned int>(imgWriter, dataType);
+      convertDataType_t<float,unsigned int>(imgWriter);
       break;
     case(GDT_Float32):
-      convertDataType_t<float,float>(imgWriter, dataType);
+      convertDataType_t<float,float>(imgWriter);
       break;
     case(GDT_Float64):
-      convertDataType_t<float,double>(imgWriter, dataType);
+      convertDataType_t<float,double>(imgWriter);
       break;
     default:
       std::string errorString="Error: data type not supported";
@@ -351,25 +351,25 @@ void Jim::convertDataType(Jim& imgWriter, const GDALDataType& dataType){
   case(GDT_Float64):
     switch(dataType){
     case(GDT_Byte):
-      convertDataType_t<double,unsigned char>(imgWriter, dataType);
+      convertDataType_t<double,unsigned char>(imgWriter);
       break;
     case(GDT_Int16):
-      convertDataType_t<double,short>(imgWriter, dataType);
+      convertDataType_t<double,short>(imgWriter);
       break;
     case(GDT_UInt16):
-      convertDataType_t<double,unsigned short>(imgWriter, dataType);
+      convertDataType_t<double,unsigned short>(imgWriter);
       break;
     case(GDT_Int32):
-      convertDataType_t<double,int>(imgWriter, dataType);
+      convertDataType_t<double,int>(imgWriter);
       break;
     case(GDT_UInt32):
-      convertDataType_t<double,unsigned int>(imgWriter, dataType);
+      convertDataType_t<double,unsigned int>(imgWriter);
       break;
     case(GDT_Float32):
-      convertDataType_t<double,float>(imgWriter, dataType);
+      convertDataType_t<double,float>(imgWriter);
       break;
     case(GDT_Float64):
-      convertDataType_t<double,double>(imgWriter, dataType);
+      convertDataType_t<double,double>(imgWriter);
       break;
     default:
       std::string errorString="Error: data type not supported";

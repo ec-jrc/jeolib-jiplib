@@ -377,6 +377,7 @@ set(IMGCLASS_H
   ${IMGCLASS_SRC_DIR}/jlsetmask_lib.h
   ${IMGCLASS_SRC_DIR}/jloperators_lib.h
   ${IMGCLASS_SRC_DIR}/jlextractimg_lib.h
+  ${IMGCLASS_SRC_DIR}/jldem_lib.h
   )
 
 set(IMGCLASS_CC
@@ -406,6 +407,7 @@ set(IMGCLASS_CC
   ${IMGCLASS_SRC_DIR}/jlpolygonize_lib.cc
   ${IMGCLASS_SRC_DIR}/jlwarp_lib.cc
   ${IMGCLASS_SRC_DIR}/jloperators_lib.cc
+  ${IMGCLASS_SRC_DIR}/jldem_lib.cc
   )
 
 if(BUILD_WITH_FANN)
