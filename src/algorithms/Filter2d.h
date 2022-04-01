@@ -1,7 +1,7 @@
 /**********************************************************************
 Filter2d.h: class for filtering images
 Author(s): Pieter.Kempeneers@ec.europa.eu
-Copyright (C) 2016-2020 European Union (Joint Research Centre)
+Copyright (C) 2016-2022 European Union (Joint Research Centre)
 
 This file is part of jiplib.
 
@@ -255,10 +255,10 @@ private:
 template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector, Vector2d<T2>& outputVector, const std::string& method, int dimX, int dimY, short down, bool disc)
 {
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  pfnProgress(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // pfnProgress(progress,pszMessage,pProgressArg);
 
   statfactory::StatFactory stat;
   double noDataValue=0;
@@ -587,9 +587,9 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
         break;
       }
     }
-    progress=(1.0+y/down);
-    progress/=outputVector.size();
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=(1.0+y/down);
+    // progress/=outputVector.size();
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
     //pfnProgress(progress,pszMessage,pProgressArg);
     //copy outBuffer to outputVector
     outputVector[y/down]=outBuffer;
@@ -614,10 +614,10 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
    long seed=time(NULL)*getpid();
    gsl_rng_set(rangen,seed);
    const char* pszMessage;
-   void* pProgressArg=NULL;
-   GDALProgressFunc pfnProgress=GDALTermProgress;
-   double progress=0;
-   pfnProgress(progress,pszMessage,pProgressArg);
+   // void* pProgressArg=NULL;
+   // GDALProgressFunc pfnProgress=GDALTermProgress;
+   // double progress=0;
+   // pfnProgress(progress,pszMessage,pProgressArg);
    for(int j=0;j<input.nRows();++j){
      for(int i=0;i<input.nCols();++i){
        T theValue=0;
@@ -680,9 +680,9 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
        assert(i<output.nCols());
        output[j][i]=theValue;
      }
-     progress=(1.0+j);
-     progress/=output.nRows();
-     pfnProgress(progress,pszMessage,pProgressArg);
+     // progress=(1.0+j);
+     // progress/=output.nRows();
+     // pfnProgress(progress,pszMessage,pProgressArg);
    }
    gsl_rng_free(rangen);
  }
@@ -690,10 +690,10 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
  template<class T> unsigned long int Filter2d::morphology(const Vector2d<T>& input, Vector2d<T>& output, const std::string& method, int dimX, int dimY, bool disc, double hThreshold)
    {
      const char* pszMessage;
-     void* pProgressArg=NULL;
-     GDALProgressFunc pfnProgress=GDALTermProgress;
-     double progress=0;
-     pfnProgress(progress,pszMessage,pProgressArg);
+     // void* pProgressArg=NULL;
+     // GDALProgressFunc pfnProgress=GDALTermProgress;
+     // double progress=0;
+     // pfnProgress(progress,pszMessage,pProgressArg);
 
      double noDataValue=0;
      if(m_noDataValues.size())
@@ -833,9 +833,9 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
              output[y][x]=noDataValue;
          }
        }
-       progress=(1.0+y);
-       progress/=output.nRows();
-       pfnProgress(progress,pszMessage,pProgressArg);
+       // progress=(1.0+y);
+       // progress/=output.nRows();
+       // pfnProgress(progress,pszMessage,pProgressArg);
      }
      return nchange;
    }
@@ -843,10 +843,10 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
  template<class T> unsigned long int Filter2d::dsm2dtm_nwse(const Vector2d<T>& inputDSM, Vector2d<T>& outputMask, double hThreshold, int nlimit, int dim)
    {
      const char* pszMessage;
-     void* pProgressArg=NULL;
-     GDALProgressFunc pfnProgress=GDALTermProgress;
-     double progress=0;
-     pfnProgress(progress,pszMessage,pProgressArg);
+     // void* pProgressArg=NULL;
+     // GDALProgressFunc pfnProgress=GDALTermProgress;
+     // double progress=0;
+     // pfnProgress(progress,pszMessage,pProgressArg);
 
      Vector2d<T> tmpDSM(inputDSM);
      double noDataValue=0;
@@ -927,9 +927,9 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
            /* inBuffer[(dimY-1)/2][x]=stat.mymin(neighbors); */
          }
        }
-       progress=(1.0+y);
-       progress/=outputMask.nRows();
-       pfnProgress(progress,pszMessage,pProgressArg);
+       // progress=(1.0+y);
+       // progress/=outputMask.nRows();
+       // pfnProgress(progress,pszMessage,pProgressArg);
      }
      return nchange;
    }
@@ -937,10 +937,10 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
  template<class T> unsigned long int Filter2d::dsm2dtm_nesw(const Vector2d<T>& inputDSM, Vector2d<T>& outputMask, double hThreshold, int nlimit, int dim)
    {
      const char* pszMessage;
-     void* pProgressArg=NULL;
-     GDALProgressFunc pfnProgress=GDALTermProgress;
-     double progress=0;
-     pfnProgress(progress,pszMessage,pProgressArg);
+     // void* pProgressArg=NULL;
+     // GDALProgressFunc pfnProgress=GDALTermProgress;
+     // double progress=0;
+     // pfnProgress(progress,pszMessage,pProgressArg);
 
      Vector2d<T> tmpDSM(inputDSM);
      double noDataValue=0;
@@ -1021,9 +1021,9 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
            /* inBuffer[(dimY-1)/2][x]=stat.mymin(neighbors); */
          }
        }
-       progress=(1.0+y);
-       progress/=outputMask.nRows();
-       pfnProgress(progress,pszMessage,pProgressArg);
+       // progress=(1.0+y);
+       // progress/=outputMask.nRows();
+       // pfnProgress(progress,pszMessage,pProgressArg);
      }
      return nchange;
    }
@@ -1031,10 +1031,10 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
  template<class T> unsigned long int Filter2d::dsm2dtm_senw(const Vector2d<T>& inputDSM, Vector2d<T>& outputMask, double hThreshold, int nlimit, int dim)
    {
      const char* pszMessage;
-     void* pProgressArg=NULL;
-     GDALProgressFunc pfnProgress=GDALTermProgress;
-     double progress=0;
-     pfnProgress(progress,pszMessage,pProgressArg);
+     // void* pProgressArg=NULL;
+     // GDALProgressFunc pfnProgress=GDALTermProgress;
+     // double progress=0;
+     // pfnProgress(progress,pszMessage,pProgressArg);
 
      Vector2d<T> tmpDSM(inputDSM);
      double noDataValue=0;
@@ -1111,9 +1111,9 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
            /* inBuffer[(dimY-1)/2][x]=stat.mymin(neighbors); */
          }
        }
-       progress=(1.0+y);
-       progress/=outputMask.nRows();
-       pfnProgress(progress,pszMessage,pProgressArg);
+       // progress=(1.0+y);
+       // progress/=outputMask.nRows();
+       // pfnProgress(progress,pszMessage,pProgressArg);
      }
      return nchange;
    }
@@ -1121,10 +1121,10 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
  template<class T> unsigned long int Filter2d::dsm2dtm_swne(const Vector2d<T>& inputDSM, Vector2d<T>& outputMask, double hThreshold, int nlimit, int dim)
    {
      const char* pszMessage;
-     void* pProgressArg=NULL;
-     GDALProgressFunc pfnProgress=GDALTermProgress;
-     double progress=0;
-     pfnProgress(progress,pszMessage,pProgressArg);
+     // void* pProgressArg=NULL;
+     // GDALProgressFunc pfnProgress=GDALTermProgress;
+     // double progress=0;
+     // pfnProgress(progress,pszMessage,pProgressArg);
 
      Vector2d<T> tmpDSM(inputDSM);
      double noDataValue=0;
@@ -1201,9 +1201,9 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
            /* inBuffer[(dimY-1)/2][x]=stat.mymin(neighbors); */
          }
        }
-       progress=(1.0+y);
-       progress/=outputMask.nRows();
-       pfnProgress(progress,pszMessage,pProgressArg);
+       // progress=(1.0+y);
+       // progress/=outputMask.nRows();
+       // pfnProgress(progress,pszMessage,pProgressArg);
      }
      return nchange;
    }
@@ -1220,10 +1220,10 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
      int indexI=0;
      int indexJ=0;
      const char* pszMessage;
-     void* pProgressArg=NULL;
-     GDALProgressFunc pfnProgress=GDALTermProgress;
-     double progress=0;
-     pfnProgress(progress,pszMessage,pProgressArg);
+     // void* pProgressArg=NULL;
+     // GDALProgressFunc pfnProgress=GDALTermProgress;
+     // double progress=0;
+     // pfnProgress(progress,pszMessage,pProgressArg);
      for(int y=0;y<input.nRows();++y){
        for(int x=0;x<input.nCols();++x){
          double currentValue=input[y][x];
@@ -1243,18 +1243,18 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
            }
          }
        }
-       progress=(1.0+y);
-       progress/=output.nRows();
-       pfnProgress(progress,pszMessage,pProgressArg);
+       // progress=(1.0+y);
+       // progress/=output.nRows();
+       // pfnProgress(progress,pszMessage,pProgressArg);
      }
    }
 
  template<class T> void Filter2d::dwtForward(Vector2d<T>& theBuffer, const std::string& wavelet_type, int family){
    const char* pszMessage;
-   void* pProgressArg=NULL;
-   GDALProgressFunc pfnProgress=GDALTermProgress;
-   double progress=0;
-   pfnProgress(progress,pszMessage,pProgressArg);
+   // void* pProgressArg=NULL;
+   // GDALProgressFunc pfnProgress=GDALTermProgress;
+   // double progress=0;
+   // pfnProgress(progress,pszMessage,pProgressArg);
 
    int nRow=theBuffer.size();
    assert(nRow);
@@ -1288,9 +1288,9 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
        int index=irow*theBuffer[irow].size()+icol;
        theBuffer[irow][icol]=data[index];
      }
-     progress=(1.0+irow);
-     progress/=theBuffer.nRows();
-     pfnProgress(progress,pszMessage,pProgressArg);
+     // progress=(1.0+irow);
+     // progress/=theBuffer.nRows();
+     // pfnProgress(progress,pszMessage,pProgressArg);
    }
    gsl_wavelet_free (w);
    gsl_wavelet_workspace_free (work);
@@ -1298,10 +1298,10 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
 
  template<class T> void Filter2d::dwtInverse(Vector2d<T>& theBuffer, const std::string& wavelet_type, int family){
    const char* pszMessage;
-   void* pProgressArg=NULL;
-   GDALProgressFunc pfnProgress=GDALTermProgress;
-   double progress=0;
-   pfnProgress(progress,pszMessage,pProgressArg);
+   // void* pProgressArg=NULL;
+   // GDALProgressFunc pfnProgress=GDALTermProgress;
+   // double progress=0;
+   // pfnProgress(progress,pszMessage,pProgressArg);
 
    int nRow=theBuffer.size();
    assert(nRow);
@@ -1336,9 +1336,9 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
        int index=irow*theBuffer[irow].size()+icol;
        theBuffer[irow][icol]=data[index];
      }
-     progress=(1.0+irow);
-     progress/=theBuffer.nRows();
-     pfnProgress(progress,pszMessage,pProgressArg);
+     // progress=(1.0+irow);
+     // progress/=theBuffer.nRows();
+     // pfnProgress(progress,pszMessage,pProgressArg);
    }
    gsl_wavelet_free (w);
    gsl_wavelet_workspace_free (work);
@@ -1346,10 +1346,10 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
 
  template<class T> void Filter2d::dwtCut(Vector2d<T>& theBuffer, const std::string& wavelet_type, int family, double cut){
    const char* pszMessage;
-   void* pProgressArg=NULL;
-   GDALProgressFunc pfnProgress=GDALTermProgress;
-   double progress=0;
-   pfnProgress(progress,pszMessage,pProgressArg);
+   // void* pProgressArg=NULL;
+   // GDALProgressFunc pfnProgress=GDALTermProgress;
+   // double progress=0;
+   // pfnProgress(progress,pszMessage,pProgressArg);
 
    int nRow=theBuffer.size();
    assert(nRow);
@@ -1394,9 +1394,9 @@ template<class T1, class T2> void Filter2d::doit(const Vector2d<T1>& inputVector
        int index=irow*theBuffer[irow].size()+icol;
        theBuffer[irow][icol]=data[index];
      }
-     progress=(1.0+irow);
-     progress/=theBuffer.nRows();
-     pfnProgress(progress,pszMessage,pProgressArg);
+     // progress=(1.0+irow);
+     // progress/=theBuffer.nRows();
+     // pfnProgress(progress,pszMessage,pProgressArg);
    }
    theBuffer.erase(theBuffer.begin()+nRow,theBuffer.end());
    for(int irow=0;irow<theBuffer.size();++irow)

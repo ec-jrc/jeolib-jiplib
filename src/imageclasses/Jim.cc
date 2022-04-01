@@ -1,7 +1,7 @@
 /**********************************************************************
 Jim.cc: class to read raster files using GDAL API library
 Author(s): Pieter.Kempeneers@ec.europa.eu
-Copyright (C) 2016-2021 European Union (Joint Research Centre)
+Copyright (C) 2016-2022 European Union (Joint Research Centre)
 
 This file is part of jiplib.
 
@@ -178,16 +178,16 @@ CPLErr Jim::setMIA(int band){
       throw(s.str());
     }
     if(m_ncol!=m_mia[band]->nx){
-      std::cerr << "Warning: x dimension of image (" << m_ncol << ") does not match MIA (" << m_mia[band]->nx << "), adapting m_ncol" << std::endl;
+      // std::cerr << "Warning: x dimension of image (" << m_ncol << ") does not match MIA (" << m_mia[band]->nx << "), adapting m_ncol" << std::endl;
       m_ncol=m_mia[band]->nx;
     }
     if(m_nrow!=m_mia[band]->ny){
-      std::cerr << "Warning: y dimension of image (" << m_nrow << ") does not match MIA (" << m_mia[band]->ny << "), adapting m_nrow" << std::endl;
+      // std::cerr << "Warning: y dimension of image (" << m_nrow << ") does not match MIA (" << m_mia[band]->ny << "), adapting m_nrow" << std::endl;
       m_nrow=m_mia[band]->ny;
       m_blockSize=m_nrow;
     }
     if(m_mia[band]->nz!=m_nplane){
-      std::cerr << "Warning: z dimension of image (" << m_nplane << ") does not match MIA (" << m_mia[band]->nz << "), adapting m_nplane" << std::endl;
+      // std::cerr << "Warning: z dimension of image (" << m_nplane << ") does not match MIA (" << m_mia[band]->nz << "), adapting m_nplane" << std::endl;
       m_nplane=m_mia[band]->nz;
     }
     if(m_nband<=band){

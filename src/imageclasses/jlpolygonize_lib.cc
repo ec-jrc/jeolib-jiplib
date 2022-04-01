@@ -1,7 +1,7 @@
 /**********************************************************************
 jlpolygonize_lib.cc: program to make vector file from raster image
 Author(s): Pieter.Kempeneers@ec.europa.eu
-Copyright (C) 2016-2020 European Union (Joint Research Centre)
+Copyright (C) 2016-2022 European Union (Joint Research Centre)
 
 This file is part of jiplib.
 
@@ -149,16 +149,18 @@ void Jim::polygonize(VectorOgr&ogrWriter, app::AppFactory &theApp, std::shared_p
           int index=ogrWriter.getLayer()->GetLayerDefn()->GetFieldIndex(fname_opt[0].c_str());
           double dfComplete=0.0;
           const char* pszMessage;
-          void* pProgressArg=NULL;
-          GDALProgressFunc pfnProgress=GDALTermProgress;
-          pfnProgress(dfComplete,pszMessage,pProgressArg);
-          if(GDALPolygonize((GDALRasterBandH)poBandMem, (GDALRasterBandH)poMaskBandMem, (OGRLayerH)ogrWriter.getLayer(),index,NULL,pfnProgress,pProgressArg)!=CE_None){
+          // void* pProgressArg=NULL;
+          // GDALProgressFunc pfnProgress=NULL;
+          // GDALProgressFunc pfnProgress=GDALTermProgress;
+          // pfnProgress(dfComplete,pszMessage,pProgressArg);
+          // if(GDALPolygonize((GDALRasterBandH)poBandMem, (GDALRasterBandH)poMaskBandMem, (OGRLayerH)ogrWriter.getLayer(),index,NULL,pfnProgress,pProgressArg)!=CE_None){
+          if(GDALPolygonize((GDALRasterBandH)poBandMem, (GDALRasterBandH)poMaskBandMem, (OGRLayerH)ogrWriter.getLayer(),index,NULL,NULL,NULL)!=CE_None){
             std::string errorString=CPLGetLastErrorMsg();
             throw(errorString);
           }
           else{
             dfComplete=1.0;
-            pfnProgress(dfComplete,pszMessage,pProgressArg);
+            // pfnProgress(dfComplete,pszMessage,pProgressArg);
           }
           for(size_t ilayer=0;ilayer<ogrWriter.getLayerCount();++ilayer)
             ogrWriter.readFeatures(ilayer);

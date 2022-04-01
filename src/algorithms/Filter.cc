@@ -1,7 +1,7 @@
 /**********************************************************************
 Filter.cc: class for filtering
 Author(s): Pieter.Kempeneers@ec.europa.eu
-Copyright (C) 2016-2020 European Union (Joint Research Centre)
+Copyright (C) 2016-2022 European Union (Joint Research Centre)
 
 This file is part of jiplib.
 
@@ -66,10 +66,10 @@ unsigned int filter::Filter::setNoDataValues(std::vector<double> vnodata){
 
 void filter::Filter::dwtForward(Jim& input, Jim& output, const std::string& wavelet_type, int family){
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
   Vector2d<double> lineInput(input.nrOfBand(),input.nrOfCol());
   Vector2d<double> lineOutput(input.nrOfBand(),input.nrOfCol());
   for(unsigned int y=0;y<input.nrOfRow();++y){
@@ -90,17 +90,17 @@ void filter::Filter::dwtForward(Jim& input, Jim& output, const std::string& wave
         cerr << errorstring << "in band " << iband << ", line " << y << endl;
       }
     }
-    progress=(1.0+y)/output.nrOfRow();
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=(1.0+y)/output.nrOfRow();
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
   }
 }
 
 void filter::Filter::dwtInverse(Jim& input, Jim& output, const std::string& wavelet_type, int family){
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
   Vector2d<double> lineInput(input.nrOfBand(),input.nrOfCol());
   Vector2d<double> lineOutput(input.nrOfBand(),input.nrOfCol());
   for(unsigned int y=0;y<input.nrOfRow();++y){
@@ -121,17 +121,17 @@ void filter::Filter::dwtInverse(Jim& input, Jim& output, const std::string& wave
         cerr << errorstring << "in band " << iband << ", line " << y << endl;
       }
     }
-    progress=(1.0+y)/output.nrOfRow();
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=(1.0+y)/output.nrOfRow();
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
   }
 }
 
 void filter::Filter::dwtCut(Jim& input, Jim& output, const std::string& wavelet_type, int family, double cut){
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
   Vector2d<double> lineInput(input.nrOfBand(),input.nrOfCol());
   Vector2d<double> lineOutput(input.nrOfBand(),input.nrOfCol());
   for(unsigned int y=0;y<input.nrOfRow();++y){
@@ -152,17 +152,17 @@ void filter::Filter::dwtCut(Jim& input, Jim& output, const std::string& wavelet_
         cerr << errorstring << "in band " << iband << ", line " << y << endl;
       }
     }
-    progress=(1.0+y)/output.nrOfRow();
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=(1.0+y)/output.nrOfRow();
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
   }
 }
 
 void filter::Filter::dwtCutFrom(Jim& input, Jim& output, const std::string& wavelet_type, int family, int band){
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
   Vector2d<double> lineInput(input.nrOfBand(),input.nrOfCol());
   Vector2d<double> lineOutput(input.nrOfBand(),input.nrOfCol());
   for(unsigned int y=0;y<input.nrOfRow();++y){
@@ -188,8 +188,8 @@ void filter::Filter::dwtCutFrom(Jim& input, Jim& output, const std::string& wave
         cerr << errorstring << "in band " << iband << ", line " << y << endl;
       }
     }
-    progress=(1.0+y)/output.nrOfRow();
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=(1.0+y)/output.nrOfRow();
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
   }
 }
 
@@ -267,10 +267,10 @@ void filter::Filter::morphology(Jim& input, Jim& output, const std::string& meth
   if(verbose)
     std::cout << "Number of bands in input: " << lineInput.size() << std::endl;
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
   for(unsigned int y=0;y<input.nrOfRow();++y){
     try{
       for(unsigned int iband=0;iband<input.nrOfBand();++iband){
@@ -301,8 +301,8 @@ void filter::Filter::morphology(Jim& input, Jim& output, const std::string& meth
         cerr << errorstring << "in band " << iband << ", line " << y << endl;
       }
     }
-    progress=(1.0+y)/output.nrOfRow();
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=(1.0+y)/output.nrOfRow();
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
   }
 }
 
@@ -311,10 +311,10 @@ void filter::Filter::smoothNoData(Jim& input, const std::string& interpolationTy
   Vector2d<double> lineInput(input.nrOfBand(),input.nrOfCol());
   Vector2d<double> lineOutput(input.nrOfBand(),input.nrOfCol());
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
   for(unsigned int y=0;y<input.nrOfRow();++y){
     for(unsigned int iband=0;iband<input.nrOfBand();++iband)
       input.readData(lineInput[iband],y,iband);
@@ -334,8 +334,8 @@ void filter::Filter::smoothNoData(Jim& input, const std::string& interpolationTy
         cerr << errorstring << "in band " << iband << ", line " << y << endl;
       }
     }
-    progress=(1.0+y)/output.nrOfRow();
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=(1.0+y)/output.nrOfRow();
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
   }
 }
 
@@ -353,10 +353,10 @@ void filter::Filter::filter(Jim& input, Jim& output)
   Vector2d<double> lineInput(input.nrOfBand(),input.nrOfCol());
   Vector2d<double> lineOutput(input.nrOfBand(),input.nrOfCol());
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
   for(unsigned int y=0;y<input.nrOfRow();++y){
     for(unsigned int iband=0;iband<input.nrOfBand();++iband)
       input.readData(lineInput[iband],y,iband);
@@ -376,8 +376,8 @@ void filter::Filter::filter(Jim& input, Jim& output)
         cerr << errorstring << "in band " << iband << ", line " << y << endl;
       }
     }
-    progress=(1.0+y)/output.nrOfRow();
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=(1.0+y)/output.nrOfRow();
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
   }
 }
 
@@ -389,10 +389,10 @@ void filter::Filter::stat(Jim& input, Jim& output, const std::string& method)
   statfactory::StatFactory stat;
   stat.setNoDataValues(m_noDataValues);
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
   for(unsigned int y=0;y<input.nrOfRow();++y){
     for(unsigned int iband=0;iband<input.nrOfBand();++iband)
       input.readData(lineInput[iband],y,iband);
@@ -437,8 +437,8 @@ void filter::Filter::stat(Jim& input, Jim& output, const std::string& method)
     catch(string errorstring){
       cerr << errorstring << "in line " << y << endl;
     }
-    progress=(1.0+y)/output.nrOfRow();
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=(1.0+y)/output.nrOfRow();
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
   }
 }
 
@@ -451,10 +451,10 @@ void filter::Filter::stats(Jim& input, Jim& output, const vector<std::string>& m
   statfactory::StatFactory stat;
   stat.setNoDataValues(m_noDataValues);
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
   for(unsigned int y=0;y<input.nrOfRow();++y){
     for(unsigned int iband=0;iband<input.nrOfBand();++iband)
       input.readData(lineInput[iband],y,iband);
@@ -510,8 +510,8 @@ void filter::Filter::stats(Jim& input, Jim& output, const vector<std::string>& m
         cerr << errorstring << "in line " << y << endl;
       }
     }
-    progress=(1.0+y)/output.nrOfRow();
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=(1.0+y)/output.nrOfRow();
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
   }
 }
 
@@ -520,10 +520,10 @@ void filter::Filter::filter(Jim& input, Jim& output, const std::string& method, 
   Vector2d<double> lineInput(input.nrOfBand(),input.nrOfCol());
   Vector2d<double> lineOutput(input.nrOfBand(),input.nrOfCol());;
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
   for(unsigned int y=0;y<input.nrOfRow();++y){
     for(unsigned int iband=0;iband<input.nrOfBand();++iband)
       input.readData(lineInput[iband],y,iband);
@@ -546,8 +546,8 @@ void filter::Filter::filter(Jim& input, Jim& output, const std::string& method, 
         cerr << errorstring << "in band " << iband << ", line " << y << endl;
       }
     }
-    progress=(1.0+y)/output.nrOfRow();
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=(1.0+y)/output.nrOfRow();
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
   }
 }
 

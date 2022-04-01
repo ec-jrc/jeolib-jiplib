@@ -1,7 +1,7 @@
 /**********************************************************************
 Jim.h: class to read/write raster files using GDAL API library
 Author(s): Pieter.Kempeneers@ec.europa.eu
-Copyright (C) 2016-2020 European Union (Joint Research Centre)
+Copyright (C) 2016-2022 European Union (Joint Research Centre)
 
 This file is part of jiplib.
 

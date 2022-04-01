@@ -1,7 +1,7 @@
 /**********************************************************************
 Filter2d.cc: class for filtering images
 Author(s): Pieter.Kempeneers@ec.europa.eu
-Copyright (C) 2016-2020 European Union (Joint Research Centre)
+Copyright (C) 2016-2022 European Union (Joint Research Centre)
 
 This file is part of jiplib.
 
@@ -142,10 +142,10 @@ void filter2d::Filter2d::filterLB(Jim& input, Jim& output, bool absolute, bool n
   int dimX=m_taps[0].size();//horizontal!!!
   int dimY=m_taps.size();//vertical!!!
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
@@ -249,10 +249,10 @@ void filter2d::Filter2d::filterLB(Jim& input, Jim& output, bool absolute, bool n
         std::cerr << errorstring << " in band " << iband << ", line " << y << std::endl;
         exit(1);
       }
-      progress=(1.0+y);
-      progress+=(output.nrOfRow()*iband);
-      progress/=output.nrOfBand()*output.nrOfRow();
-      MyProgressFunc(progress,pszMessage,pProgressArg);
+      // progress=(1.0+y);
+      // progress+=(output.nrOfRow()*iband);
+      // progress/=output.nrOfBand()*output.nrOfRow();
+      // MyProgressFunc(progress,pszMessage,pProgressArg);
     }
   }
 }
@@ -265,10 +265,10 @@ void filter2d::Filter2d::majorVoting(Jim& input, Jim& output, int dim, const std
   output.setNoData(m_noDataValues);
 
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
 
   bool usePriors=true;
   if(prior.empty()){
@@ -391,8 +391,8 @@ void filter2d::Filter2d::majorVoting(Jim& input, Jim& output, int dim, const std
     catch(std::string errorstring){
       std::cerr << errorstring << "in line" << y << std::endl;
     }
-    progress=(1.0+y)/output.nrOfRow();
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=(1.0+y)/output.nrOfRow();
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
   }
   input.close();
   output.close();
@@ -420,10 +420,10 @@ void filter2d::Filter2d::doit(Jim& input, Jim& output, const std::string& method
   output.setNoData(m_noDataValues);
 
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
 
   assert(dimX);
   assert(dimY);
@@ -752,10 +752,10 @@ void filter2d::Filter2d::doit(Jim& input, Jim& output, const std::string& method
         }
         }
       }
-      progress=(1.0+y/down);
-      progress+=(output.nrOfRow()*iband);
-      progress/=output.nrOfBand()*output.nrOfRow();
-      MyProgressFunc(progress,pszMessage,pProgressArg);
+      // progress=(1.0+y/down);
+      // progress+=(output.nrOfRow()*iband);
+      // progress/=output.nrOfBand()*output.nrOfRow();
+      // MyProgressFunc(progress,pszMessage,pProgressArg);
       //write outBuffer to file
       try{
         output.writeData(outBuffer,y/down,iband);
@@ -765,7 +765,7 @@ void filter2d::Filter2d::doit(Jim& input, Jim& output, const std::string& method
       }
     }
   }
-  MyProgressFunc(1.0,pszMessage,pProgressArg);
+  // MyProgressFunc(1.0,pszMessage,pProgressArg);
 }
 
 void filter2d::Filter2d::mrf(Jim& input, Jim& output, int dimX, int dimY, double beta, bool eightConnectivity, short down, bool verbose){
@@ -785,10 +785,10 @@ void filter2d::Filter2d::mrf(Jim& input, Jim& output, int dimX, int dimY, Vector
   output.setNoData(m_noDataValues);
 
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
 
   assert(dimX);
   assert(dimY);
@@ -897,8 +897,8 @@ void filter2d::Filter2d::mrf(Jim& input, Jim& output, int dimX, int dimY, Vector
           outBuffer[iclass1][x/down]/=norm;
       }
     }
-    progress=(1.0+y/down)/output.nrOfRow();
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=(1.0+y/down)/output.nrOfRow();
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
     //write outBuffer to file
     assert(outBuffer.size()==m_class.size());
     assert(y<output.nrOfRow());
@@ -925,10 +925,10 @@ void filter2d::Filter2d::shift(Jim& input, Jim& output, double offsetX, double o
   assert(input.nrOfRow()==output.nrOfRow());
   assert(input.nrOfBand()==output.nrOfBand());
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
   //process band per band in memory
   Vector2d<double> inBuffer(input.nrOfRow(),output.nrOfCol());
   Vector2d<double> outBuffer(input.nrOfRow(),output.nrOfCol());
@@ -1053,10 +1053,10 @@ void filter2d::Filter2d::morphology(Jim& input, Jim& output, const std::string& 
   output.setNoData(m_noDataValues);
 
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
 
   assert(dimX);
   assert(dimY);
@@ -1225,10 +1225,10 @@ void filter2d::Filter2d::morphology(Jim& input, Jim& output, const std::string& 
       catch(std::string errorstring){
         std::cerr << errorstring << "in band " << iband << ", line " << y << std::endl;
       }
-      progress=(1.0+y);
-      progress+=(output.nrOfRow()*iband);
-      progress/=output.nrOfBand()*output.nrOfRow();
-      MyProgressFunc(progress,pszMessage,pProgressArg);
+      // progress=(1.0+y);
+      // progress+=(output.nrOfRow()*iband);
+      // progress/=output.nrOfBand()*output.nrOfRow();
+      // MyProgressFunc(progress,pszMessage,pProgressArg);
     }
   }
 }
@@ -1323,10 +1323,10 @@ void filter2d::Filter2d::linearFeature(const Vector2d<float>& input, std::vector
   int indexI=0;
   int indexJ=0;
   const char* pszMessage;
-  void* pProgressArg=NULL;
-  GDALProgressFunc pfnProgress=GDALTermProgress;
-  double progress=0;
-  MyProgressFunc(progress,pszMessage,pProgressArg);
+  // void* pProgressArg=NULL;
+  // GDALProgressFunc pfnProgress=GDALTermProgress;
+  // double progress=0;
+  // MyProgressFunc(progress,pszMessage,pProgressArg);
   for(unsigned int y=0;y<input.nRows();++y){
     for(unsigned int x=0;x<input.nCols();++x){
       float currentValue=input[y][x];
@@ -1402,8 +1402,8 @@ void filter2d::Filter2d::linearFeature(const Vector2d<float>& input, std::vector
         output[iband++][y][x]=lineAngle2;
       assert(iband==nband);
     }
-    progress=(1.0+y);
-    progress/=input.nRows();
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=(1.0+y);
+    // progress/=input.nRows();
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
   }
 }

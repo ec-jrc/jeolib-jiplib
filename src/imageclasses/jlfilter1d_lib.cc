@@ -1,7 +1,7 @@
 /**********************************************************************
 jlfilter1d_lib.cc: program to filter raster images: median, min/max, morphological, filtering
 Author(s): Pieter.Kempeneers@ec.europa.eu
-Copyright (C) 2016-2020 European Union (Joint Research Centre)
+Copyright (C) 2016-2022 European Union (Joint Research Centre)
 
 This file is part of jiplib.
 
@@ -347,10 +347,10 @@ void Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
       Vector2d<double> lineInput(this->nrOfBand(),this->nrOfCol());
       Vector2d<double> lineOutput(wavelengthOut_opt.size(),this->nrOfCol());
       const char* pszMessage;
-      void* pProgressArg=NULL;
-      GDALProgressFunc pfnProgress=GDALTermProgress;
-      double progress=0;
-      pfnProgress(progress,pszMessage,pProgressArg);
+      // void* pProgressArg=NULL;
+      // GDALProgressFunc pfnProgress=GDALTermProgress;
+      // double progress=0;
+      // pfnProgress(progress,pszMessage,pProgressArg);
       for(unsigned int y=0;y<this->nrOfRow();++y){
         if((y+1+down_opt[0]/2)%down_opt[0])
           continue;
@@ -360,8 +360,8 @@ void Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
         for(unsigned int iband=0;iband<imgWriter.nrOfBand();++iband){
           imgWriter.writeData(lineOutput[iband],y/down_opt[0],iband);
         }
-        progress=(1.0+y)/imgWriter.nrOfRow();
-        pfnProgress(progress,pszMessage,pProgressArg);
+        // progress=(1.0+y)/imgWriter.nrOfRow();
+        // pfnProgress(progress,pszMessage,pProgressArg);
       }
     }
     else if(srf_opt.size()){
@@ -397,10 +397,10 @@ void Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
       double centreWavelength=0;
       Vector2d<double> lineInput(this->nrOfBand(),this->nrOfCol());
       const char* pszMessage;
-      void* pProgressArg=NULL;
-      GDALProgressFunc pfnProgress=GDALTermProgress;
-      double progress=0;
-      pfnProgress(progress,pszMessage,pProgressArg);
+      // void* pProgressArg=NULL;
+      // GDALProgressFunc pfnProgress=GDALTermProgress;
+      // double progress=0;
+      // pfnProgress(progress,pszMessage,pProgressArg);
       for(unsigned int y=0;y<this->nrOfRow();++y){
         if((y+1+down_opt[0]/2)%down_opt[0])
           continue;
@@ -415,8 +415,8 @@ void Jim::filter1d(Jim& imgWriter, app::AppFactory& app){
             std::cout << "centre wavelength srf " << isrf << ": " << centreWavelength << std::endl;
           imgWriter.writeData(lineOutput,y/down_opt[0],isrf);
         }
-        progress=(1.0+y)/imgWriter.nrOfRow();
-        pfnProgress(progress,pszMessage,pProgressArg);
+        // progress=(1.0+y)/imgWriter.nrOfRow();
+        // pfnProgress(progress,pszMessage,pProgressArg);
       }
 
     }

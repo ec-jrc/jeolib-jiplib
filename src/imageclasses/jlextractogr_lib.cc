@@ -1,7 +1,7 @@
 /**********************************************************************
 jlextractogr_lib.cc: extract pixel values from raster image from a vector sample
 Author(s): Pieter.Kempeneers@ec.europa.eu
-Copyright (C) 2016-2020 European Union (Joint Research Centre)
+Copyright (C) 2016-2022 European Union (Joint Research Centre)
 
 This file is part of jiplib.
 
@@ -2686,9 +2686,9 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
     }
 
     const char* pszMessage;
-    void* pProgressArg=NULL;
-    GDALProgressFunc pfnProgress=GDALTermProgress;
-    double progress=0;
+    // void* pProgressArg=NULL;
+    // GDALProgressFunc pfnProgress=GDALTermProgress;
+    // double progress=0;
     srand(time(NULL));
 
     bool sampleIsRaster=false;
@@ -3152,8 +3152,8 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
     ogrWriter.resize(sampleReaderOgr.getFeatureCount());
     if(verbose_opt[0])
       std::cout << "start processing " << sampleReaderOgr.getFeatureCount() << " features" << std::endl;
-    progress=0;
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=0;
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
     // readLayer->ResetReading();
     // while( (readFeature = readLayer->GetNextFeature()) != NULL ){
 
@@ -4512,15 +4512,15 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
           }
         }
         // ++ifeature;
-        if(theThreshold>0){
-          if(threshold_opt.size()==sampleReaderOgr.getLayerCount())
-            progress=(100.0/theThreshold)*static_cast<float>(ntotalvalidLayer)/nfeatureLayer;
-          else
-            progress=static_cast<float>(ntotalvalidLayer)/nfeatureLayer;
-        }
-        else
-          progress=static_cast<float>(ifeature+1)/(-theThreshold);
-        MyProgressFunc(progress,pszMessage,pProgressArg);
+        // if(theThreshold>0){
+        //   if(threshold_opt.size()==sampleReaderOgr.getLayerCount())
+        //     progress=(100.0/theThreshold)*static_cast<float>(ntotalvalidLayer)/nfeatureLayer;
+        //   else
+        //     progress=static_cast<float>(ntotalvalidLayer)/nfeatureLayer;
+        // }
+        // else
+        //   progress=static_cast<float>(ifeature+1)/(-theThreshold);
+        // MyProgressFunc(progress,pszMessage,pProgressArg);
       }
       catch(std::string e){
         std::cout << e << std::endl;
@@ -4534,8 +4534,8 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
     }
     // if(rbox_opt[0]>0||cbox_opt[0]>0)
     //   boxWriter.close();
-    progress=1.0;
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=1.0;
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
     if(verbose_opt[0])
       std::cout << "number of valid points in layer: " << ntotalvalidLayer << std::endl;
     if(verbose_opt[0])
@@ -4546,8 +4546,8 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
       CSLDestroy(papszOptions);
     // ogrWriter.write();
     // ogrWriter.close();
-    progress=1.0;
-    MyProgressFunc(progress,pszMessage,pProgressArg);
+    // progress=1.0;
+    // MyProgressFunc(progress,pszMessage,pProgressArg);
     // this->close();
     if(maskReader.isInit())
       maskReader.close();
