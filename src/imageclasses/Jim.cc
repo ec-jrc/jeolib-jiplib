@@ -3191,7 +3191,7 @@ void Jim::setData(double value, int band){
     }
   }
   for(size_t iplane=1;iplane<nrOfPlane();++iplane)
-    memcpy(static_cast<char*>(m_data[band])+iplane*nrOfCol()*nrOfRow(),static_cast<char*>(m_data[band]),getDataTypeSizeBytes()*nrOfCol()*m_blockSize);
+    memcpy(static_cast<char*>(m_data[band])+iplane*getDataTypeSizeBytes()*nrOfCol()*nrOfRow(),static_cast<char*>(m_data[band]),getDataTypeSizeBytes()*nrOfCol()*nrOfRow());
 }
 
 void Jim::setData(double value, double ulx, double uly, double lrx, double lry, int band, double dx, double dy, bool nogeo){
