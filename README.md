@@ -30,16 +30,18 @@ jiplib is released under the [GPLv3](https://www.gnu.org/licenses) license.
 ## Install dependency libraries (example for Debian based system using apt)
 
 ```
-apt install build-essential cmake
-apt install libgsl-dev
-apt install libfann-dev
-apt install libgdal-dev
-apt install libjsoncpp-dev
-apt install libpython3-dev
-apt install python3-numpy
-apt install libboost-filesystem-dev 
-apt install libboost-serialization-dev
-apt install swig
+sudo apt install -yq \
+  build-essential \
+  cmake \
+  libgsl-dev \
+  libfann-dev \
+  libgdal-dev \
+  libjsoncpp-dev \
+  libpython3-dev \
+  python3-numpy \
+  libboost-filesystem-dev  \
+  libboost-serialization-dev \
+  swig
 ```
 
  ## miallib
@@ -52,7 +54,7 @@ See more information at [miallib](https://github.com/ec-jrc/jeolib-miallib)
 mkdir build
 cd build
 cmake ..
-make -j
+make
 sudo make install
 ```
 
