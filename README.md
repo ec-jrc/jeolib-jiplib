@@ -65,7 +65,7 @@ Download the source code from [miallib](https://github.com/ec-jrc/jeolib-miallib
 /local/miallib/dir/jeolib-miallib
 ```
 
-and install install [miallib](https://github.com/ec-jrc/jeolib-miallib) locally:
+and install [miallib](https://github.com/ec-jrc/jeolib-miallib) locally:
 
 ```
 make install prefix=/local/miallib/install/dir
