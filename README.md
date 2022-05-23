@@ -58,6 +58,43 @@ make
 sudo make install
 ```
 
+# Install without sudo rights
+
+Download the source code from [miallib](https://github.com/ec-jrc/jeolib-miallib) to a local directory:
+```
+/local/miallib/dir/jeolib-miallib
+```
+
+and install install [miallib](https://github.com/ec-jrc/jeolib-miallib) locally:
+
+```
+make install prefix=/local/miallib/install/dir
+```
+
+Then build and install jiplib locally (replacing the same directories for `MIAL_INCLUDE_DIR` for `MIAL_LIBRARY` appropriately as used above):
+
+```
+mkdir build
+cd build
+cmake -DMIAL_INCLUDE_DIR=/local/miallib/dir/jeolib-miallib/core/c/ -DMIAL_LIBRARY=/local/miallib/install/dir/libmiallib_generic.so .. -DCMAKE_INSTALL_PREFIX=/local/jiplib/install/dir -DPYTHON_INSTALL_DIR=/local/jiplib/python/dist/dir ..
+make -j
+make install
+```
+
+For `CMAKE_INSTALL_PREFIX` and `PYTHON_INSTALL_DIR` use any directory where you have write access.
+
+Then export the `LD_LIBRARY_PATH` environment variable so that the libraries can be found:
+
+```
+export LD_LIBRARY_PATH=/local/miallib/install/dir/:/local/jiplib/install/dir
+```
+
+Finally adapt the `PYTHONPATH`:
+
+```
+export PYTHONPATH=$PYTHONPATH:/local/jiplib/python/dist/dir
+```
+
 # Test the installation
 
 From the build directory, run:
