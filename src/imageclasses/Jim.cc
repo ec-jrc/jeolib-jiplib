@@ -149,7 +149,7 @@ IMAGE* Jim::getMIA(int band){
     m_mia[band]->nx=nrOfCol();
     m_mia[band]->ny=nrOfRow();
     m_mia[band]->nz=nrOfPlane();
-    m_mia[band]->NByte=m_mia[band]->nx * m_mia[band]->ny * m_mia[band]->nz * getDataTypeSizeBytes();//assumes image data type is not of bit type!!!
+    m_mia[band]->NByte=(mia_size_t)m_mia[band]->nx * m_mia[band]->ny * m_mia[band]->nz * getDataTypeSizeBytes();//assumes image data type is not of bit type!!!
     //todo: remove m_mia[band]->vol and only rely on the getVolume function
     m_mia[band]->vol=0;//use getVolume() function
     m_mia[band]->lut=0;

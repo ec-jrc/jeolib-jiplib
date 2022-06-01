@@ -92,7 +92,7 @@ export LD_LIBRARY_PATH=/local/miallib/install/dir/:/local/jiplib/install/dir
 Finally adapt the `PYTHONPATH`:
 
 ```
-export PYTHONPATH=$PYTHONPATH:/local/jiplib/python/dist/dir
+export PYTHONPATH=/local/jiplib/python/dist/dir:$PYTHONPATH
 ```
 
 # Test the installation
