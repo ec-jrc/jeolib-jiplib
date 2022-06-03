@@ -771,7 +771,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
         std::string errorString="Error: Unknown data type";
         throw(errorString);
       }
-      int ndim=(PyArray_NDIM((PyArrayObject*)npArray))? 3 : 2;
+      int ndim=(PyArray_NDIM((PyArrayObject*)npArray)==3)? 3 : 2;
       int nplane=(PyArray_NDIM((PyArrayObject*)npArray)==3) ? PyArray_DIM((PyArrayObject*)npArray,0): 1;
       int nrow=(PyArray_NDIM((PyArrayObject*)npArray)==3) ? PyArray_DIM((PyArrayObject*)npArray,1): PyArray_DIM((PyArrayObject*)npArray,0);
       int ncol=(PyArray_NDIM((PyArrayObject*)npArray)==3) ? PyArray_DIM((PyArrayObject*)npArray,2): PyArray_DIM((PyArrayObject*)npArray,1);
