@@ -111,7 +111,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
   Optionjl<double> msknodata_opt("msknodata", "msknodata", "Mask value not to extract.", 0);
   Optionjl<unsigned int> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed)", 0);
   Optionjl<float> polythreshold_opt("tp", "thresholdPolygon", "(absolute) threshold for selecting samples in each polygon");
-  Optionjl<short> buffer_opt("buf", "buffer", "Buffer for calculating statistics in geometric units of raster dataset");
+  Optionjl<float> buffer_opt("buf", "buffer", "Buffer for calculating statistics in geometric units of raster dataset");
   Optionjl<bool> disc_opt("circ", "circular", "Use a circular disc kernel buffer (for vector point sample datasets only, use in combination with buffer option)", false);
   Optionjl<std::string> allCovered_opt("cover", "cover", "Which polygons to include based on coverage (ALL_TOUCHED, ALL_COVERED)", "ALL_TOUCHED");
   Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
@@ -884,14 +884,25 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
           std::string errorString="Error: coordinate transform not successful";
           throw(errorString);
         }
-        if(buffer_opt.size())
+        if(buffer_opt.size()){
+          if(verbose_opt[0]>2){
+            std::cout << "before buffer: " << std::endl;
+            std::cout << poGeometry->exportToJson() << std::endl;
+          }
           poGeometry=poGeometry->Buffer(buffer_opt[0]);
+          if(verbose_opt[0]>2){
+            std::cout << "after buffer: " << std::endl;
+            std::cout << poGeometry->exportToJson() << std::endl;
+          }
+        }
         if(!poGeometry){
           std::string errorString="Error: po geometry is empty";
           throw(errorString);
         }
         try{
           if(wkbFlatten(poGeometry->getGeometryType()) == wkbPoint ){
+            if(verbose_opt[0]>2)
+              std::cout << "poGeometry is wkbPoint" << std::endl;
             //todo: handle case if m_data is empty
             OGRPoint readPoint = *((OGRPoint *) poGeometry);//readPoint is in SRS of raster
 
@@ -1595,6 +1606,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
             }
           }//for points
           else{//(multi-)polygons
+            if(verbose_opt[0]>2)
+              std::cout << "poGeometry is (multi-)polygon" << std::endl;
             OGRPolygon readPolygon;//readPolygon is in SRS of raster dataset
             OGRMultiPolygon readMultiPolygon;//readMultiPolygon is in SRS of raster dataset
 
@@ -1603,11 +1616,15 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 
 
             if(wkbFlatten(poGeometry->getGeometryType()) == wkbPolygon){
+              if(verbose_opt[0]>2)
+                std::cout << "get psEnvelope from readPolygon" << std::endl;
               readPolygon = *((OGRPolygon *) poGeometry);
               readPolygon.closeRings();
               readPolygon.getEnvelope(psEnvelope);
             }
             else if(wkbFlatten(poGeometry->getGeometryType()) == wkbMultiPolygon){
+              if(verbose_opt[0]>2)
+                std::cout << "get psEnvelope from readMultiPolygon" << std::endl;
               readMultiPolygon = *((OGRMultiPolygon *) poGeometry);
               readMultiPolygon.closeRings();
               readMultiPolygon.getEnvelope(psEnvelope);
@@ -1620,6 +1637,9 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 
             double ulx,uly,lrx,lry;
             double uli,ulj,lri,lrj;
+            if(verbose_opt[0]>2)
+              std::cout << "calculating ulx, uly, lrx, lry from psEnvelope" << std::endl;
+
             ulx=psEnvelope->MinX;
             uly=psEnvelope->MaxY;
             lrx=psEnvelope->MaxX;
@@ -2484,7 +2504,7 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
   Optionjl<double> msknodata_opt("msknodata", "msknodata", "Mask value not to consider for crop.", 0);
   Optionjl<unsigned int> mskband_opt("mskband", "mskband", "Mask band to read (0 indexed)", 0);
   Optionjl<float> polythreshold_opt("tp", "thresholdPolygon", "(absolute) threshold for selecting samples in each polygon");
-  Optionjl<short> buffer_opt("buf", "buffer", "Buffer for calculating statistics for point features (in geometric units of raster dataset) ");
+  Optionjl<float> buffer_opt("buf", "buffer", "Buffer for calculating statistics for point features (in geometric units of raster dataset) ");
   Optionjl<bool> disc_opt("circ", "circular", "Use a circular disc kernel buffer (for vector point sample datasets only, use in combination with buffer option)", false);
   Optionjl<std::string> allCovered_opt("cover", "cover", "Which polygons to include based on coverage (ALL_TOUCHED, ALL_COVERED)", "ALL_TOUCHED");
   Optionjl<unsigned long int>  memory_opt("mem", "mem", "Buffer size (in MB) to read image data blocks in memory",0,1);
