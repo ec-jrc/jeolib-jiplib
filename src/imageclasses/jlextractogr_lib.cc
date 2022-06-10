@@ -980,14 +980,20 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                 throw(errorString);
               }
               writePolygonFeature = ogrWriter.createFeature(ilayer);
+              if(verbose_opt[0]>2)
+                std::cout << "geometry of feature (1): " << writePolygonFeature->GetGeometryRef()->getGeometryName() << std::endl;
               // writePolygonFeature = OGRFeature::CreateFeature(writeLayer->GetLayerDefn());
               if(writePolygonFeature->SetFrom(readFeature)!= OGRERR_NONE)
                 cerr << "writing feature failed" << std::endl;
               writePolygonFeature->SetGeometry(&writePolygon);
+              if(verbose_opt[0]>2)
+                std::cout << "geometry of feature (2): " << writePolygonFeature->GetGeometryRef()->getGeometryName() << std::endl;
               if(verbose_opt[0]>1)
                 std::cout << "copying new fields write polygon " << std::endl;
               if(verbose_opt[0]>1)
                 std::cout << "write feature has " << writePolygonFeature->GetFieldCount() << " fields" << std::endl;
+              if(verbose_opt[0]>2)
+                std::cout << "geometry of feature (3): " << writePolygonFeature->GetGeometryRef()->getGeometryName() << std::endl;
 
               OGRPoint readPoint;//this readPoint is in SRS of vector layer
               if(find(rule_opt.begin(),rule_opt.end(),"centroid")!=rule_opt.end()){
@@ -1710,7 +1716,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
             int nPointPolygon=0;
             if(createPolygon){
               if(verbose_opt[0]>2)
-                std::cout << "writePolygonFeature in ogrWriter for layer " << ilayer << std::endl;
+                std::cout << "writePolygonFeature in ogrWriter for layer (!)" << ilayer << std::endl;
               // writePolygonFeature = OGRFeature::CreateFeature(writeLayer->GetLayerDefn());
               writePolygonFeature = ogrWriter.createFeature(ilayer);
               //coordinate transform
@@ -1721,8 +1727,14 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               //writePolygonFeature and readFeature are both of type wkbPolygon
               if(writePolygonFeature->SetFrom(readFeature)!= OGRERR_NONE)
                 cerr << "writing feature failed" << std::endl;
+              if(verbose_opt[0]>2)
+                std::cout << "geometry of feature (3): " << writePolygonFeature->GetGeometryRef()->getGeometryName() << std::endl;
               //uncomment if we want to get buffered geometry
-              // writePolygonFeature->SetGeometry(poGeometry);
+              if(verbose_opt[0]>2)
+                std::cout << "geometry of poGeometry (3): " << poGeometry->getGeometryName() << std::endl;
+              writePolygonFeature->SetGeometry(poGeometry);
+              if(verbose_opt[0]>2)
+                std::cout << "geometry of feature (4): " << writePolygonFeature->GetGeometryRef()->getGeometryName() << std::endl;
               if(verbose_opt[0]>1)
                 std::cout << "copying new fields write polygon " << std::endl;
               if(verbose_opt[0]>1)
