@@ -269,14 +269,14 @@ void Jim::warp(Jim& imgWriter, app::AppFactory &theApp)
 
   sourceSpatialRef.SetFromUserInput(getProjectionRef().c_str());
   targetSpatialRef.SetFromUserInput(targetSRS_opt[0].c_str());
-  if(sourceSpatialRef.IsSame(&targetSpatialRef)){
-    if(verbose_opt[0])
-      std::cout << "source SRS is same as target SRS, no warp is needed (just converting):  " << GDALGetDataTypeName(theType) << std::endl;
-    app::AppFactory convertApp(theApp);
-    convertApp.clearOption("t_srs");
-    convertApp.clearOption("resample");
-    Jim::convert(imgWriter,convertApp);
-  }
+  // if(sourceSpatialRef.IsSame(&targetSpatialRef)){
+  //   if(verbose_opt[0])
+  //     std::cout << "source SRS is same as target SRS, no warp is needed (just converting):  " << GDALGetDataTypeName(theType) << std::endl;
+  //   app::AppFactory convertApp(theApp);
+  //   convertApp.clearOption("t_srs");
+  //   convertApp.clearOption("resample");
+  //   Jim::convert(imgWriter,convertApp);
+  // }
   // char *sourceWKT=getProjectionRef().c_str();
   char *targetWKT=0;
   targetSpatialRef.exportToWkt(&targetWKT);
