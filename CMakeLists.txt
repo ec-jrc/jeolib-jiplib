@@ -573,6 +573,7 @@ target_link_libraries(
   )
 
 if(BUILD_WITH_MIALLIB)
+  message(STATUS "Found MIALLIB_LIBRARY: ${MIAL_LIBRARIES}")
   target_include_directories(${JIPLIB_LIB_NAME} PUBLIC
     $<BUILD_INTERFACE:${MIAL_INCLUDE_DIR}
     )
