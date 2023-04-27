@@ -61,7 +61,7 @@ Option names should have regular characters and no white space in them. Some nam
 - short option `h` or long option `help`: shows usage
 - long option `help` shows long help info
 - long option `license`: shows license info
-- long option `version`: shows current version of pktools
+- long option `version`: shows current version of jiplib
 - long option `doxygen`: shows help info in table format, ready to be included in doxygen
 - long option `doxypar`: shows list of parameters for doxygen inline documentation
 

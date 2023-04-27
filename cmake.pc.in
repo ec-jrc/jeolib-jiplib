@@ -5,7 +5,7 @@ includedir=@CMAKE_INSTALL_PREFIX@\include
 
 Name: jiplib
 Description: API library for jiplib
-Requires: pktools, mial
+Requires: mial
 Version: @PACKAGE_VERSION@
 Libs: -L${libdir} -ljiplib
 Cflags: -I${includedir}/jiplib

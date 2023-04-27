@@ -1527,7 +1527,7 @@ CPLErr Jim::registerDriver()
     }
 
     // m_gds->SetMetadataItem( "TIFFTAG_DOCUMENTNAME", m_filename.c_str());
-    // std::string versionString="pktools ";
+    // std::string versionString="jiplib ";
     // versionString+=JIPLIB_VERSION;
     // versionString+=" by Pieter Kempeneers";
     // m_gds->SetMetadataItem( "TIFFTAG_SOFTWARE", versionString.c_str());

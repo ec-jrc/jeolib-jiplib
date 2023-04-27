@@ -37,7 +37,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace app
 {
-#if PKTOOLS_BUILD_WITH_PYTHON==1
+#if JIPLIB_BUILD_WITH_PYTHON==1
 #define MyProgressFunc(dfComplete,pszMessage,pProgressArg) {}
 #else
 #define MyProgressFunc(dfComplete,pszMessage,pProgressArg) pfnProgress(dfComplete,pszMessage,pProgressArg)

@@ -694,7 +694,6 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 /* %template(VectorDouble) std::vector<double>; */
 
 //Parse the header file
-//%include "swig/pktools.i"
 %include "swig/miallib_tmp.i"
 
 %include "op.h"
