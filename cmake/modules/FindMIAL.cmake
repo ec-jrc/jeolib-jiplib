@@ -2,7 +2,8 @@ include(GNUInstallDirs)
 
 find_library(
     MIAL_LIBRARY
-    miallib_generic
+    miallib
+    # miallib_generic
     HINTS ${CMAKE_INSTALL_FULL_LIBDIR}
     PATH_SUFFIXES mial/native-linux-x64/)
 
