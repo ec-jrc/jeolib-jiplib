@@ -1,7 +1,7 @@
 ###############################################################################
 # CMakeLists build script for cmake
 # Author(s): Pieter.Kempeneers@ec.europa.eu
-# Copyright (C) 2016-2022 European Union (Joint Research Centre)
+# Copyright (C) 2016-2023 European Union (Joint Research Centre)
 #
 # This file is part of jiplib.
 
@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.9)
 
 # The project's name and version
 project(jiplib)
