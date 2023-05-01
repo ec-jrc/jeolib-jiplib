@@ -49,8 +49,9 @@ sudo apt install -yq \
 See more information at [miallib](https://github.com/ec-jrc/jeolib-miallib)
 
 # Install
-
 ```
+git clone https://github.com/ec-jrc/jeolib-miallib.git
+cd jeolib-miallib
 mkdir build
 cd build
 cmake ..
