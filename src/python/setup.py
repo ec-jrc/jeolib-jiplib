@@ -28,12 +28,12 @@ from setuptools import find_packages
 
 setup(
     name='jiplib',
-    version='1.1.1',
+    version='1.1.2',
     author_email='pieter.kempeneers@.ec.europa.eu',
     url='https://jeodpp.jrc.ec.europa.eu/apps/gitlab/JIPlib/jiplib',
     license='GPLv3',
     packages=find_packages(),
     package_data={'jiplib': ['_jiplib.so', 'libjiplib.so.1', 'libjiplib.so',
-                             'libjiplib.so.1.1.1', 'libmiallib_generic.so']},
+                             'libjiplib.so.1.1.2', 'libmiallib_generic.so']},
     include_package_data=True
 )

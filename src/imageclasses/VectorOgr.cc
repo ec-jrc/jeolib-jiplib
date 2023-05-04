@@ -182,7 +182,7 @@ OGRErr VectorOgr::open(const std::string& ogrFilename, const std::vector<std::st
 #else
     //open options
     char **papszOptions=NULL;
-    for(std::vector<std::string>::const_iterator optionIt=m_ooptions.begin();optionIt!=m_ooptions.end();++optionIt)
+    for(std::vector<std::string>::const_iterator optionIt=ooptions.begin();optionIt!=ooptions.end();++optionIt)
       papszOptions=CSLAddString(papszOptions,optionIt->c_str());
     papszOptions=CSLAddString(papszOptions,NULL);
     //register the drivers
