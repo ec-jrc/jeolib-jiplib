@@ -43,8 +43,8 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///Default constructor
   VectorOgr(void);
   ///constructor from filename (for reading)
-  VectorOgr(const std::string& filename, const std::vector<std::string>& layernames=std::vector<std::string>(), bool noread=false){
-    open(filename,layernames,noread);
+  VectorOgr(const std::string& filename, const std::vector<std::string>& layernames=std::vector<std::string>(), bool noread=false, const std::vector<std::string>& ooptions=std::vector<std::string>()){
+    open(filename,layernames,noread,ooptions);
   }
   ///constructor from filename (for reading or writing)
   VectorOgr(app::AppFactory &app) : m_gds(NULL), m_access(GDAL_OF_READONLY){m_filename.clear();open(app);}
@@ -184,7 +184,7 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///open a GDAL vector dataset for writing with layers to be pushed later
   OGRErr open(const std::string& filename, const std::string& imageType, unsigned int access=GDAL_OF_UPDATE);
   ///open a GDAL vector dataset for reading
-  OGRErr open(const std::string& filename, const std::vector<std::string>& layernames=std::vector<std::string>(), bool noread=false);
+  OGRErr open(const std::string& filename, const std::vector<std::string>& layernames=std::vector<std::string>(), bool noread=false, const std::vector<std::string>& ooptions=std::vector<std::string>());
   //open a GDAL vector dataset for writing
   OGRErr open(const std::string& filename, const std::vector<std::string>& layernames, const std::string& imageType, const OGRwkbGeometryType& geometryType, OGRSpatialReference* theSRS=NULL, char** options=NULL);
   //open a GDAL vector dataset for writing

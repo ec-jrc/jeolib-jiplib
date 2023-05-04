@@ -171,7 +171,7 @@ void VectorOgr::destroyFeatures(size_t ilayer){
 // }
 
 ///open a GDAL vector dataset for reading
-OGRErr VectorOgr::open(const std::string& ogrFilename, const std::vector<std::string>& layernames, bool noread){
+OGRErr VectorOgr::open(const std::string& ogrFilename, const std::vector<std::string>& layernames, bool noread, const std::vector<std::string>& ooptions){
   try{
     m_filename = ogrFilename;
 #if GDAL_VERSION_MAJOR < 2
@@ -180,17 +180,24 @@ OGRErr VectorOgr::open(const std::string& ogrFilename, const std::vector<std::st
     //open the input OGR datasource. Datasources can be files, RDBMSes, directories full of files, or even remote web services depending on the driver being used. However, the datasource name is always a single string.
     m_gds = OGRSFDriverRegistrar::Open(ogrFilename, FALSE);//FALSE: do not update
 #else
+    //open options
+    char **papszOptions=NULL;
+    for(std::vector<std::string>::const_iterator optionIt=m_ooptions.begin();optionIt!=m_ooptions.end();++optionIt)
+      papszOptions=CSLAddString(papszOptions,optionIt->c_str());
+    papszOptions=CSLAddString(papszOptions,NULL);
     //register the drivers
     GDALAllRegister();
     //open the input OGR datasource. Datasources can be files, RDBMSes, directories full of files, or even remote web services depending on the driver being used. However, the datasource name is always a single string.
-    m_gds = (GDALDataset*) GDALOpenEx(ogrFilename.c_str(), GDAL_OF_VECTOR||GDAL_OF_READONLY, NULL, NULL, NULL);
+    m_gds = (GDALDataset*) GDALOpenEx(ogrFilename.c_str(), GDAL_OF_VECTOR||GDAL_OF_READONLY, NULL, papszOptions, NULL);
+    // m_gds = (GDALDataset*) GDALOpenEx(ogrFilename.c_str(), GDAL_OF_VECTOR||GDAL_OF_READONLY, NULL, NULL, NULL);
 #endif
     if( m_gds == NULL ){
 #if GDAL_VERSION_MAJOR < 2
       std::string errorString="Open failed";
       throw(errorString);
 #else
-      m_gds = (GDALDataset*) GDALOpenEx(ogrFilename.c_str(), GDAL_OF_VECTOR, NULL, NULL, NULL);
+      m_gds = (GDALDataset*) GDALOpenEx(ogrFilename.c_str(), GDAL_OF_VECTOR, NULL, papszOptions, NULL);
+      // m_gds = (GDALDataset*) GDALOpenEx(ogrFilename.c_str(), GDAL_OF_VECTOR, NULL, NULL, NULL);
       if( m_gds == NULL ){
         ostringstream errorStream;
         errorStream << "Open failed for file " << ogrFilename << std::endl;
@@ -263,7 +270,8 @@ OGRErr VectorOgr::open(app::AppFactory& app){
   Optionjl<std::string> layer_opt("ln", "ln", "Layer name");
   Optionjl<std::string> projection_opt("a_srs", "a_srs", "Assign projection");
   Optionjl<std::string> geometryType_opt("gtype", "gtype", "Geometry type","wkbUnknown");
-  Optionjl<std::string> options_opt("co", "co", "format dependent options controlling creation of the output file");
+  Optionjl<std::string> coptions_opt("co", "co", "format dependent options controlling creation of the output file");
+  Optionjl<std::string> ooptions_opt("oo", "oo", "Open option(s) for output file. Multiple options can be specified.");
   Optionjl<std::string> ogrformat_opt("f", "oformat", "Output sample dataset format");
   Optionjl<unsigned int> access_opt("access", "access", "Access (0: GDAL_OF_READ_ONLY, 1: GDAL_OF_UPDATE)",0);
   Optionjl<bool> noread_opt("noread", "noread", "do not read features when opening)",false);
@@ -280,7 +288,8 @@ OGRErr VectorOgr::open(app::AppFactory& app){
     layer_opt.retrieveOption(app);
     projection_opt.retrieveOption(app);
     geometryType_opt.retrieveOption(app);
-    options_opt.retrieveOption(app);
+    coptions_opt.retrieveOption(app);
+    ooptions_opt.retrieveOption(app);
     ogrformat_opt.retrieveOption(app);
     access_opt.retrieveOption(app);
     noread_opt.retrieveOption(app);
@@ -326,7 +335,7 @@ OGRErr VectorOgr::open(app::AppFactory& app){
       std::cout << "open in read access mode" << std::endl;
     bool noread=true;
     //do not read features yet, only initialize layers
-    open(filename_opt[0],layer_opt,noread);
+    open(filename_opt[0], layer_opt, noread, ooptions_opt);
     if(m_gds){
       // for(size_t ilayer=0;ilayer<getGDSLayerCount();++ilayer){
       for(size_t ilayer=0;ilayer<getLayerCount();++ilayer){
@@ -371,14 +380,14 @@ OGRErr VectorOgr::open(app::AppFactory& app){
     if(ogrformat_opt.empty())
       ogrformat_opt.push_back("SQLite");
     char **papszOptions=NULL;
-    for(std::vector<std::string>::const_iterator optionIt=options_opt.begin();optionIt!=options_opt.end();++optionIt){
+    for(std::vector<std::string>::const_iterator optionIt=coptions_opt.begin();optionIt!=coptions_opt.end();++optionIt){
       papszOptions=CSLAddString(papszOptions,optionIt->c_str());
     }
     if(verbose_opt[0])
       std::cout << "open in update mode" << std::endl;
     if(layer_opt.size()){
       if(projection_opt.size()){
-        return(open(filename_opt[0], layer_opt, ogrformat_opt[0], geometryType_opt[0], projection_opt[0],papszOptions));
+        return(open(filename_opt[0], layer_opt, ogrformat_opt[0], geometryType_opt[0], projection_opt[0], papszOptions));
       }
       else{
         OGRwkbGeometryType gType=string2geotype(geometryType_opt[0]);
