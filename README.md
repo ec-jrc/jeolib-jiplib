@@ -82,7 +82,7 @@ Then build and install jiplib locally (replacing the same directories for `MIAL_
 ```
 mkdir build
 cd build
-cmake -DMIAL_INCLUDE_DIR=/local/miallib/install/dir/include -DMIAL_LIBRARY=/local/miallib/install/dir/lib/libmiallib.so -DCMAKE_INSTALL_PREFIX=/local/jiplib/install/dir -DPYTHON_INSTALL_DIR=/local/jiplib/python/dist/dir ..
+cmake -DMIAL_INCLUDE_DIR=/local/miallib/install/dir/include/miallib -DMIAL_LIBRARY=/local/miallib/install/dir/lib/libmiallib.so -DCMAKE_INSTALL_PREFIX=/local/jiplib/install/dir -DPYTHON_INSTALL_DIR=/local/jiplib/python/dist/dir ..
 make
 make install
 ```
