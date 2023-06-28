@@ -29,6 +29,7 @@ jiplib is released under the [GPLv3](https://www.gnu.org/licenses) license.
 
 ## Install dependency libraries (example for Debian based system using apt)
 
+### Install dependencies from the repository
 ```
 sudo apt install -yq \
   build-essential \
@@ -44,14 +45,14 @@ sudo apt install -yq \
   swig
 ```
 
- ## miallib
+### Install miallib
 
 See more information at [miallib](https://github.com/ec-jrc/jeolib-miallib)
 
-# Install
+# Install jiplib
 ```
-git clone https://github.com/ec-jrc/jeolib-miallib.git
-cd jeolib-miallib
+git clone https://github.com/ec-jrc/jeolib-jiplib.git
+cd jeolib-jiplib
 mkdir build
 cd build
 cmake ..
@@ -59,7 +60,7 @@ make
 sudo make install
 ```
 
-# Install without sudo rights
+# How to install without sudo rights
 
 Download the source code from [miallib](https://github.com/ec-jrc/jeolib-miallib) to a local directory:
 ```
