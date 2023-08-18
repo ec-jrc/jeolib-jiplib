@@ -3,7 +3,7 @@
 usage()
 {
     cat <<EOF
-Usage: cmake-config [OPTIONS]
+Usage: jiplib-config [OPTIONS]
 Options:
      [--prefix]
      [--version]

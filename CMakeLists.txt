@@ -184,7 +184,7 @@ function(gdal_find_version _version)
     set(${_version} ${MAJOR}.${MINOR}.${REV} PARENT_SCOPE)
 endfunction(gdal_find_version)
 
-set(GDAL3 OFF CACHE BOOL "set ON for GDAL3")
+set(GDAL3 ON CACHE BOOL "set ON for GDAL3")
 if(GDAL3)
   find_package(GDAL 3.00 REQUIRED)
 else(GDAL3)
@@ -246,10 +246,20 @@ configure_file (
   "config_jiplib.h"
   )
 
-configure_file ( "cmake-config.in" "${CMAKE_CURRENT_BINARY_DIR}/jiplib-config" @ONLY )
+# configure a header file to pass some of the CMake settings to the source code
+configure_file (
+  "cmake-config.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/jiplib-config"
+  @ONLY
+  )
+
 add_definitions(-DHAVE_CONFIG_H)
 
-configure_file ( "cmake.pc.in" "jiplib.pc"  @ONLY)
+configure_file (
+  "cmake.pc.in"
+  "jiplib.pc"
+  @ONLY
+  )
 
 
 

@@ -67,39 +67,40 @@ Download the source code from [miallib](https://github.com/ec-jrc/jeolib-miallib
 /local/miallib/dir/jeolib-miallib
 ```
 
-and install [miallib](https://github.com/ec-jrc/jeolib-miallib) locally:
+install [miallib](https://github.com/ec-jrc/jeolib-miallib) locally in `/home/user/install`:
 
 ```
-cd /local/miallib/dir/jeolib-miallib
+git clone https://github.com/ec-jrc/jeolib-miallib.git
+cd jeolib-miallib
 mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=/local/miallib/install/dir ..
-make
-make install
+cmake -DCMAKE_INSTALL_PREFIX=/home/user/install ..
+cmake --build .
+cmake --install .
 ```
 
-Then build and install jiplib locally (replacing the same directories for `MIAL_INCLUDE_DIR` for `MIAL_LIBRARY` appropriately as used above):
+Then build and install jiplib locally:
 
 ```
+git clone https://github.com/ec-jrc/jeolib-jiplib.git
+cd jeolib-jiplib
 mkdir build
 cd build
-cmake -DMIAL_INCLUDE_DIR=/local/miallib/install/dir/include/miallib -DMIAL_LIBRARY=/local/miallib/install/dir/lib/libmiallib.so -DCMAKE_INSTALL_PREFIX=/local/jiplib/install/dir -DPYTHON_INSTALL_DIR=/local/jiplib/python/dist/dir ..
-make
-make install
+cmake -DCMAKE_INSTALL_PREFIX=/home/user/install -DPYTHON_INSTALL_DIR=/home/user/install/python/dist/dir ..
+cmake --build .
+cmake --install .
 ```
-
-For `CMAKE_INSTALL_PREFIX` and `PYTHON_INSTALL_DIR` use any directory where you have write access.
 
 Then export the `LD_LIBRARY_PATH` environment variable so that the libraries can be found:
 
 ```
-export LD_LIBRARY_PATH=/local/miallib/install/dir/:/local/jiplib/install/dir
+export LD_LIBRARY_PATH=/home/user/install/jiplib/lib:/home/user/install/miallib/lib:
 ```
 
 Finally adapt the `PYTHONPATH`:
 
 ```
-export PYTHONPATH=/local/jiplib/python/dist/dir:$PYTHONPATH
+export PYTHONPATH=/home/user/install/python/dist/dir:$PYTHONPATH
 ```
 
 # Test the installation
