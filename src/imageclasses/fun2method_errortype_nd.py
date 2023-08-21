@@ -155,6 +155,7 @@ def fun2method(inputfile, outputfile_basename):
         catch(...){
         throw;
         }
+        return(CE_None);
 }\n''')
 
     ifp.close()
