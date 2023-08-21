@@ -240,27 +240,48 @@ endif(PROCESS_IN_PARALLEL)
 ###############################################################################
 # Setup configure file
 
+include(GNUInstallDirs)
+set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/jiplib
+  CACHE PATH "Location of header files" )
+set(SYSCONFIG_INSTALL_DIR ${CMAKE_INSTALL_SYSCONFDIR}/jiplib
+  CACHE PATH "Location of configuration files" )
+
 # configure a header file to pass some of the CMake settings to the source code
 configure_file (
   "cmake-config.h.in"
   "config_jiplib.h"
   )
 
-# configure a header file to pass some of the CMake settings to the source code
-configure_file (
-  "cmake-config.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/jiplib-config"
-  @ONLY
-  )
+# # configure a header file to pass some of the CMake settings to the source code
+# configure_file (
+#   "cmake-config.in"
+#   "${CMAKE_CURRENT_BINARY_DIR}/jiplib-config"
+#   @ONLY
+#   )
 
 add_definitions(-DHAVE_CONFIG_H)
 
-configure_file (
-  "cmake.pc.in"
-  "jiplib.pc"
-  @ONLY
-  )
+# configure_file (
+#   "cmake.pc.in"
+#   "jiplib.pc"
+#   @ONLY
+#   )
 
+#Generating Package Files
+include(CMakePackageConfigHelpers)
+configure_package_config_file(JiplibConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/JiplibConfig.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jiplib
+  PATH_VARS INCLUDE_INSTALL_DIR SYSCONFIG_INSTALL_DIR)
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/JiplibConfigVersion.cmake
+  VERSION ${JIPLIB_VERSION}
+  COMPATIBILITY SameMajorVersion )
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/JiplibConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/JiplibConfigVersion.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jiplib )
+
+configure_file ( "cmake.pc.in" "jiplib.pc"  @ONLY)
 
 
 # Name of C++ library
