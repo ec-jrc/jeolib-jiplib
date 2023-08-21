@@ -2643,8 +2643,6 @@ int svm_save_model(const std::string &model_file_name, const struct svm_model *m
 
 int svm_serialize_model(std::ostream &outputStream, const struct svm_model *model, const std::vector<double> &offset, const std::vector<double> &scale, const std::map<std::string,short> &classValueMap, const std::vector<std::string> &nameVector, const std::vector<std::string> &bandNames)//pk 11/04/2018{
 {
-  Json::StyledWriter styledWriter;
-
   Json::Value model_json;
   const svm_parameter& param = model->param;
 
@@ -2770,7 +2768,8 @@ int svm_serialize_model(std::ostream &outputStream, const struct svm_model *mode
   model_json["SV_coef"]=SV_coefs;
   model_json["SV_node"]=SV_nodes;
 
-  outputStream << styledWriter.write(model_json);
+  Json::StreamWriterBuilder builder;
+  outputStream << Json::writeString(builder, model_json) << std::endl;
   return 0;
 }
 

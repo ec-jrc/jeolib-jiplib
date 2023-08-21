@@ -736,6 +736,7 @@ CPLErr Jim::close()
     GDALClose(m_gds);
   }
   reset();
+  return(CE_None);
 }
 
 /**
@@ -949,8 +950,9 @@ CPLErr Jim::setGeoTransform(const std::vector<double>& gt){
     if(m_gds&&m_access==WRITE)
       return(m_gds->SetGeoTransform(&m_gt[0]));
   }
-  else
-    return(CE_Warning);
+  // else
+  //   return(CE_Warning);
+  return(CE_Warning);
 }
 
 /**
@@ -970,6 +972,7 @@ CPLErr Jim::copyGeoReference(const Jim& imgSrc)
   imgSrc.getGeoTransform(gt);
   setGeoTransform(gt);
   setProjection(imgSrc.getProjection());
+  return(CE_None);
 }
 
 /**
@@ -1426,8 +1429,8 @@ bool Jim::covers(double ulx, double  uly, double lrx, double lry, std::string co
   switch(coverMap[coverType]){
   case(cover::ALL_COVERED):
     return((theULX<ulximg)&&(theULY>ulyimg)&&(theLRX>lrximg)&&(theLRY<lryimg));
-  case(cover::ALL_CENTER):
-    break;
+  // case(cover::ALL_CENTER):
+  //   break;
   case(cover::ALL_TOUCHED):
   default:
     return((ulximg < theLRX)&&(lrximg > theULX)&&(lryimg < theULY)&&(ulyimg > theLRY));
@@ -3028,6 +3031,7 @@ CPLErr Jim::writeNewBlock(int row, int band)
 
 CPLErr Jim::write(){
   //write, but do not reset
+  CPLErr returnValue=CE_None;
   if(m_data.size()&&m_filename.size()){
     for(int iband=0;iband<nrOfBand();++iband)
       writeNewBlock(nrOfRow(),iband);
@@ -3041,6 +3045,7 @@ CPLErr Jim::write(){
     GDALClose(m_gds);
   m_gds=0;
   // reset();
+  return(returnValue);//GDAL was closed
 }
 
 CPLErr Jim::writeDataPlanes(){
@@ -3347,8 +3352,15 @@ std::string Jim::jim2json(){
   std::ostringstream os;
   os << iimg++;
   custom["0"]=image;
-  Json::FastWriter fastWriter;
-  return(fastWriter.write(custom));
+
+  Json::StreamWriterBuilder builder;
+  builder["indentation"] = "";  // assume default for comments is None
+  std::string str = Json::writeString(builder, custom);
+  return(str);
+  //deprecated:
+  // Json::Value custom; // population is left as an exercise for the reader
+  // std::string str = Json::FastWriter().write(custom);
+  // return(str);
 }
 
 std::shared_ptr<Jim> Jim::clone(bool copyData) {

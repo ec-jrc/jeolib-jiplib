@@ -223,7 +223,7 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///get access mode
   unsigned int getAccess(){return m_access;};
   ///set access mode
-  OGRErr setAccess(unsigned int theAccess){m_access=theAccess;};
+  OGRErr setAccess(unsigned int theAccess){m_access=theAccess; return(OGRERR_NONE);};
   ///set access mode using a string argument
   OGRErr setAccess(std::string accessString){
     if(accessString=="GDAL_OF_READONLY"){
@@ -232,6 +232,7 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
     if(accessString=="GDAL_OF_UPDATE"){
       m_access=GDAL_OF_UPDATE;
     }
+    return(OGRERR_NONE);
   }
   ///get number of layers
   size_t getGDSLayerCount() const {
@@ -376,6 +377,7 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///resize features
   OGRErr resize(size_t theSize, size_t ilayer=0){
     m_features[ilayer].resize(theSize);
+    return(OGRERR_NONE);
   };
   ///create a new feature
   OGRFeature* createFeature(size_t ilayer=0){OGRFeature* newFeature=OGRFeature::CreateFeature(getLayer(ilayer)->GetLayerDefn());return(newFeature);};
@@ -386,11 +388,11 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///Assignment operator
   /* VectorOgr& operator=(VectorOgr& other); */
   ///Set rectangular spatial filter (warning: mind order, unlike GDAL I do not use minX, minY, maxX, maxY!!!)
-  OGRErr setSpatialFilterRect(double ulx, double uly, double lrx, double lry, size_t ilayer=0){m_layer[ilayer]->SetSpatialFilterRect(ulx,lry,lrx,uly);};
+  OGRErr setSpatialFilterRect(double ulx, double uly, double lrx, double lry, size_t ilayer=0){m_layer[ilayer]->SetSpatialFilterRect(ulx,lry,lrx,uly);return(OGRERR_NONE);};
   ///Set spatial filter
-  OGRErr setSpatialFilter(OGRGeometry* spatialFilter=NULL, size_t ilayer=0){m_layer[ilayer]->SetSpatialFilter(spatialFilter);};
+  OGRErr setSpatialFilter(OGRGeometry* spatialFilter=NULL, size_t ilayer=0){m_layer[ilayer]->SetSpatialFilter(spatialFilter);return(OGRERR_NONE);};
   ///Set attribute filter
-  OGRErr setAttributeFilter(const std::string& attributeFilter, size_t ilayer=0){if(attributeFilter.size()) m_layer[ilayer]->SetAttributeFilter(attributeFilter.c_str());else m_layer[ilayer]->SetAttributeFilter(NULL);};
+  OGRErr setAttributeFilter(const std::string& attributeFilter, size_t ilayer=0){if(attributeFilter.size()) m_layer[ilayer]->SetAttributeFilter(attributeFilter.c_str());else m_layer[ilayer]->SetAttributeFilter(NULL);return(OGRERR_NONE);};
   ///clone feature. The newly created feature is owned by the caller, and will have it's own reference to the OGRFeatureDefn.
   OGRFeature* cloneFeature(unsigned int index, size_t ilayer=0);
   ///get feature reference (feature should not be deleted)

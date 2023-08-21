@@ -453,4 +453,5 @@ CPLErr Jim::diff(Jim& imgReference, app::AppFactory& app){
     std::cout << predefinedString << std::endl;
     throw;
   }
+  return(CE_None);
 }

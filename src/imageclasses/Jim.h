@@ -421,6 +421,7 @@ class Jim : public std::enable_shared_from_this<Jim>
         m_scale[iband]=1.0;
     }
     m_scale[band]=theScale;
+    return CE_None;
   };
   ///Set offset for a specific band when writing the raster data values. The scaling and offset are applied on a per band basis. You need to set the offset for each band. If the image data are cached (class was created with memory>0), the offset is applied on the cached memory.
   CPLErr setOffset(double theOffset, int band=0){
@@ -430,9 +431,10 @@ class Jim : public std::enable_shared_from_this<Jim>
         m_offset[iband]=0.0;
     }
     m_offset[band]=theOffset;
+    return(CE_None);
   };
   ///set externalData
-  CPLErr setExternalData(bool flag){m_externalData=flag;};
+  CPLErr setExternalData(bool flag){m_externalData=flag; return CE_None;};
   bool getExternalData() const {return(m_externalData);};
   ///Open image from allocated memory instead of from file. This will allow in place image processing in memory (streaming). Notice that an extra call must be made to set the geotranform and projection. This function has not been tested yet!
   //void open(void* dataPointer, int ncol, int nrow, int nband, const GDALDataType& dataType);
@@ -698,15 +700,15 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///Read all pixels from image in memory for specific dataset band
   CPLErr readDataDS(int band, int ds_band);
   ///Read all pixels from image in memory for specific band
-  CPLErr readData(int band){readDataDS(band,band);};
+  CPLErr readData(int band){return readDataDS(band,band);};
   ///Read all pixels from image in memory
   CPLErr readData();
   ///Read data using the arguments from AppFactory
   /* CPLErr readData(app::AppFactory &app); */
   ///Read a single pixel cell value at a specific column and row for a specific band (all indices start counting from 0)
-  template<typename T> void readData(T& value, int col, int row, int band=0);
-  template<typename T> void readData3D(T& value, std::size_t col, std::size_t row, std::size_t plane, std::size_t band=0);
-  template<typename T> void readData3D(std::vector<T>& buffer, std::size_t minCol, std::size_t maxCol, std::size_t row, std::size_t plane, std::size_t band=0);
+  template<typename T> CPLErr readData(T& value, int col, int row, int band=0);
+  template<typename T> CPLErr readData3D(T& value, std::size_t col, std::size_t row, std::size_t plane, std::size_t band=0);
+  template<typename T> CPLErr readData3D(std::vector<T>& buffer, std::size_t minCol, std::size_t maxCol, std::size_t row, std::size_t plane, std::size_t band=0);
   ///Return a single pixel cell value at a specific column and row for a specific band (all indices start counting from 0)
   double readData(int col, int row, int band=0){
     double value;
@@ -724,10 +726,10 @@ class Jim : public std::enable_shared_from_this<Jim>
   template<typename T> CPLErr readData(std::vector<T>& buffer, int minCol, int maxCol, double row, int band, RESAMPLE resample);
   ///Read pixel cell values for a range of columns and rows for a specific band (all indices start counting from 0). The buffer is a two dimensional vector (stl vector of stl vector) representing [row][col].
   template<typename T> CPLErr readDataBlock(Vector2d<T>& buffer2d, int minCol, int maxCol, int minRow, int maxRow, int band=0);
-  template<typename T> void readDataBlock3D(Vector2d<T>& buffer2d, std::size_t minCol, std::size_t maxCol, std::size_t minRow, std::size_t maxRow, std::size_t plane, std::size_t band=0);
+  template<typename T> CPLErr readDataBlock3D(Vector2d<T>& buffer2d, std::size_t minCol, std::size_t maxCol, std::size_t minRow, std::size_t maxRow, std::size_t plane, std::size_t band=0);
   ///Read pixel cell values for a range of columns and rows for a specific band (all indices start counting from 0). The buffer is a one dimensional stl vector representing all pixel values read starting from upper left to lower right.
   template<typename T> CPLErr readDataBlock(std::vector<T>& buffer , int minCol, int maxCol, int minRow, int maxRow, int band=0);
-  template<typename T> void readDataBlock3D(std::vector<T>& buffer , std::size_t minCol, std::size_t maxCol, std::size_t minRow, std::size_t maxRow, std::size_t plane, std::size_t band=0);
+  template<typename T> CPLErr readDataBlock3D(std::vector<T>& buffer , std::size_t minCol, std::size_t maxCol, std::size_t minRow, std::size_t maxRow, std::size_t plane, std::size_t band=0);
   ///Read pixel cell values for a range of columns, rows and bands for a specific band (all indices start counting from 0). The buffer is a one dimensional stl vector representing all pixel values read starting from upper left to lower right, band interleaved.
   template<typename T> CPLErr readData(std::vector<T>& buffer, int row, int band=0);
   ///Read pixel cell values for an entire row for a specific band (all indices start counting from 0). The row counter can be floating, in which case a resampling is applied at the row level. You still must apply the resampling at column level. This function will be deprecated, as the GDAL API now supports rasterIO resampling (see http://www.gdal.org/structGDALRasterIOExtraArg.html)
@@ -788,7 +790,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   CPLErr open(app::AppFactory &app);
 
   ///Set the image description (only for GeoTiff format: TIFFTAG_IMAGEDESCRIPTION)
-  CPLErr setImageDescription(const std::string& imageDescription){m_gds->SetMetadataItem( "TIFFTAG_IMAGEDESCRIPTION",imageDescription.c_str());};
+  CPLErr setImageDescription(const std::string& imageDescription){m_gds->SetMetadataItem( "TIFFTAG_IMAGEDESCRIPTION",imageDescription.c_str()); return(CE_None);};
 
   ///Write a single pixel cell value at a specific column and row for a specific band (all indices start counting from 0)
   template<typename T> CPLErr writeData(const T& value, int col, int row, int band=0);
@@ -1221,7 +1223,7 @@ class Jim : public std::enable_shared_from_this<Jim>
   ///Read new block for a specific band in the dataset in specified band of cache (defined by m_begin and m_end) in band ()
   CPLErr readNewBlockDS(int row, int band, int ds_band);
   ///Read new block in cache (defined by m_begin and m_end)
-  CPLErr readNewBlock(int row, int band){readNewBlockDS(row,band,band);};
+  CPLErr readNewBlock(int row, int band){return readNewBlockDS(row,band,band);};
   ///Write new block from cache (defined by m_begin and m_end)
   CPLErr writeNewBlock(int row, int band);
 
@@ -1234,8 +1236,9 @@ class Jim : public std::enable_shared_from_this<Jim>
 #endif
 };
 
-template<typename T> void Jim::readData(T& value, int col, int row, int band)
+template<typename T> CPLErr Jim::readData(T& value, int col, int row, int band)
 {
+  CPLErr returnValue=CE_None;
   try{
     if(nrOfBand()<=band){
       std::string errorString="Error: band number exceeds number of bands in input image";
@@ -1267,7 +1270,7 @@ template<typename T> void Jim::readData(T& value, int col, int row, int band)
       }
       if(row<m_begin[band]||row>=m_end[band]){
         if(m_filename.size())
-          readNewBlock(row,band);
+          returnValue = readNewBlock(row,band);
       }
       int index=(row-m_begin[band])*nrOfCol()+col;
       switch(getDataType()){
@@ -1303,7 +1306,7 @@ template<typename T> void Jim::readData(T& value, int col, int row, int band)
       //fetch raster band
       GDALRasterBand  *poBand;
       poBand = m_gds->GetRasterBand(band+1);//GDAL uses 1 based index
-      poBand->RasterIO(GF_Read,col,row,1,1,&value,1,1,type2GDAL<T>(),0,0);
+      returnValue = poBand->RasterIO(GF_Read,col,row,1,1,&value,1,1,type2GDAL<T>(),0,0);
       dvalue=theScale*value+theOffset;
       value=static_cast<T>(dvalue);
     }
@@ -1315,9 +1318,10 @@ template<typename T> void Jim::readData(T& value, int col, int row, int band)
   catch(...){
     throw;
   }
+  return(returnValue);
 }
 
-template<typename T> void Jim::readData3D(T& value, std::size_t col, std::size_t row, std::size_t plane, std::size_t band)
+template<typename T> CPLErr Jim::readData3D(T& value, std::size_t col, std::size_t row, std::size_t plane, std::size_t band)
 {
   try{
     if(nrOfBand()<=band){
@@ -1399,9 +1403,10 @@ template<typename T> void Jim::readData3D(T& value, std::size_t col, std::size_t
   catch(...){
     throw;
   }
+  return(CE_None);
 }
 
-template<typename T> void Jim::readData3D(std::vector<T>& buffer, std::size_t minCol, std::size_t maxCol, std::size_t row, std::size_t plane, std::size_t band)
+template<typename T> CPLErr Jim::readData3D(std::vector<T>& buffer, std::size_t minCol, std::size_t maxCol, std::size_t row, std::size_t plane, std::size_t band)
 {
   try{
     if(nrOfBand()<=band){
@@ -1490,6 +1495,7 @@ template<typename T> void Jim::readData3D(std::vector<T>& buffer, std::size_t mi
   catch(...){
     throw;
   }
+  return(CE_None);
 }
 
 /**
@@ -1501,6 +1507,7 @@ template<typename T> void Jim::readData3D(std::vector<T>& buffer, std::size_t mi
  **/
 template<typename T> CPLErr Jim::readData(std::vector<T>& buffer, int minCol, int maxCol, int row, int band)
 {
+  CPLErr returnValue=CE_None;
   try{
     if(nrOfBand()<=band){
       std::string errorString="Error: band number exceeds number of bands in input image";
@@ -1534,7 +1541,6 @@ template<typename T> CPLErr Jim::readData(std::vector<T>& buffer, int minCol, in
       std::string errorString="Error: row number exceeds number of rows in input image";
       throw(errorString);
     }
-    CPLErr returnValue=CE_None;
     double theScale=1;
     double theOffset=0;
     if(m_scale.size()>band||m_offset.size()>band){
@@ -1694,10 +1700,11 @@ template<typename T> CPLErr Jim::readDataBlock(Vector2d<T>& buffer2d, int minCol
   return(returnValue);
 }
 
-template<typename T> void Jim::readDataBlock3D(Vector2d<T>& buffer2d, std::size_t minCol, std::size_t maxCol, std::size_t minRow, std::size_t maxRow, std::size_t plane, std::size_t band){
+template<typename T> CPLErr Jim::readDataBlock3D(Vector2d<T>& buffer2d, std::size_t minCol, std::size_t maxCol, std::size_t minRow, std::size_t maxRow, std::size_t plane, std::size_t band){
+  CPLErr returnValue=CE_None;
   buffer2d.resize(maxRow-minRow+1,maxCol-minCol+1);
   typename std::vector<T> buffer;
-  readDataBlock3D(buffer,minCol,maxCol,minRow,maxRow,plane,band);
+  returnValue = readDataBlock3D(buffer,minCol,maxCol,minRow,maxRow,plane,band);
   typename std::vector<T>::const_iterator startit=buffer.begin();
   typename std::vector<T>::const_iterator endit=startit;
   for(int irow=minRow;irow<=maxRow;++irow){
@@ -1706,6 +1713,7 @@ template<typename T> void Jim::readDataBlock3D(Vector2d<T>& buffer2d, std::size_
     buffer2d[irow-minRow].assign(startit,endit);
     startit+=maxCol-minCol+1;
   }
+  return(returnValue);
 }
 
 /**
@@ -1808,8 +1816,9 @@ template<typename T> CPLErr Jim::readDataBlock(std::vector<T>& buffer, int minCo
   }
 }
 
-template<typename T> void Jim::readDataBlock3D(std::vector<T>& buffer, std::size_t minCol, std::size_t maxCol, std::size_t minRow, std::size_t maxRow, std::size_t plane, std::size_t band)
+template<typename T> CPLErr Jim::readDataBlock3D(std::vector<T>& buffer, std::size_t minCol, std::size_t maxCol, std::size_t minRow, std::size_t maxRow, std::size_t plane, std::size_t band)
 {
+  CPLErr returnValue=CE_None;
   try{
     double theScale=1;
     double theOffset=0;
@@ -1885,6 +1894,7 @@ template<typename T> void Jim::readDataBlock3D(std::vector<T>& buffer, std::size
   catch(...){
     throw;
   }
+  return(returnValue);
 }
 
 /**

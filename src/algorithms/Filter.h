@@ -50,11 +50,15 @@ namespace filter
 
     static const gsl_wavelet_type* getWaveletType(const std::string waveletType){
       if(waveletType=="daubechies") return(gsl_wavelet_daubechies);
-      if(waveletType=="daubechies_centered") return(gsl_wavelet_daubechies_centered);
-      if(waveletType=="haar") return(gsl_wavelet_haar);
-      if(waveletType=="haar_centered") return(gsl_wavelet_haar_centered);
-      if(waveletType=="bspline") return(gsl_wavelet_bspline);
-      if(waveletType=="bspline_centered") return(gsl_wavelet_bspline_centered);
+      else if(waveletType=="daubechies_centered") return(gsl_wavelet_daubechies_centered);
+      else if(waveletType=="haar") return(gsl_wavelet_haar);
+      else if(waveletType=="haar_centered") return(gsl_wavelet_haar_centered);
+      else if(waveletType=="bspline") return(gsl_wavelet_bspline);
+      else if(waveletType=="bspline_centered") return(gsl_wavelet_bspline_centered);
+      else{
+        std::string errorString="Error: wavelet type not supported";
+        throw(errorString);
+      }
     }
     static FILTER_TYPE getFilterType(const std::string filterType){
       std::map<std::string, FILTER_TYPE> m_filterMap;

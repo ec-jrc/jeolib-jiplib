@@ -61,21 +61,23 @@ JimList::JimList(unsigned int theSize){
 ///constructor using a json string coming from a custom colllection
 JimList& JimList::open(const std::string& strjson){
   Json::Value custom;
-  Json::Reader reader;
-  bool parsedSuccess=reader.parse(strjson,custom,false);
-  if(parsedSuccess){
-    for(int iimg=0;iimg<custom["size"].asInt();++iimg){
-      std::ostringstream os;
-      os << iimg;
-      Json::Value image=custom[os.str()];
-      std::string filename=image["path"].asString();
-      //todo: open without reading?
-      app::AppFactory theApp;
-      theApp.setLongOption("filename",filename);
-      std::shared_ptr<Jim> theImage=Jim::createImg(theApp);
-      pushImage(theImage);
-    }
+  std::istringstream sin(strjson);
+  sin >> custom;
+  // Json::Reader reader;
+  // bool parsedSuccess=reader.parse(strjson,custom,false);
+  // if(parsedSuccess){
+  for(int iimg=0;iimg<custom["size"].asInt();++iimg){
+    std::ostringstream os;
+    os << iimg;
+    Json::Value image=custom[os.str()];
+    std::string filename=image["path"].asString();
+    //todo: open without reading?
+    app::AppFactory theApp;
+    theApp.setLongOption("filename",filename);
+    std::shared_ptr<Jim> theImage=Jim::createImg(theApp);
+    pushImage(theImage);
   }
+  // }
   return(*this);
 }
 
@@ -136,8 +138,13 @@ std::string JimList::jl2json(){
     os << iimg++;
     custom[os.str()]=image;
   }
-  Json::FastWriter fastWriter;
-  return(fastWriter.write(custom));
+  Json::StreamWriterBuilder builder;
+  builder["indentation"] = "";  // assume default for comments is None
+  std::string str = Json::writeString(builder, custom);
+  return(str);
+  //deprecated:
+  // Json::FastWriter fastWriter;
+  // return(fastWriter.write(custom));
 }
 JimList& JimList::selectGeo(double ulx, double uly, double lrx, double lry){
   /* std::vector<std::shared_ptr<Jim>>::iterator it=begin(); */

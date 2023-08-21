@@ -52,12 +52,15 @@ namespace app
     AppFactory(Json::Value &jsonobj){json2app(jsonobj);};
     AppFactory(const std::string &jsonAppString){
       Json::Value root;
-      Json::Reader reader;
-      bool parsedSuccess = reader.parse(jsonAppString, root, false);
-      if( parsedSuccess )
-        {
-          json2app(root);
-        }
+      std::istringstream sin(jsonAppString);
+      sin >> root;
+      json2app(root);
+      // Json::Reader reader;
+      // bool parsedSuccess = reader.parse(jsonAppString, root, false);
+      // if( parsedSuccess )
+      //   {
+      //     json2app(root);
+      //   }
     }
     ///copy constructor
     AppFactory(const AppFactory &theApp){

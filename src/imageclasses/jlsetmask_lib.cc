@@ -621,7 +621,7 @@ void Jim::d_setMask(VectorOgr& ogrReader, app::AppFactory& app){
       imgMask->setProjection(getProjectionRef());
       imgMask->d_rasterizeBuf(ogrReader,nodata_opt[0],eoption_opt,layernames_opt);
       //test
-      std::cout << imgMask->getMax() << std::endl;
+      // std::cout << imgMask->getMax() << std::endl;
       d_setMask(*imgMask,*imgMask);
 
       // switch(getDataType()){

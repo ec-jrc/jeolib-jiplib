@@ -400,6 +400,7 @@ OGRErr VectorOgr::open(app::AppFactory& app){
   }
   if(verbose_opt[0])
     std::cout << "Opened vector dataset" << std::endl;
+  return(OGRERR_NONE);
 }
 
 ///prepare driver for writing vector dataset
@@ -668,7 +669,6 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
       //todo: check if needed?
       // ogrWriter.destroyEmptyFeatures(ilayer);
     }
-    return(OGRERR_NONE);
   }
   catch(std::string errorString){
     std::cerr << "Error: " << errorString << std::endl;
@@ -681,6 +681,7 @@ OGRErr VectorOgr::intersect(OGRPolygon *pGeom, VectorOgr& ogrWriter, app::AppFac
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
   ogrWriter.destroyEmptyFeatures();
 #endif
+  return(OGRERR_NONE);
 }
 
 OGRErr VectorOgr::intersect(const Jim& aJim, VectorOgr& ogrWriter, app::AppFactory& app){
@@ -778,7 +779,6 @@ OGRErr VectorOgr::convexHull(VectorOgr& ogrWriter, app::AppFactory& app){
       //todo:check if need to destroy feature?
       // destroyEmptyFeatures(ilayer);
     }
-    return(OGRERR_NONE);
   }
   catch(std::string errorString){
     std::cerr << "Error: " << errorString << std::endl;
@@ -788,26 +788,27 @@ OGRErr VectorOgr::convexHull(VectorOgr& ogrWriter, app::AppFactory& app){
     std::cerr << "Error: undefined" << std::endl;
     throw;
   }
+  return(OGRERR_NONE);
 }
 
-  OGRErr VectorOgr::createField(const std::string& fieldname, const OGRFieldType& fieldType, size_t ilayer){
+OGRErr VectorOgr::createField(const std::string& fieldname, const OGRFieldType& fieldType, size_t ilayer){
   OGRFieldDefn oField( fieldname.c_str(), fieldType );
   if(fieldType==OFTString)
     oField.SetWidth(32);
   return(getLayer(ilayer)->CreateField( &oField ));
 }
 
-  ///create field
- OGRErr VectorOgr::createField(OGRFieldDefn*	poField, size_t ilayer){
-   if(! m_gds){
-      std::cerr << "Error: createField failed, no dataset" << std::endl;
-      std::string errorString="createField failed, no dataset";
-      throw(errorString);
-      // return(OGRERR_FAILURE);
-    }
-    m_gds->GetLayer(ilayer)->CreateField(poField);
-    return(OGRERR_NONE);
+///create field
+OGRErr VectorOgr::createField(OGRFieldDefn*	poField, size_t ilayer){
+  if(! m_gds){
+    std::cerr << "Error: createField failed, no dataset" << std::endl;
+    std::string errorString="createField failed, no dataset";
+    throw(errorString);
+    // return(OGRERR_FAILURE);
   }
+  m_gds->GetLayer(ilayer)->CreateField(poField);
+  return(OGRERR_NONE);
+}
 
 ///copy fields from other VectorOgr instance
 OGRErr VectorOgr::copyFields(const VectorOgr& vectorOgr,const vector<std::string>& fieldnames, size_t fromLayer, size_t toLayer){
@@ -842,12 +843,12 @@ OGRErr VectorOgr::copyFields(const VectorOgr& vectorOgr,const vector<std::string
         }
       }
     }
-    return(OGRERR_NONE);
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
     throw;
   }
+  return(OGRERR_NONE);
 }
 
 ///perform a deep copy, including layers and features
@@ -1154,29 +1155,29 @@ bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, si
 // }
 
 ///set feature to the object
- OGRErr VectorOgr::setFeature(unsigned int index, OGRFeature *poFeature, size_t ilayer){
-   if(index>=0&&index<m_features[ilayer].size()){
-     m_features[ilayer][index]=poFeature;
-   }
-   else{
-     std::cerr << "Error: setFeature failed" << std::endl;
-     std::string errorString="setFeature failed";
-     throw(errorString);
-   }
-   return(OGRERR_NONE);
+OGRErr VectorOgr::setFeature(unsigned int index, OGRFeature *poFeature, size_t ilayer){
+  if(index>=0&&index<m_features[ilayer].size()){
+    m_features[ilayer][index]=poFeature;
+  }
+  else{
+    std::cerr << "Error: setFeature failed" << std::endl;
+    std::string errorString="setFeature failed";
+    throw(errorString);
+  }
+  return(OGRERR_NONE);
 }
 
 ///push feature to the object
- OGRErr VectorOgr::pushFeature(OGRFeature *poFeature, size_t ilayer){
-   if(ilayer<m_features.size())
-     m_features[ilayer].push_back(poFeature);
-   else{
-     std::string errorString="Error: pushFeature failed";
-     std::cerr << errorString << std::endl;
-     throw(errorString);
-   }
-   return(OGRERR_NONE);
- }
+OGRErr VectorOgr::pushFeature(OGRFeature *poFeature, size_t ilayer){
+  if(ilayer<m_features.size())
+    m_features[ilayer].push_back(poFeature);
+  else{
+    std::string errorString="Error: pushFeature failed";
+    std::cerr << errorString << std::endl;
+    throw(errorString);
+  }
+  return(OGRERR_NONE);
+}
 
 ///read all features from an OGR dataset, specifying layer, attribute filter and spatial filter optionally
 unsigned int VectorOgr::readFeatures(){
@@ -1214,7 +1215,7 @@ unsigned int VectorOgr::readFeatures(size_t ilayer){
 }
 
 ///clone feature. The newly created feature is owned by the caller, and will have it's own reference to the OGRFeatureDefn.
- OGRFeature* VectorOgr::cloneFeature(unsigned int index, size_t ilayer){
+OGRFeature* VectorOgr::cloneFeature(unsigned int index, size_t ilayer){
   OGRFeature* poFeature=NULL;
   if(index>=0&&index<m_features[ilayer].size()){
     poFeature=(m_features[ilayer][index])->Clone();
@@ -1223,7 +1224,7 @@ unsigned int VectorOgr::readFeatures(size_t ilayer){
 }
 
 ///get feature reference (feature should not be deleted)
- OGRFeature* VectorOgr::getFeatureRef(unsigned int index, size_t ilayer){
+OGRFeature* VectorOgr::getFeatureRef(unsigned int index, size_t ilayer){
   OGRFeature* poFeature=NULL;
   if(m_features.size()<=ilayer){
     std::ostringstream errorStream;
@@ -1237,7 +1238,7 @@ unsigned int VectorOgr::readFeatures(size_t ilayer){
   return(poFeature);
 }
 
- OGRErr VectorOgr::getFields(std::vector<OGRFieldDefn*>& fields, size_t ilayer) const{
+OGRErr VectorOgr::getFields(std::vector<OGRFieldDefn*>& fields, size_t ilayer) const{
   OGRFeatureDefn *poFeatureDefn = getLayer(ilayer)->GetLayerDefn();
   fields.clear();
   fields.resize(poFeatureDefn->GetFieldCount());
@@ -1391,6 +1392,7 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
 
   bool doProcess;//stop process when program was invoked with help option (-h --help)
   try{
+    OGRErr result=OGRERR_NONE;
     doProcess=output_opt.retrieveOption(app);
     ogrformat_opt.retrieveOption(app);
     access_opt.retrieveOption(app);
@@ -1405,7 +1407,6 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
       helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
       throw(helpStream.str());//help was invoked, stop processing
     }
-    OGRErr result=OGRERR_NONE;
     char **papszOptions=NULL;
     for(std::vector<std::string>::const_iterator optionIt=option_opt.begin();optionIt!=option_opt.end();++optionIt)
       papszOptions=CSLAddString(papszOptions,optionIt->c_str());
@@ -1869,13 +1870,13 @@ OGRErr VectorOgr::join(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFacto
         throw(errorStream.str());
         break;
       }
-      return(OGRERR_NONE);
     }
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
     throw;
   }
+  return(OGRERR_NONE);
 }
 
 shared_ptr<VectorOgr> VectorOgr::merge(VectorOgr &ogrReader, app::AppFactory& app){
@@ -1905,7 +1906,6 @@ void VectorOgr::merge(VectorOgr &ogrReader, VectorOgr &ogrWriter,app::AppFactory
       helpStream << "short option -h shows basic options only, use long option --help to show all options" << std::endl;
       throw(helpStream.str());//help was invoked, stop processing
     }
-    OGRErr result=OGRERR_NONE;
     char **papszOptions=NULL;
     for(std::vector<std::string>::const_iterator optionIt=option_opt.begin();optionIt!=option_opt.end();++optionIt)
       papszOptions=CSLAddString(papszOptions,optionIt->c_str());
@@ -2080,12 +2080,12 @@ OGRErr VectorOgr::sortByLabel(std::map<std::string,Vector2d<float> > &mapPixels,
         mapPixels[theClass].push_back(theFeature);
       }
     }
-    return(OGRERR_NONE);
   }
   catch(std::string errorString){
     std::cerr << errorString << std::endl;
     throw;
   }
+  return(OGRERR_NONE);
 }
 
 // ///static function for coordinate transform based on proj4 parameters
