@@ -23,6 +23,9 @@ cmake_minimum_required(VERSION 3.9)
 # The project's name and version
 project(jiplib)
 
+# Name of C++ library
+set(JIPLIB_LIB_NAME jiplib)
+
 enable_testing()
 include(CTest)
 
@@ -110,11 +113,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 # Make sure Boost libraries are found
 set(Boost_DEBUG 0)
 find_package(Boost COMPONENTS filesystem system serialization REQUIRED)
-if(Boost_FOUND)
-  include_directories(${Boost_INCLUDE_DIRS})
-  # add_definitions("-DBOOST_ALL")
-  add_definitions("-DBOOST_ALL_NO_LIB")
-endif()
 
 if(BUILD_WITH_PYTHON)
   set(CREATE_WHEEL TRUE CACHE BOOL "Choose if jiplib PYTHON wheel is to be created")
@@ -137,8 +135,6 @@ else(PYTHONLIBS_FOUND)
   message(STATUS "Warning: PYTHON exact version ${PYTHON_VERSION} not found, trying default")
   FIND_PACKAGE(PythonLibs REQUIRED)
 endif(PYTHONLIBS_FOUND)
-
-INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIR})
 
 function(gdal_find_major _major)
     file(READ ${GDAL_INCLUDE_DIR}/gdal_version.h versionfile)
@@ -203,13 +199,11 @@ if(GDAL_FOUND)
   message(STATUS "GDAL version found: ${GDAL_VERSION}")
   message(STATUS "GDAL version major: ${GDAL_VERSION_MAJOR}")
   message(STATUS "GDAL version minor: ${GDAL_VERSION_MINOR}")
-  include_directories(${GDAL_INCLUDE_DIRS})
 endif()
 
 find_package(GSL REQUIRED)
 if(GSL_FOUND)
   message(STATUS "Found GSL: ${GSL_LIBRARIES}")
-  include_directories(${GSL_INCLUDE_DIRS})
   add_definitions(-DGSL_DLL)
 endif()
 
@@ -222,7 +216,6 @@ else(JSONCPP_FOUND)
 endif(JSONCPP_FOUND)
 
 # link_libraries(${JSONCPP_LIBRARIES})
-include_directories(${JSONCPP_INCLUDE_DIRS})
 
 if(PROCESS_IN_PARALLEL)
   find_package(OpenMP)
@@ -284,16 +277,13 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/JiplibConfig.cmake
 configure_file ( "cmake.pc.in" "jiplib.pc"  @ONLY)
 
 
-# Name of C++ library
-set(JIPLIB_LIB_NAME jiplib)
-
 set(BUILD_WITH_MIALLIB TRUE CACHE BOOL "JIPlib needs to be built with mialiab")
 
 # Include directories
 ###############################################################################
 # include_directories("${CMAKE_SOURCE_DIR}")
-include_directories("${PROJECT_BINARY_DIR}")# needed for config_jiplib.h
-include_directories("${PROJECT_BINARY_DIR}/src")#  this is where sources will go
+# include_directories("${PROJECT_BINARY_DIR}")# needed for config_jiplib.h
+
 # INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 # include_directories("${CMAKE_CURRENT_BINARY_DIR}")# needed for config_jiplib.h
 # include_directories("${CMAKE_CURRENT_BINARY_DIR}/src/")#
@@ -307,7 +297,6 @@ add_subdirectory ("${PROJECT_TEST_DIR}")
 if (BUILD_WITH_FANN)
   FIND_PACKAGE(FANN 2.2 REQUIRED)
   if(FANN_FOUND)
-    include_directories(${FANN_INCLUDE_DIRS})
     add_definitions(-DFANN_DLL)
   else(FANN_FOUND)
     message(STATUS "Error: could not find FANN package version >= 2.2")
@@ -449,18 +438,26 @@ if(BUILD_WITH_FANN)
 endif(BUILD_WITH_FANN)
 
 if(BUILD_WITH_MIALLIB)
-  find_package(MIAL REQUIRED)
-  if(MIAL_FOUND)
-    # message(STATUS "Found MIAL library: ${MIAL_LIBRARY}")
-    message(STATUS "Found MIAL libraries: ${MIAL_LIBRARIES}")
-    message(STATUS "Found MIAL include dir: ${MIAL_INCLUDE_DIRS}")
-    include_directories(${MIAL_INCLUDE_DIRS})
-    add_definitions(-DMIAL_DLL)
+  find_package(MIALLIB REQUIRED)
+  if(MIALLIB_FOUND)
+    # if(MIALLIB_FOUND AND NOT TARGET miallib::miallib)
+      add_library(miallib::miallib SHARED IMPORTED)
+      set_target_properties(
+        miallib::miallib
+        PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${MIALLIB_INCLUDE_DIRS}"
+        IMPORTED_LOCATION ${MIALLIB_LIBRARY})
+    # endif()
+    message(STATUS "MIALLIB was found")
+    # message(STATUS "Found MIALLIB library: ${MIALLIB_LIBRARY}")
+    message(STATUS "Found MIALLIB libraries: ${MIALLIB_LIBRARIES}")
+    message(STATUS "Found MIALLIB include dir: ${MIALLIB_INCLUDE_DIRS}")
+    add_definitions(-DMIALLIB_DLL)
   endif()
 
   set(MIAL_BOOL 1)
   message(STATUS "build with miallib: ${MIAL_BOOL}")
-  # include_directories(${MIAL_INCLUDE_DIRS})
+  # include_directories(${MIALLIB_INCLUDE_DIRS})
   # set(MIA_LIB_NAME miallib_generic)
   # set(MIA_INCLUDE_DIR /usr/local/include/miallib CACHE PATH "Include PATH for MIA")
   # set(MIA_LIB_PATH /usr/local/lib CACHE PATH "Library PATH for MIA")
@@ -484,11 +481,11 @@ if(PYTHONINTERP_FOUND)
   if(BUILD_WITH_MIALLIB)
     MESSAGE(STATUS "PythonInterp was found")
 
-    file(GLOB MIAL_HEADER_FILES ${MIAL_INCLUDE_DIR}/miallib_*.h)
-    MESSAGE(STATUS "MIAL_HEADER_FILES: ${MIAL_HEADER_FILES}")
-    IF("${MIAL_HEADER_FILES}" STREQUAL "")
+    file(GLOB MIALLIB_HEADER_FILES ${MIALLIB_INCLUDE_DIR}/miallib_*.h)
+    MESSAGE(STATUS "MIALLIB_HEADER_FILES: ${MIALLIB_HEADER_FILES}")
+    IF("${MIALLIB_HEADER_FILES}" STREQUAL "")
       MESSAGE(FATAL_ERROR "Error: no header files found for miallib")
-    ENDIF("${MIAL_HEADER_FILES}" STREQUAL "")
+    ENDIF("${MIALLIB_HEADER_FILES}" STREQUAL "")
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_imagetype)
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_imagelisttype)
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype_nd)
@@ -501,8 +498,8 @@ if(PYTHONINTERP_FOUND)
     SET(F_NM "addframebox|subframebox")
     #These functions must only be included if MCISRG is set
     SET(F_MCISRG "labelImage|segmentImage")
-    #Create a text file with the list of headers to MIAL functions, e.g., miallib_imagetype for functions returning IMAGE *
-    FOREACH(infileName ${MIAL_HEADER_FILES})
+    #Create a text file with the list of headers to MIALLIB functions, e.g., miallib_imagetype for functions returning IMAGE *
+    FOREACH(infileName ${MIALLIB_HEADER_FILES})
       MESSAGE(STATUS "Process file: ${infileName}")
       file(STRINGS ${infileName} FUN_IMAGETYPE REGEX "^extern IMAGE \\*[^*]")
       FOREACH(fun ${FUN_IMAGETYPE})
@@ -588,6 +585,30 @@ endif(BUILD_WITH_LIBLAS)
 
 ###############################################################################
 
+# INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${PYTHON_INCLUDE_DIR})
+if(Boost_FOUND)
+  # include_directories(${Boost_INCLUDE_DIRS})
+  target_include_directories(${JIPLIB_LIB_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
+  # add_definitions("-DBOOST_ALL")
+  add_definitions("-DBOOST_ALL_NO_LIB")
+endif()
+
+# include_directories(${GDAL_INCLUDE_DIRS})
+TARGET_include_directories(${JIPLIB_LIB_NAME} PUBLIC ${GDAL_INCLUDE_DIRS})
+# include_directories(${GSL_INCLUDE_DIRS})
+TARGET_include_directories(${JIPLIB_LIB_NAME} PUBLIC ${GSL_INCLUDE_DIRS})
+# include_directories(${JSONCPP_INCLUDE_DIRS})
+TARGET_include_directories(${JIPLIB_LIB_NAME} PUBLIC ${JSONCPP_INCLUDE_DIRS})
+
+TARGET_include_directories(${JIPLIB_LIB_NAME} PUBLIC "${PROJECT_BINARY_DIR}")# needed for config_jiplib.h
+include_directories("${PROJECT_BINARY_DIR}/src")#  this is where sources will go
+# TARGET_include_directories(${JIPLIB_LIB_NAME} PUBLIC "${PROJECT_BINARY_DIR}/src")#  this is where sources will go
+# include_directories(${FANN_INCLUDE_DIRS})
+TARGET_include_directories(${JIPLIB_LIB_NAME} PUBLIC ${FANN_INCLUDE_DIRS})
+include_directories(${MIALLIB_INCLUDE_DIRS})
+# TARGET_include_directories(${JIPLIB_LIB_NAME} PUBLIC ${MIALLIB_INCLUDE_DIRS})
+
 SET_TARGET_PROPERTIES(${JIPLIB_LIB_NAME}
   PROPERTIES
   SOVERSION ${JIPLIB_SOVERSION}
@@ -604,14 +625,13 @@ target_link_libraries(
   )
 
 if(BUILD_WITH_MIALLIB)
-  message(STATUS "Found MIALLIB_LIBRARY: ${MIAL_LIBRARIES}")
+  message(STATUS "Found MIALLIB_LIBRARY: ${MIALLIB_LIBRARIES}")
   target_include_directories(${JIPLIB_LIB_NAME} PUBLIC
-    $<BUILD_INTERFACE:${MIAL_INCLUDE_DIR}
+    $<BUILD_INTERFACE:${MIALLIB_INCLUDE_DIR}
     )
   target_link_libraries(
     ${JIPLIB_LIB_NAME}
-    ${MIAL_LIBRARIES}
-    mial::mial
+    miallib::miallib
     )
 endif(BUILD_WITH_MIALLIB)
 
@@ -641,9 +661,12 @@ if(BUILD_WITH_PYTHON)
   FIND_PACKAGE(SWIG REQUIRED)
   INCLUDE(${SWIG_USE_FILE})
   INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+  # TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} ${PYTHON_INCLUDE_PATH})
 endif(BUILD_WITH_PYTHON)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/src)
+# TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+# TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 #test
 # INCLUDE_DIRECTORIES(/usr/local/include)
@@ -694,8 +717,8 @@ if(BUILD_WITH_PYTHON)
       COMMAND cp ${CMAKE_BINARY_DIR}/${JIPLIB_LIB_NAME}.py ${WHEEL_DIR}
       COMMAND cp ${CMAKE_BINARY_DIR}/_${JIPLIB_LIB_NAME}.so ${WHEEL_DIR}
       COMMAND cp ${CMAKE_BINARY_DIR}/lib${JIPLIB_LIB_NAME}.so* ${WHEEL_DIR}
-      # COMMAND cp ${MIA_LIB_PATH}/lib${MIA_LIB_NAME}.so ${WHEEL_DIR}
-      COMMAND cp ${MIAL_LIBRARIES} ${WHEEL_DIR}
+      # COMMAND cp ${MIALLIB_LIB_PATH}/lib${MIALLIB_LIB_NAME}.so ${WHEEL_DIR}
+      COMMAND cp ${MIALLIB_LIBRARIES} ${WHEEL_DIR}
       COMMAND pip3 wheel ${CMAKE_CURRENT_BINARY_DIR}
       COMMAND rm -rf ${WHEEL_DIR}
       COMMENT "create wheel directory"

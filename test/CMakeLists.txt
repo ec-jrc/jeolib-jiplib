@@ -61,6 +61,7 @@ set(JIPLIBS
 
 foreach(TESTAPP ${TESTAPPS})
   add_executable(${TESTAPP} ${CMAKE_CURRENT_SOURCE_DIR}/${TESTAPP}.cc)
+  TARGET_INCLUDE_DIRECTORIES(${TESTAPP} PUBLIC ${PYTHON_INCLUDE_PATH})
   target_link_libraries(${TESTAPP} ${JIPLIBS})
 endforeach()
 
