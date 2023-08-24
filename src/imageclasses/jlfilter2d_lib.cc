@@ -655,7 +655,7 @@ void Jim::d_dwt2d(app::AppFactory& app){
       ++newrow;
     while(newcol&(newcol-1))
       ++newcol;
-    std::vector<int> box{0,newcol-oldcol,0,newrow-oldrow,0,0};
+    std::vector<int> box{0,static_cast<int>(newcol-oldcol),0,static_cast<int>(newrow-oldrow),0,0};
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else
@@ -726,7 +726,7 @@ void Jim::d_dwti2d(app::AppFactory& app){
       ++newrow;
     while(newcol&(newcol-1))
       ++newcol;
-    std::vector<int> box{0,newcol-oldcol,0,newrow-oldrow,0,0};
+    std::vector<int> box{0,static_cast<int>(newcol-oldcol),0,static_cast<int>(newrow-oldrow),0,0};
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
 #pragma omp parallel for
 #else

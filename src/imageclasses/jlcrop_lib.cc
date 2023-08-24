@@ -2144,7 +2144,7 @@ void Jim::cropPlane(Jim& imgWriter, AppFactory& app){
   imgWriter.setProjection(this->getProjection());
   for(size_t iband=0;iband<nrOfBand();++iband){
     for(size_t iplane=0;iplane<vplane.size();++iplane){
-      memcpy(imgWriter.getDataPointer(iband)+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*iplane,m_data[iband]+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*vplane[iplane],getDataTypeSizeBytes()*nrOfCol()*nrOfRow());
+      memcpy((uint_least8_t*)(imgWriter.getDataPointer(iband))+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*iplane,(uint_least8_t*)(m_data[iband])+getDataTypeSizeBytes()*nrOfCol()*nrOfRow()*vplane[iplane],getDataTypeSizeBytes()*nrOfCol()*nrOfRow());
     }
   }
 }
@@ -2222,12 +2222,12 @@ void Jim::d_cropPlane(AppFactory& app){
     void* newpointer=(void *) calloc(static_cast<size_t>(nrOfCol())*nrOfRow()*vplane.size(),getDataTypeSizeBytes());
     for(size_t iband=0;iband<nrOfBand();++iband){
       for(size_t iplane=0;iplane<vplane.size();++iplane){
-        memcpy(newpointer+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*iplane,m_data[iband]+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*vplane[iplane],static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow());
+        memcpy((uint_least8_t*)(newpointer)+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*iplane,(uint_least8_t*)(m_data[iband])+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*vplane[iplane],static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow());
       }
       //free m_data[iband] and re-allocate to avoid memory leak
       free(m_data[iband]);
       m_data[iband]=(void *) calloc(static_cast<size_t>(nrOfCol()*nrOfRow())*vplane.size(),getDataTypeSizeBytes());
-      memcpy(m_data[iband],newpointer,static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*vplane.size());
+      memcpy((uint_least8_t*)(m_data[iband]),(uint_least8_t*)(newpointer),static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*vplane.size());
     }
     free(newpointer);
     m_nplane=vplane.size();
@@ -4015,8 +4015,8 @@ void Jim::d_stackPlane(Jim& imgSrc, AppFactory& app){
         std::string errorString="Error: not sufficient memory for reallocation in stackPlane";
         throw(errorString);
       }
-      memcpy(newpointer,m_data[iband],static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*oldnplane);
-      memcpy(newpointer+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*oldnplane,imgSrc.getDataPointer(iband),static_cast<size_t>(imgSrc.getDataTypeSizeBytes())*imgSrc.nrOfCol()*imgSrc.nrOfRow()*oldnplane);
+      memcpy((uint_least8_t*)(newpointer),(uint_least8_t*)(m_data[iband]),static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*oldnplane);
+      memcpy((uint_least8_t*)(newpointer)+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*oldnplane,(uint_least8_t*)(imgSrc.getDataPointer(iband)),static_cast<size_t>(imgSrc.getDataTypeSizeBytes())*imgSrc.nrOfCol()*imgSrc.nrOfRow()*oldnplane);
       m_data[iband]=newpointer;
     }
     else{
@@ -4027,7 +4027,7 @@ void Jim::d_stackPlane(Jim& imgSrc, AppFactory& app){
         throw(errorString);
       }
       m_data[iband]=newpointer;
-      memcpy(m_data[iband]+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*oldnplane,imgSrc.getDataPointer(iband),static_cast<size_t>(imgSrc.getDataTypeSizeBytes())*imgSrc.nrOfCol()*imgSrc.nrOfRow()*imgSrc.nrOfPlane());
+      memcpy((uint_least8_t*)(m_data[iband])+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*oldnplane,(uint_least8_t*)(imgSrc.getDataPointer(iband)),static_cast<size_t>(imgSrc.getDataTypeSizeBytes())*imgSrc.nrOfCol()*imgSrc.nrOfRow()*imgSrc.nrOfPlane());
     }
   }
 }
@@ -4111,7 +4111,7 @@ void JimList::stackPlane(Jim& imgWriter, AppFactory& app){
             std::string errorString="Error: band number out of range";
             throw(errorString);
           }
-          (*imit)->copyData(imgWriter.getDataPointer(iband)+imgWriter.nrOfCol()*imgWriter.nrOfRow()*iplane*imgWriter.getDataTypeSizeBytes(),iband);
+          (*imit)->copyData((uint_least8_t*)(imgWriter.getDataPointer(iband))+imgWriter.nrOfCol()*imgWriter.nrOfRow()*iplane*imgWriter.getDataTypeSizeBytes(),iband);
       }
       iplane+=(*imit)->nrOfPlane();
     }

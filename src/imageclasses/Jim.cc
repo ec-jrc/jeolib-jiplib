@@ -102,7 +102,7 @@ void Jim::d_band2plane(){
       throw(errorString);
     }
     m_data[0]=newpointer;
-    memcpy(m_data[0]+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*iband,m_data[iband],static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow());
+    memcpy((uint_least8_t*)(m_data[0])+static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow()*iband,(uint_least8_t*)(m_data[iband]),static_cast<size_t>(getDataTypeSizeBytes())*nrOfCol()*nrOfRow());
     free(m_data[iband]);
     m_data[iband]=0;
     m_nband-=1;
@@ -672,7 +672,7 @@ CPLErr Jim::open(void* dataPointer, int ncol, int nrow, int nplane, const GDALDa
   if(dataPointer){
     if(copyData){
       initMem(0);
-      memcpy(m_data[0],dataPointer,getDataTypeSizeBytes()*nrOfCol()*m_blockSize*nrOfPlane());
+      memcpy((uint_least8_t*)(m_data[0]),(uint_least8_t*)(dataPointer),getDataTypeSizeBytes()*nrOfCol()*m_blockSize*nrOfPlane());
     }
     else{
       m_data[0]=(uint8_t*)dataPointer;
@@ -709,7 +709,7 @@ CPLErr Jim::open(std::vector<void*> dataPointers, int ncol, int nrow, int nplane
       initMem(0);
       for(int iband=0;iband<m_nband;++iband){
         if(dataPointers[iband]){
-          memcpy(m_data[iband],dataPointers[iband],getDataTypeSizeBytes()*nrOfCol()*m_blockSize*nrOfPlane());
+          memcpy((uint_least8_t*)(m_data[iband]),(uint_least8_t*)(dataPointers[iband]),getDataTypeSizeBytes()*nrOfCol()*m_blockSize*nrOfPlane());
           m_begin[iband]=0;
           m_end[iband]=m_begin[iband]+m_blockSize;
         }
@@ -3146,7 +3146,7 @@ CPLErr Jim::write(app::AppFactory &app){
 void Jim::setData(double value){
   setData(value,0);
   for(size_t iband=1;iband<nrOfBand();++iband)
-    memcpy(static_cast<char*>(m_data[iband]),static_cast<char*>(m_data[0]),getDataTypeSizeBytes()*nrOfCol()*m_blockSize*nrOfPlane());
+    memcpy(static_cast<uint_least8_t*>(m_data[iband]),static_cast<uint_least8_t*>(m_data[0]),getDataTypeSizeBytes()*nrOfCol()*m_blockSize*nrOfPlane());
 }
 
 void Jim::setData(double value, int band){
@@ -3196,7 +3196,7 @@ void Jim::setData(double value, int band){
     }
   }
   for(size_t iplane=1;iplane<nrOfPlane();++iplane)
-    memcpy(static_cast<char*>(m_data[band])+iplane*getDataTypeSizeBytes()*nrOfCol()*nrOfRow(),static_cast<char*>(m_data[band]),getDataTypeSizeBytes()*nrOfCol()*nrOfRow());
+    memcpy(static_cast<uint_least8_t*>(m_data[band])+iplane*getDataTypeSizeBytes()*nrOfCol()*nrOfRow(),static_cast<uint_least8_t*>(m_data[band]),getDataTypeSizeBytes()*nrOfCol()*nrOfRow());
 }
 
 void Jim::setData(double value, double ulx, double uly, double lrx, double lry, int band, double dx, double dy, bool nogeo){
@@ -3622,7 +3622,7 @@ CPLErr Jim::setFile(const std::string& filename, const std::string& imageType, u
 
 ///Copy data
 CPLErr Jim::copyData(void* data, int band){
-  memcpy(data,m_data[band],getDataTypeSizeBytes()*nrOfCol()*m_blockSize*nrOfPlane());
+  memcpy(static_cast<uint_least8_t*>(data),static_cast<uint_least8_t*>(m_data[band]),getDataTypeSizeBytes()*nrOfCol()*m_blockSize*nrOfPlane());
   m_begin[band]=0;
   m_end[band]=nrOfRow();
   // memcpy(data,m_data[band],(GDALGetDataTypeSize(getDataType())>>3)*nrOfCol()*m_blockSize);
