@@ -49,6 +49,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 %enddef
 
 %module(docstring=DOCJIPLIB) jiplib
+#pragma SWIG nowarn=303,362,401,467,503,509,
 
 /* %define DOCJIPLIB */
 /* "Joint image processing library (jiplib) */
@@ -149,9 +150,13 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
   }
   else{
     PyObject* kwargs;
+    char *theString;
+    char *theOptInt;
+    strcpy(theString, "theString");
+    strcpy(theOptInt, "theOptInt");
     static char *kwlist[] = {
-      "theString",
-      "theOptInt",
+      theString,
+      theOptInt,
       NULL
     };
     PyArg_ParseTupleAndKeywords($input,kwargs,"S|i",kwlist);
@@ -797,7 +802,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
   }
 
   //todo: return multi-plane/band images according to: http://scikit-image.org/docs/dev/user_guide/numpy_images.html
-  PyObject* jim2np(std::shared_ptr<Jim> aJim, size_t band=0, bool copyData=true) {
+     PyObject* jim2np(std::shared_ptr<Jim> aJim, size_t band=0, bool copyData=true) {
     if(band>=aJim->nrOfBand()){
       std::string errorString="Error: band out of range";
       throw(errorString);
@@ -894,7 +899,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
     }
     nfields=fieldindexes.size();
     int ndim=2;
-    npy_intp dims[2]{ntotalfeatures,nfields};
+    npy_intp dims[2]{static_cast<int>(ntotalfeatures),static_cast<int>(nfields)};
     PyArrayObject *npArray =(PyArrayObject*) PyArray_SimpleNew(ndim, dims, npDataType);
     double *ad = (double *) PyArray_DATA((PyArrayObject *) npArray);
     OGRFeatureDefn *poFDefn = aJimVect->getLayer(ilayer)->GetLayerDefn();
