@@ -56,8 +56,8 @@ cd jeolib-jiplib
 mkdir build
 cd build
 cmake ..
-make
-sudo make install
+cmake --build .
+sudo cmake --install .
 ```
 
 # How to install without sudo rights
