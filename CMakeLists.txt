@@ -24,28 +24,28 @@ cmake_minimum_required(VERSION 3.9)
 project(jiplib)
 
 # Name of C++ library
-set(JIPLIB_LIB_NAME jiplib)
+SET(JIPLIB_LIB_NAME jiplib)
 
 enable_testing()
 include(CTest)
 
-set (JIPLIB_VERSION_MAJOR 1)
-set (JIPLIB_VERSION_MINOR 1)
-set (JIPLIB_VERSION_PATCH 2)
-set (JIPLIB_VERSION "${JIPLIB_VERSION_MAJOR}.${JIPLIB_VERSION_MINOR}.${JIPLIB_VERSION_PATCH}")
-set (JIPLIB_SOVERSION "${JIPLIB_VERSION_MAJOR}")
-set (JIPLIB_PACKAGE_BUGREPORT "pieter.kempeneers@ec.europa.eu")
+SET(JIPLIB_VERSION_MAJOR 1)
+SET(JIPLIB_VERSION_MINOR 1)
+SET(JIPLIB_VERSION_PATCH 2)
+SET(JIPLIB_VERSION "${JIPLIB_VERSION_MAJOR}.${JIPLIB_VERSION_MINOR}.${JIPLIB_VERSION_PATCH}")
+SET(JIPLIB_SOVERSION "${JIPLIB_VERSION_MAJOR}")
+SET(JIPLIB_PACKAGE_BUGREPORT "pieter.kempeneers@ec.europa.eu")
 
 
-set(CLASSIF 0 CACHE STRING "set a variable that can be used in Jim.cc")
-set(ODOITHIN 0 CACHE STRING "set a variable that can be used in Jim.cc")
-set(MCISRG 1 CACHE STRING "set a variable that can be used in Jim.cc")
+SET(CLASSIF 0 CACHE STRING "set a variable that can be used in Jim.cc")
+SET(ODOITHIN 0 CACHE STRING "set a variable that can be used in Jim.cc")
+SET(MCISRG 1 CACHE STRING "set a variable that can be used in Jim.cc")
 
-set(BUILD_WITH_LIBLAS FALSE CACHE BOOL "Choose if jiplib is to be built with liblas")
-set(BUILD_WITH_FANN TRUE CACHE BOOL "Choose if jiplib is to be built with fann")
-set(BUILD_WITH_PYTHON TRUE CACHE BOOL "Choose if jiplib is to be built with PYTHON support")
-set(PROCESS_IN_PARALLEL TRUE CACHE BOOL "Choose if jiplib should be run in parallel")
-set(BUILD_WITH_MIALLIB TRUE CACHE BOOL "Choose if jiplib should be compiled with miallib")
+SET(BUILD_WITH_LIBLAS FALSE CACHE BOOL "Choose if jiplib is to be built with liblas")
+SET(BUILD_WITH_FANN TRUE CACHE BOOL "Choose if jiplib is to be built with fann")
+SET(BUILD_WITH_PYTHON TRUE CACHE BOOL "Choose if jiplib is to be built with PYTHON support")
+SET(PROCESS_IN_PARALLEL TRUE CACHE BOOL "Choose if jiplib should be run in parallel")
+SET(BUILD_WITH_MIALLIB TRUE CACHE BOOL "Choose if jiplib should be compiled with miallib")
 #from https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
 #By default if you don't change any RPATH related settings, CMake will
 # link the executables and shared libraries with full RPATH to all used
@@ -55,15 +55,15 @@ SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 SET(CMAKE_INSTALL_RPATH "$\{ORIGIN\}:${CMAKE_CURRENT_BINARY_DIR}")
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-set (PROJECT_INCLUDE_DIR include/jiplib)
-set (PROJECT_TEST_DIR test)
+SET(PROJECT_INCLUDE_DIR include/jiplib)
+SET(PROJECT_TEST_DIR test)
 
-set(CMAKE_COLOR_MAKEFILE ON)
+SET(CMAKE_COLOR_MAKEFILE ON)
 
 if(BUILD_WITH_MIALLIB)
-  set(MIAL_BOOL 1)
+  SET(MIAL_BOOL 1)
 else(BUILD_WITH_MIALLIB)
-  set(MIAL_BOOL 0)
+  SET(MIAL_BOOL 0)
 endif(BUILD_WITH_MIALLIB)
 
 
@@ -76,7 +76,7 @@ include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 if(COMPILER_SUPPORTS_CXX11)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-long-long")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-long-long")
   message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has C++11 support.")
 else(COMPILER_SUPPORTS_CXX11)
   message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
@@ -85,11 +85,11 @@ endif()
 ########## BUILDING INSTALLLER ##########
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
-set (CPACK_RESOURCE_FILE_LICENSE
+SET(CPACK_RESOURCE_FILE_LICENSE
      "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
-set (CPACK_PACKAGE_VERSION_MAJOR "${JIPLIB_VERSION_MAJOR}")
-set (CPACK_PACKAGE_VERSION_MINOR "${JIPLIB_VERSION_MINOR}")
-set (CPACK_PACKAGE_VERSION_PATCH "${JIPLIB_VERSION_PATCH}")
+SET(CPACK_PACKAGE_VERSION_MAJOR "${JIPLIB_VERSION_MAJOR}")
+SET(CPACK_PACKAGE_VERSION_MINOR "${JIPLIB_VERSION_MINOR}")
+SET(CPACK_PACKAGE_VERSION_PATCH "${JIPLIB_VERSION_PATCH}")
 
 # Set files to ignore
 list(APPEND CPACK_SOURCE_IGNORE_FILES "_CPack_Packages")
@@ -111,14 +111,14 @@ add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 
 # Make sure Boost libraries are found
-set(Boost_DEBUG 0)
+SET(Boost_DEBUG 0)
 find_package(Boost COMPONENTS filesystem system serialization REQUIRED)
 
 if(BUILD_WITH_PYTHON)
-  set(CREATE_WHEEL TRUE CACHE BOOL "Choose if jiplib PYTHON wheel is to be created")
+  SET(CREATE_WHEEL TRUE CACHE BOOL "Choose if jiplib PYTHON wheel is to be created")
 endif(BUILD_WITH_PYTHON)
 
-set(PYTHON3 ON CACHE BOOL "set ON for PYTHON3")
+SET(PYTHON3 ON CACHE BOOL "set ON for PYTHON3")
 if(PYTHON3)
   FIND_PACKAGE( PythonInterp 3.5 REQUIRED )
   FIND_PACKAGE( PythonLibs 3.5 REQUIRED )
@@ -139,48 +139,48 @@ endif(PYTHONLIBS_FOUND)
 function(gdal_find_major _major)
     file(READ ${GDAL_INCLUDE_DIR}/gdal_version.h versionfile)
     string(REGEX MATCH "GDAL_VERSION_MAJOR[\t ]+([0-9]+)" _ ${versionfile})
-    set(MAJOR ${CMAKE_MATCH_1})
+    SET(MAJOR ${CMAKE_MATCH_1})
     string(REGEX MATCH "GDAL_VERSION_MINOR[\t ]+([0-9]+)" _ ${versionfile})
-    set(MINOR ${CMAKE_MATCH_1})
+    SET(MINOR ${CMAKE_MATCH_1})
     string(REGEX MATCH "GDAL_VERSION_REV[\t ]+([0-9]+)" _ ${versionfile})
-    set(REV ${CMAKE_MATCH_1})
-    set(${_major} ${MAJOR} PARENT_SCOPE)
+    SET(REV ${CMAKE_MATCH_1})
+    SET(${_major} ${MAJOR} PARENT_SCOPE)
 endfunction(gdal_find_major)
 
 function(gdal_find_minor _minor)
     file(READ ${GDAL_INCLUDE_DIR}/gdal_version.h versionfile)
     string(REGEX MATCH "GDAL_VERSION_MAJOR[\t ]+([0-9]+)" _ ${versionfile})
-    set(MAJOR ${CMAKE_MATCH_1})
+    SET(MAJOR ${CMAKE_MATCH_1})
     string(REGEX MATCH "GDAL_VERSION_MINOR[\t ]+([0-9]+)" _ ${versionfile})
-    set(MINOR ${CMAKE_MATCH_1})
+    SET(MINOR ${CMAKE_MATCH_1})
     string(REGEX MATCH "GDAL_VERSION_REV[\t ]+([0-9]+)" _ ${versionfile})
-    set(REV ${CMAKE_MATCH_1})
-    set(${_minor} ${MINOR} PARENT_SCOPE)
+    SET(REV ${CMAKE_MATCH_1})
+    SET(${_minor} ${MINOR} PARENT_SCOPE)
 endfunction(gdal_find_minor)
 
 function(gdal_find_rev _rev)
     file(READ ${GDAL_INCLUDE_DIR}/gdal_version.h versionfile)
     string(REGEX MATCH "GDAL_VERSION_MAJOR[\t ]+([0-9]+)" _ ${versionfile})
-    set(MAJOR ${CMAKE_MATCH_1})
+    SET(MAJOR ${CMAKE_MATCH_1})
     string(REGEX MATCH "GDAL_VERSION_MINOR[\t ]+([0-9]+)" _ ${versionfile})
-    set(MINOR ${CMAKE_MATCH_1})
+    SET(MINOR ${CMAKE_MATCH_1})
     string(REGEX MATCH "GDAL_VERSION_REV[\t ]+([0-9]+)" _ ${versionfile})
-    set(REV ${CMAKE_MATCH_1})
-    set(${_rev} ${REV} PARENT_SCOPE)
+    SET(REV ${CMAKE_MATCH_1})
+    SET(${_rev} ${REV} PARENT_SCOPE)
 endfunction(gdal_find_rev)
 
 function(gdal_find_version _version)
     file(READ ${GDAL_INCLUDE_DIR}/gdal_version.h versionfile)
     string(REGEX MATCH "GDAL_VERSION_MAJOR[\t ]+([0-9]+)" _ ${versionfile})
-    set(MAJOR ${CMAKE_MATCH_1})
+    SET(MAJOR ${CMAKE_MATCH_1})
     string(REGEX MATCH "GDAL_VERSION_MINOR[\t ]+([0-9]+)" _ ${versionfile})
-    set(MINOR ${CMAKE_MATCH_1})
+    SET(MINOR ${CMAKE_MATCH_1})
     string(REGEX MATCH "GDAL_VERSION_REV[\t ]+([0-9]+)" _ ${versionfile})
-    set(REV ${CMAKE_MATCH_1})
-    set(${_version} ${MAJOR}.${MINOR}.${REV} PARENT_SCOPE)
+    SET(REV ${CMAKE_MATCH_1})
+    SET(${_version} ${MAJOR}.${MINOR}.${REV} PARENT_SCOPE)
 endfunction(gdal_find_version)
 
-set(GDAL3 ON CACHE BOOL "set ON for GDAL3")
+SET(GDAL3 ON CACHE BOOL "set ON for GDAL3")
 if(GDAL3)
   find_package(GDAL 3.00 REQUIRED)
 else(GDAL3)
@@ -195,7 +195,7 @@ if(GDAL_FOUND)
   SET(CMAKE_SWIG_FLAGS "-DGDAL_VERSION_MAJOR=${GDAL_VERSION_MAJOR}")
   SET(CMAKE_SWIG_FLAGS "-DGDAL_VERSION_MINOR=${GDAL_VERSION_MINOR}")
   # gdal_find_version(GDAL_VERSION)
-  # set(GDAL_VERSION_MAJOR "2" CACHE STRING " ")
+  # SET(GDAL_VERSION_MAJOR "2" CACHE STRING " ")
   message(STATUS "GDAL version found: ${GDAL_VERSION}")
   message(STATUS "GDAL version major: ${GDAL_VERSION_MAJOR}")
   message(STATUS "GDAL version minor: ${GDAL_VERSION_MINOR}")
@@ -204,7 +204,6 @@ endif()
 find_package(GSL REQUIRED)
 if(GSL_FOUND)
   message(STATUS "Found GSL: ${GSL_LIBRARIES}")
-  add_definitions(-DGSL_DLL)
 endif()
 
 find_package(PkgConfig REQUIRED)
@@ -220,13 +219,13 @@ endif(JSONCPP_FOUND)
 if(PROCESS_IN_PARALLEL)
   find_package(OpenMP)
   if (OPENMP_FOUND)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(PARALLEL_BOOL 1)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    SET(PARALLEL_BOOL 1)
     message(STATUS "parallel processing: ${PARALLEL_BOOL}")
   endif(OPENMP_FOUND)
 else(PROCESS_IN_PARALLEL)
-  set(PARALLEL_BOOL 0)
+  SET(PARALLEL_BOOL 0)
   message(STATUS "parallel processing: ${PARALLEL_BOOL}")
 endif(PROCESS_IN_PARALLEL)
 
@@ -234,9 +233,9 @@ endif(PROCESS_IN_PARALLEL)
 # Setup configure file
 
 include(GNUInstallDirs)
-set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/jiplib
+SET(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/jiplib
   CACHE PATH "Location of header files" )
-set(SYSCONFIG_INSTALL_DIR ${CMAKE_INSTALL_SYSCONFDIR}/jiplib
+SET(SYSCONFIG_INSTALL_DIR ${CMAKE_INSTALL_SYSCONFDIR}/jiplib
   CACHE PATH "Location of configuration files" )
 
 # configure a header file to pass some of the CMake settings to the source code
@@ -251,8 +250,6 @@ configure_file (
 #   "${CMAKE_CURRENT_BINARY_DIR}/jiplib-config"
 #   @ONLY
 #   )
-
-add_definitions(-DHAVE_CONFIG_H)
 
 # configure_file (
 #   "cmake.pc.in"
@@ -277,30 +274,13 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/JiplibConfig.cmake
 configure_file ( "cmake.pc.in" "jiplib.pc"  @ONLY)
 
 
-set(BUILD_WITH_MIALLIB TRUE CACHE BOOL "JIPlib needs to be built with mialiab")
+SET(BUILD_WITH_MIALLIB TRUE CACHE BOOL "JIPlib needs to be built with mialiab")
 
-# Include directories
-###############################################################################
-# include_directories("${CMAKE_SOURCE_DIR}")
-# include_directories("${PROJECT_BINARY_DIR}")# needed for config_jiplib.h
-
-# INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
-# include_directories("${CMAKE_CURRENT_BINARY_DIR}")# needed for config_jiplib.h
-# include_directories("${CMAKE_CURRENT_BINARY_DIR}/src/")#
-# include_directories("${CMAKE_CURRENT_BINARY_DIR}/doc")#needed for jiplib_doc.i
-###############################################################################
 # Instruct CMake to inspect the following subfolders (with CMakeLists.txt in each subfolder)
-# add_subdirectory ("${PROJECT_DOC_DIR}")
-#todo: add if condition with TEST?
 add_subdirectory ("${PROJECT_TEST_DIR}")
 
 if (BUILD_WITH_FANN)
   FIND_PACKAGE(FANN 2.2 REQUIRED)
-  if(FANN_FOUND)
-    add_definitions(-DFANN_DLL)
-  else(FANN_FOUND)
-    message(STATUS "Error: could not find FANN package version >= 2.2")
-  endif()
 endif(BUILD_WITH_FANN)
 
 ###############################################################################
@@ -310,16 +290,16 @@ endif(BUILD_WITH_FANN)
 message(STATUS "cmake_current_binary_dir: ${CMAKE_CURRENT_BINARY_DIR}")
 file(COPY ${PROJECT_SOURCE_DIR}/src DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-set(BASE_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/base)
-set(ALGOR_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/algorithms)
-set(FILECLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/fileclasses)
-set(IMGCLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-set(LASCLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/lasclasses)
-set(APP_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/apps)
-# set(PYTHON_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/swig)
-# set(PYTHON_SRC_DIR src/swig)
+SET(BASE_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/base)
+SET(ALGOR_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/algorithms)
+SET(FILECLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/fileclasses)
+SET(IMGCLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+SET(LASCLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/lasclasses)
+SET(APP_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/apps)
+# SET(PYTHON_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/swig)
+# SET(PYTHON_SRC_DIR src/swig)
 
-set(BASE_H
+SET(BASE_H
   ${BASE_SRC_DIR}/IndexValue.h
   ${BASE_SRC_DIR}/typeconversion.h
   ${BASE_SRC_DIR}/Optionjl.h
@@ -327,12 +307,12 @@ set(BASE_H
   ${BASE_SRC_DIR}/Vector2d.h
   )
 
-set(BASE_CC
+SET(BASE_CC
   ${BASE_SRC_DIR}/typeconversion.cc
   ${BASE_SRC_DIR}/Vector2d.cc
   )
 
-set(ALGOR_H
+SET(ALGOR_H
   ${ALGOR_SRC_DIR}/ConfusionMatrix.h
   ${ALGOR_SRC_DIR}/CostFactory.h
   ${ALGOR_SRC_DIR}/CostFactorySVM.h
@@ -346,12 +326,12 @@ set(ALGOR_H
   )
 
 if(BUILD_WITH_FANN)
-  set(ALGOR_H ${ALGOR_H}
+  SET(ALGOR_H ${ALGOR_H}
     ${ALGOR_SRC_DIR}/myfann_cpp.h
     )
 endif(BUILD_WITH_FANN)
 
-set(ALGOR_CC
+SET(ALGOR_CC
   ${ALGOR_SRC_DIR}/ConfusionMatrix.cc
   ${ALGOR_SRC_DIR}/CostFactorySVM.cc
   ${ALGOR_SRC_DIR}/CostFactorySVM.h
@@ -362,29 +342,29 @@ set(ALGOR_CC
   ${ALGOR_SRC_DIR}/svm.cpp
   )
 
-set(FILECLASS_H
+SET(FILECLASS_H
   ${FILECLASS_SRC_DIR}/FileReaderAscii.h
   )
 
-set(FILECLASS_CC
+SET(FILECLASS_CC
   ${FILECLASS_SRC_DIR}/FileReaderAscii.cc
   )
 
-set(LASCLASS_H
+SET(LASCLASS_H
   ${LASCLASS_SRC_DIR}/FileReaderLas.h
   )
 
-set(LASCLASS_CC
+SET(LASCLASS_CC
   ${LASCLASS_SRC_DIR}/FileReaderLas.cc
   )
 
-set(APP_H
+SET(APP_H
   ${APP_SRC_DIR}/AppFactory.h
   )
 
-set(IMGCLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+SET(IMGCLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
 
-set(IMGCLASS_H
+SET(IMGCLASS_H
   ${IMGCLASS_SRC_DIR}/Jim.h
   ${IMGCLASS_SRC_DIR}/Mia.h
   ${IMGCLASS_SRC_DIR}/JimList.h
@@ -400,7 +380,7 @@ set(IMGCLASS_H
   ${IMGCLASS_SRC_DIR}/jldem_lib.h
   )
 
-set(IMGCLASS_CC
+SET(IMGCLASS_CC
   ${IMGCLASS_SRC_DIR}/Jim.cc
   ${IMGCLASS_SRC_DIR}/Mia.cc
   ${IMGCLASS_SRC_DIR}/JimList.cc
@@ -431,7 +411,7 @@ set(IMGCLASS_CC
   )
 
 if(BUILD_WITH_FANN)
-  set(IMGCLASS_CC ${IMGCLASS_CC}
+  SET(IMGCLASS_CC ${IMGCLASS_CC}
   ${IMGCLASS_SRC_DIR}/jlann_lib.cc
   ${IMGCLASS_SRC_DIR}/jlannogr_lib.cc
   )
@@ -440,30 +420,23 @@ endif(BUILD_WITH_FANN)
 if(BUILD_WITH_MIALLIB)
   find_package(MIALLIB REQUIRED)
   if(MIALLIB_FOUND)
-    # if(MIALLIB_FOUND AND NOT TARGET miallib::miallib)
-      add_library(miallib::miallib SHARED IMPORTED)
-      set_target_properties(
-        miallib::miallib
-        PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${MIALLIB_INCLUDE_DIRS}"
-        IMPORTED_LOCATION ${MIALLIB_LIBRARY})
-    # endif()
+    ADD_LIBRARY(miallib::miallib SHARED IMPORTED)
+    SET_TARGET_PROPERTIES(
+      miallib::miallib
+      PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${MIALLIB_INCLUDE_DIRS}"
+      IMPORTED_LOCATION ${MIALLIB_LIBRARY}
+      )
     message(STATUS "MIALLIB was found")
-    # message(STATUS "Found MIALLIB library: ${MIALLIB_LIBRARY}")
     message(STATUS "Found MIALLIB libraries: ${MIALLIB_LIBRARIES}")
     message(STATUS "Found MIALLIB include dir: ${MIALLIB_INCLUDE_DIRS}")
-    add_definitions(-DMIALLIB_DLL)
   endif()
 
-  set(MIAL_BOOL 1)
+  SET(MIAL_BOOL 1)
   message(STATUS "build with miallib: ${MIAL_BOOL}")
-  # include_directories(${MIALLIB_INCLUDE_DIRS})
-  # set(MIA_LIB_NAME miallib_generic)
-  # set(MIA_INCLUDE_DIR /usr/local/include/miallib CACHE PATH "Include PATH for MIA")
-  # set(MIA_LIB_PATH /usr/local/lib CACHE PATH "Library PATH for MIA")
 
 else(BUILD_WITH_MIALLIB)
-  set(MIAL_BOOL 0)
+  SET(MIAL_BOOL 0)
   message(STATUS "build with miallib: ${MIAL_BOOL}")
 endif(BUILD_WITH_MIALLIB)
 
@@ -585,29 +558,27 @@ endif(BUILD_WITH_LIBLAS)
 
 ###############################################################################
 
-# INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${PYTHON_INCLUDE_DIR})
-if(Boost_FOUND)
-  # include_directories(${Boost_INCLUDE_DIRS})
-  target_include_directories(${JIPLIB_LIB_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
-  # add_definitions("-DBOOST_ALL")
-  add_definitions("-DBOOST_ALL_NO_LIB")
-endif()
+# add_definitions(-DMIALLIB_DLL)
+# add_definitions("-DBOOST_ALL_NO_LIB")
+# add_definitions(-DHAVE_CONFIG_H)
+# add_definitions(-DGSL_DLL)
+# add_definitions(-DFANN_DLL)
+TARGET_COMPILE_DEFINITIONS(${JIPLIB_LIB_NAME} PUBLIC MIALLIB_DLL)
+if (BUILD_WITH_FANN)
+  TARGET_COMPILE_DEFINITIONS(${JIPLIB_LIB_NAME} PUBLIC FANN_DLL)
+endif(BUILD_WITH_FANN)
+TARGET_COMPILE_DEFINITIONS(${JIPLIB_LIB_NAME} PUBLIC GSL_DLL)
+TARGET_COMPILE_DEFINITIONS(${JIPLIB_LIB_NAME} PUBLIC HAVE_CONFIG_H)
+TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
+TARGET_COMPILE_DEFINITIONS(${JIPLIB_LIB_NAME} PUBLIC BOOST_ALL_NO_LIB)
 
-# include_directories(${GDAL_INCLUDE_DIRS})
-TARGET_include_directories(${JIPLIB_LIB_NAME} PUBLIC ${GDAL_INCLUDE_DIRS})
-# include_directories(${GSL_INCLUDE_DIRS})
-TARGET_include_directories(${JIPLIB_LIB_NAME} PUBLIC ${GSL_INCLUDE_DIRS})
-# include_directories(${JSONCPP_INCLUDE_DIRS})
-TARGET_include_directories(${JIPLIB_LIB_NAME} PUBLIC ${JSONCPP_INCLUDE_DIRS})
-
-TARGET_include_directories(${JIPLIB_LIB_NAME} PUBLIC "${PROJECT_BINARY_DIR}")# needed for config_jiplib.h
-include_directories("${PROJECT_BINARY_DIR}/src")#  this is where sources will go
-# TARGET_include_directories(${JIPLIB_LIB_NAME} PUBLIC "${PROJECT_BINARY_DIR}/src")#  this is where sources will go
-# include_directories(${FANN_INCLUDE_DIRS})
-TARGET_include_directories(${JIPLIB_LIB_NAME} PUBLIC ${FANN_INCLUDE_DIRS})
-include_directories(${MIALLIB_INCLUDE_DIRS})
-# TARGET_include_directories(${JIPLIB_LIB_NAME} PUBLIC ${MIALLIB_INCLUDE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${GDAL_INCLUDE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${GSL_INCLUDE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${JSONCPP_INCLUDE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC "${PROJECT_BINARY_DIR}")# needed for config_jiplib.h
+TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC "${PROJECT_BINARY_DIR}/src")#  this is where sources will go
+TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${FANN_INCLUDE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${MIALLIB_INCLUDE_DIRS})
 
 SET_TARGET_PROPERTIES(${JIPLIB_LIB_NAME}
   PROPERTIES
@@ -626,7 +597,7 @@ target_link_libraries(
 
 if(BUILD_WITH_MIALLIB)
   message(STATUS "Found MIALLIB_LIBRARY: ${MIALLIB_LIBRARIES}")
-  target_include_directories(${JIPLIB_LIB_NAME} PUBLIC
+  TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC
     $<BUILD_INTERFACE:${MIALLIB_INCLUDE_DIR}
     )
   target_link_libraries(
@@ -653,23 +624,20 @@ endif(BUILD_WITH_FANN)
 
 if(BUILD_WITH_PYTHON)
   ########## SWIG #############
-  set(PYTHON_SRC_DIR src/swig)
-  # set(PYTHON_CC
+  SET(PYTHON_SRC_DIR src/swig)
+  # SET(PYTHON_CC
   #   ${PYTHON_SRC_DIR}/jiplib_wrap.cc
   #   )
-  set(JIPLIB_I ${PYTHON_SRC_DIR}/jiplib.i)
+  SET(JIPLIB_I ${PYTHON_SRC_DIR}/jiplib.i)
   FIND_PACKAGE(SWIG REQUIRED)
   INCLUDE(${SWIG_USE_FILE})
-  INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
-  # TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} ${PYTHON_INCLUDE_PATH})
+  TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${PYTHON_INCLUDE_PATH})
 endif(BUILD_WITH_PYTHON)
+#we need INCLUDE_DIRECTORIES here instead of TARGET_INCLUDE_DIRECTORIES
+# for subfolder WORKING_DIRECTORY
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/src)
-# TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-# TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
-#test
-# INCLUDE_DIRECTORIES(/usr/local/include)
+INCLUDE_DIRECTORIES(${MIALLIB_INCLUDE_DIRS})
 
 SET(CMAKE_SWIG_FLAGS "-keyword")
 SET(CMAKE_SWIG_FLAGS "-DMIALLIB=${MIAL_BOOL}")
@@ -688,12 +656,6 @@ endif(${CMAKE_VERSION} VERSION_LESS "3.8.0")
 
 SET_SOURCE_FILES_PROPERTIES(${JIPLIB_I} PROPERTIES SWIG_FLAGS "-W2")
 SWIG_LINK_LIBRARIES(jiplib ${PYTHON_LIBRARIES} ${JIPLIB_LIB_NAME} ${BOOST_LIBRARIES})
-
-# SET_PROPERTY(SOURCE ${PYTHON_SRC_DIR}/jiplib.i PROPERTY CPLUSPLUS ON)
-# SWIG_ADD_MODULE(jiplib python ${PYTHON_SRC_DIR}/jiplib.i)
-# SET_SOURCE_FILES_PROPERTIES(${PYTHON_SRC_DIR}/jiplib.i PROPERTIES SWIG_FLAGS "-W2")
-# SWIG_LINK_LIBRARIES(jiplib ${PYTHON_LIBRARIES} ${JIPLIB_LIB_NAME} ${BOOST_LIBRARIES})
-
 
 if(BUILD_WITH_PYTHON)
   SET(PYTHON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/python)
@@ -715,10 +677,12 @@ if(BUILD_WITH_PYTHON)
       COMMAND cp ${PYTHON_SOURCE_DIR}/setup.py ${CMAKE_CURRENT_BINARY_DIR}
       COMMAND cp ${CMAKE_BINARY_DIR}/_${JIPLIB_LIB_NAME}.so ${WHEEL_DIR}
       COMMAND cp ${CMAKE_BINARY_DIR}/${JIPLIB_LIB_NAME}.py ${WHEEL_DIR}
-      COMMAND cp ${CMAKE_BINARY_DIR}/_${JIPLIB_LIB_NAME}.so ${WHEEL_DIR}
-      COMMAND cp ${CMAKE_BINARY_DIR}/lib${JIPLIB_LIB_NAME}.so* ${WHEEL_DIR}
-      # COMMAND cp ${MIALLIB_LIB_PATH}/lib${MIALLIB_LIB_NAME}.so ${WHEEL_DIR}
+      #todo: create links for jiplib?
+      # ${JIPLIB_VERSION} #is the full version
+      # ${JIPLIB_SO_VERSION} #is the major version
+      COMMAND cp ${CMAKE_BINARY_DIR}/lib${JIPLIB_LIB_NAME}.so ${WHEEL_DIR}
       COMMAND cp ${MIALLIB_LIBRARIES} ${WHEEL_DIR}
+      #todo: create links for miallib?
       COMMAND pip3 wheel ${CMAKE_CURRENT_BINARY_DIR}
       COMMAND rm -rf ${WHEEL_DIR}
       COMMENT "create wheel directory"
@@ -738,8 +702,10 @@ INSTALL (FILES ${LASCLASS_H} DESTINATION include/jiplib/lasclasses)
 
 if(BUILD_WITH_PYTHON)
   EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
-  SET(PYTHON_INSTALL_DIR ${PYTHON_SITE_PACKAGES}/${JIPLIB_LIB_NAME} CACHE PATH "Install directory for Python library")
-  # INSTALL(TARGETS ${SWIG_MODULE_JIPLIB_REAL_NAME} LIBRARY DESTINATION ${PYTHON_INSTALL_DIR})
+  # SET(PYTHON_INSTALL_DIR ${PYTHON_SITE_PACKAGES}/${JIPLIB_LIB_NAME} CACHE PATH "Install directory for Python library")
+  #test
+  SET("PYTHON_INSTALL_DIR /home/kempepi/repositories/jeolib-jiplib/build/_skbuild/linux-x86_64-3.9/cmake-install/"/${JIPLIB_LIB_NAME} CACHE PATH "Install directory for Python library")
+  INSTALL(TARGETS ${SWIG_MODULE_JIPLIB_REAL_NAME} LIBRARY DESTINATION ${PYTHON_INSTALL_DIR})
   MESSAGE(STATUS "Python install directory: ${PYTHON_INSTALL_DIR}")
   MESSAGE(STATUS "Python executable: ${PYTHON_EXECUTABLE}")
   INSTALL(FILES ${CMAKE_BINARY_DIR}/${JIPLIB_LIB_NAME}.py DESTINATION ${PYTHON_INSTALL_DIR})
