@@ -36,7 +36,6 @@ SET(JIPLIB_VERSION "${JIPLIB_VERSION_MAJOR}.${JIPLIB_VERSION_MINOR}.${JIPLIB_VER
 SET(JIPLIB_SOVERSION "${JIPLIB_VERSION_MAJOR}")
 SET(JIPLIB_PACKAGE_BUGREPORT "pieter.kempeneers@ec.europa.eu")
 
-
 SET(CLASSIF 0 CACHE STRING "set a variable that can be used in Jim.cc")
 SET(ODOITHIN 0 CACHE STRING "set a variable that can be used in Jim.cc")
 SET(MCISRG 1 CACHE STRING "set a variable that can be used in Jim.cc")
@@ -65,8 +64,6 @@ if(BUILD_WITH_MIALLIB)
 else(BUILD_WITH_MIALLIB)
   SET(MIAL_BOOL 0)
 endif(BUILD_WITH_MIALLIB)
-
-
 
 option (BUILD_SHARED_LIBS "Build with shared library" ON)
 
@@ -259,16 +256,19 @@ configure_file (
 
 #Generating Package Files
 include(CMakePackageConfigHelpers)
-configure_package_config_file(JiplibConfig.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}/JiplibConfig.cmake
+
+configure_package_config_file(jiplib-config.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/jiplib-config.cmake
   INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jiplib
-  PATH_VARS INCLUDE_INSTALL_DIR SYSCONFIG_INSTALL_DIR)
+  PATH_VARS INCLUDE_INSTALL_DIR SYSCONFIG_INSTALL_DIR
+  )
 write_basic_package_version_file(
-  ${CMAKE_CURRENT_BINARY_DIR}/JiplibConfigVersion.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/jiplib-config-version.cmake
   VERSION ${JIPLIB_VERSION}
-  COMPATIBILITY SameMajorVersion )
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/JiplibConfig.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/JiplibConfigVersion.cmake
+  COMPATIBILITY AnyNewerVersion
+  )
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/jiplib-config.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/jiplib-config-version.cmake
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jiplib )
 
 configure_file ( "cmake.pc.in" "jiplib.pc"  @ONLY)
@@ -428,6 +428,7 @@ if(BUILD_WITH_MIALLIB)
       IMPORTED_LOCATION ${MIALLIB_LIBRARY}
       )
     message(STATUS "MIALLIB was found")
+    message(STATUS "MIALLIB was found with version ${MIALLIB_VERSION}")
     message(STATUS "Found MIALLIB libraries: ${MIALLIB_LIBRARIES}")
     message(STATUS "Found MIALLIB include dir: ${MIALLIB_INCLUDE_DIRS}")
   endif()
@@ -663,11 +664,12 @@ if(BUILD_WITH_PYTHON)
 
   if(CREATE_WHEEL)
     MESSAGE(STATUS "creating python wheel: ${CREATE_WHEEL}")
-    MESSAGE(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
-    MESSAGE(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
-    MESSAGE(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
     MESSAGE(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
+    MESSAGE(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
     MESSAGE(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+    MESSAGE(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
+    MESSAGE(STATUS "CMAKE_INSTALL_LIBDIR: ${CMAKE_INSTALL_LIBDIR}")
+    MESSAGE(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
     SET(WHEEL_DIR ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
 
     add_custom_command(TARGET _${JIPLIB_LIB_NAME}
@@ -680,37 +682,46 @@ if(BUILD_WITH_PYTHON)
       #todo: create links for jiplib?
       # ${JIPLIB_VERSION} #is the full version
       # ${JIPLIB_SO_VERSION} #is the major version
-      COMMAND cp ${CMAKE_BINARY_DIR}/lib${JIPLIB_LIB_NAME}.so ${WHEEL_DIR}
-      COMMAND cp ${MIALLIB_LIBRARIES} ${WHEEL_DIR}
+      COMMAND cp ${CMAKE_BINARY_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION} ${WHEEL_DIR}
+      COMMAND ln -s ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION} ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION_MAJOR}
+      COMMAND ln -s ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION_MAJOR} ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so
+      #todo: get major version from miallib config file
+      COMMAND cp ${MIALLIB_LIBRARIES}.${MIALLIB_VERSION} ${WHEEL_DIR}
       #todo: create links for miallib?
       COMMAND pip3 wheel ${CMAKE_CURRENT_BINARY_DIR}
       COMMAND rm -rf ${WHEEL_DIR}
       COMMENT "create wheel directory"
+      # INSTALL (TARGETS *.whl LIBRARY DESTINATION lib)
+      # INSTALL(FILES *.whl
+      #   DESTINATION ${CMAKE_INSTALL_LIBDIR}/${JIPLIB_LIB_NAME}
+      #   )
+      COMMAND mkdir ${CMAKE_INSTALL_PREFIX}/${JIPLIB_LIB_NAME}
     )
   endif(CREATE_WHEEL)
 endif(BUILD_WITH_PYTHON)
 
 ########## INSTALL ##########
-MESSAGE(STATUS "install library in: ${CMAKE_INSTALL_PREFIX}")
+# MESSAGE(STATUS "install library in: ${CMAKE_INSTALL_PREFIX}")
 INSTALL (TARGETS ${JIPLIB_LIB_NAME} LIBRARY DESTINATION lib)
-INSTALL (FILES ${IMGCLASS_H} DESTINATION include/jiplib/imageclasses)
-INSTALL (FILES ${APP_H} DESTINATION include/jiplib/apps)
-INSTALL (FILES ${BASE_H} DESTINATION include/jiplib/base)
-INSTALL (FILES ${ALGOR_H} DESTINATION include/jiplib/algorithms)
-INSTALL (FILES ${FILECLASS_H} DESTINATION include/jiplib/fileclasses)
-INSTALL (FILES ${LASCLASS_H} DESTINATION include/jiplib/lasclasses)
+# INSTALL (FILES ${IMGCLASS_H} DESTINATION include/jiplib/imageclasses)
+# INSTALL (FILES ${APP_H} DESTINATION include/jiplib/apps)
+# INSTALL (FILES ${BASE_H} DESTINATION include/jiplib/base)
+# INSTALL (FILES ${ALGOR_H} DESTINATION include/jiplib/algorithms)
+# INSTALL (FILES ${FILECLASS_H} DESTINATION include/jiplib/fileclasses)
+# INSTALL (FILES ${LASCLASS_H} DESTINATION include/jiplib/lasclasses)
 
-if(BUILD_WITH_PYTHON)
-  EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
-  # SET(PYTHON_INSTALL_DIR ${PYTHON_SITE_PACKAGES}/${JIPLIB_LIB_NAME} CACHE PATH "Install directory for Python library")
-  #test
-  SET("PYTHON_INSTALL_DIR /home/kempepi/repositories/jeolib-jiplib/build/_skbuild/linux-x86_64-3.9/cmake-install/"/${JIPLIB_LIB_NAME} CACHE PATH "Install directory for Python library")
-  INSTALL(TARGETS ${SWIG_MODULE_JIPLIB_REAL_NAME} LIBRARY DESTINATION ${PYTHON_INSTALL_DIR})
-  MESSAGE(STATUS "Python install directory: ${PYTHON_INSTALL_DIR}")
-  MESSAGE(STATUS "Python executable: ${PYTHON_EXECUTABLE}")
-  INSTALL(FILES ${CMAKE_BINARY_DIR}/${JIPLIB_LIB_NAME}.py DESTINATION ${PYTHON_INSTALL_DIR})
-  INSTALL(FILES ${CMAKE_BINARY_DIR}/_${JIPLIB_LIB_NAME}.so DESTINATION ${PYTHON_INSTALL_DIR})
-  INSTALL(FILES ${JIPLIB_INIT} DESTINATION ${PYTHON_INSTALL_DIR})
-endif(BUILD_WITH_PYTHON)
-INSTALL (FILES "${CMAKE_CURRENT_BINARY_DIR}/config_jiplib.h" DESTINATION ${PROJECT_INCLUDE_DIR})
+
+# if(BUILD_WITH_PYTHON)
+#   EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
+#   # SET(PYTHON_INSTALL_DIR ${PYTHON_SITE_PACKAGES}/${JIPLIB_LIB_NAME} CACHE PATH "Install directory for Python library")
+#   #test
+#   SET("PYTHON_INSTALL_DIR /home/kempepi/repositories/jeolib-jiplib/build/_skbuild/linux-x86_64-3.9/cmake-install/"/${JIPLIB_LIB_NAME} CACHE PATH "Install directory for Python library")
+#   INSTALL(TARGETS ${SWIG_MODULE_JIPLIB_REAL_NAME} LIBRARY DESTINATION ${PYTHON_INSTALL_DIR})
+#   MESSAGE(STATUS "Python install directory: ${PYTHON_INSTALL_DIR}")
+#   MESSAGE(STATUS "Python executable: ${PYTHON_EXECUTABLE}")
+#   INSTALL(FILES ${CMAKE_BINARY_DIR}/${JIPLIB_LIB_NAME}.py DESTINATION ${PYTHON_INSTALL_DIR})
+#   INSTALL(FILES ${CMAKE_BINARY_DIR}/_${JIPLIB_LIB_NAME}.so DESTINATION ${PYTHON_INSTALL_DIR})
+#   INSTALL(FILES ${JIPLIB_INIT} DESTINATION ${PYTHON_INSTALL_DIR})
+# endif(BUILD_WITH_PYTHON)
+# INSTALL (FILES "${CMAKE_CURRENT_BINARY_DIR}/config_jiplib.h" DESTINATION ${PROJECT_INCLUDE_DIR})
 ###############################################################################

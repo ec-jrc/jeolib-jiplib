@@ -34,6 +34,7 @@ setup(
     license='GPLv3',
     packages=find_packages(),
     package_data={'jiplib': ['_jiplib.so', 'libjiplib.so.1', 'libjiplib.so',
-                             'libjiplib.so.1.1.2', 'libmiallib_generic.so']},
+                             'libjiplib.so.1.1.2', 'libmiallib.so',
+                             'libmiallib.so.1', 'libmiallib.so.1.1.1']},
     include_package_data=True
 )
