@@ -116,22 +116,30 @@ if(BUILD_WITH_PYTHON)
 endif(BUILD_WITH_PYTHON)
 
 SET(PYTHON3 ON CACHE BOOL "set ON for PYTHON3")
-if(PYTHON3)
-  FIND_PACKAGE( PythonInterp 3.5 REQUIRED )
-  FIND_PACKAGE( PythonLibs 3.5 REQUIRED )
-else(PYTHON3)
-  FIND_PACKAGE( PythonInterp 2.7 REQUIRED )
-  FIND_PACKAGE( PythonLibs 2.7 REQUIRED )
-endif(PYTHON3)
 
-if(PYTHONLIBS_FOUND)
-  message(STATUS "Python version found: ${PYTHONLIBS_VERSION_STRING}")
-  message(STATUS "Found Python library: ${PYTHON_LIBRARY}")
-  message(STATUS "Found Python include dir: ${PYTHON_INCLUDE_DIR}")
-else(PYTHONLIBS_FOUND)
-  message(STATUS "Warning: PYTHON exact version ${PYTHON_VERSION} not found, trying default")
-  FIND_PACKAGE(PythonLibs REQUIRED)
-endif(PYTHONLIBS_FOUND)
+find_package(Python COMPONENTS Interpreter Development)
+
+# detect virtualenv and set Pip args accordingly
+if(DEFINED ENV{VIRTUAL_ENV} OR DEFINED ENV{CONDA_PREFIX})
+  set(_pip_args)
+else()
+  set(_pip_args "--user")
+endif()
+# if(PYTHON3)
+#   find_package (Python3 COMPONENTS Interpreter Development)
+# else(PYTHON3)
+#   find_package (Python2 COMPONENTS Interpreter Development)
+# endif(PYTHON3)
+
+# if(PYTHONLIBS_FOUND)
+message(STATUS "Python version found: ${Python_VERSION}")
+MESSAGE(STATUS "Python_LIBRARIES: ${Python_LIBRARIES}")
+MESSAGE(STATUS "Python_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}")
+message(STATUS "Python package will be installed in ${Python_SITELIB}")
+# else(PYTHONLIBS_FOUND)
+#   message(STATUS "Warning: PYTHON exact version ${PYTHON_VERSION} not found, trying default")
+#   FIND_PACKAGE(PythonLibs REQUIRED)
+# endif(PYTHONLIBS_FOUND)
 
 function(gdal_find_major _major)
     file(READ ${GDAL_INCLUDE_DIR}/gdal_version.h versionfile)
@@ -420,16 +428,19 @@ endif(BUILD_WITH_FANN)
 if(BUILD_WITH_MIALLIB)
   find_package(MIALLIB REQUIRED)
   if(MIALLIB_FOUND)
-    ADD_LIBRARY(miallib::miallib SHARED IMPORTED)
+    SET(MIALLIB_LIB_NAME miallib)
+    ADD_LIBRARY(${MIALLIB_LIB_NAME}::${MIALLIB_LIB_NAME} SHARED IMPORTED)
     SET_TARGET_PROPERTIES(
-      miallib::miallib
+      ${MIALLIB_LIB_NAME}::${MIALLIB_LIB_NAME}
       PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${MIALLIB_INCLUDE_DIRS}"
       IMPORTED_LOCATION ${MIALLIB_LIBRARY}
       )
-    message(STATUS "MIALLIB was found")
     message(STATUS "MIALLIB was found with version ${MIALLIB_VERSION}")
+    message(STATUS "MIALLIB was found with major version ${MIALLIB_VERSION_MAJOR}")
+    message(STATUS "MIALLIB was found with minor version ${MIALLIB_VERSION_MINOR}")
     message(STATUS "Found MIALLIB libraries: ${MIALLIB_LIBRARIES}")
+    message(STATUS "MIALLIB library name: ${MIALLIB_LIB_NAME}")
     message(STATUS "Found MIALLIB include dir: ${MIALLIB_INCLUDE_DIRS}")
   endif()
 
@@ -443,8 +454,8 @@ endif(BUILD_WITH_MIALLIB)
 
 ###############################################################################
 
-find_package(PythonInterp)
-if(PYTHONINTERP_FOUND)
+# find_package(PythonInterp)
+# if(PYTHONINTERP_FOUND)
   # file(WRITE ${JIPLIB_DOC} "//This is an automatically generated doc file, do not edit")
   #todo: treat miallib functions that return: int, long int, double, G_TYPE
   # G_TYPE: getpixval
@@ -453,8 +464,6 @@ if(PYTHONINTERP_FOUND)
   # long int thresholdRegion_Contrast
   # double julian_date
   if(BUILD_WITH_MIALLIB)
-    MESSAGE(STATUS "PythonInterp was found")
-
     file(GLOB MIALLIB_HEADER_FILES ${MIALLIB_INCLUDE_DIR}/miallib_*.h)
     MESSAGE(STATUS "MIALLIB_HEADER_FILES: ${MIALLIB_HEADER_FILES}")
     IF("${MIALLIB_HEADER_FILES}" STREQUAL "")
@@ -545,9 +554,9 @@ if(PYTHONINTERP_FOUND)
     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_d_nm.cc\"\n")
     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/JimList.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype_jimlist.cc\"\n")
   endif(BUILD_WITH_MIALLIB)
-else(PYTHONINTERP_FOUND)
-    MESSAGE(STATUS "Error: PythonInterp not found")
-endif(PYTHONINTERP_FOUND)
+# else(PYTHONINTERP_FOUND)
+#     MESSAGE(STATUS "Error: PythonInterp not found")
+# endif(PYTHONINTERP_FOUND)
 
 ###############################################################################
 # Define the jiplib library.
@@ -609,7 +618,7 @@ endif(BUILD_WITH_MIALLIB)
 
 target_link_libraries(
   ${JIPLIB_LIB_NAME}
-  ${PYTHON_LIBRARIES}
+  ${Python_LIBRARIES}
   gomp
   ${JSONCPP_LIBRARIES}
   ${GDAL_LIBRARIES}
@@ -623,6 +632,7 @@ if(BUILD_WITH_FANN)
     )
 endif(BUILD_WITH_FANN)
 
+
 if(BUILD_WITH_PYTHON)
   ########## SWIG #############
   SET(PYTHON_SRC_DIR src/swig)
@@ -631,9 +641,16 @@ if(BUILD_WITH_PYTHON)
   #   )
   SET(JIPLIB_I ${PYTHON_SRC_DIR}/jiplib.i)
   FIND_PACKAGE(SWIG REQUIRED)
+  MESSAGE(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
+  # cmake_policy(SET CMP0078 NEW)
+  # cmake_policy(SET CMP0086 NEW)
   INCLUDE(${SWIG_USE_FILE})
-  TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${PYTHON_INCLUDE_PATH})
+  MESSAGE(STATUS "Python_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}")
+  MESSAGE(STATUS "Python_LIBRARIES: ${Python_LIBRARIES}")
+  TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${Python_INCLUDE_DIRS})
+  # TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${PYTHON_INCLUDE_DIR})
 endif(BUILD_WITH_PYTHON)
+
 #we need INCLUDE_DIRECTORIES here instead of TARGET_INCLUDE_DIRECTORIES
 # for subfolder WORKING_DIRECTORY
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/src)
@@ -656,7 +673,7 @@ SWIG_ADD_LIBRARY(
 endif(${CMAKE_VERSION} VERSION_LESS "3.8.0")
 
 SET_SOURCE_FILES_PROPERTIES(${JIPLIB_I} PROPERTIES SWIG_FLAGS "-W2")
-SWIG_LINK_LIBRARIES(jiplib ${PYTHON_LIBRARIES} ${JIPLIB_LIB_NAME} ${BOOST_LIBRARIES})
+SWIG_LINK_LIBRARIES(jiplib ${Python_LIBRARIES} ${JIPLIB_LIB_NAME} ${BOOST_LIBRARIES})
 
 if(BUILD_WITH_PYTHON)
   SET(PYTHON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/python)
@@ -677,32 +694,42 @@ if(BUILD_WITH_PYTHON)
       COMMAND mkdir -p ${WHEEL_DIR}
       COMMAND cp ${JIPLIB_INIT} ${WHEEL_DIR}
       COMMAND cp ${PYTHON_SOURCE_DIR}/setup.py ${CMAKE_CURRENT_BINARY_DIR}
+      COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/README.md ${WHEEL_DIR}
       COMMAND cp ${CMAKE_BINARY_DIR}/_${JIPLIB_LIB_NAME}.so ${WHEEL_DIR}
       COMMAND cp ${CMAKE_BINARY_DIR}/${JIPLIB_LIB_NAME}.py ${WHEEL_DIR}
-      #todo: create links for jiplib?
-      # ${JIPLIB_VERSION} #is the full version
-      # ${JIPLIB_SO_VERSION} #is the major version
       COMMAND cp ${CMAKE_BINARY_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION} ${WHEEL_DIR}
+      COMMAND rm -f ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION_MAJOR}
+      COMMAND rm -f ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so
       COMMAND ln -s ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION} ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION_MAJOR}
       COMMAND ln -s ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION_MAJOR} ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so
-      #todo: get major version from miallib config file
+      COMMAND ls ${PROJECT_SOURCE_DIR}/README.md
+      COMMAND cp ${PROJECT_SOURCE_DIR}/README.md ${WHEEL_DIR}
       COMMAND cp ${MIALLIB_LIBRARIES}.${MIALLIB_VERSION} ${WHEEL_DIR}
-      #todo: create links for miallib?
+      COMMAND rm -f  ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so.${MIALLIB_VERSION_MAJOR}
+      COMMAND rm -f  ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so
+      COMMAND ln -s ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so.${MIALLIB_VERSION} ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so.${MIALLIB_VERSION_MAJOR}
+      COMMAND ln -s ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so.${MIALLIB_VERSION_MAJOR} ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so
+      # COMMAND python3 -m build --wheel ${CMAKE_CURRENT_BINARY_DIR}
+      #this works
       COMMAND pip3 wheel ${CMAKE_CURRENT_BINARY_DIR}
-      COMMAND rm -rf ${WHEEL_DIR}
-      COMMENT "create wheel directory"
+      # COMMAND rm -rf ${WHEEL_DIR}
       # INSTALL (TARGETS *.whl LIBRARY DESTINATION lib)
       # INSTALL(FILES *.whl
       #   DESTINATION ${CMAKE_INSTALL_LIBDIR}/${JIPLIB_LIB_NAME}
       #   )
-      COMMAND mkdir ${CMAKE_INSTALL_PREFIX}/${JIPLIB_LIB_NAME}
+      # COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/${JIPLIB_LIB_NAME}
     )
   endif(CREATE_WHEEL)
 endif(BUILD_WITH_PYTHON)
 
 ########## INSTALL ##########
-# MESSAGE(STATUS "install library in: ${CMAKE_INSTALL_PREFIX}")
 INSTALL (TARGETS ${JIPLIB_LIB_NAME} LIBRARY DESTINATION lib)
+INSTALL(CODE "execute_process(COMMAND ${Python_EXECUTABLE} -m pip install ${_pip_args} ${CMAKE_CURRENT_BINARY_DIR})")
+# install(CODE "execute_process(COMMAND ${Python_EXECUTABLE} -m pip install ${_pip_args} -e ${CMAKE_CURRENT_BINARY_DIR})")
+
+#installation installs into wheel (but in data directory)
+# MESSAGE(STATUS "install library in: ${CMAKE_INSTALL_PREFIX}")
+# INSTALL (FILES ${MIALLIB_LIBRARIES}.${MIALLIB_VERSION} DESTINATION lib)
 # INSTALL (FILES ${IMGCLASS_H} DESTINATION include/jiplib/imageclasses)
 # INSTALL (FILES ${APP_H} DESTINATION include/jiplib/apps)
 # INSTALL (FILES ${BASE_H} DESTINATION include/jiplib/base)
@@ -710,6 +737,11 @@ INSTALL (TARGETS ${JIPLIB_LIB_NAME} LIBRARY DESTINATION lib)
 # INSTALL (FILES ${FILECLASS_H} DESTINATION include/jiplib/fileclasses)
 # INSTALL (FILES ${LASCLASS_H} DESTINATION include/jiplib/lasclasses)
 
+
+# INSTALL(TARGETS ${SWIG_MODULE_JIPLIB_REAL_NAME} LIBRARY DESTINATION ${Python_SITELIB})
+# INSTALL(FILES ${CMAKE_BINARY_DIR}/${JIPLIB_LIB_NAME}.py DESTINATION ${Python_SITELIB})
+# INSTALL(FILES ${CMAKE_BINARY_DIR}/_${JIPLIB_LIB_NAME}.so DESTINATION ${Python_SITELIB})
+# INSTALL(FILES ${JIPLIB_INIT} DESTINATION ${Python_SITELIB})
 
 # if(BUILD_WITH_PYTHON)
 #   EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
