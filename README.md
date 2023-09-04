@@ -79,28 +79,21 @@ cmake --build .
 cmake --install .
 ```
 
-Then build and install jiplib locally:
+Then build jiplib referring to the install prefix:
 
 ```
 git clone https://github.com/ec-jrc/jeolib-jiplib.git
 cd jeolib-jiplib
 mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=/home/user/install -DPYTHON_INSTALL_DIR=/home/user/install/python/dist/dir ..
+cmake -DCMAKE_INSTALL_PREFIX=/home/user/install ..
 cmake --build .
+```
+
+Create a virtual environment and install both jiplib libraries and python wheel:
+
+```
 cmake --install .
-```
-
-Then export the `LD_LIBRARY_PATH` environment variable so that the libraries can be found:
-
-```
-export LD_LIBRARY_PATH=/home/user/install/jiplib/lib:/home/user/install/miallib/lib:
-```
-
-Finally adapt the `PYTHONPATH`:
-
-```
-export PYTHONPATH=/home/user/install/python/dist/dir:$PYTHONPATH
 ```
 
 # Test the installation
