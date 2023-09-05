@@ -27,9 +27,9 @@ jiplib is released under the [GPLv3](https://www.gnu.org/licenses) license.
 * Sphinx: BSD http://www.sphinx-doc.org/en/master/
 
 
+# Installation procedure
 ## Install dependency libraries (example for Debian based system using apt)
 
-### Install dependencies from the repository
 ```
 sudo apt install -yq \
   build-essential \
@@ -45,62 +45,72 @@ sudo apt install -yq \
   swig
 ```
 
-### Install miallib
+## Install miallib
 
-See more information at [miallib](https://github.com/ec-jrc/jeolib-miallib)
-
-# Install jiplib
-```
-git clone https://github.com/ec-jrc/jeolib-jiplib.git
-cd jeolib-jiplib
-mkdir build
-cd build
-cmake ..
-cmake --build .
-sudo cmake --install .
-```
-
-# How to install without sudo rights
-
-Download the source code from [miallib](https://github.com/ec-jrc/jeolib-miallib) to a local directory:
-```
-/local/miallib/dir/jeolib-miallib
-```
-
-install [miallib](https://github.com/ec-jrc/jeolib-miallib) locally in `/home/user/install`:
+Get the source code from [miallib](https://github.com/ec-jrc/jeolib-miallib), to create the library:
 
 ```
 git clone https://github.com/ec-jrc/jeolib-miallib.git
 cd jeolib-miallib
 mkdir build
 cd build
+cmake ..
+```
+
+or without sudo rights, replace the last command with:
+```
 cmake -DCMAKE_INSTALL_PREFIX=/home/user/install ..
+```
+
+Build and install the [miallib](https://github.com/ec-jrc/jeolib-miallib) library:
+
+```
 cmake --build .
+sudo cmake --install .
+```
+
+or without sudo rights, replace the last command with:
+
+```
 cmake --install .
 ```
 
-Then build jiplib referring to the install prefix:
+## Install jiplib
 
+Get the source code from [jiplib](https://github.com/ec-jrc/jeolib-jiplib):
 ```
 git clone https://github.com/ec-jrc/jeolib-jiplib.git
 cd jeolib-jiplib
 mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=/home/user/install ..
-cmake --build .
+cmake ..
 ```
 
-Create a virtual environment and install both jiplib libraries and python wheel:
+or without sudo rights, replace the last command with:
+```
+cmake -DCMAKE_INSTALL_PREFIX=/home/user/install ..
+```
+
+Build and install the [jiplib](https://github.com/ec-jrc/jeolib-jiplib) library:
+```
+cmake --build .
+sudo cmake --install .
+```
+
+or without sudo rights, replace the last command with:
 
 ```
 cmake --install .
 ```
 
+Make sure to execute this command within a virtual python environment.
+This will then install both the jiplib library and the python bindings in your virtual environment:
+
 # Test the installation
 
 From the build directory, run:
 ```
-ctest
+ctest .
 ```
 
 # Build documentation (deprecated, users are encouraged to use pyjeo documentation)
