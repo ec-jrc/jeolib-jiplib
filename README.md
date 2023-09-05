@@ -59,7 +59,7 @@ cmake ..
 
 or without sudo rights, replace the last command with:
 ```
-cmake -DCMAKE_INSTALL_PREFIX=/home/user/install ..
+cmake -DCMAKE_INSTALL_PREFIX=/home/user/install/miallib ..
 ```
 
 Build and install the [miallib](https://github.com/ec-jrc/jeolib-miallib) library:
@@ -88,7 +88,7 @@ cmake ..
 
 or without sudo rights, replace the last command with:
 ```
-cmake -DCMAKE_INSTALL_PREFIX=/home/user/install ..
+cmake -DCMAKE_PREFIX_PATH=/home/user/install/miallib -DCMAKE_INSTALL_PREFIX=/home/user/install/jiplib ..
 ```
 
 Build and install the [jiplib](https://github.com/ec-jrc/jeolib-jiplib) library:
@@ -103,8 +103,13 @@ or without sudo rights, replace the last command with:
 cmake --install .
 ```
 
-Make sure to execute this command within a virtual python environment.
-This will then install both the jiplib library and the python bindings in your virtual environment:
+This will only install the jiplib library.
+
+Install the python bindings (in your virtual python environment):
+
+```
+pip install jiplib-*.whl
+```
 
 # Test the installation
 
