@@ -120,26 +120,15 @@ SET(PYTHON3 ON CACHE BOOL "set ON for PYTHON3")
 find_package(Python COMPONENTS Interpreter Development)
 
 # detect virtualenv and set Pip args accordingly
-if(DEFINED ENV{VIRTUAL_ENV} OR DEFINED ENV{CONDA_PREFIX})
-  set(_pip_args)
-else()
-  set(_pip_args "--user")
-endif()
-# if(PYTHON3)
-#   find_package (Python3 COMPONENTS Interpreter Development)
-# else(PYTHON3)
-#   find_package (Python2 COMPONENTS Interpreter Development)
-# endif(PYTHON3)
-
-# if(PYTHONLIBS_FOUND)
+# if(DEFINED ENV{VIRTUAL_ENV} OR DEFINED ENV{CONDA_PREFIX})
+#   set(_pip_args)
+# else()
+#   set(_pip_args "--user")
+# endif()
 message(STATUS "Python version found: ${Python_VERSION}")
 MESSAGE(STATUS "Python_LIBRARIES: ${Python_LIBRARIES}")
 MESSAGE(STATUS "Python_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}")
 message(STATUS "Python package will be installed in ${Python_SITELIB}")
-# else(PYTHONLIBS_FOUND)
-#   message(STATUS "Warning: PYTHON exact version ${PYTHON_VERSION} not found, trying default")
-#   FIND_PACKAGE(PythonLibs REQUIRED)
-# endif(PYTHONLIBS_FOUND)
 
 function(gdal_find_major _major)
     file(READ ${GDAL_INCLUDE_DIR}/gdal_version.h versionfile)
@@ -199,8 +188,6 @@ if(GDAL_FOUND)
 
   SET(CMAKE_SWIG_FLAGS "-DGDAL_VERSION_MAJOR=${GDAL_VERSION_MAJOR}")
   SET(CMAKE_SWIG_FLAGS "-DGDAL_VERSION_MINOR=${GDAL_VERSION_MINOR}")
-  # gdal_find_version(GDAL_VERSION)
-  # SET(GDAL_VERSION_MAJOR "2" CACHE STRING " ")
   message(STATUS "GDAL version found: ${GDAL_VERSION}")
   message(STATUS "GDAL version major: ${GDAL_VERSION_MAJOR}")
   message(STATUS "GDAL version minor: ${GDAL_VERSION_MINOR}")
@@ -218,8 +205,6 @@ if(JSONCPP_FOUND)
 else(JSONCPP_FOUND)
   message(STATUS "Warning: JSONCPP package not found!")
 endif(JSONCPP_FOUND)
-
-# link_libraries(${JSONCPP_LIBRARIES})
 
 if(PROCESS_IN_PARALLEL)
   find_package(OpenMP)
@@ -248,19 +233,6 @@ configure_file (
   "cmake-config.h.in"
   "config_jiplib.h"
   )
-
-# # configure a header file to pass some of the CMake settings to the source code
-# configure_file (
-#   "cmake-config.in"
-#   "${CMAKE_CURRENT_BINARY_DIR}/jiplib-config"
-#   @ONLY
-#   )
-
-# configure_file (
-#   "cmake.pc.in"
-#   "jiplib.pc"
-#   @ONLY
-#   )
 
 #Generating Package Files
 include(CMakePackageConfigHelpers)
@@ -304,8 +276,6 @@ SET(FILECLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/fileclasses)
 SET(IMGCLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
 SET(LASCLASS_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/lasclasses)
 SET(APP_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/apps)
-# SET(PYTHON_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/swig)
-# SET(PYTHON_SRC_DIR src/swig)
 
 SET(BASE_H
   ${BASE_SRC_DIR}/IndexValue.h
@@ -453,110 +423,97 @@ else(BUILD_WITH_MIALLIB)
 endif(BUILD_WITH_MIALLIB)
 
 ###############################################################################
-
-# find_package(PythonInterp)
-# if(PYTHONINTERP_FOUND)
-  # file(WRITE ${JIPLIB_DOC} "//This is an automatically generated doc file, do not edit")
-  #todo: treat miallib functions that return: int, long int, double, G_TYPE
-  # G_TYPE: getpixval
-  # G_TYPE* min_max
-  # long int thresholdRegion_Size
-  # long int thresholdRegion_Contrast
-  # double julian_date
-  if(BUILD_WITH_MIALLIB)
-    file(GLOB MIALLIB_HEADER_FILES ${MIALLIB_INCLUDE_DIR}/miallib_*.h)
-    MESSAGE(STATUS "MIALLIB_HEADER_FILES: ${MIALLIB_HEADER_FILES}")
-    IF("${MIALLIB_HEADER_FILES}" STREQUAL "")
-      MESSAGE(FATAL_ERROR "Error: no header files found for miallib")
-    ENDIF("${MIALLIB_HEADER_FILES}" STREQUAL "")
-    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_imagetype)
-    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_imagelisttype)
-    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype_nd)
-    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype_nm)
-    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype)
-    #Miallib functions have been designed as destructive. We will therefore create a copy to avoid the destructive behaviour. The destructive method will still be available with the prefix d_
-    #The following functions F_ND from miallib do not modify the input image and should therefore not create a copy. They will be treated in the same way as the destructive functions (without the prefix d_)
-    SET(F_ND "dumpxyz|szcompat|szgeocompat|iminfo|tiffinfo|writeGnuPlot3D|vectorizeImage|IsPartitionEqual|IsPartitionFiner|dendro|getfirstmaxpos|volume|imequalp|getmax|getminmax")
-    #The following functions F_NM from miallib are not compatible for multi-band processing
-    SET(F_NM "addframebox|subframebox")
-    #These functions must only be included if MCISRG is set
-    SET(F_MCISRG "labelImage|segmentImage")
-    #Create a text file with the list of headers to MIALLIB functions, e.g., miallib_imagetype for functions returning IMAGE *
-    FOREACH(infileName ${MIALLIB_HEADER_FILES})
-      MESSAGE(STATUS "Process file: ${infileName}")
-      file(STRINGS ${infileName} FUN_IMAGETYPE REGEX "^extern IMAGE \\*[^*]")
-      FOREACH(fun ${FUN_IMAGETYPE})
-        IF("${fun}" MATCHES "${F_MCISRG}")
-          IF(MCISRG)
-            file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_imagetype "${fun}\n")
-          ENDIF(MCISRG)
-        ELSE("${fun}" MATCHES "${F_MCISRG}")
+if(BUILD_WITH_MIALLIB)
+  file(GLOB MIALLIB_HEADER_FILES ${MIALLIB_INCLUDE_DIR}/miallib_*.h)
+  MESSAGE(STATUS "MIALLIB_HEADER_FILES: ${MIALLIB_HEADER_FILES}")
+  IF("${MIALLIB_HEADER_FILES}" STREQUAL "")
+    MESSAGE(FATAL_ERROR "Error: no header files found for miallib")
+  ENDIF("${MIALLIB_HEADER_FILES}" STREQUAL "")
+  file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_imagetype)
+  file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_imagelisttype)
+  file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype_nd)
+  file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype_nm)
+  file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype)
+  #Miallib functions have been designed as destructive. We will therefore create a copy to avoid the destructive behaviour. The destructive method will still be available with the prefix d_
+  #The following functions F_ND from miallib do not modify the input image and should therefore not create a copy. They will be treated in the same way as the destructive functions (without the prefix d_)
+  SET(F_ND "dumpxyz|szcompat|szgeocompat|iminfo|tiffinfo|writeGnuPlot3D|vectorizeImage|IsPartitionEqual|IsPartitionFiner|dendro|getfirstmaxpos|volume|imequalp|getmax|getminmax")
+  #The following functions F_NM from miallib are not compatible for multi-band processing
+  SET(F_NM "addframebox|subframebox")
+  #These functions must only be included if MCISRG is set
+  SET(F_MCISRG "labelImage|segmentImage")
+  #Create a text file with the list of headers to MIALLIB functions, e.g., miallib_imagetype for functions returning IMAGE *
+  FOREACH(infileName ${MIALLIB_HEADER_FILES})
+    MESSAGE(STATUS "Process file: ${infileName}")
+    file(STRINGS ${infileName} FUN_IMAGETYPE REGEX "^extern IMAGE \\*[^*]")
+    FOREACH(fun ${FUN_IMAGETYPE})
+      IF("${fun}" MATCHES "${F_MCISRG}")
+        IF(MCISRG)
           file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_imagetype "${fun}\n")
-        ENDIF("${fun}" MATCHES "${F_MCISRG}")
-      ENDFOREACH(fun)
-      file(STRINGS ${infileName} FUN_IMAGELISTTYPE REGEX "^extern IMAGE \\*\\*[^*]")
-      FOREACH(fun ${FUN_IMAGELISTTYPE})
-        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_imagelisttype "${fun}\n")
-      ENDFOREACH(fun)
-      file(STRINGS ${infileName} FUN_ERRORTYPE REGEX "^extern ERROR")
-      FOREACH(fun ${FUN_ERRORTYPE})
-        IF("${fun}" MATCHES "${F_ND}")
-          file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype_nd "${fun}\n")
-        ELSE("${fun}" MATCHES "${F_ND}")
-          IF("${fun}" MATCHES "${F_NM}")
-            file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype_nm "${fun}\n")
-          ELSE("${fun}" MATCHES "${F_NM}")
-            file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype "${fun}\n")
-          ENDIF("${fun}" MATCHES "${F_NM}")
-        ENDIF("${fun}" MATCHES "${F_ND}")
-      ENDFOREACH(fun)
-    ENDFOREACH(infileName)
+        ENDIF(MCISRG)
+      ELSE("${fun}" MATCHES "${F_MCISRG}")
+        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_imagetype "${fun}\n")
+      ENDIF("${fun}" MATCHES "${F_MCISRG}")
+    ENDFOREACH(fun)
+    file(STRINGS ${infileName} FUN_IMAGELISTTYPE REGEX "^extern IMAGE \\*\\*[^*]")
+    FOREACH(fun ${FUN_IMAGELISTTYPE})
+      file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_imagelisttype "${fun}\n")
+    ENDFOREACH(fun)
+    file(STRINGS ${infileName} FUN_ERRORTYPE REGEX "^extern ERROR")
+    FOREACH(fun ${FUN_ERRORTYPE})
+      IF("${fun}" MATCHES "${F_ND}")
+        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype_nd "${fun}\n")
+      ELSE("${fun}" MATCHES "${F_ND}")
+        IF("${fun}" MATCHES "${F_NM}")
+          file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype_nm "${fun}\n")
+        ELSE("${fun}" MATCHES "${F_NM}")
+          file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/miallib_errortype "${fun}\n")
+        ENDIF("${fun}" MATCHES "${F_NM}")
+      ENDIF("${fun}" MATCHES "${F_ND}")
+    ENDFOREACH(fun)
+  ENDFOREACH(infileName)
 
-    #Create headers with new names in build directory
-    EXECUTE_PROCESS(COMMAND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/rename.sh ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses OUTPUT_QUIET)
-    EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype.py OUTPUT_QUIET)
-    EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype_multi.py OUTPUT_QUIET)
-    EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype_jimlist.py OUTPUT_QUIET)
-    EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagelisttype.py OUTPUT_QUIET)
-    EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype.py OUTPUT_QUIET)
-    EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_d.py OUTPUT_QUIET)
-    EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_nd.py OUTPUT_QUIET)
-    EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_nm.py OUTPUT_QUIET)
-    EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_d_nm.py OUTPUT_QUIET)
+  #Create headers with new names in build directory
+  EXECUTE_PROCESS(COMMAND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/rename.sh ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses OUTPUT_QUIET)
+  EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype.py OUTPUT_QUIET)
+  EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype_multi.py OUTPUT_QUIET)
+  EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype_jimlist.py OUTPUT_QUIET)
+  EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagelisttype.py OUTPUT_QUIET)
+  EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype.py OUTPUT_QUIET)
+  EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_d.py OUTPUT_QUIET)
+  EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_nd.py OUTPUT_QUIET)
+  EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_nm.py OUTPUT_QUIET)
+  EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses INPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_d_nm.py OUTPUT_QUIET)
 
-    # remove all lines in between start and end in Jim.cc
-    execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_imagetype/,/\\/\\/end insert from fun2method_imagetype/{/\\/\\/start insert from fun2method_imagetype/!{/\\/\\/end insert from fun2method_imagetype/!d}}' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_imagetype/ {p; r fun2method_imagetype.h' -e ':a; n; /\\/\\/end insert from fun2method_imagetype/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_imagetype_multi/,/\\/\\/end insert from fun2method_imagetype_multi/{/\\/\\/start insert from fun2method_imagetype_multi/!{/\\/\\/end insert from fun2method_imagetype_multi/!d}}' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_imagetype_multi/ {p; r fun2method_imagetype_multi.h' -e ':a; n; /\\/\\/end insert from fun2method_imagetype_multi/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_imagetype_jimlist/,/\\/\\/end insert from fun2method_imagetype_jimlist/{/\\/\\/start insert from fun2method_imagetype_jimlist/!{/\\/\\/end insert from fun2method_imagetype_jimlist/!d}}' JimList.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_imagetype_jimlist/ {p; r fun2method_imagetype_jimlist.h' -e ':a; n; /\\/\\/end insert from fun2method_imagetype_jimlist/ {p; b}; ba}; p' JimList.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_imagelisttype/,/\\/\\/end insert from fun2method_imagelisttype/{/\\/\\/start insert from fun2method_imagelisttype/!{/\\/\\/end insert from fun2method_imagelisttype/!d}}' JimList.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_imagelisttype/ {p; r fun2method_imagelisttype.h' -e ':a; n; /\\/\\/end insert from fun2method_imagelisttype/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_errortype/,/\\/\\/end insert from fun2method_errortype/{/\\/\\/start insert from fun2method_errortype/!{/\\/\\/end insert from fun2method_errortype/!d}}' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_errortype/ {p; r fun2method_errortype.h' -e ':a; n; /\\/\\/end insert from fun2method_errortype/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_errortype_d/,/\\/\\/end insert from fun2method_errortype_d/{/\\/\\/start insert from fun2method_errortype_d/!{/\\/\\/end insert from fun2method_errortype_d/!d}}' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_errortype_d/ {p; r fun2method_errortype_d.h' -e ':a; n; /\\/\\/end insert from fun2method_errortype_d/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_errortype_nd/,/\\/\\/end insert from fun2method_errortype_nd/{/\\/\\/start insert from fun2method_errortype_nd/!{/\\/\\/end insert from fun2method_errortype_nd/!d}}' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_errortype_nd/ {p; r fun2method_errortype_nd.h' -e ':a; n; /\\/\\/end insert from fun2method_errortype_nd/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_errortype_nm/,/\\/\\/end insert from fun2method_errortype_nm/{/\\/\\/start insert from fun2method_errortype_nm/!{/\\/\\/end insert from fun2method_errortype_nm/!d}}' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_errortype_nm/ {p; r fun2method_errortype_nm.h' -e ':a; n; /\\/\\/end insert from fun2method_errortype_nm/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_errortype_d_nm/,/\\/\\/end insert from fun2method_errortype_d_nm/{/\\/\\/start insert from fun2method_errortype_d_nm/!{/\\/\\/end insert from fun2method_errortype_d_nm/!d}}' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_errortype_d_nm/ {p; r fun2method_errortype_d_nm.h' -e ':a; n; /\\/\\/end insert from fun2method_errortype_d_nm/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
-    #Append the source files to Jim.cc
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype.cc\"\n")
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype_multi.cc\"\n")
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagelisttype.cc\"\n")
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype.cc\"\n")
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_d.cc\"\n")
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_nd.cc\"\n")
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_nm.cc\"\n")
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_d_nm.cc\"\n")
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/JimList.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype_jimlist.cc\"\n")
-  endif(BUILD_WITH_MIALLIB)
-# else(PYTHONINTERP_FOUND)
-#     MESSAGE(STATUS "Error: PythonInterp not found")
-# endif(PYTHONINTERP_FOUND)
+  # remove all lines in between start and end in Jim.cc
+  execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_imagetype/,/\\/\\/end insert from fun2method_imagetype/{/\\/\\/start insert from fun2method_imagetype/!{/\\/\\/end insert from fun2method_imagetype/!d}}' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_imagetype/ {p; r fun2method_imagetype.h' -e ':a; n; /\\/\\/end insert from fun2method_imagetype/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_imagetype_multi/,/\\/\\/end insert from fun2method_imagetype_multi/{/\\/\\/start insert from fun2method_imagetype_multi/!{/\\/\\/end insert from fun2method_imagetype_multi/!d}}' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_imagetype_multi/ {p; r fun2method_imagetype_multi.h' -e ':a; n; /\\/\\/end insert from fun2method_imagetype_multi/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_imagetype_jimlist/,/\\/\\/end insert from fun2method_imagetype_jimlist/{/\\/\\/start insert from fun2method_imagetype_jimlist/!{/\\/\\/end insert from fun2method_imagetype_jimlist/!d}}' JimList.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_imagetype_jimlist/ {p; r fun2method_imagetype_jimlist.h' -e ':a; n; /\\/\\/end insert from fun2method_imagetype_jimlist/ {p; b}; ba}; p' JimList.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_imagelisttype/,/\\/\\/end insert from fun2method_imagelisttype/{/\\/\\/start insert from fun2method_imagelisttype/!{/\\/\\/end insert from fun2method_imagelisttype/!d}}' JimList.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_imagelisttype/ {p; r fun2method_imagelisttype.h' -e ':a; n; /\\/\\/end insert from fun2method_imagelisttype/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_errortype/,/\\/\\/end insert from fun2method_errortype/{/\\/\\/start insert from fun2method_errortype/!{/\\/\\/end insert from fun2method_errortype/!d}}' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_errortype/ {p; r fun2method_errortype.h' -e ':a; n; /\\/\\/end insert from fun2method_errortype/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_errortype_d/,/\\/\\/end insert from fun2method_errortype_d/{/\\/\\/start insert from fun2method_errortype_d/!{/\\/\\/end insert from fun2method_errortype_d/!d}}' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_errortype_d/ {p; r fun2method_errortype_d.h' -e ':a; n; /\\/\\/end insert from fun2method_errortype_d/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_errortype_nd/,/\\/\\/end insert from fun2method_errortype_nd/{/\\/\\/start insert from fun2method_errortype_nd/!{/\\/\\/end insert from fun2method_errortype_nd/!d}}' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_errortype_nd/ {p; r fun2method_errortype_nd.h' -e ':a; n; /\\/\\/end insert from fun2method_errortype_nd/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_errortype_nm/,/\\/\\/end insert from fun2method_errortype_nm/{/\\/\\/start insert from fun2method_errortype_nm/!{/\\/\\/end insert from fun2method_errortype_nm/!d}}' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_errortype_nm/ {p; r fun2method_errortype_nm.h' -e ':a; n; /\\/\\/end insert from fun2method_errortype_nm/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i '/\\/\\/start insert from fun2method_errortype_d_nm/,/\\/\\/end insert from fun2method_errortype_d_nm/{/\\/\\/start insert from fun2method_errortype_d_nm/!{/\\/\\/end insert from fun2method_errortype_d_nm/!d}}' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  execute_process(COMMAND bash "-c" "sed -i -ne '/\\/\\/start insert from fun2method_errortype_d_nm/ {p; r fun2method_errortype_d_nm.h' -e ':a; n; /\\/\\/end insert from fun2method_errortype_d_nm/ {p; b}; ba}; p' Jim.h" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses)
+  #Append the source files to Jim.cc
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype.cc\"\n")
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype_multi.cc\"\n")
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagelisttype.cc\"\n")
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype.cc\"\n")
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_d.cc\"\n")
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_nd.cc\"\n")
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_nm.cc\"\n")
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/Jim.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_errortype_d_nm.cc\"\n")
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/JimList.cc "#include \"${CMAKE_CURRENT_BINARY_DIR}/src/imageclasses/fun2method_imagetype_jimlist.cc\"\n")
+endif(BUILD_WITH_MIALLIB)
 
 ###############################################################################
 # Define the jiplib library.
@@ -568,11 +525,6 @@ endif(BUILD_WITH_LIBLAS)
 
 ###############################################################################
 
-# add_definitions(-DMIALLIB_DLL)
-# add_definitions("-DBOOST_ALL_NO_LIB")
-# add_definitions(-DHAVE_CONFIG_H)
-# add_definitions(-DGSL_DLL)
-# add_definitions(-DFANN_DLL)
 TARGET_COMPILE_DEFINITIONS(${JIPLIB_LIB_NAME} PUBLIC MIALLIB_DLL)
 if (BUILD_WITH_FANN)
   TARGET_COMPILE_DEFINITIONS(${JIPLIB_LIB_NAME} PUBLIC FANN_DLL)
@@ -642,13 +594,13 @@ if(BUILD_WITH_PYTHON)
   SET(JIPLIB_I ${PYTHON_SRC_DIR}/jiplib.i)
   FIND_PACKAGE(SWIG REQUIRED)
   MESSAGE(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
+  # todo adapt to new policies:
   # cmake_policy(SET CMP0078 NEW)
   # cmake_policy(SET CMP0086 NEW)
   INCLUDE(${SWIG_USE_FILE})
   MESSAGE(STATUS "Python_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}")
   MESSAGE(STATUS "Python_LIBRARIES: ${Python_LIBRARIES}")
   TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${Python_INCLUDE_DIRS})
-  # TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${PYTHON_INCLUDE_DIR})
 endif(BUILD_WITH_PYTHON)
 
 #we need INCLUDE_DIRECTORIES here instead of TARGET_INCLUDE_DIRECTORIES
@@ -709,51 +661,12 @@ if(BUILD_WITH_PYTHON)
       COMMAND rm -f  ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so
       COMMAND ln -s ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so.${MIALLIB_VERSION} ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so.${MIALLIB_VERSION_MAJOR}
       COMMAND ln -s ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so.${MIALLIB_VERSION_MAJOR} ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so
-      # COMMAND python3 -m build --wheel ${CMAKE_CURRENT_BINARY_DIR}
-      #this works
-      COMMAND pip3 wheel ${CMAKE_CURRENT_BINARY_DIR}
-      # COMMAND rm -rf ${WHEEL_DIR}
-      # INSTALL (TARGETS *.whl LIBRARY DESTINATION lib)
-      # INSTALL(FILES *.whl
-      #   DESTINATION ${CMAKE_INSTALL_LIBDIR}/${JIPLIB_LIB_NAME}
-      #   )
-      # COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/${JIPLIB_LIB_NAME}
+      COMMAND pip wheel ${CMAKE_CURRENT_BINARY_DIR}
+      COMMAND rm -rf ${WHEEL_DIR}
     )
   endif(CREATE_WHEEL)
 endif(BUILD_WITH_PYTHON)
 
 ########## INSTALL ##########
 INSTALL (TARGETS ${JIPLIB_LIB_NAME} LIBRARY DESTINATION lib)
-INSTALL(CODE "execute_process(COMMAND ${Python_EXECUTABLE} -m pip install ${_pip_args} ${CMAKE_CURRENT_BINARY_DIR})")
-# install(CODE "execute_process(COMMAND ${Python_EXECUTABLE} -m pip install ${_pip_args} -e ${CMAKE_CURRENT_BINARY_DIR})")
-
-#installation installs into wheel (but in data directory)
-# MESSAGE(STATUS "install library in: ${CMAKE_INSTALL_PREFIX}")
-# INSTALL (FILES ${MIALLIB_LIBRARIES}.${MIALLIB_VERSION} DESTINATION lib)
-# INSTALL (FILES ${IMGCLASS_H} DESTINATION include/jiplib/imageclasses)
-# INSTALL (FILES ${APP_H} DESTINATION include/jiplib/apps)
-# INSTALL (FILES ${BASE_H} DESTINATION include/jiplib/base)
-# INSTALL (FILES ${ALGOR_H} DESTINATION include/jiplib/algorithms)
-# INSTALL (FILES ${FILECLASS_H} DESTINATION include/jiplib/fileclasses)
-# INSTALL (FILES ${LASCLASS_H} DESTINATION include/jiplib/lasclasses)
-
-
-# INSTALL(TARGETS ${SWIG_MODULE_JIPLIB_REAL_NAME} LIBRARY DESTINATION ${Python_SITELIB})
-# INSTALL(FILES ${CMAKE_BINARY_DIR}/${JIPLIB_LIB_NAME}.py DESTINATION ${Python_SITELIB})
-# INSTALL(FILES ${CMAKE_BINARY_DIR}/_${JIPLIB_LIB_NAME}.so DESTINATION ${Python_SITELIB})
-# INSTALL(FILES ${JIPLIB_INIT} DESTINATION ${Python_SITELIB})
-
-# if(BUILD_WITH_PYTHON)
-#   EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
-#   # SET(PYTHON_INSTALL_DIR ${PYTHON_SITE_PACKAGES}/${JIPLIB_LIB_NAME} CACHE PATH "Install directory for Python library")
-#   #test
-#   SET("PYTHON_INSTALL_DIR /home/kempepi/repositories/jeolib-jiplib/build/_skbuild/linux-x86_64-3.9/cmake-install/"/${JIPLIB_LIB_NAME} CACHE PATH "Install directory for Python library")
-#   INSTALL(TARGETS ${SWIG_MODULE_JIPLIB_REAL_NAME} LIBRARY DESTINATION ${PYTHON_INSTALL_DIR})
-#   MESSAGE(STATUS "Python install directory: ${PYTHON_INSTALL_DIR}")
-#   MESSAGE(STATUS "Python executable: ${PYTHON_EXECUTABLE}")
-#   INSTALL(FILES ${CMAKE_BINARY_DIR}/${JIPLIB_LIB_NAME}.py DESTINATION ${PYTHON_INSTALL_DIR})
-#   INSTALL(FILES ${CMAKE_BINARY_DIR}/_${JIPLIB_LIB_NAME}.so DESTINATION ${PYTHON_INSTALL_DIR})
-#   INSTALL(FILES ${JIPLIB_INIT} DESTINATION ${PYTHON_INSTALL_DIR})
-# endif(BUILD_WITH_PYTHON)
-# INSTALL (FILES "${CMAKE_CURRENT_BINARY_DIR}/config_jiplib.h" DESTINATION ${PROJECT_INCLUDE_DIR})
-###############################################################################
+# INSTALL(CODE "execute_process(COMMAND ${Python_EXECUTABLE} -m pip install ${_pip_args} ${CMAKE_CURRENT_BINARY_DIR})")
