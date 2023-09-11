@@ -27,7 +27,7 @@ project(jiplib)
 SET(JIPLIB_LIB_NAME jiplib)
 
 enable_testing()
-include(CTest)
+INCLUDE(CTest)
 
 SET(JIPLIB_VERSION_MAJOR 1)
 SET(JIPLIB_VERSION_MINOR 1)
@@ -69,7 +69,7 @@ option (BUILD_SHARED_LIBS "Build with shared library" ON)
 
 # Platform and compiler specific settings
 
-include(CheckCXXCompilerFlag)
+INCLUDE(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 if(COMPILER_SUPPORTS_CXX11)
@@ -81,7 +81,7 @@ endif()
 
 ########## BUILDING INSTALLLER ##########
 # build a CPack driven installer package
-include (InstallRequiredSystemLibraries)
+INCLUDE (InstallRequiredSystemLibraries)
 SET(CPACK_RESOURCE_FILE_LICENSE
      "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
 SET(CPACK_PACKAGE_VERSION_MAJOR "${JIPLIB_VERSION_MAJOR}")
@@ -101,7 +101,7 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "CPackConfig.cmake")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "schemas")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/build/;~$;${CPACK_SOURCE_IGNORE_FILES}")
 
-include (CPack)
+INCLUDE (CPack)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
@@ -222,7 +222,7 @@ endif(PROCESS_IN_PARALLEL)
 ###############################################################################
 # Setup configure file
 
-include(GNUInstallDirs)
+INCLUDE(GNUInstallDirs)
 SET(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/jiplib
   CACHE PATH "Location of header files" )
 SET(SYSCONFIG_INSTALL_DIR ${CMAKE_INSTALL_SYSCONFDIR}/jiplib
@@ -235,7 +235,7 @@ configure_file (
   )
 
 #Generating Package Files
-include(CMakePackageConfigHelpers)
+INCLUDE(CMakePackageConfigHelpers)
 
 configure_package_config_file(jiplib-config.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/jiplib-config.cmake
@@ -411,7 +411,7 @@ if(BUILD_WITH_MIALLIB)
     message(STATUS "MIALLIB was found with minor version ${MIALLIB_VERSION_MINOR}")
     message(STATUS "Found MIALLIB libraries: ${MIALLIB_LIBRARIES}")
     message(STATUS "MIALLIB library name: ${MIALLIB_LIB_NAME}")
-    message(STATUS "Found MIALLIB include dir: ${MIALLIB_INCLUDE_DIRS}")
+    message(STATUS "Found MIALLIB INCLUDE dir: ${MIALLIB_INCLUDE_DIRS}")
   endif()
 
   SET(MIAL_BOOL 1)
@@ -648,19 +648,10 @@ if(BUILD_WITH_PYTHON)
       COMMAND cp ${PYTHON_SOURCE_DIR}/setup.py ${CMAKE_CURRENT_BINARY_DIR}
       COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/README.md ${WHEEL_DIR}
       COMMAND cp ${CMAKE_BINARY_DIR}/_${JIPLIB_LIB_NAME}.so ${WHEEL_DIR}
+      COMMAND cp ${CMAKE_BINARY_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION_MAJOR} ${WHEEL_DIR}
+      COMMAND cp ${MIALLIB_LIBRARIES}.${MIALLIB_VERSION_MAJOR} ${WHEEL_DIR}
       COMMAND cp ${CMAKE_BINARY_DIR}/${JIPLIB_LIB_NAME}.py ${WHEEL_DIR}
-      COMMAND cp ${CMAKE_BINARY_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION} ${WHEEL_DIR}
-      COMMAND rm -f ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION_MAJOR}
-      COMMAND rm -f ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so
-      COMMAND ln -s ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION} ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION_MAJOR}
-      COMMAND ln -s ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION_MAJOR} ${WHEEL_DIR}/lib${JIPLIB_LIB_NAME}.so
-      COMMAND ls ${PROJECT_SOURCE_DIR}/README.md
       COMMAND cp ${PROJECT_SOURCE_DIR}/README.md ${WHEEL_DIR}
-      COMMAND cp ${MIALLIB_LIBRARIES}.${MIALLIB_VERSION} ${WHEEL_DIR}
-      COMMAND rm -f  ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so.${MIALLIB_VERSION_MAJOR}
-      COMMAND rm -f  ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so
-      COMMAND ln -s ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so.${MIALLIB_VERSION} ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so.${MIALLIB_VERSION_MAJOR}
-      COMMAND ln -s ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so.${MIALLIB_VERSION_MAJOR} ${WHEEL_DIR}/lib${MIALLIB_LIB_NAME}.so
       COMMAND pip wheel ${CMAKE_CURRENT_BINARY_DIR}
       COMMAND rm -rf ${WHEEL_DIR}
     )
