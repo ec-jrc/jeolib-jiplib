@@ -25,7 +25,6 @@ except ImportError:
 
 from setuptools import find_packages
 
-
 setup(
     name='jiplib',
     version='1.1.2',
@@ -34,9 +33,8 @@ setup(
     url='https://jeodpp.jrc.ec.europa.eu/apps/gitlab/JIPlib/jiplib',
     license='GPLv3',
     packages=find_packages(),
-    package_data={'jiplib': ['_jiplib.so', 'libjiplib.so.1', 'libjiplib.so',
-                             'libjiplib.so.1.1.2', 'libmiallib.so',
-                             'libmiallib.so.1', 'libmiallib.so.1.1.1']},
+    package_data={'jiplib': ['_jiplib.so', 'libjiplib.so.1',
+                             'libmiallib.so.1']},
     include_package_data=True,
     long_description=open('jiplib/README.md').read(),
     long_description_content_type='text/markdown',
@@ -46,13 +44,9 @@ setup(
         #   4 - Beta
         #   5 - Production/Stable
         'Development Status :: 4 - Beta',
-        # Indicate who your project is intended for
         'Intended Audience :: Developers',
-        'Topic :: Software Development :: Build Tools',
+        'Topic :: Image processing',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-
-        # Specify the Python versions you support here. In particular, ensure
-        # that you indicate whether you support Python 2, Python 3 or both.
         'Programming Language :: Python :: 3.8',
     ],
     python_requires='>=3.8',
