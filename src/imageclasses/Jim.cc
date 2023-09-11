@@ -23,10 +23,8 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include <iostream>
 #include "ogr_spatialref.h"
-extern "C" {
 #include "gdal_alg.h"
 #include "gdalwarper.h"
-}
 #include <config_jiplib.h>
 #include "Jim.h"
 #include "VectorOgr.h"
