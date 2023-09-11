@@ -22,10 +22,8 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 #include "gdal_priv.h"
 #include "gdal.h"
 #include "ogrsf_frmts.h"
-extern "C" {
 #include "gdal_alg.h"
 #include "ogr_api.h"
-}
 #include <config_jiplib.h>
 #include "base/Optionjl.h"
 #include "Jim.h"
