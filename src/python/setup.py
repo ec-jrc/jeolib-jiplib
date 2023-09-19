@@ -29,15 +29,15 @@ setup(
     name='jiplib',
     version='1.1.3',
     author='Pieter Kempeneers',
-    author_email='pieter.kempeneers@.ec.europa.eu',
+    author_email='pieter.kempeneers@ec.europa.eu',
     url='https://jeodpp.jrc.ec.europa.eu/apps/gitlab/JIPlib/jiplib',
     license='GPLv3',
     packages=find_packages(),
     package_data={'jiplib': ['_jiplib.so', 'libjiplib.so.1',
                              'libmiallib.so.1']},
     include_package_data=True,
-    long_description=open('jiplib/README.md').read(),
-    long_description_content_type='text/markdown',
+    # long_description=open('jiplib/README.md').read(),
+    # long_description_content_type='text/markdown',
     classifiers=[
         # How mature is this project? Common values are
         #   3 - Alpha
@@ -45,7 +45,7 @@ setup(
         #   5 - Production/Stable
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
-        'Topic :: Image processing',
+        'Topic :: Scientific/Engineering :: Image Processing',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Programming Language :: Python :: 3.8',
     ],
