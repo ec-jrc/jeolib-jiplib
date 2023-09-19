@@ -104,7 +104,7 @@ sudo cmake --install .
 Install the python bindings (in your virtual python environment):
 
 ```
-pip install jiplib-*.whl
+pip install dist/jiplib-*.whl
 ```
 
 # Test the installation
