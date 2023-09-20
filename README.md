@@ -45,7 +45,7 @@ sudo apt install -yq \
   swig
 ```
 
-## Install miallib
+## Build and install miallib
 
 Get the source code from [miallib](https://github.com/ec-jrc/jeolib-miallib), to create the library:
 
@@ -74,7 +74,7 @@ Install the [miallib](https://github.com/ec-jrc/jeolib-miallib) library (remove 
 sudo cmake --install .
 ```
 
-## Install jiplib
+## Build and install jiplib
 
 Get the source code from [jiplib](https://github.com/ec-jrc/jeolib-jiplib):
 ```
@@ -95,16 +95,16 @@ Build the [jiplib](https://github.com/ec-jrc/jeolib-jiplib) library and create a
 cmake --build .
 ```
 
-Install the [jiplib](https://github.com/ec-jrc/jeolib-jiplib) library (remove sudo to install without sudo rights):
+Install the [jiplib](https://github.com/ec-jrc/jeolib-jiplib) library:
 
 ```
-sudo cmake --install .
+cmake --install .
 ```
 
-Install the python bindings (in your virtual python environment):
+To only install the Python bindings using the wheel that has been built:
 
 ```
-pip install dist/jiplib-*.whl
+cmake --install . --component wheels
 ```
 
 # Test the installation

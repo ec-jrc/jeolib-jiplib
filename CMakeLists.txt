@@ -18,13 +18,14 @@
 # You should have received a copy of the GNU General Public License
 # along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 ###############################################################################
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.15)
 
 # The project's name and version
 project(jiplib)
 
 # Name of C++ library
 SET(JIPLIB_LIB_NAME jiplib)
+SET(JIPLIB_PYTHON_LIB_NAME jiplib)
 
 enable_testing()
 INCLUDE(CTest)
@@ -112,10 +113,9 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "/build/;~$;${CPACK_SOURCE_IGNORE_FILES}")
 INCLUDE(CPack)
 CPACK_ADD_COMPONENT(libraries)
 CPACK_ADD_COMPONENT(headers)
-CPACK_ADD_COMPONENT(wheel)
+CPACK_ADD_COMPONENT(wheels)
 SET(CPACK_DEB_COMPONENT_INSTALL YES)
-SET(CPACK_COMPONENTS_ALL libraries headers wheel)
-
+SET(CPACK_COMPONENTS_ALL libraries headers wheels)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
@@ -126,6 +126,7 @@ SET(Boost_DEBUG 0)
 find_package(Boost COMPONENTS filesystem system serialization REQUIRED)
 
 if(BUILD_WITH_PYTHON)
+  # SET(CREATE_WHEEL TRUE CACHE BOOL "Choose if jiplib PYTHON wheel is to be created")
   SET(CREATE_WHEEL TRUE CACHE BOOL "Choose if jiplib PYTHON wheel is to be created")
 endif(BUILD_WITH_PYTHON)
 
@@ -532,10 +533,14 @@ endif(BUILD_WITH_MIALLIB)
 ###############################################################################
 # Define the jiplib library.
 if (BUILD_WITH_LIBLAS)
-  add_library( ${JIPLIB_LIB_NAME} ${LASCLASS_H} ${LASCLASS_CC} ${IMGCLASS_H} ${IMGCLASS_CC} ${ALGOR_H} ${ALGOR_CC} ${FILECLASS_CC} ${FILECLASS_H} ${BASE_H} ${BASE_CC})
+  SET(JIPLIB_HEADER_FILES ${LASCLASS_H} ${IMGCLASS_H} ${ALGOR_H} ${FILECLASS_H} ${BASE_H})
+  SET(JIPLIB_SRC_FILES ${LASCLASS_CC} ${IMGCLASS_CC} ${ALGOR_CC} ${FILECLASS_CC} ${BASE_CC})
 else(BUILD_WITH_LIBLAS)
-  add_library( ${JIPLIB_LIB_NAME} ${IMGCLASS_H} ${IMGCLASS_CC} ${ALGOR_H} ${ALGOR_CC} ${FILECLASS_CC} ${FILECLASS_H} ${BASE_H} ${BASE_CC})
+  SET(JIPLIB_HEADER_FILES ${IMGCLASS_H} ${ALGOR_H} ${FILECLASS_H} ${BASE_H})
+  SET(JIPLIB_SRC_FILES ${IMGCLASS_CC} ${ALGOR_CC} ${FILECLASS_CC} ${BASE_CC})
 endif(BUILD_WITH_LIBLAS)
+ADD_LIBRARY(${JIPLIB_LIB_NAME} ${JIPLIB_HEADER_FILES} ${JIPLIB_SRC_FILES})
+SET_TARGET_PROPERTIES(${JIPLIB_LIB_NAME} PROPERTIES PUBLIC_HEADER "${JIPLIB_HEADER_FILES}")
 
 ###############################################################################
 
@@ -564,11 +569,11 @@ SET_TARGET_PROPERTIES(${JIPLIB_LIB_NAME}
 
 target_link_libraries(
   ${JIPLIB_LIB_NAME}
-  ${BOOST_LIBRARIES}
+  ${Boost_LIBRARIES}
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_SERIALIZATION_LIBRARY}
-  ${BOOST_ARCHIVE_LIBRARY}
+  # ${BOOST_ARCHIVE_LIBRARY}
   )
 
 if(BUILD_WITH_MIALLIB)
@@ -609,8 +614,10 @@ if(BUILD_WITH_PYTHON)
   FIND_PACKAGE(SWIG REQUIRED)
   MESSAGE(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
   # todo adapt to new policies:
-  cmake_policy(SET CMP0078 OLD)
-  cmake_policy(SET CMP0086 OLD)
+  #Changed in version 3.13: This command creates a target with the specified <name> when policy CMP0078 is set to NEW. Otherwise, the legacy behavior will choose a different target name and store it in the SWIG_MODULE_<name>_REAL_NAME variable.
+  #Changed in version 3.15: Alternate library name (set with the OUTPUT_NAME property, for example) will be passed on to Python and CSharp wrapper libraries.
+  cmake_policy(SET CMP0078 NEW)
+  cmake_policy(SET CMP0086 NEW)
   INCLUDE(${SWIG_USE_FILE})
   MESSAGE(STATUS "Python_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}")
   MESSAGE(STATUS "Python_LIBRARIES: ${Python_LIBRARIES}")
@@ -630,16 +637,25 @@ SET_PROPERTY(SOURCE ${JIPLIB_I} PROPERTY CPLUSPLUS ON)
 if(${CMAKE_VERSION} VERSION_LESS "3.8.0")
   SWIG_ADD_MODULE(jiplib python ${JIPLIB_I})
 else(${CMAKE_VERSION} VERSION_LESS "3.8.0")
-SWIG_ADD_LIBRARY(
-  jiplib
-  TYPE USE_BUILD_SHARED_LIBS
-  LANGUAGE python
-  SOURCES ${JIPLIB_I}
-  )
+  SWIG_ADD_LIBRARY(
+    jiplib_python
+    TYPE USE_BUILD_SHARED_LIBS
+    LANGUAGE python
+    SOURCES ${JIPLIB_I}
+    )
+  #NEW
+  SET_PROPERTY(TARGET jiplib_python PROPERTY OUTPUT_NAME ${JIPLIB_PYTHON_LIB_NAME})
+  #OLD
+  # SET_PROPERTY(TARGET _jiplib_python PROPERTY OUTPUT_NAME ${JIPLIB_PYTHON_LIB_NAME})
 endif(${CMAKE_VERSION} VERSION_LESS "3.8.0")
 
 SET_SOURCE_FILES_PROPERTIES(${JIPLIB_I} PROPERTIES SWIG_FLAGS "-W2")
-SWIG_LINK_LIBRARIES(jiplib ${Python_LIBRARIES} ${JIPLIB_LIB_NAME} ${BOOST_LIBRARIES})
+#deprecated:
+# SWIG_LINK_LIBRARIES(jiplib ${Python_LIBRARIES} ${JIPLIB_LIB_NAME} ${Boost_LIBRARIES})
+#NEW
+TARGET_LINK_LIBRARIES(jiplib_python ${Python_LIBRARIES} ${JIPLIB_LIB_NAME} ${Boost_LIBRARIES})
+#OLD
+# TARGET_LINK_LIBRARIES(_jiplib_python ${Python_LIBRARIES} ${JIPLIB_LIB_NAME} ${Boost_LIBRARIES})
 
 if(BUILD_WITH_PYTHON)
   SET(PYTHON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/python)
@@ -655,7 +671,8 @@ if(BUILD_WITH_PYTHON)
     MESSAGE(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
     SET(WHEEL_DIR ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
 
-    add_custom_command(TARGET _${JIPLIB_LIB_NAME}
+    # add_custom_command(TARGET ${JIPLIB_LIB_NAME}
+    add_custom_command(TARGET jiplib_python
       POST_BUILD
       COMMAND mkdir -p ${WHEEL_DIR}
       COMMAND cp ${JIPLIB_INIT} ${WHEEL_DIR}
@@ -666,8 +683,7 @@ if(BUILD_WITH_PYTHON)
       COMMAND cp ${MIALLIB_LIBRARIES}.${MIALLIB_VERSION_MAJOR} ${WHEEL_DIR}
       COMMAND cp ${CMAKE_BINARY_DIR}/${JIPLIB_LIB_NAME}.py ${WHEEL_DIR}
       COMMAND cp ${PROJECT_SOURCE_DIR}/README.md ${WHEEL_DIR}
-      COMMAND ${Python_EXECUTABLE} -m build
-      # COMMAND pip wheel ${CMAKE_CURRENT_BINARY_DIR}
+      COMMAND ${Python_EXECUTABLE} -m pip wheel ${CMAKE_CURRENT_BINARY_DIR}
       COMMAND rm -rf ${WHEEL_DIR}
     )
   endif(CREATE_WHEEL)
@@ -684,7 +700,6 @@ INSTALL(TARGETS ${JIPLIB_LIB_NAME}
   )
 
 INSTALL(CODE
-  "execute_process(COMMAND ${Python_EXECUTABLE} -m pip install ${_pip_args} ${CMAKE_CURRENT_BINARY_DIR})"
-  COMPONENT wheel
+  "execute_process(COMMAND ${Python_EXECUTABLE} -m pip install ${_pip_args} ${CMAKE_CURRENT_BINARY_DIR}/jiplib-${JIPLIB_VERSION}-py3-none-any.whl --force-reinstall)"
+  COMPONENT wheels
   )
-
