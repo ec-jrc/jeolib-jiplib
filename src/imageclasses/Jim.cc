@@ -1155,8 +1155,8 @@ void Jim::getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, OGR
       std::vector<double> yvector(4);//uly,ury,lly,lry
       xvector[0]=ulx;
       xvector[1]=lrx;
-      xvector[2]=ulx;
-      xvector[3]=lrx;
+      xvector[2]=lrx;
+      xvector[3]=ulx;
       yvector[0]=uly;
       yvector[1]=uly;
       yvector[2]=lry;
@@ -1166,8 +1166,8 @@ void Jim::getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, OGR
         errorStream << "Error: cannot apply OGRCoordinateTransformation in Jim::getBoundingBox" << std::endl;
         throw(errorStream.str());
       }
-      ulx=std::min(xvector[0],xvector[2]);
-      lrx=std::max(xvector[1],xvector[3]);
+      ulx=std::min(xvector[0],xvector[3]);
+      lrx=std::max(xvector[1],xvector[2]);
       uly=std::max(yvector[0],yvector[1]);
       lry=std::min(yvector[2],yvector[3]);
     }

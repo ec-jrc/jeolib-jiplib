@@ -350,14 +350,15 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///Get geographical extent upper left and lower right corners over all layers
   bool getExtent(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT=0) const;
   ///Get geographical extent upper left and lower right corners for specific layer
-  bool getExtent(double& ulx, double& uly, double& lrx, double& lry, size_t ilayer, OGRCoordinateTransformation *poCT) const;
+  bool getExtent(double& ulx, double& uly, double& lrx, double& lry, size_t ilayer, OGRCoordinateTransformation *poCT=0) const;
+  bool getExtent(OGRPolygon *bbPolygon, size_t ilayer, OGRCoordinateTransformation *poCT=0) const;
   ///Get geographical extent upper left and lower right corners
   /* void getExtent(std::vector<double> &bbvector, size_t ilayer=0, OGRCoordinateTransformation *poCT=0) const; */
   /* void getExtent(OGRPolygon *bbPolygon, size_t ilayer=0, OGRCoordinateTransformation *poCT=0) const; */
   void getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT=0) const{getExtent(ulx,uly,lrx,lry,poCT);};
-  void getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, size_t ilayer, OGRCoordinateTransformation *poCT) const{getExtent(ulx,uly,lrx,lry,ilayer,poCT);};
+  void getBoundingBox(double& ulx, double& uly, double& lrx, double& lry, size_t ilayer, OGRCoordinateTransformation *poCT=0) const{getExtent(ulx,uly,lrx,lry,ilayer,poCT);};
   /* void getBoundingBox(std::vector<double> &bbvector, size_t ilayer=0, OGRCoordinateTransformation *poCT=0) const{getExtent(bbvector,ilayer,poCT);}; */
-  /* void getBoundingBox(OGRPolygon *bbPolygon, size_t ilayer=0, OGRCoordinateTransformation *poCT=0) const{getExtent(bbPolygon,ilayer,poCT);}; */
+  void getBoundingBox(OGRPolygon *bbPolygon, size_t ilayer=0, OGRCoordinateTransformation *poCT=0) const{getExtent(bbPolygon,ilayer,poCT);};
   ///Get Upper left corner in x over all layers
   double getUlx(OGRCoordinateTransformation *poCT=0) const{double ulx,uly,lrx,lry;getExtent(ulx,uly,lrx,lry,poCT);return(ulx);};
   ///Get Upper left corner in y over all layers
@@ -367,13 +368,13 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///Get lower right corner in y over all layers
   double getLry(OGRCoordinateTransformation *poCT=0) const{double ulx,uly,lrx,lry;getExtent(ulx,uly,lrx,lry,poCT);return(lry);};
   ///Get Upper left corner in x
-  double getUlx(size_t ilayer, OGRCoordinateTransformation *poCT) const{double ulx,uly,lrx,lry;getExtent(ulx,uly,lrx,lry,ilayer,poCT);return(ulx);};
+  double getUlx(size_t ilayer, OGRCoordinateTransformation *poCT=0) const{double ulx,uly,lrx,lry;getExtent(ulx,uly,lrx,lry,ilayer,poCT);return(ulx);};
   ///Get Upper left corner in y
-  double getUly(size_t ilayer, OGRCoordinateTransformation *poCT) const{double ulx,uly,lrx,lry;getExtent(ulx,uly,lrx,lry,ilayer,poCT);return(uly);};
+  double getUly(size_t ilayer, OGRCoordinateTransformation *poCT=0) const{double ulx,uly,lrx,lry;getExtent(ulx,uly,lrx,lry,ilayer,poCT);return(uly);};
   ///Get lower right corner in x
-  double getLrx(size_t ilayer, OGRCoordinateTransformation *poCT) const{double ulx,uly,lrx,lry;getExtent(ulx,uly,lrx,lry,ilayer,poCT);return(lrx);};
+  double getLrx(size_t ilayer, OGRCoordinateTransformation *poCT=0) const{double ulx,uly,lrx,lry;getExtent(ulx,uly,lrx,lry,ilayer,poCT);return(lrx);};
   ///Get lower right corner in y
-  double getLry(size_t ilayer, OGRCoordinateTransformation *poCT) const{double ulx,uly,lrx,lry;getExtent(ulx,uly,lrx,lry,ilayer,poCT);return(lry);};
+  double getLry(size_t ilayer, OGRCoordinateTransformation *poCT=0) const{double ulx,uly,lrx,lry;getExtent(ulx,uly,lrx,lry,ilayer,poCT);return(lry);};
   ///resize features
   OGRErr resize(size_t theSize, size_t ilayer=0){
     m_features[ilayer].resize(theSize);

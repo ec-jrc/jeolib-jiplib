@@ -80,6 +80,7 @@ shared_ptr<VectorOgr> Jim::extractSample(AppFactory& app){
 //todo: support multiple layers for writing
 //output vector ogrWriter will take spatial reference system of input vector sampleReader
 // make sure to setSpatialFilterRect on vector before entering here
+
 CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory& app){
   // Optionjl<string> image_opt("i", "input", "Raster input dataset containing band information");
   // Optionjl<string> sample_opt("s", "sample", "OGR vector dataset with features to be extracted from input data. Output will contain features with input band information included.");
@@ -821,8 +822,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         std::cerr << errorString << "failed to initWriter" << std::endl;
         throw;
       }
-      OGRFeature *readFeature;
-      unsigned long int ifeature=0;
+      // OGRFeature *readFeature;
+      // unsigned long int ifeature=0;
       // unsigned long int nfeatureLayer=sampleReaderOgr.getFeatureCount();
       unsigned long int nfeatureLayer=sampleReader.getFeatureCount(ilayer);
       if(verbose_opt[0])
@@ -840,10 +841,10 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
       if(verbose_opt[0])
         std::cout << "process in parallel" << std::endl;
-#pragma omp parallel for
+#pragma omp parallel for ordered shared(ntotalvalidLayer, ntotalvalid, sampleReader, ogrWriter)
 #else
 #endif
-      for(unsigned int ifeature=0;ifeature<sampleReader.getFeatureCount(ilayer);++ifeature){
+      for(unsigned long int ifeature=0;ifeature<sampleReader.getFeatureCount(ilayer);++ifeature){
         // OGRFeature *readFeature=sampleReaderOgr.getFeatureRef(ifeature);
         OGRFeature *readFeature=sampleReader.cloneFeature(ifeature,ilayer);
         bool validFeature=false;
@@ -1451,13 +1452,12 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                     if(verbose_opt[0]>1)
                       std::cout << "creating point feature" << std::endl;
                     // if(writeLayer->CreateFeature( writePointFeature ) != OGRERR_NONE ){
-                    if(ogrWriter.getLayer(ilayer)->CreateFeature( writePointFeature ) != OGRERR_NONE ){
-                      std::string errorString="Failed to create feature in ogr vector dataset";
-                      throw(errorString);
-                    }
+                    ogrWriter.getLayer(ilayer)->CreateFeature( writePointFeature );
                     //destroy feature
                     // OGRFeature::DestroyFeature( writePointFeature );
+                    #pragma omp atomic
                     ++ntotalvalid;
+                    #pragma omp atomic
                     ++ntotalvalidLayer;
                   }
                 }//for in i
@@ -1607,7 +1607,9 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               if(!writePolygonFeature)
                 std::cerr << "Warning: NULL feature" << ifeature << std::endl;
               ogrWriter.setFeature(ifeature,writePolygonFeature,ilayer);
+              #pragma omp atomic
               ++ntotalvalid;
+              #pragma omp atomic
               ++ntotalvalidLayer;
             }
           }//for points
@@ -2272,13 +2274,12 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                     if(verbose_opt[0])
                       std::cout << "creating point feature " << ntotalvalidLayer << std::endl;
                     // if(writeLayer->CreateFeature( writePointFeature ) != OGRERR_NONE ){
-                    if(ogrWriter.getLayer(ilayer)->CreateFeature( writePointFeature ) != OGRERR_NONE ){
-                      std::string errorString="Failed to create feature in ogr vector dataset";
-                      throw(errorString);
-                    }
+                    ogrWriter.getLayer(ilayer)->CreateFeature( writePointFeature );
                     //destroy feature
                     // OGRFeature::DestroyFeature( writePointFeature );
+                    #pragma omp atomic
                     ++ntotalvalid;
+                    #pragma omp atomic
                     ++ntotalvalidLayer;
                   }
                 }//for in i
@@ -2430,7 +2431,9 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               if(!writePolygonFeature)
                 std::cerr << "Warning: NULL feature" << ifeature << std::endl;
               ogrWriter.setFeature(ifeature,writePolygonFeature,ilayer);
+              #pragma omp atomic
               ++ntotalvalid;
+              #pragma omp atomic
               ++ntotalvalidLayer;
               if(verbose_opt[0])
                 std::cout << "ntotalvalidLayer: " << ntotalvalidLayer << std::endl;
@@ -3175,8 +3178,7 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
         }
       }
     }
-    OGRFeature *readFeature;
-    unsigned long int ifeature=0;
+    // OGRFeature *readFeature;
     unsigned long int nfeatureLayer=sampleReaderOgr.getFeatureCount();
     unsigned long int ntotalvalidLayer=0;
 
@@ -3190,10 +3192,10 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
     // while( (readFeature = readLayer->GetNextFeature()) != NULL ){
 
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
-#pragma omp parallel for
+#pragma omp parallel for ordered shared(ntotalvalidLayer, ntotalvalid, ogrWriter)
 #else
 #endif
-    for(unsigned int ifeature=0;ifeature<sampleReaderOgr.getFeatureCount();++ifeature){
+    for(unsigned long int ifeature=0;ifeature<sampleReaderOgr.getFeatureCount();++ifeature){
       // OGRFeature *readFeature=sampleReaderOgr.getFeatureRef(ifeature);
       OGRFeature *readFeature=sampleReaderOgr.cloneFeature(ifeature);
       bool validFeature=false;
@@ -3717,7 +3719,9 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
                   }
                   //destroy feature
                   // OGRFeature::DestroyFeature( writePointFeature );
+                  #pragma omp atomic
                   ++ntotalvalid;
+                  #pragma omp atomic
                   ++ntotalvalidLayer;
                 }
               }//for in i
@@ -3861,7 +3865,9 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
             if(!writePolygonFeature)
               std::cerr << "Warning: NULL feature" << ifeature << std::endl;
             ogrWriter.setFeature(ifeature,writePolygonFeature);
+            #pragma omp atomic
             ++ntotalvalid;
+            #pragma omp atomic
             ++ntotalvalidLayer;
           }
         }
@@ -4395,7 +4401,9 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
                   }
                   //destroy feature
                   // OGRFeature::DestroyFeature( writePointFeature );
+                  #pragma omp atomic
                   ++ntotalvalid;
+                  #pragma omp atomic
                   ++ntotalvalidLayer;
                 }
               }//for in i
@@ -4539,7 +4547,9 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
             if(!writePolygonFeature)
               std::cerr << "Warning: NULL feature" << ifeature << std::endl;
             ogrWriter.setFeature(ifeature,writePolygonFeature);
+            #pragma omp atomic
             ++ntotalvalid;
+            #pragma omp atomic
             ++ntotalvalidLayer;
           }
         }

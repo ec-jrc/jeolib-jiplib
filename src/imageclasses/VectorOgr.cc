@@ -857,12 +857,15 @@ OGRErr VectorOgr::copy(VectorOgr& other, app::AppFactory &app){
   Optionjl<std::string> newfield_opt("newfield", "newfield", "create new field(s)");
   Optionjl<std::string> ftype_opt("newtype", "newtype", "Field type (only Inter, Real, or String)", "Integer");
   Optionjl<std::string> newvalue_opt("newvalue", "newvalue", "value(s) to set for new field(s)");
+  Optionjl<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference, e.g., epsg:3035 to use European projection and force to European grid");
+  Optionjl<std::string> projection_opt("t_srs", "t_srs", "reproject to target spatial reference system");
   Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
 
   options_opt.retrieveOption(app);
   newfield_opt.retrieveOption(app);
   ftype_opt.retrieveOption(app);
   newvalue_opt.retrieveOption(app);
+  targetSRS_opt.retrieveOption(app);
   verbose_opt.retrieveOption(app);
 
   OGRFieldType fieldType;
@@ -900,22 +903,63 @@ OGRErr VectorOgr::copy(VectorOgr& other, app::AppFactory &app){
       while(newvalue_opt.size()<newfield_opt.size())
         newvalue_opt.push_back(newvalue_opt.back());
   }
+
+  OGRSpatialReference sourceSpatialRef;
+  OGRSpatialReference targetSpatialRef;
+#if GDAL_VERSION_MAJOR > 2
+  sourceSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+  targetSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
+#endif
+
   for(size_t ilayer=0;ilayer<other.getLayerCount();++ilayer){
-    pushLayer(other.getLayerName(ilayer),other.getProjection(ilayer),other.getGeometryType(ilayer),papszOptions);
+    sourceSpatialRef.SetFromUserInput(getProjection(ilayer).c_str());
+    if(targetSRS_opt.size())
+      targetSpatialRef.SetFromUserInput(targetSRS_opt[0].c_str());
+    else
+      targetSpatialRef.SetFromUserInput(getProjection(ilayer).c_str());
+
+    char *targetWKT=0;
+    targetSpatialRef.exportToWkt(&targetWKT);
+
+    OGRCoordinateTransformation *transform = OGRCreateCoordinateTransformation(&sourceSpatialRef, &targetSpatialRef);
+
+    if(sourceSpatialRef.IsSame(&targetSpatialRef)){
+      if(verbose_opt[0])
+        std::cout << "spatial reference of vector target is same as raster" << std::endl;
+      transform=0;
+    }
+    else{
+      if(verbose_opt[0])
+        std::cout << "spatial reference of vector target is different from raster, transform: " << transform << std::endl;
+      if(!transform){
+        std::ostringstream errorStream;
+        errorStream << "Error: cannot create OGRCoordinateTransformation" << std::endl;
+        throw(errorStream.str());
+      }
+    }
+
+    pushLayer(other.getLayerName(ilayer),&targetSpatialRef,other.getGeometryType(ilayer),papszOptions);
     destroyFeatures(ilayer);
     copyFields(other,std::vector<std::string>(),ilayer,ilayer);
     for(std::vector<std::string>::const_iterator fieldit=newfield_opt.begin();fieldit!=newfield_opt.end();++fieldit)
       createField(*fieldit,fieldType,ilayer);
+
     m_features[ilayer].resize(other.getFeatureCount(ilayer));
-// #if JIPLIB_PROCESS_IN_PARALLEL == 1
-// #pragma omp parallel for
-// #else
-// #endif
     for(size_t ifeature=0;ifeature<other.getFeatureCount(ilayer);++ifeature){
       OGRFeature *writeFeature=createFeature(ilayer);
+      OGRGeometry* writeGeometry = writeFeature->GetGeometryRef();
+      //coordinate transform
+      if(!VectorOgr::transform(writeGeometry,transform)){
+        std::string errorString="Error: coordinate transform not successful";
+        throw(errorString);
+      }
+      if(verbose_opt[0])
+        std::cout << "geometry of writeFeature: " << writeGeometry->getGeometryName() << std::endl;
+
       OGRFeature *otherFeature=other.getFeatureRef(ifeature,ilayer);
       if(otherFeature){
         writeFeature->SetFrom(otherFeature);
+        writeFeature->SetGeometry(writeGeometry);
         for(size_t ifield=0;ifield<newfield_opt.size();++ifield){
           if(newvalue_opt.size()){
             switch( fieldType ){
@@ -1079,6 +1123,38 @@ bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, OG
   return result;
 }
 
+bool VectorOgr::getExtent(OGRPolygon *bbPolygon, size_t ilayer, OGRCoordinateTransformation *poCT) const{
+  bool result = true;
+  OGRLinearRing bbRing;
+  double layer_ulx=0;
+  double layer_uly=0;
+  double layer_lrx=0;
+  double layer_lry=0;
+  if(!getExtent(layer_ulx, layer_uly, layer_lrx, layer_lry, ilayer, poCT)){
+    result = false;
+  }
+  OGRPoint ul;
+  OGRPoint ur;
+  OGRPoint lr;
+  OGRPoint ll;
+  ul.setX(layer_ulx);
+  ul.setY(layer_uly);
+  ur.setX(layer_lrx);
+  ur.setY(layer_uly);
+  lr.setX(layer_lrx);
+  lr.setY(layer_lry);
+  ll.setX(layer_ulx);
+  ll.setY(layer_lry);
+  bbRing.addPoint(&ul);
+  bbRing.addPoint(&ur);
+  bbRing.addPoint(&lr);
+  bbRing.addPoint(&ll);
+  bbRing.addPoint(&ul);
+  bbPolygon->addRing(&bbRing);
+  bbPolygon->closeRings();
+  return result;
+}
+
 ///get extent of the layer
 bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, size_t ilayer, OGRCoordinateTransformation *poCT) const{
   // try{
@@ -1126,8 +1202,8 @@ bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, si
       std::vector<double> yvector(4);//uly,ury,lly,lry
       xvector[0]=ulx;
       xvector[1]=lrx;
-      xvector[2]=ulx;
-      xvector[3]=lrx;
+      xvector[2]=lrx;
+      xvector[3]=ulx;
       yvector[0]=uly;
       yvector[1]=uly;
       yvector[2]=lry;
@@ -1137,14 +1213,11 @@ bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, si
         errorStream << "Error: cannot apply OGRCoordinateTransformation in VectorOgr::getExtent" << std::endl;
         throw(errorStream.str());
       }
-      ulx=xvector[0];
-      lrx=xvector[1];
-      ulx=xvector[2];
-      lrx=xvector[3];
-      uly=yvector[0];
-      uly=yvector[1];
-      lry=yvector[2];
-      lry=yvector[3];
+      
+      ulx=std::min(xvector[0],xvector[3]);
+      uly=std::max(yvector[0],yvector[1]);
+      lrx=std::max(xvector[1],xvector[2]);
+      lry=std::min(yvector[2],yvector[3]);
     }
     return true;
 }
