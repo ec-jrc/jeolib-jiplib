@@ -1,7 +1,7 @@
 /**********************************************************************
 VectorOgr.h: class to hold OGR features, typically read with readNextFeature
 Author(s): Pieter.Kempeneers@ec.europa.eu
-Copyright (C) 2016-2020 European Union (Joint Research Centre)
+Copyright (C) 2016-2024 European Union (Joint Research Centre)
 
 This file is part of jiplib.
 
@@ -204,6 +204,8 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
     OGRSpatialReference thisSpatialRef(getProjection(ilayer).c_str());
     return thisSpatialRef;
   }
+  //set projection
+  void setProjection(const std::string& projection);
   ///Get the filename of this dataset
   std::string getFileName() const {return m_filename;};
   ///Create a layer

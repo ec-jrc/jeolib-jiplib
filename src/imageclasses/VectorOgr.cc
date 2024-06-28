@@ -1,7 +1,7 @@
 /**********************************************************************
 VectorOgr.cc: class to hold OGR features, typically read with readNextFeature
 Author(s): Pieter.Kempeneers@ec.europa.eu
-Copyright (C) 2016-2020 European Union (Joint Research Centre)
+Copyright (C) 2016-2024 European Union (Joint Research Centre)
 
 This file is part of jiplib.
 
@@ -340,7 +340,7 @@ OGRErr VectorOgr::open(app::AppFactory& app){
       // for(size_t ilayer=0;ilayer<getGDSLayerCount();++ilayer){
       for(size_t ilayer=0;ilayer<getLayerCount();++ilayer){
         // OGRLayer *readLayer=m_gds->GetLayer(ilayer);
-        OGRLayer *readLayer=getLayer(ilayer);
+        // OGRLayer *readLayer=getLayer(ilayer);
         // string currentLayername=readLayer->GetName();
         // if(layer_opt.size()){
         //   vector<string>::const_iterator it=find(layer_opt.begin(),layer_opt.end(),currentLayername);
@@ -858,7 +858,6 @@ OGRErr VectorOgr::copy(VectorOgr& other, app::AppFactory &app){
   Optionjl<std::string> ftype_opt("newtype", "newtype", "Field type (only Inter, Real, or String)", "Integer");
   Optionjl<std::string> newvalue_opt("newvalue", "newvalue", "value(s) to set for new field(s)");
   Optionjl<std::string> targetSRS_opt("t_srs", "t_srs", "Target spatial reference, e.g., epsg:3035 to use European projection and force to European grid");
-  Optionjl<std::string> projection_opt("t_srs", "t_srs", "reproject to target spatial reference system");
   Optionjl<short> verbose_opt("v", "verbose", "Verbose mode if > 0", 0,2);
 
   options_opt.retrieveOption(app);
@@ -911,86 +910,91 @@ OGRErr VectorOgr::copy(VectorOgr& other, app::AppFactory &app){
   targetSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
 #endif
 
-  for(size_t ilayer=0;ilayer<other.getLayerCount();++ilayer){
-    sourceSpatialRef.SetFromUserInput(getProjection(ilayer).c_str());
-    if(targetSRS_opt.size())
-      targetSpatialRef.SetFromUserInput(targetSRS_opt[0].c_str());
-    else
-      targetSpatialRef.SetFromUserInput(getProjection(ilayer).c_str());
-
-    char *targetWKT=0;
-    targetSpatialRef.exportToWkt(&targetWKT);
-
-    OGRCoordinateTransformation *transform = OGRCreateCoordinateTransformation(&sourceSpatialRef, &targetSpatialRef);
-
-    if(sourceSpatialRef.IsSame(&targetSpatialRef)){
-      if(verbose_opt[0])
-        std::cout << "spatial reference of vector target is same as raster" << std::endl;
-      transform=0;
-    }
-    else{
-      if(verbose_opt[0])
-        std::cout << "spatial reference of vector target is different from raster, transform: " << transform << std::endl;
-      if(!transform){
-        std::ostringstream errorStream;
-        errorStream << "Error: cannot create OGRCoordinateTransformation" << std::endl;
-        throw(errorStream.str());
+  if(targetSRS_opt.size())
+    setProjection(targetSRS_opt[0]);
+  try{
+    for(size_t ilayer=0;ilayer<other.getLayerCount();++ilayer){
+      sourceSpatialRef.SetFromUserInput(other.getProjection(ilayer).c_str());
+      if(targetSRS_opt.size()){
+        targetSpatialRef.SetFromUserInput(targetSRS_opt[0].c_str());
       }
-    }
-
-    pushLayer(other.getLayerName(ilayer),&targetSpatialRef,other.getGeometryType(ilayer),papszOptions);
-    destroyFeatures(ilayer);
-    copyFields(other,std::vector<std::string>(),ilayer,ilayer);
-    for(std::vector<std::string>::const_iterator fieldit=newfield_opt.begin();fieldit!=newfield_opt.end();++fieldit)
-      createField(*fieldit,fieldType,ilayer);
-
-    m_features[ilayer].resize(other.getFeatureCount(ilayer));
-    for(size_t ifeature=0;ifeature<other.getFeatureCount(ilayer);++ifeature){
-      OGRFeature *writeFeature=createFeature(ilayer);
-      OGRGeometry* writeGeometry = writeFeature->GetGeometryRef();
-      //coordinate transform
-      if(!VectorOgr::transform(writeGeometry,transform)){
-        std::string errorString="Error: coordinate transform not successful";
-        throw(errorString);
+      else{
+        targetSpatialRef.SetFromUserInput(other.getProjection(ilayer).c_str());
       }
-      if(verbose_opt[0])
-        std::cout << "geometry of writeFeature: " << writeGeometry->getGeometryName() << std::endl;
 
-      OGRFeature *otherFeature=other.getFeatureRef(ifeature,ilayer);
-      if(otherFeature){
-        writeFeature->SetFrom(otherFeature);
-        writeFeature->SetGeometry(writeGeometry);
-        for(size_t ifield=0;ifield<newfield_opt.size();++ifield){
-          if(newvalue_opt.size()){
-            switch( fieldType ){
-            case OFTInteger:
-              writeFeature->SetField(newfield_opt[ifield].c_str(),string2type<GIntBig>(newvalue_opt[ifield]));
-              // writeFeature->SetField(newfield_opt[ifield].c_str(),string2type<size_t>(newvalue_opt[ifield]));
-              break;
-            case OFTReal:
-            case OFTRealList:
-              writeFeature->SetField(newfield_opt[ifield].c_str(),string2type<double>(newvalue_opt[ifield]));
-              break;
-            case OFTString:
-              writeFeature->SetField(newfield_opt[ifield].c_str(),newvalue_opt[ifield].c_str());
-              break;
-            default:
-              cerr << "field type " << OGRFieldDefn::GetFieldTypeName(fieldType) << " not supported" << std::endl;
-              std::ostringstream errorStream;
-              errorStream << "field type " << OGRFieldDefn::GetFieldTypeName(fieldType) << " not supported";
-              std::cerr << errorStream.str();
-              throw(errorStream.str());
-            }
-          }
-          else{
-            writeFeature->SetField(newfield_opt[ifield].c_str(),static_cast<GIntBig>(ifeature));
-          }
+      char *targetWKT=0;
+      targetSpatialRef.exportToWkt(&targetWKT);
+
+      OGRCoordinateTransformation *transform = OGRCreateCoordinateTransformation(&sourceSpatialRef, &targetSpatialRef);
+
+      if(sourceSpatialRef.IsSame(&targetSpatialRef)){
+        if(verbose_opt[0])
+          std::cout << "spatial reference of vector target is same as raster" << std::endl;
+        transform=0;
+      }
+      else{
+        if(verbose_opt[0])
+          std::cout << "spatial reference of vector target is different from raster, transform: " << transform << std::endl;
+        if(!transform){
+          std::ostringstream errorStream;
+          errorStream << "Error: cannot create OGRCoordinateTransformation" << std::endl;
+          throw(errorStream.str());
         }
       }
-      // else
-      //   std::cerr << "Warning: " << ifeature << " is NULL" << std::endl;
-      m_features[ilayer][ifeature]=writeFeature;
+
+      pushLayer(other.getLayerName(ilayer),&targetSpatialRef,other.getGeometryType(ilayer),papszOptions);
+      destroyFeatures(ilayer);
+      copyFields(other,std::vector<std::string>(),ilayer,ilayer);
+      for(std::vector<std::string>::const_iterator fieldit=newfield_opt.begin();fieldit!=newfield_opt.end();++fieldit)
+        createField(*fieldit,fieldType,ilayer);
+
+      m_features[ilayer].resize(other.getFeatureCount(ilayer));
+    
+      for(size_t ifeature=0;ifeature<other.getFeatureCount(ilayer);++ifeature){
+        OGRFeature *writeFeature=createFeature(ilayer);
+
+        OGRFeature *otherFeature=other.getFeatureRef(ifeature,ilayer);
+        if(otherFeature){
+          writeFeature->SetFrom(otherFeature);
+          OGRGeometry* writeGeometry = writeFeature->GetGeometryRef();
+          //coordinate transform
+          if(!VectorOgr::transform(writeGeometry,transform)){
+            std::string errorString="Error: coordinate transform not successful";
+            throw(errorString);
+          }
+          writeFeature->SetGeometry(writeGeometry);
+          for(size_t ifield=0;ifield<newfield_opt.size();++ifield){
+            if(newvalue_opt.size()){
+              switch( fieldType ){
+              case OFTInteger:
+                writeFeature->SetField(newfield_opt[ifield].c_str(),string2type<GIntBig>(newvalue_opt[ifield]));
+                break;
+              case OFTReal:
+              case OFTRealList:
+                writeFeature->SetField(newfield_opt[ifield].c_str(),string2type<double>(newvalue_opt[ifield]));
+                break;
+              case OFTString:
+                writeFeature->SetField(newfield_opt[ifield].c_str(),newvalue_opt[ifield].c_str());
+                break;
+              default:
+                cerr << "field type " << OGRFieldDefn::GetFieldTypeName(fieldType) << " not supported" << std::endl;
+                std::ostringstream errorStream;
+                errorStream << "field type " << OGRFieldDefn::GetFieldTypeName(fieldType) << " not supported";
+                std::cerr << errorStream.str();
+                throw(errorStream.str());
+              }
+            }
+            else{
+              writeFeature->SetField(newfield_opt[ifield].c_str(),static_cast<GIntBig>(ifeature));
+            }
+          }
+        }
+        m_features[ilayer][ifeature]=writeFeature;
+      }
     }
+  }
+  catch(std::string errorString){
+    std::cout << errorString << std::endl;
   }
   write();
   return(OGRERR_NONE);
@@ -1095,6 +1099,23 @@ std::string VectorOgr::getProjection(size_t ilayer) const{
   CPLFree(wktString);
   return(projectionString);
 };
+
+void VectorOgr::setProjection(const std::string& projection)
+{
+  if(projection.size()){
+    OGRSpatialReference theRef;
+    theRef.SetFromUserInput(projection.c_str());
+    char *wktString;
+    theRef.exportToWkt(&wktString);
+    if(m_gds&&m_access==GDAL_OF_UPDATE)
+      m_gds->SetProjection(wktString);
+    else{
+      std::ostringstream errorStream;
+      errorStream << "Error: could not set projection, no m_gds and access is " << m_access << std::endl;
+      throw(errorStream.str());
+    }
+  }
+}
 
 ///get extent of all layers
 bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT) const{
@@ -1958,7 +1979,7 @@ shared_ptr<VectorOgr> VectorOgr::merge(VectorOgr &ogrReader, app::AppFactory& ap
   return(ogrWriter);
 }
 
-void VectorOgr::merge(VectorOgr &ogrReader, VectorOgr &ogrWriter,app::AppFactory& app){
+void VectorOgr::merge(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFactory& app){
   Optionjl<string> output_opt("o", "output", "Filename of joined vector dataset");
   Optionjl<string> ogrformat_opt("f", "oformat", "Output ogr format for joined vector dataset","SQLite");
   Optionjl<std::string> option_opt("co", "co", "Creation option for output file. Multiple options can be specified.");
