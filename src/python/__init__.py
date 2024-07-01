@@ -23,4 +23,4 @@ from __future__ import absolute_import
 from .jiplib import *
 
 
-__version__ = '1.1.3'
+__version__ = '1.1.4'

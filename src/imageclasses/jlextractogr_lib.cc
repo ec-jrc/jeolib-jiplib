@@ -80,6 +80,7 @@ shared_ptr<VectorOgr> Jim::extractSample(AppFactory& app){
 //todo: support multiple layers for writing
 //output vector ogrWriter will take spatial reference system of input vector sampleReader
 // make sure to setSpatialFilterRect on vector before entering here
+
 CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory& app){
   // Optionjl<string> image_opt("i", "input", "Raster input dataset containing band information");
   // Optionjl<string> sample_opt("s", "sample", "OGR vector dataset with features to be extracted from input data. Output will contain features with input band information included.");
@@ -296,8 +297,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 #if GDAL_VERSION_MAJOR > 2
       sampleSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
 #endif
-      OGRCoordinateTransformation *sample2img = OGRCreateCoordinateTransformation(&sampleSpatialRef, &thisSpatialRef);
-      OGRCoordinateTransformation *img2sample = OGRCreateCoordinateTransformation(&thisSpatialRef,&sampleSpatialRef);
+      // OGRCoordinateTransformation *sample2img = OGRCreateCoordinateTransformation(&sampleSpatialRef, &thisSpatialRef);
+      // OGRCoordinateTransformation *img2sample = OGRCreateCoordinateTransformation(&thisSpatialRef,&sampleSpatialRef);
       if(verbose_opt[0]){
         std::cout << "spatialref of raster: " << this->getFileName() << std::endl;
         thisSpatialRef.dumpReadable();
@@ -307,26 +308,30 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       if(thisSpatialRef.IsSame(&sampleSpatialRef)){
         if(verbose_opt[0])
           std::cout << "spatial reference of vector sample is same as raster" << std::endl;
-        sample2img=0;
-        img2sample=0;
+        // sample2img=0;
+        // img2sample=0;
       }
       else{
-        if(verbose_opt[0])
-          std::cout << "spatial reference of vector sample is different from raster, img2sample: " << img2sample << std::endl;
-        if(!sample2img){
           std::ostringstream errorStream;
-          errorStream << "Error: cannot create OGRCoordinateTransformation sample to image" << std::endl;
+          errorStream << "Error: spatial reference of vector sample must be identical to raster" << std::endl;
           throw(errorStream.str());
-        }
-        if(!img2sample){
-          std::ostringstream errorStream;
-          errorStream << "Error: cannot create OGRCoordinateTransformation image to sample" << std::endl;
-          throw(errorStream.str());
-        }
+        // if(verbose_opt[0])
+        //   std::cout << "spatial reference of vector sample is different from raster, img2sample: " << img2sample << std::endl;
+        // if(!sample2img){
+        //   std::ostringstream errorStream;
+        //   errorStream << "Error: cannot create OGRCoordinateTransformation sample to image" << std::endl;
+        //   throw(errorStream.str());
+        // }
+        // if(!img2sample){
+        //   std::ostringstream errorStream;
+        //   errorStream << "Error: cannot create OGRCoordinateTransformation image to sample" << std::endl;
+        //   throw(errorStream.str());
+        // }
       }
       //image bounding box in SRS of the input sample vector sampleReader
       double img_ulx,img_uly,img_lrx,img_lry;
-      this->getBoundingBox(img_ulx,img_uly,img_lrx,img_lry,img2sample);
+      // this->getBoundingBox(img_ulx,img_uly,img_lrx,img_lry,img2sample);
+      this->getBoundingBox(img_ulx,img_uly,img_lrx,img_lry);
       //layer bounding box in SRS of this image raster
       double layer_ulx;
       double layer_uly;
@@ -334,7 +339,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       double layer_lry;
       if(verbose_opt[0])
         std::cout << "getExtent " << std::endl;
-      sampleReader.getExtent(layer_ulx,layer_uly,layer_lrx,layer_lry,ilayer,sample2img);
+      // sampleReader.getExtent(layer_ulx,layer_uly,layer_lrx,layer_lry,ilayer,sample2img);
+      sampleReader.getExtent(layer_ulx,layer_uly,layer_lrx,layer_lry,ilayer);
 
       if(verbose_opt[0])
         std::cout<< std::setprecision(12) << "--ulx " << layer_ulx << " --uly " << layer_uly << " --lrx " << layer_lrx   << " --lry " << layer_lry << std::endl;
@@ -567,6 +573,9 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       layer_uly+=fmod(this->getUly()-layer_uly,this->getDeltaY());
       layer_lry-=fmod(layer_lry-this->getLry(),this->getDeltaY());
 
+      if(verbose_opt[0])
+        std::cout << "aligned layer coordinates: " << std::setprecision(12) << "--ulx " << layer_ulx << " --uly " << layer_uly << " --lrx " << layer_lrx   << " --lry " << layer_lry << std::endl;
+
       //do not read outside input image
       if(layer_ulx<this->getUlx())
         layer_ulx=this->getUlx();
@@ -576,6 +585,9 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         layer_uly=this->getUly();
       if(layer_lry<this->getLry())
         layer_lry=this->getLry();
+
+      if(verbose_opt[0])
+        std::cout << "constrained layer coordinates: " << std::setprecision(12) << "--ulx " << layer_ulx << " --uly " << layer_uly << " --lrx " << layer_lrx   << " --lry " << layer_lry << std::endl;
 
       //read entire block for coverage in memory
       //todo: use different data types
@@ -601,6 +613,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       this->geo2image(layer_lrx,layer_lry,layer_lri,layer_lrj);
 
       if(verbose_opt[0])
+        std::cout << "layer image coordinates: " << std::setprecision(12) << "--uli " << layer_uli << " --ulj " << layer_ulj << " --lri " << layer_lri   << " --lrj " << layer_lrj << std::endl;
         std::cout << "reading layer geometry" << std::endl;
       OGRwkbGeometryType layerGeometry=readLayer->GetLayerDefn()->GetGeomType();
       if(verbose_opt[0])
@@ -640,6 +653,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       layer_lri=(layer_lri>=this->nrOfCol())? this->nrOfCol()-1 : static_cast<int>(layer_lri);
       layer_lrj=(layer_lrj>=this->nrOfRow())? this->nrOfRow()-1 : static_cast<int>(layer_lrj);
 
+      if(verbose_opt[0])
+        std::cout << "constrained layer image coordinates: " << std::setprecision(12) << "--uli " << layer_uli << " --ulj " << layer_ulj << " --lri " << layer_lri   << " --lrj " << layer_lrj << std::endl;
       //todo: separate between case when data has been read already or opened with noRead true;
       // if(m_data.size()){
       bool layerRead=false;
@@ -821,8 +836,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         std::cerr << errorString << "failed to initWriter" << std::endl;
         throw;
       }
-      OGRFeature *readFeature;
-      unsigned long int ifeature=0;
+      // OGRFeature *readFeature;
+      // unsigned long int ifeature=0;
       // unsigned long int nfeatureLayer=sampleReaderOgr.getFeatureCount();
       unsigned long int nfeatureLayer=sampleReader.getFeatureCount(ilayer);
       if(verbose_opt[0])
@@ -840,10 +855,10 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
       if(verbose_opt[0])
         std::cout << "process in parallel" << std::endl;
-#pragma omp parallel for
+#pragma omp parallel for ordered shared(ntotalvalidLayer, ntotalvalid, sampleReader, ogrWriter)
 #else
 #endif
-      for(unsigned int ifeature=0;ifeature<sampleReader.getFeatureCount(ilayer);++ifeature){
+      for(unsigned long int ifeature=0;ifeature<sampleReader.getFeatureCount(ilayer);++ifeature){
         // OGRFeature *readFeature=sampleReaderOgr.getFeatureRef(ifeature);
         OGRFeature *readFeature=sampleReader.cloneFeature(ifeature,ilayer);
         bool validFeature=false;
@@ -880,10 +895,10 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
         }
         //create buffer
         OGRGeometry* poGeometry=readGeometry->clone();
-        if(!VectorOgr::transform(poGeometry,sample2img)){
-          std::string errorString="Error: coordinate transform not successful";
-          throw(errorString);
-        }
+        // if(!VectorOgr::transform(poGeometry,sample2img)){
+        //   std::string errorString="Error: coordinate transform not successful";
+        //   throw(errorString);
+        // }
         if(buffer_opt.size()){
           if(verbose_opt[0]>2){
             std::cout << "before buffer: " << std::endl;
@@ -975,10 +990,10 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                 writePolygon.closeRings();
               }
               //coordinate transform
-              if(!VectorOgr::transform(&writePolygon,img2sample)){
-                std::string errorString="Error: coordinate transform img2sample not successful";
-                throw(errorString);
-              }
+              // if(!VectorOgr::transform(&writePolygon,img2sample)){
+              //   std::string errorString="Error: coordinate transform img2sample not successful";
+              //   throw(errorString);
+              // }
               writePolygonFeature = ogrWriter.createFeature(ilayer);
               if(verbose_opt[0]>2)
                 std::cout << "geometry of feature (1): " << writePolygonFeature->GetGeometryRef()->getGeometryName() << std::endl;
@@ -1001,7 +1016,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                   std::cout << "get centroid" << std::endl;
                 writePolygon.Centroid(&readPoint);
                 double i,j;
-                this->geo2image(readPoint.getX(),readPoint.getY(),i,j,sample2img);
+                // this->geo2image(readPoint.getX(),readPoint.getY(),i,j,sample2img);
+                this->geo2image(readPoint.getX(),readPoint.getY(),i,j);
                 if(verbose_opt[0]>1)
                   std::cout << "centroid in vector SRS: " << readPoint.getX() << ", " << readPoint.getY() << std::endl;
                 int indexJ=static_cast<int>(j-layer_ulj);
@@ -1017,7 +1033,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                 if(valid){
                   if(maskReader.isInit()){
                     double maskI,maskJ;
-                    maskReader.geo2image(readPoint.getX(),readPoint.getY(),maskI,maskJ,sample2img);
+                    // maskReader.geo2image(readPoint.getX(),readPoint.getY(),maskI,maskJ,sample2img);
+                    maskReader.geo2image(readPoint.getX(),readPoint.getY(),maskI,maskJ);
                     maskI=static_cast<unsigned int>(maskI);
                     maskJ=static_cast<unsigned int>(maskJ);
                     if(maskI>0&&maskI<maskBuffer.nrOfCol()&&maskJ>0&&maskJ<maskBuffer.nrOfRow()){
@@ -1108,7 +1125,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                 if(writePolygon.PointOnSurface(&readPoint)!=OGRERR_NONE)
                   writePolygon.Centroid(&readPoint);
                 double i,j;
-                this->geo2image(readPoint.getX(),readPoint.getY(),i,j,sample2img);
+                // this->geo2image(readPoint.getX(),readPoint.getY(),i,j,sample2img);
+                this->geo2image(readPoint.getX(),readPoint.getY(),i,j);
                 int indexJ=static_cast<int>(j-layer_ulj);
                 int indexI=static_cast<int>(i-layer_uli);
                 bool valid=true;
@@ -1122,7 +1140,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                 if(valid){
                   if(maskReader.isInit()){
                     double maskI,maskJ;
-                    maskReader.geo2image(readPoint.getX(),readPoint.getY(),maskI,maskJ,sample2img);
+                    // maskReader.geo2image(readPoint.getX(),readPoint.getY(),maskI,maskJ,sample2img);
+                    maskReader.geo2image(readPoint.getX(),readPoint.getY(),maskI,maskJ);
                     maskI=static_cast<unsigned int>(maskI);
                     maskJ=static_cast<unsigned int>(maskJ);
                     if(maskI>0&&maskI<maskBuffer.nrOfCol()&&maskJ>0&&maskJ<maskBuffer.nrOfRow()){
@@ -1277,7 +1296,8 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
 
                   if(maskReader.isInit()){
                     double maskI,maskJ;
-                    maskReader.geo2image(readPoint.getX(),readPoint.getY(),maskI,maskJ,sample2img);
+                    // maskReader.geo2image(readPoint.getX(),readPoint.getY(),maskI,maskJ,sample2img);
+                    maskReader.geo2image(readPoint.getX(),readPoint.getY(),maskI,maskJ);
                     maskI=static_cast<unsigned int>(maskI);
                     maskJ=static_cast<unsigned int>(maskJ);
                     if(maskI>0&&maskI<maskBuffer.nrOfCol()&&maskJ>0&&maskJ<maskBuffer.nrOfRow()){
@@ -1342,10 +1362,10 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                     if(verbose_opt[0]>1)
                       std::cout << "set geometry as point " << std::endl;
                     //coordinate transform
-                    if(!VectorOgr::transform(&thePoint,img2sample)){
-                      std::string errorString="Error: coordinate transform img2sample not successful";
-                      throw(errorString);
-                    }
+                    // if(!VectorOgr::transform(&thePoint,img2sample)){
+                    //   std::string errorString="Error: coordinate transform img2sample not successful";
+                    //   throw(errorString);
+                    // }
                     writePointFeature->SetGeometry(&thePoint);
                     assert(wkbFlatten(writePointFeature->GetGeometryRef()->getGeometryType()) == wkbPoint);
                     if(verbose_opt[0]>1){
@@ -1451,13 +1471,12 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                     if(verbose_opt[0]>1)
                       std::cout << "creating point feature" << std::endl;
                     // if(writeLayer->CreateFeature( writePointFeature ) != OGRERR_NONE ){
-                    if(ogrWriter.getLayer(ilayer)->CreateFeature( writePointFeature ) != OGRERR_NONE ){
-                      std::string errorString="Failed to create feature in ogr vector dataset";
-                      throw(errorString);
-                    }
+                    ogrWriter.getLayer(ilayer)->CreateFeature( writePointFeature );
                     //destroy feature
                     // OGRFeature::DestroyFeature( writePointFeature );
+                    #pragma omp atomic
                     ++ntotalvalid;
+                    #pragma omp atomic
                     ++ntotalvalidLayer;
                   }
                 }//for in i
@@ -1607,7 +1626,9 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               if(!writePolygonFeature)
                 std::cerr << "Warning: NULL feature" << ifeature << std::endl;
               ogrWriter.setFeature(ifeature,writePolygonFeature,ilayer);
+              #pragma omp atomic
               ++ntotalvalid;
+              #pragma omp atomic
               ++ntotalvalidLayer;
             }
           }//for points
@@ -1720,10 +1741,10 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               // writePolygonFeature = OGRFeature::CreateFeature(writeLayer->GetLayerDefn());
               writePolygonFeature = ogrWriter.createFeature(ilayer);
               //coordinate transform
-              if(!VectorOgr::transform(poGeometry,img2sample)){
-                std::string errorString="Error: coordinate transform img2sample not successful";
-                throw(errorString);
-              }
+              // if(!VectorOgr::transform(poGeometry,img2sample)){
+              //   std::string errorString="Error: coordinate transform img2sample not successful";
+              //   throw(errorString);
+              // }
               //writePolygonFeature and readFeature are both of type wkbPolygon
               if(writePolygonFeature->SetFrom(readFeature)!= OGRERR_NONE)
                 cerr << "writing feature failed" << std::endl;
@@ -2162,7 +2183,7 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                       cerr << "writing feature failed" << std::endl;
                     if(verbose_opt[0]>1)
                       std::cout << "set geometry as point in SRS of vector layer" << std::endl;
-                    VectorOgr::transform(&thePoint,img2sample);
+                    // VectorOgr::transform(&thePoint,img2sample);
                     writePointFeature->SetGeometry(&thePoint);
                     assert(wkbFlatten(writePointFeature->GetGeometryRef()->getGeometryType()) == wkbPoint);
                     if(verbose_opt[0]>1){
@@ -2272,13 +2293,12 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
                     if(verbose_opt[0])
                       std::cout << "creating point feature " << ntotalvalidLayer << std::endl;
                     // if(writeLayer->CreateFeature( writePointFeature ) != OGRERR_NONE ){
-                    if(ogrWriter.getLayer(ilayer)->CreateFeature( writePointFeature ) != OGRERR_NONE ){
-                      std::string errorString="Failed to create feature in ogr vector dataset";
-                      throw(errorString);
-                    }
+                    ogrWriter.getLayer(ilayer)->CreateFeature( writePointFeature );
                     //destroy feature
                     // OGRFeature::DestroyFeature( writePointFeature );
+                    #pragma omp atomic
                     ++ntotalvalid;
+                    #pragma omp atomic
                     ++ntotalvalidLayer;
                   }
                 }//for in i
@@ -2430,7 +2450,9 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
               if(!writePolygonFeature)
                 std::cerr << "Warning: NULL feature" << ifeature << std::endl;
               ogrWriter.setFeature(ifeature,writePolygonFeature,ilayer);
+              #pragma omp atomic
               ++ntotalvalid;
+              #pragma omp atomic
               ++ntotalvalidLayer;
               if(verbose_opt[0])
                 std::cout << "ntotalvalidLayer: " << ntotalvalidLayer << std::endl;
@@ -3175,8 +3197,7 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
         }
       }
     }
-    OGRFeature *readFeature;
-    unsigned long int ifeature=0;
+    // OGRFeature *readFeature;
     unsigned long int nfeatureLayer=sampleReaderOgr.getFeatureCount();
     unsigned long int ntotalvalidLayer=0;
 
@@ -3190,10 +3211,10 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
     // while( (readFeature = readLayer->GetNextFeature()) != NULL ){
 
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
-#pragma omp parallel for
+#pragma omp parallel for ordered shared(ntotalvalidLayer, ntotalvalid, ogrWriter)
 #else
 #endif
-    for(unsigned int ifeature=0;ifeature<sampleReaderOgr.getFeatureCount();++ifeature){
+    for(unsigned long int ifeature=0;ifeature<sampleReaderOgr.getFeatureCount();++ifeature){
       // OGRFeature *readFeature=sampleReaderOgr.getFeatureRef(ifeature);
       OGRFeature *readFeature=sampleReaderOgr.cloneFeature(ifeature);
       bool validFeature=false;
@@ -3717,7 +3738,9 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
                   }
                   //destroy feature
                   // OGRFeature::DestroyFeature( writePointFeature );
+                  #pragma omp atomic
                   ++ntotalvalid;
+                  #pragma omp atomic
                   ++ntotalvalidLayer;
                 }
               }//for in i
@@ -3861,7 +3884,9 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
             if(!writePolygonFeature)
               std::cerr << "Warning: NULL feature" << ifeature << std::endl;
             ogrWriter.setFeature(ifeature,writePolygonFeature);
+            #pragma omp atomic
             ++ntotalvalid;
+            #pragma omp atomic
             ++ntotalvalidLayer;
           }
         }
@@ -4395,7 +4420,9 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
                   }
                   //destroy feature
                   // OGRFeature::DestroyFeature( writePointFeature );
+                  #pragma omp atomic
                   ++ntotalvalid;
+                  #pragma omp atomic
                   ++ntotalvalidLayer;
                 }
               }//for in i
@@ -4539,7 +4566,9 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
             if(!writePolygonFeature)
               std::cerr << "Warning: NULL feature" << ifeature << std::endl;
             ogrWriter.setFeature(ifeature,writePolygonFeature);
+            #pragma omp atomic
             ++ntotalvalid;
+            #pragma omp atomic
             ++ntotalvalidLayer;
           }
         }
