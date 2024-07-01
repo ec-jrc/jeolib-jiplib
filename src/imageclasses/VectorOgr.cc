@@ -474,20 +474,6 @@ void VectorOgr::close(void)
   }
 }
 
-// OGRErr VectorOgr::setProjection(const std::string& theProjection, size_t ilayer){
-//   OGRSpatialReference theRef;
-//   if(theProjection.empty())
-//     return(CE_None);
-//   theRef.SetFromUserInput(theProjection.c_str());
-//   char *wktString;
-//   theRef.exportToWkt(&wktString);
-//   m_projection=wktString;
-//   if(m_gds)
-//     return(m_gds->SetProjection(wktString));
-//   else
-//     return(CE_Warning);
-// }
-
 ///Create a layer
 OGRErr VectorOgr::pushLayer(const std::string& layername, OGRSpatialReference* theSRS, const OGRwkbGeometryType& geometryType, char** papszOptions){
   if( !m_gds->TestCapability( ODsCCreateLayer ) ){
@@ -910,8 +896,6 @@ OGRErr VectorOgr::copy(VectorOgr& other, app::AppFactory &app){
   targetSpatialRef.SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
 #endif
 
-  if(targetSRS_opt.size())
-    setProjection(targetSRS_opt[0]);
   try{
     for(size_t ilayer=0;ilayer<other.getLayerCount();++ilayer){
       sourceSpatialRef.SetFromUserInput(other.getProjection(ilayer).c_str());
@@ -1100,22 +1084,22 @@ std::string VectorOgr::getProjection(size_t ilayer) const{
   return(projectionString);
 };
 
-void VectorOgr::setProjection(const std::string& projection)
-{
-  if(projection.size()){
-    OGRSpatialReference theRef;
-    theRef.SetFromUserInput(projection.c_str());
-    char *wktString;
-    theRef.exportToWkt(&wktString);
-    if(m_gds&&m_access==GDAL_OF_UPDATE)
-      m_gds->SetProjection(wktString);
-    else{
-      std::ostringstream errorStream;
-      errorStream << "Error: could not set projection, no m_gds and access is " << m_access << std::endl;
-      throw(errorStream.str());
-    }
-  }
-}
+// void VectorOgr::setProjection(const std::string& projection)
+// {
+//   if(projection.size()){
+//     OGRSpatialReference theRef;
+//     theRef.SetFromUserInput(projection.c_str());
+//     char *wktString;
+//     theRef.exportToWkt(&wktString);
+//     if(m_gds&&m_access==GDAL_OF_UPDATE)
+//       m_gds->SetProjection(wktString);
+//     else{
+//       std::ostringstream errorStream;
+//       errorStream << "Error: could not set projection, no m_gds and access is " << m_access << std::endl;
+//       throw(errorStream.str());
+//     }
+//   }
+// }
 
 ///get extent of all layers
 bool VectorOgr::getExtent(double& ulx, double& uly, double& lrx, double& lry, OGRCoordinateTransformation *poCT) const{

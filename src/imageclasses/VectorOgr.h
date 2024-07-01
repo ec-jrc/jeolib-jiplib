@@ -204,8 +204,6 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
     OGRSpatialReference thisSpatialRef(getProjection(ilayer).c_str());
     return thisSpatialRef;
   }
-  //set projection
-  void setProjection(const std::string& projection);
   ///Get the filename of this dataset
   std::string getFileName() const {return m_filename;};
   ///Create a layer
