@@ -131,6 +131,8 @@ if(BUILD_WITH_PYTHON)
   SET(CREATE_WHEEL TRUE CACHE BOOL "Choose if jiplib PYTHON wheel is to be created")
 endif(BUILD_WITH_PYTHON)
 
+MESSAGE(STATUS "CREATE_WHEEL: ${CREATE_WHEEL}")
+
 SET(PYTHON3 ON CACHE BOOL "set ON for PYTHON3")
 
 find_package(Python COMPONENTS NumPy Interpreter Development)
