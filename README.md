@@ -40,6 +40,7 @@ sudo apt install -yq \
   libjsoncpp-dev \
   libpython3-dev \
   python3-numpy \
+  python3-pip \
   libboost-filesystem-dev  \
   libboost-serialization-dev \
   swig
