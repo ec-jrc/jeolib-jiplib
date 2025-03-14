@@ -78,6 +78,9 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 %rename(filter2d_dilate) filter2d::dilate;
 %rename(filter2d_shift) filter2d::shift;
 
+%rename(Jim_createImg) Jim::createImg;
+%rename(VectorOgr_createVector) VectorOgr::createVector;
+
 %typemap(in) app::AppFactory& (app::AppFactory tempFactory){
   if(PyDict_Check($input)){
     PyObject *pKey, *pValue;
@@ -199,9 +202,15 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
       if arg1:
           if isinstance(arg1,Jim):
               if 'copyData' in kwargs.keys():
-                  return Jim_createImg(arg1,kwargs['copyData'])
+                  if 'Jim_createImg' in globals():
+                      return Jim_createImg(arg1,kwargs['copyData'])
+                  else:
+                      return Jim.Jim_createImg(arg1,kwargs['copyData'])
               else:
-                  return Jim_createImg(arg1)
+                  if 'Jim_createImg' in globals():
+                      return Jim_createImg(arg1)
+                  else:
+                      return Jim.Jim_createImg(arg1)
           elif isinstance(arg1,str):
               if os.path.isfile(arg1):
                   appDict.update({'filename':arg1})
@@ -211,9 +220,15 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
           appDict.update({key:value})
       if appDict:
           # SWIG generates wrappers that try to work around calling static member functions, replaceing :: with _ (underscore)
-          return Jim_createImg(appDict)
+          if 'Jim_createImg' in globals():
+            return Jim_createImg(appDict)
+          else:
+            return Jim.Jim_createImg(appDict)
       else:
-          return Jim_createImg()
+          if 'Jim_createImg' in globals():
+            return Jim_createImg()
+          else:
+            return Jim.Jim_createImg()
 
   def createVector(arg1=None,**kwargs):
       appDict={}
@@ -222,7 +237,10 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
       if arg1:
           if isinstance(arg1,VectorOgr):
               if appDict:
-                  return VectorOgr_createVector(arg1,appDict)
+                if 'VectorOgr_createVector' in globals():
+                    return VectorOgr_createVector(arg1,appDict)
+                else:
+                    return VectorOgr.VectorOgr_createVector(arg1,appDict)
               else:
                   return VectorOgr_createVector(arg1)
           elif isinstance(arg1,str):
@@ -235,9 +253,15 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
               raise TypeError("Error: bad argument type for createVector, arguments without names should be a path or of VectorOgr type")
       if appDict:
           # SWIG generates wrappers that try to work around calling static member functions, replaceing :: with _ (underscore)
-          return VectorOgr_createVector(appDict)
+          if 'VectorOgr_createVector' in globals():
+              return VectorOgr_createVector(appDict)
+          else:
+              return VectorOgr.VectorOgr_createVector(appDict)
       else:
-          return VectorOgr_createVector()
+          if 'VectorOgr_createVector' in globals():
+              return VectorOgr_createVector()
+          else:
+              return VectorOgr.VectorOgr_createVector()
     %}
 
 /* !!! from: http://svn.salilab.org/imp/branches/1.0/kernel/pyext/IMP_streams.i */
