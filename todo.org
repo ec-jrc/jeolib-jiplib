@@ -1,7 +1,7 @@
 
 
 * List of issues/functions to address (20170201) with decreasing order of priority:
-  - function getpixval not warpted correctly (existing typemap in
+  - function getpixval not warped correctly (existing typemap in
     miallib_tmp.i should return a value and not a G_TYPE * swig object!
   - typemap for mia function argument int *box introduced in
     miallib_tmp.i works only for functional call in jiplib (method
