@@ -219,7 +219,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
       for key, value in kwargs.items():
           appDict.update({key:value})
       if appDict:
-          # SWIG generates wrappers that try to work around calling static member functions, replaceing :: with _ (underscore)
+          # SWIG generates wrappers that try to work around calling static member functions, replacing :: with _ (underscore)
           if 'Jim_createImg' in globals():
             return Jim_createImg(appDict)
           else:
@@ -252,7 +252,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
           else:
               raise TypeError("Error: bad argument type for createVector, arguments without names should be a path or of VectorOgr type")
       if appDict:
-          # SWIG generates wrappers that try to work around calling static member functions, replaceing :: with _ (underscore)
+          # SWIG generates wrappers that try to work around calling static member functions, replacing :: with _ (underscore)
           if 'VectorOgr_createVector' in globals():
               return VectorOgr_createVector(appDict)
           else:
