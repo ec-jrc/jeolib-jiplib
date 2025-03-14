@@ -612,9 +612,10 @@ CPLErr Jim::extractOgr(VectorOgr& sampleReader, VectorOgr&ogrWriter, AppFactory&
       this->geo2image(layer_ulx,layer_uly,layer_uli,layer_ulj);
       this->geo2image(layer_lrx,layer_lry,layer_lri,layer_lrj);
 
-      if(verbose_opt[0])
+      if(verbose_opt[0]){
         std::cout << "layer image coordinates: " << std::setprecision(12) << "--uli " << layer_uli << " --ulj " << layer_ulj << " --lri " << layer_lri   << " --lrj " << layer_lrj << std::endl;
         std::cout << "reading layer geometry" << std::endl;
+      }
       OGRwkbGeometryType layerGeometry=readLayer->GetLayerDefn()->GetGeomType();
       if(verbose_opt[0])
         std::cout << "layer geometry: " << OGRGeometryTypeToName(layerGeometry) << std::endl;
