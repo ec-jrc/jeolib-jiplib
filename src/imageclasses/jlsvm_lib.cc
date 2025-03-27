@@ -153,7 +153,7 @@ std::string VectorOgr::trainSVM(app::AppFactory& app){
     kernelMap["sigmoid;"]=svm::sigmoid;
 
     // if(model_opt.empty()){
-    //   std::string errorString="Error: filename to save model is emtpy";
+    //   std::string errorString="Error: filename to save model is empty";
     //   throw(errorString);
     // }
 

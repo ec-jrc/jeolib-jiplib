@@ -53,7 +53,7 @@ void Jim::stretch(Jim& imgWriter, app::AppFactory& app){
   Optionjl<double> nodata_opt("nodata", "nodata", "nodata value(s) (first value will be put in output image)");
   Optionjl<double> src_min_opt("src_min","src_min","clip source below this minimum value");
   Optionjl<double> src_max_opt("src_max","src_max","clip source above this maximum value");
-  Optionjl<double> fromValue_opt("dst_min", "dst_min", "mininum value in output image", 0);
+  Optionjl<double> fromValue_opt("dst_min", "dst_min", "minimum value in output image", 0);
   Optionjl<double> toValue_opt("dst_max", "dst_max", "maximum value in output image", 255);
   Optionjl<double> minp_opt("cc_min", "cc_min", "cumulative count cut from");
   Optionjl<double> maxp_opt("cc_max", "cc_max", "cumulative count cut to");

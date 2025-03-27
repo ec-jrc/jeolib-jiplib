@@ -110,7 +110,7 @@ std::string VectorOgr::trainANN(app::AppFactory& app){
     FANN::neural_net net;//the neural network
 
     // if(model_opt.empty()){
-    //   std::string errorString="Error: filename to save model is emtpy";
+    //   std::string errorString="Error: filename to save model is empty";
     //   throw(errorString);
     // }
 
