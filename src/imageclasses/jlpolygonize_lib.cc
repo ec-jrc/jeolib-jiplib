@@ -112,7 +112,7 @@ void Jim::polygonize(VectorOgr&ogrWriter, app::AppFactory &theApp, std::shared_p
           }
         }
         else{
-          std::string errorString="Error: clould not create memory dataset for mask dataset";
+          std::string errorString="Error: could not create memory dataset for mask dataset";
           throw(errorString);
         }
       }
@@ -165,12 +165,12 @@ void Jim::polygonize(VectorOgr&ogrWriter, app::AppFactory &theApp, std::shared_p
         }
       }
       else{
-        std::string errorString="Error: clould not create memory dataset for input dataset";
+        std::string errorString="Error: could not create memory dataset for input dataset";
         throw(errorString);
       }
     }
     else{
-      std::string errorString="Error: clould not create memory driver";
+      std::string errorString="Error: could not create memory driver";
       throw(errorString);
     }
   }
@@ -179,7 +179,7 @@ void Jim::polygonize(VectorOgr&ogrWriter, app::AppFactory &theApp, std::shared_p
     throw;
   }
   catch(...){
-    std::cerr << "Error: clould not polygonize" << std::endl;
+    std::cerr << "Error: could not polygonize" << std::endl;
     throw;
   }
 }
