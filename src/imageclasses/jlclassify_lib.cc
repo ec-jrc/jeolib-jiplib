@@ -103,7 +103,7 @@ void VectorOgr::train(app::AppFactory& app){
       throw(helpStream.str());//help was invoked, stop processing
     }
     if(model_opt.empty()){
-      std::string errorString="Error: filename to save model is emtpy";
+      std::string errorString="Error: filename to save model is empty";
       throw(errorString);
     }
     switch(getClassifier(method_opt[0])){

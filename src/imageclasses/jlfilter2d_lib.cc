@@ -67,7 +67,7 @@ using namespace filter;
  * @param down (type: short) (default: 1) down sampling factor. Use value 1 for no downsampling. Use value n>1 for downsampling (aggregation)
  * @param beta (type: std::string) ASCII file with beta for each class transition in Markov Random Field
  * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
- * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid). Use none to ommit color table
+ * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid). Use none to omit color table
  * @param circular (type: bool) (default: 0) circular disc kernel for dilation and erosion
  * @return shared pointer to image object
  **/
@@ -99,7 +99,7 @@ shared_ptr<Jim> Jim::filter2d(const app::AppFactory& app){
  * @param down (type: short) (default: 1) down sampling factor. Use value 1 for no downsampling. Use value n>1 for downsampling (aggregation)
  * @param beta (type: std::string) ASCII file with beta for each class transition in Markov Random Field
  * @param otype (type: std::string) Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image
- * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid). Use none to ommit color table
+ * @param ct (type: std::string) color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid). Use none to omit color table
  * @param circular (type: bool) (default: 0) circular disc kernel for dilation and erosion
  **/
 void Jim::filter2d(Jim& imgWriter, const app::AppFactory& app){
@@ -119,7 +119,7 @@ void Jim::filter2d(Jim& imgWriter, const app::AppFactory& app){
   Optionjl<bool> norm_opt("norm", "norm", "normalize tap values values when filtering",false);
   Optionjl<string> padding_opt("pad","pad", "Padding method for filtering (how to handle edge effects). Choose between: symmetric, replicate, circular, zero (pad with 0).", "symmetric");
   Optionjl<std::string>  otype_opt("ot", "otype", "Data type for output image ({Byte/Int16/UInt16/UInt32/Int32/Float32/Float64/CInt16/CInt32/CFloat32/CFloat64}). Empty string: inherit type from input image");
-  Optionjl<string>  colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid). Use none to ommit color table");
+  Optionjl<string>  colorTable_opt("ct", "ct", "color table (file with 5 columns: id R G B ALFA (0: transparent, 255: solid). Use none to omit color table");
   Optionjl<short> down_opt("d", "down", "down sampling factor. Use value 1 for no downsampling. Use value n>1 for downsampling (aggregation)", 1);
   Optionjl<string> beta_opt("beta", "beta", "ASCII file with beta for each class transition in Markov Random Field");
   Optionjl<short> verbose_opt("v", "verbose", "verbose mode if > 0", 0,2);

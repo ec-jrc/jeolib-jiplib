@@ -103,7 +103,7 @@ void Jim::trainSML(JimList& referenceReader, app::AppFactory& app){
   try{
     // doProcess=model_opt.retrieveOption(app);
     // if(model_opt.empty()){
-    //   std::string errorString="Error: filename to save model is emtpy";
+    //   std::string errorString="Error: filename to save model is empty";
     //   throw(errorString);
     // }
     // std::ofstream outputStream(model_opt[0]);
@@ -167,7 +167,7 @@ void Jim::trainSML2d(JimList& referenceReader, app::AppFactory& app){
       throw(helpStream.str());//help was invoked, stop processing
     }
     if(model_opt.empty()){
-      std::string errorString="Error: filename to save model is emtpy";
+      std::string errorString="Error: filename to save model is empty";
       throw(errorString);
     }
     std::ofstream outputStream(model_opt[0]);

@@ -2605,7 +2605,7 @@ CPLErr Jim::readDataPlanes(std::vector<int> bands){
 /**
  * @param x Reported column where minimum value in image was found (start counting from 0)
  * @param y Reported row where minimum value in image was found (start counting from 0)
- * @param band Search mininum value in image for this band
+ * @param band Search minimum value in image for this band
  * @return minimum value in image for the selected band
  **/
 double Jim::getMin(int& x, int& y, int band){
@@ -2641,7 +2641,7 @@ double Jim::getMin(int& x, int& y, int band){
 /**
  * @param x Reported column where maximum value in image was found (start counting from 0)
  * @param y Reported row where maximum value in image was found (start counting from 0)
- * @param band Search mininum value in image for this band
+ * @param band Search minimum value in image for this band
  * @return maximum value in image for the selected band
  **/
 double Jim::getMax(int& x, int& y, int band){

@@ -2852,7 +2852,7 @@ CPLErr Jim::extractSample(VectorOgr& ogrWriter, AppFactory& app){
         std::cout << "out of region: " << outOfRegion << " from " << trials << " trials"<< std::endl;
       if(!ipoint){
         ostringstream ess;
-        ess << "Error: no random point created afer " << trials << " trials" << endl;
+        ess << "Error: no random point created after " << trials << " trials" << endl;
         throw(ess.str());
       }
       else if(trials>=maxTrials)
