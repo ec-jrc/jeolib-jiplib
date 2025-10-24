@@ -475,7 +475,7 @@ void VectorOgr::close(void)
 }
 
 ///Create a layer
-OGRErr VectorOgr::pushLayer(const std::string& layername, OGRSpatialReference* theSRS, const OGRwkbGeometryType& geometryType, char** papszOptions){
+OGRErr VectorOgr::pushLayer(const std::string& layername, const OGRSpatialReference* theSRS, const OGRwkbGeometryType& geometryType, char** papszOptions){
   if( !m_gds->TestCapability( ODsCCreateLayer ) ){
     // std::ostringstream errorStream;
     // errorStream << "Error: Test capability to create layer " << layername << " failed (1)" << std::endl;
@@ -2016,7 +2016,7 @@ void VectorOgr::merge(VectorOgr &ogrReader, VectorOgr &ogrWriter, app::AppFactor
       if(verbose_opt[0])
         std::cout << "layer: " << layerstream.str() << std::endl;
 
-      OGRSpatialReference *thatSpatialRef=ogrReader.getLayer(ilayer)->GetSpatialRef();
+      OGRSpatialReference *thatSpatialRef=ogrReader.getLayer(ilayer)->GetSpatialRef()->Clone();
 #if GDAL_VERSION_MAJOR > 2
       thatSpatialRef->SetAxisMappingStrategy(OSRAxisMappingStrategy::OAMS_TRADITIONAL_GIS_ORDER);
 #endif
