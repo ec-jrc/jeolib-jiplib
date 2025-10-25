@@ -689,7 +689,7 @@ endif(BUILD_WITH_PYTHON)
 ########## INSTALL ##########
 INSTALL(TARGETS ${JIPLIB_LIB_NAME}
   LIBRARY
-  DESTINATION lib
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}
   COMPONENT libraries
   PUBLIC_HEADER
   DESTINATION include/${JIPLIB_LIB_NAME}
@@ -697,7 +697,7 @@ INSTALL(TARGETS ${JIPLIB_LIB_NAME}
   )
 
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/jiplib.pc
-        DESTINATION lib/pkgconfig
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
 INSTALL(CODE
   "execute_process(COMMAND ${Python_EXECUTABLE} -m pip install ${_pip_args} ${CMAKE_CURRENT_BINARY_DIR}/jiplib-${JIPLIB_VERSION}-py3-none-any.whl --force-reinstall)"
