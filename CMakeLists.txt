@@ -124,7 +124,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 
 # Make sure Boost libraries are found
 SET(Boost_DEBUG 0)
-find_package(Boost COMPONENTS filesystem system serialization REQUIRED)
+find_package(Boost COMPONENTS filesystem serialization REQUIRED)
 
 if(BUILD_WITH_PYTHON)
   # SET(CREATE_WHEEL TRUE CACHE BOOL "Choose if jiplib PYTHON wheel is to be created")
