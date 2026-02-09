@@ -3,7 +3,7 @@ Install the jiplib package.
 Author(s): Pieter.Kempeneers@ec.europa.eu,
            Ondrej Pesek,
            Pierre.Soille@ec.europa.eu
-Copyright (C) 2018-2025 European Union (Joint Research Centre)
+Copyright (C) 2018-2026 European Union (Joint Research Centre)
 
 This file is part of jiplib.
 
@@ -23,4 +23,4 @@ from __future__ import absolute_import
 from .jiplib import *
 
 
-__version__ = '1.1.6'
+__version__ = '1.1.7'

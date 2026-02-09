@@ -1,7 +1,7 @@
 ###############################################################################
 # CMakeLists build script for cmake
 # Author(s): Pieter.Kempeneers@ec.europa.eu
-# Copyright (C) 2016-2023 European Union (Joint Research Centre)
+# Copyright (C) 2016-2026 European Union (Joint Research Centre)
 #
 # This file is part of jiplib.
 
@@ -32,7 +32,7 @@ INCLUDE(CTest)
 
 SET(JIPLIB_VERSION_MAJOR 1)
 SET(JIPLIB_VERSION_MINOR 1)
-SET(JIPLIB_VERSION_PATCH 6)
+SET(JIPLIB_VERSION_PATCH 7)
 SET(JIPLIB_VERSION "${JIPLIB_VERSION_MAJOR}.${JIPLIB_VERSION_MINOR}.${JIPLIB_VERSION_PATCH}")
 SET(PACKAGE_VERSION "${JIPLIB_VERSION}")
 SET(JIPLIB_SOVERSION "${JIPLIB_VERSION_MAJOR}")

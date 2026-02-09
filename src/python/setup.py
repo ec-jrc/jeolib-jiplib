@@ -1,7 +1,7 @@
 """
 Install the jiplib package.
 Author(s): Pieter.Kempeneers@ec.europa.eu,
-Copyright (C) 2018-2023 European Union (Joint Research Centre)
+Copyright (C) 2018-2026 European Union (Joint Research Centre)
 
 This file is part of jiplib.
 
@@ -27,7 +27,7 @@ from setuptools import find_packages
 
 setup(
     name='jiplib',
-    version='1.1.6',
+    version='1.1.7',
     author='Pieter Kempeneers',
     author_email='pieter.kempeneers@ec.europa.eu',
     url='https://jeodpp.jrc.ec.europa.eu/apps/gitlab/JIPlib/jiplib',
