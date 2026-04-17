@@ -1026,7 +1026,11 @@ void Jim::getGeoTransform(vector<double>& gt) const{
 /**
  * @return the metadata of this data set in C style string format (const version)
  **/
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3, 13, 0)
+CSLConstList Jim::getMetadata() const
+#else
 char** Jim::getMetadata() const
+#endif
 {
   if(m_gds){
     if(m_gds->GetMetadata()!=NULL)
@@ -1045,7 +1049,11 @@ char** Jim::getMetadata() const
 void Jim::getMetadata(std::list<std::string>& metadata) const
 {
   if(m_gds){
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3, 13, 0)
+    CSLConstList cmetadata=m_gds->GetMetadata();
+#else
     char** cmetadata=m_gds->GetMetadata();
+#endif
     while(*cmetadata!=NULL){
       metadata.push_back(*(cmetadata));
       ++cmetadata;
@@ -1494,7 +1502,11 @@ CPLErr Jim::registerDriver()
       s << "FileOpenError (" << m_imageType << ")";
       throw(s.str());
     }
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3, 13, 0)
+    CSLConstList papszMetadata;
+#else
     char **papszMetadata;
+#endif
     papszMetadata = poDriver->GetMetadata();
     //todo: try and catch if CREATE is not supported (as in PNG)
     if( ! CSLFetchBoolean( papszMetadata, GDAL_DCAP_CREATE, FALSE )){
@@ -2120,7 +2132,11 @@ CPLErr Jim::open(app::AppFactory &app){
     GDALRasterBand *poBand;//we will fetch the first band to obtain the gds metadata
 
     if(m_gds){
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3, 13, 0)
+      CSLConstList papszMetadata;
+#else
       char **papszMetadata;
+#endif
       papszMetadata = m_gds->GetMetadata("SUBDATASETS");
       vector<string> LayersAll;
       if( papszMetadata ){
