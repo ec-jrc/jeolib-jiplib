@@ -640,7 +640,11 @@ class Jim : public std::enable_shared_from_this<Jim>
   //Get a pointer to the GDAL dataset
   GDALDataset* getDataset(){return m_gds;};
   ///Get the metadata of this dataset
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3, 13, 0)
+  CSLConstList getMetadata() const;
+#else
   char** getMetadata() const;
+#endif
   // Get the metadata of this dataset in the form of a list of strings (const version)
   void getMetadata(std::list<std::string>& metadata) const;
   ///Get the image description from the driver of this dataset
