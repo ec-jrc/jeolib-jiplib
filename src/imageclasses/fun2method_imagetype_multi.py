@@ -1,7 +1,6 @@
 # first 20170830 by pieter.kempeneers@ec.europa.eu
 
-
-def fun2method(inputfile, outputfile_basename):
+def fun2method(inputfile, outputfile_basename, json_path):
     """converts MIALib C function declarations into JIPLib C++ methods (outputfile_basename.cc file) and C++ method declarations (outputfile_basename.h file).  Currently only convert desctuctive functions, i.e., ERROR_TYPE functions, with IMAGE ** as first argument
 
     :param inputfile: string for input file containing extern declarations
@@ -13,7 +12,12 @@ def fun2method(inputfile, outputfile_basename):
 
     import re
     import json
-    old2newDic = json.load(open("old2NewNames.json"))
+    import sys 
+    import os
+    with open(json_path, 'r') as f:
+        old2newDic = json.load(f)
+
+    #old2newDic = json.load(open("old2NewNames.json"))
 
     ifp=open(inputfile, 'r')
 
@@ -177,23 +181,27 @@ import sys, getopt
 def main(argv):
    inputfile="miallib_imagetype"
    outputfile="fun2method_imagetype_multi"
+   json_path = "old2NewNames.json"
    try:
-      opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
+       opts, args = getopt.getopt(argv,"hi:o:j:",["ifile=","ofile=", "json="])
    except getopt.GetoptError:
-      print('fun2method.py -i <inputfile> -o <outputfilebasename>')
+      print('fun2method.py -i <inputfile> -o <outputfilebasename> -j <json_path>')
       sys.exit(2)
    for opt, arg in opts:
       if opt == '-h':
-         print('fun2method.py -i <inputfile> -o <outputfilebasename>')
+         print('fun2method.py -i <inputfile> -o <outputfilebasename> -j <json_path>')
          sys.exit()
       elif opt in ("-i", "--ifile"):
          inputfile = arg
       elif opt in ("-o", "--ofile"):
          outputfile = arg
+      elif opt in ("-j", "--json"):
+         json_path = arg
    print('Input file is "', inputfile)
    print('Output file is "', outputfile)
+   print('JSON file is "', json_path)
 
-   fun2method(inputfile, outputfile)
+   fun2method(inputfile, outputfile, json_path)
 
 if __name__ == "__main__":
    main(sys.argv[1:])
