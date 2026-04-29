@@ -234,7 +234,7 @@ static std::size_t getDataTypeSizeBytes(const std::string &typeString){
       std::string errorString="Error: data type not supported";
       throw(errorString);
     }
-    return(static_cast<std::size_t>(GDALGetDataTypeSize(static_cast<GDALDataType>(typeInt))>>3));
+    return static_cast<std::size_t>(GDALGetDataTypeSizeBytes(static_cast<GDALDataType>(typeInt)));
   }
   }
 }
@@ -1759,8 +1759,8 @@ template<typename T> CPLErr Jim::readDataBlock(std::vector<T>& buffer, int minCo
             returnValue=readNewBlock(irow,band);
         }
         int index=(irow-m_begin[band])*nrOfCol();
-        int minindex=(index+minCol);//*(GDALGetDataTypeSize(getDataType())>>3);
-        int maxindex=(index+maxCol);//*(GDALGetDataTypeSize(getDataType())>>3);
+        int minindex=(index+minCol);
+        int maxindex=(index+maxCol);
 
         for(index=minindex;index<=maxindex;++index,++bufit){
           double dvalue=0;
@@ -1854,8 +1854,8 @@ template<typename T> CPLErr Jim::readDataBlock3D(std::vector<T>& buffer, std::si
         }
         /* int index=(irow-m_begin[band])*nrOfCol(); */
         std::size_t index=(plane*nrOfRow()*nrOfCol())+(irow-m_begin[band])*nrOfCol();
-        std::size_t minindex=(index+minCol);//*(GDALGetDataTypeSize(getDataType())>>3);
-        std::size_t maxindex=(index+maxCol);//*(GDALGetDataTypeSize(getDataType())>>3);
+        std::size_t minindex=(index+minCol);
+        std::size_t maxindex=(index+maxCol);
 
         for(index=minindex;index<=maxindex;++index,++bufit){
           double dvalue=0;

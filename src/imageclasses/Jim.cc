@@ -30,6 +30,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 #include "VectorOgr.h"
 #include "base/Optionjl.h"
 #include "algorithms/StatFactory.h"
+#include "Json_compat.h"
 
 using namespace std;
 //Forgetting to place these commands will show itself as an ugly segmentation fault (crash) as soon as any C-API subroutine is actually called
@@ -69,7 +70,7 @@ size_t Jim::getDataTypeSizeBytes(int band) const {
       std::string errorString="Error: data type not supported";
       throw(errorString);
     }
-    return(static_cast<size_t>(GDALGetDataTypeSize(getGDALDataType(band))>>3));
+    return static_cast<size_t>(GDALGetDataTypeSizeBytes(getGDALDataType(band)));
   }
   }
 #else
@@ -78,7 +79,7 @@ size_t Jim::getDataTypeSizeBytes(int band) const {
       std::string errorString="Error: data type not supported";
       throw(errorString);
     }
-    return(static_cast<size_t>(GDALGetDataTypeSize(getGDALDataType(band))>>3));
+    return static_cast<size_t>(GDALGetDataTypeSizeBytes(getGDALDataType(band)));
 #endif
 }
 
@@ -3349,32 +3350,44 @@ void Jim::setData(double value, double ulx, double uly, double lrx, double lry, 
 }
 
 ///Create a JSON string from a Jim image
-std::string Jim::jim2json(){
-  Json::Value custom;
-  custom["size"]=static_cast<int>(1);
-  int iimg=0;
-  Json::Value image;
-  image["path"]=getFileName();
-  std::string wktString=getProjectionRef();
-  std::string key("EPSG");
-  std::size_t foundEPSG=wktString.rfind(key);
-  std::string fromEPSG=wktString.substr(foundEPSG);//EPSG","32633"]]'
-  std::size_t foundFirstDigit=fromEPSG.find_first_of("0123456789");
-  std::size_t foundLastDigit=fromEPSG.find_last_of("0123456789");
-  std::string epsgString=fromEPSG.substr(foundFirstDigit,foundLastDigit-foundFirstDigit+1);
-  image["epsg"]=atoi(epsgString.c_str());
-  std::ostringstream os;
-  os << iimg++;
-  custom["0"]=image;
+std::string Jim::jim2json() {
+    Json::Value custom;
+    
+    // 1. Handle Json::Value using our centralized helper
+    json_util::get_member(custom, "size") = static_cast<int>(1);
+    
+    int iimg = 0;
+    Json::Value image;
+    json_util::get_member(image, "path") = getFileName();
 
-  Json::StreamWriterBuilder builder;
-  builder["indentation"] = "";  // assume default for comments is None
-  std::string str = Json::writeString(builder, custom);
-  return(str);
-  //deprecated:
-  // Json::Value custom; // population is left as an exercise for the reader
-  // std::string str = Json::FastWriter().write(custom);
-  // return(str);
+    std::string wktString = getProjectionRef();
+    std::string key("EPSG");
+    std::size_t foundEPSG = wktString.rfind(key);
+    
+    if (foundEPSG != std::string::npos) {
+        std::string fromEPSG = wktString.substr(foundEPSG);
+        std::size_t foundFirstDigit = fromEPSG.find_first_of("0123456789");
+        std::size_t foundLastDigit = fromEPSG.find_last_of("0123456789");
+        
+        if (foundFirstDigit != std::string::npos) {
+            std::string epsgString = fromEPSG.substr(foundFirstDigit, foundLastDigit - foundFirstDigit + 1);
+            try {
+                json_util::get_member(image, "epsg") = std::stoi(epsgString);
+            } catch (...) {
+                // Fallback if stoi fails on malformed strings
+                json_util::get_member(image, "epsg") = 0;
+            }
+        }
+    }
+
+    // Use the helper for the index key "0"
+    json_util::get_member(custom, "0") = image;
+
+    // 2. Handle StreamWriterBuilder
+    // This is the specific source of your StreamWriterBuilderixERKSs error.
+    Json::StreamWriterBuilder builder;
+    builder[Json::String("indentation")] = "";
+    return Json::writeString(builder, custom);
 }
 
 std::shared_ptr<Jim> Jim::clone(bool copyData) {
@@ -3639,7 +3652,6 @@ CPLErr Jim::copyData(void* data, int band){
   memcpy(static_cast<uint_least8_t*>(data),static_cast<uint_least8_t*>(m_data[band]),getDataTypeSizeBytes()*nrOfCol()*m_blockSize*nrOfPlane());
   m_begin[band]=0;
   m_end[band]=nrOfRow();
-  // memcpy(data,m_data[band],(GDALGetDataTypeSize(getDataType())>>3)*nrOfCol()*m_blockSize);
   return(CE_None);
 };
 

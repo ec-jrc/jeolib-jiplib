@@ -30,8 +30,6 @@ set(JIPLIB_VERSION "${JIPLIB_VERSION_MAJOR}.${JIPLIB_VERSION_MINOR}.${JIPLIB_VER
 set(JIPLIB_SOVERSION "${JIPLIB_VERSION_MAJOR}")
 
 # --- 2. Build Settings ---
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(BUILD_SHARED_LIBS "Build with shared library" ON)
 
 # 1. Locate MIALLIB headers (as siblings in the pyjeo build)
@@ -349,7 +347,8 @@ find_package(Boost REQUIRED CONFIG COMPONENTS filesystem system serialization)
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
 find_package(GDAL 3.00 REQUIRED)
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(JSONCPP REQUIRED jsoncpp)
+#test
+#pkg_check_modules(JSONCPP REQUIRED jsoncpp)
 find_package(OpenMP REQUIRED)
 
 message(STATUS "Searching (1) for FANN in: ${CMAKE_MODULE_PATH}")
@@ -416,15 +415,10 @@ option (BUILD_SHARED_LIBS "Build with shared library" ON)
 
 # Platform and compiler specific settings
 
-INCLUDE(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-long-long")
-  message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has C++11 support.")
-else(COMPILER_SUPPORTS_CXX11)
-  message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-endif()
+# 1. Elevate to C++17 to match your Conda dependencies
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 ########## BUILDING INSTALLLER ##########
 # build a CPack driven installer package
@@ -560,13 +554,21 @@ if(GSL_FOUND)
   message(STATUS "Found GSL: ${GSL_LIBRARIES}")
 endif()
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(JSONCPP jsoncpp)
-if(JSONCPP_FOUND)
-  message(STATUS "JSONCPP package found: OK")
-else(JSONCPP_FOUND)
-  message(STATUS "Warning: JSONCPP package not found!")
-endif(JSONCPP_FOUND)
+#Find the module and create a modern target
+pkg_check_modules(JSONCPP REQUIRED IMPORTED_TARGET jsoncpp)
+#Link against the target (it handles includes automatically!)
+#test
+#target_link_libraries(jiplib PRIVATE PkgConfig::JSONCPP)
+#No need for target_include_directories!
+# The target PkgConfig::JSONCPP already knows where its headers are.
+#test
+#find_package(PkgConfig REQUIRED)
+#pkg_check_modules(JSONCPP jsoncpp)
+#if(JSONCPP_FOUND)
+#  message(STATUS "JSONCPP package found: OK")
+#else(JSONCPP_FOUND)
+#  message(STATUS "Warning: JSONCPP package not found!")
+#endif(JSONCPP_FOUND)
 
 if(PROCESS_IN_PARALLEL)
 	find_package(OpenMP REQUIRED)
@@ -712,6 +714,7 @@ SET(IMGCLASS_H
   ${IMGCLASS_SRC_DIR}/jloperators_lib.h
   ${IMGCLASS_SRC_DIR}/jlextractimg_lib.h
   ${IMGCLASS_SRC_DIR}/jldem_lib.h
+  ${IMGCLASS_SRC_DIR}/Json_compat.h
   )
 
 SET(IMGCLASS_CC
@@ -742,6 +745,7 @@ SET(IMGCLASS_CC
   ${IMGCLASS_SRC_DIR}/jlwarp_lib.cc
   ${IMGCLASS_SRC_DIR}/jloperators_lib.cc
   ${IMGCLASS_SRC_DIR}/jldem_lib.cc
+  ${IMGCLASS_SRC_DIR}/Json_compat.cc
   )
 
 if(BUILD_WITH_FANN)
@@ -890,7 +894,8 @@ TARGET_COMPILE_DEFINITIONS(${JIPLIB_LIB_NAME} PUBLIC BOOST_ALL_NO_LIB)
 
 TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${GDAL_INCLUDE_DIRS})
 TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${GSL_INCLUDE_DIRS})
-TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${JSONCPP_INCLUDE_DIRS})
+#test
+#TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${JSONCPP_INCLUDE_DIRS})
 TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC "${PROJECT_BINARY_DIR}")# needed for config_jiplib.h
 TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC "${PROJECT_BINARY_DIR}/src")#  this is where sources will go
 TARGET_INCLUDE_DIRECTORIES(${JIPLIB_LIB_NAME} PUBLIC ${FANN_INCLUDE_DIRS})
@@ -902,6 +907,8 @@ SET_TARGET_PROPERTIES(${JIPLIB_LIB_NAME}
   VERSION ${JIPLIB_VERSION}
 )
 
+get_target_property(JSON_LOC PkgConfig::JSONCPP INTERFACE_LINK_LIBRARIES)
+message(STATUS "JSONCPP Target Location: ${JSON_LOC}")
 #test
 target_link_libraries(${JIPLIB_LIB_NAME}
     PUBLIC
@@ -911,8 +918,7 @@ target_link_libraries(${JIPLIB_LIB_NAME}
         Python::Module
         GDAL::GDAL
         GSL::gsl
-	#jsoncpp_lib
-	jsoncpp
+	PkgConfig::JSONCPP
         OpenMP::OpenMP_CXX
         Boost::filesystem
         Boost::system
@@ -932,6 +938,10 @@ target_link_libraries(${JIPLIB_LIB_NAME}
 target_include_directories(jiplib PUBLIC
  ${MIALLIB_INCLUDE_DIR}
  )
+
+message(STATUS "JSONCPP LIBRARIES: ${JSONCPP_LIBRARIES}")
+message(STATUS "JSONCPP INCLUDE DIRS: ${JSONCPP_INCLUDE_DIRS}")
+
 #target_link_libraries(
 #  ${JIPLIB_LIB_NAME}
 #  PRIVATE

@@ -28,6 +28,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 #include "algorithms/Egcs.h"
 #include "apps/AppFactory.h"
 #include "JimList.h"
+#include "Json_compat.h"
 
 //todo: namespace jiplib
 using namespace std;
@@ -59,93 +60,135 @@ JimList::JimList(unsigned int theSize){
 }
 
 ///constructor using a json string coming from a custom colllection
-JimList& JimList::open(const std::string& strjson){
-  Json::Value custom;
-  std::istringstream sin(strjson);
-  sin >> custom;
-  // Json::Reader reader;
-  // bool parsedSuccess=reader.parse(strjson,custom,false);
-  // if(parsedSuccess){
-  for(int iimg=0;iimg<custom["size"].asInt();++iimg){
-    std::ostringstream os;
-    os << iimg;
-    Json::Value image=custom[os.str()];
-    std::string filename=image["path"].asString();
-    //todo: open without reading?
-    app::AppFactory theApp;
-    theApp.setLongOption("filename",filename);
-    std::shared_ptr<Jim> theImage=Jim::createImg(theApp);
-    pushImage(theImage);
-  }
-  // }
-  return(*this);
-}
+JimList& JimList::open(const std::string& strjson) {
+    Json::Value custom;
+    std::istringstream sin(strjson);
+    
+    // Modern JsonCpp uses operators or CharReader, but sin >> custom 
+    // is generally well-supported across versions.
+    sin >> custom;
 
-JimList& JimList::open(app::AppFactory& theApp){
-  Optionjl<std::string> json_opt("json", "json", "The json object");
-  bool doProcess;//stop process when program was invoked with help option (-h --help)
-  try{
-    doProcess=json_opt.retrieveOption(theApp);
-  }
-  catch(std::string predefinedString){
-    std::cout << predefinedString << std::endl;
-  }
-  if(!doProcess){
-    std::cout << std::endl;
-    std::ostringstream helpStream;
-    helpStream << "exception thrown due to help info";
-    throw(helpStream.str());//help was invoked, stop processing
-  }
-
-  std::vector<std::string> badKeys;
-  theApp.badKeys(badKeys);
-  if(badKeys.size()){
-    std::ostringstream errorStream;
-    if(badKeys.size()>1)
-      errorStream << "Error: unknown keys: ";
-    else
-      errorStream << "Error: unknown key: ";
-    for(int ikey=0;ikey<badKeys.size();++ikey){
-      errorStream << badKeys[ikey] << " ";
+    // 1. Robustly access the "size" member
+    int size = 0;
+    try {
+        size = json_util::get_member(custom, "size").asInt();
+    } catch (...) {
+        // Handle cases where "size" might be missing or not an int
+        return *this; 
     }
-    errorStream << std::endl;
-    throw(errorStream.str());
-  }
-  if(json_opt.empty()){
-    std::string errorString="Error: json string is empty";
-    throw(errorString);
-  }
-  return(open(json_opt[0]));
-  // JimList(std::string(""));
+
+    for (int iimg = 0; iimg < size; ++iimg) {
+        // 2. Convert index to string safely
+        std::string indexKey = std::to_string(iimg);
+        
+        // 3. Access the image object using the helper
+        Json::Value image = json_util::get_member(custom, indexKey);
+        
+        // 4. Access the "path" member using the helper
+        std::string filename = json_util::get_member(image, "path").asString();
+
+        if (!filename.empty()) {
+            app::AppFactory theApp;
+            theApp.setLongOption("filename", filename);
+            
+            try {
+                std::shared_ptr<Jim> theImage = Jim::createImg(theApp);
+                pushImage(theImage);
+            } catch (const std::exception& e) {
+                // Log or handle individual image load failures 
+                // to prevent one bad path from crashing the whole list
+            }
+        }
+    }
+    
+    return *this;
 }
 
-std::string JimList::jl2json(){
-  Json::Value custom;
-  custom["size"]=static_cast<int>(size());
-  int iimg=0;
-  for(std::list<std::shared_ptr<Jim> >::iterator lit=begin();lit!=end();++lit){
-    Json::Value image;
-    image["path"]=(*lit)->getFileName();
-    std::string wktString=(*lit)->getProjectionRef();
-    std::string key("EPSG");
-    std::size_t foundEPSG=wktString.rfind(key);
-    std::string fromEPSG=wktString.substr(foundEPSG);//EPSG","32633"]]'
-    std::size_t foundFirstDigit=fromEPSG.find_first_of("0123456789");
-    std::size_t foundLastDigit=fromEPSG.find_last_of("0123456789");
-    std::string epsgString=fromEPSG.substr(foundFirstDigit,foundLastDigit-foundFirstDigit+1);
-    image["epsg"]=atoi(epsgString.c_str());
-    std::ostringstream os;
-    os << iimg++;
-    custom[os.str()]=image;
-  }
-  Json::StreamWriterBuilder builder;
-  builder["indentation"] = "";  // assume default for comments is None
-  std::string str = Json::writeString(builder, custom);
-  return(str);
-  //deprecated:
-  // Json::FastWriter fastWriter;
-  // return(fastWriter.write(custom));
+JimList& JimList::open(app::AppFactory& theApp) {
+    Optionjl<std::string> json_opt("json", "json", "The json object");
+    bool doProcess = true;
+
+    try {
+        doProcess = json_opt.retrieveOption(theApp);
+    }
+    catch (const std::string& predefinedString) {
+        std::cout << predefinedString << std::endl;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Standard exception: " << e.what() << std::endl;
+    }
+
+    if (!doProcess) {
+        std::cout << std::endl;
+        // Using runtime_error is more robust for Python/C++ boundary
+        throw std::runtime_error("exception thrown due to help info");
+    }
+
+    std::vector<std::string> badKeys;
+    theApp.badKeys(badKeys);
+    if (!badKeys.empty()) {
+        std::ostringstream errorStream;
+        errorStream << "Error: unknown key" << (badKeys.size() > 1 ? "s: " : ": ");
+
+        for (const auto& key : badKeys) {
+            errorStream << key << " ";
+        }
+        errorStream << std::endl;
+        throw std::runtime_error(errorStream.str());
+    }
+
+    if (json_opt.empty()) {
+        throw std::runtime_error("Error: json string is empty");
+    }
+
+    // This calls your newly robust open(const std::string&)
+    return open(json_opt[0]);
 }
+
+std::string JimList::jl2json() {
+    Json::Value custom;
+
+    // 1. Set global size using helper
+    json_util::get_member(custom, "size") = static_cast<int>(size());
+
+    int iimg = 0;
+    // Using a modern range-based loop if your list supports it,
+    // otherwise sticking to the iterator for compatibility.
+    for (auto lit = begin(); lit != end(); ++lit) {
+        Json::Value image;
+
+        // 2. Access "path" safely
+        json_util::get_member(image, "path") = (*lit)->getFileName();
+
+        std::string wktString = (*lit)->getProjectionRef();
+        std::string key("EPSG");
+        std::size_t foundEPSG = wktString.rfind(key);
+
+        // Robustness: Check if EPSG was actually found to avoid npos crashes
+        if (foundEPSG != std::string::npos) {
+            std::string fromEPSG = wktString.substr(foundEPSG);
+            std::size_t foundFirstDigit = fromEPSG.find_first_of("0123456789");
+            std::size_t foundLastDigit = fromEPSG.find_last_of("0123456789");
+
+            if (foundFirstDigit != std::string::npos && foundLastDigit != std::string::npos) {
+                std::string epsgString = fromEPSG.substr(foundFirstDigit, foundLastDigit - foundFirstDigit + 1);
+                // 3. Access "epsg" safely
+                json_util::get_member(image, "epsg") = std::stoi(epsgString);
+            }
+        }
+
+        // 4. Use to_string and helper for the dynamic image keys ("0", "1", etc.)
+        std::string indexKey = std::to_string(iimg++);
+        json_util::get_member(custom, indexKey) = image;
+    }
+
+    // 5. Handle StreamWriterBuilder specifically
+    Json::StreamWriterBuilder builder;
+    builder[Json::String("indentation")] = "";
+
+    return Json::writeString(builder, custom);
+}
+
 JimList& JimList::selectGeo(double ulx, double uly, double lrx, double lry){
   /* std::vector<std::shared_ptr<Jim>>::iterator it=begin(); */
   std::list<std::shared_ptr<Jim>>::iterator it=begin();

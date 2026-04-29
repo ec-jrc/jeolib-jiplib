@@ -21,6 +21,10 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef _JLEXTRACTIMG_LIB_H_
 #define _JLEXTRACTIMG_LIB_H_
 
+#include <random>
+#if JIPLIB_PROCESS_IN_PARALLEL == 1
+    #include <omp.h>
+#endif
 #include "imageclasses/Jim.h"
 #include "imageclasses/VectorOgr.h"
 #include "apps/AppFactory.h"
@@ -276,23 +280,42 @@ template<typename T> void Jim::extractImg_t(Jim& classReader, VectorOgr& ogrWrit
     if(threshold_opt[0]!=100){
       //todo (optimization): if selection is small, better select random sample than shuffle all...
 #if JIPLIB_PROCESS_IN_PARALLEL == 1
-#pragma omp parallel for
-#else
-#endif
-      for(unsigned short iclass=0;iclass<nclass;++iclass){
-        if(verbose_opt[0]){
-          if(nvalid[iclass]){
-            std::cout << "nvalid[" << iclass << "]: " << nvalid[iclass] << std::endl;
-            std::cout << "ninvalid[" << iclass << "]: " << ninvalid[iclass] << std::endl;
-          }
-        }
-        if(sample[iclass].size()){
+#pragma omp parallel
+      {
+        // Each thread gets its own generator instance, seeded uniquely
+        // We use thread ID to ensure each thread shuffles differently
+        std::random_device rd;
+        std::mt19937 g(rd() ^ omp_get_thread_num()); 
+    
+        #pragma omp for
+        for(unsigned short iclass=0; iclass<nclass; ++iclass) {
           if(verbose_opt[0]){
-            std::cout << "random shuffle class " << iclass << " with size " << sample[iclass].size() << std::endl;
+            if(nvalid[iclass]){
+              std::cout << "nvalid[" << iclass << "]: " << nvalid[iclass] << std::endl;
+              std::cout << "ninvalid[" << iclass << "]: " << ninvalid[iclass] << std::endl;
+            }
           }
-          std::random_shuffle(sample[iclass].begin(), sample[iclass].end());
+          if(sample[iclass].size()) {
+            std::shuffle(sample[iclass].begin(), sample[iclass].end(), g);
+          }
         }
       }
+#else
+      // Serial fallback
+      std::random_device rd;
+      std::mt19937 g(rd());
+      for(unsigned short iclass=0; iclass<nclass; ++iclass) {
+          if(verbose_opt[0]){
+            if(nvalid[iclass]){
+              std::cout << "nvalid[" << iclass << "]: " << nvalid[iclass] << std::endl;
+              std::cout << "ninvalid[" << iclass << "]: " << ninvalid[iclass] << std::endl;
+            }
+          }
+          if(sample[iclass].size()) {
+              std::shuffle(sample[iclass].begin(), sample[iclass].end(), g);
+          }
+      }
+#endif
     }
 
     size_t fid=0;//unique field identifier

@@ -924,7 +924,7 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
       for(int inodata=0;inodata<nodata_opt.size();++inodata){
         if(!inodata){
           getImage(0)->GDALSetNoDataValue(nodata_opt[0],band_opt[0]);//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
-          getImage(1)->GDALSetNoDataValue(nodata_opt[0]),band_opt[1];//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
+          getImage(1)->GDALSetNoDataValue(nodata_opt[0],band_opt[1]);//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
         }
         getImage(0)->pushNoDataValue(nodata_opt[inodata]);
         getImage(1)->pushNoDataValue(nodata_opt[inodata]);
@@ -971,7 +971,7 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
       for(int inodata=0;inodata<nodata_opt.size();++inodata){
         if(!inodata){
           getImage(0)->GDALSetNoDataValue(nodata_opt[0],band_opt[0]);//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
-          getImage(1)->GDALSetNoDataValue(nodata_opt[0]),band_opt[1];//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
+          getImage(1)->GDALSetNoDataValue(nodata_opt[0],band_opt[1]);//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
         }
         getImage(0)->pushNoDataValue(nodata_opt[inodata]);
         getImage(1)->pushNoDataValue(nodata_opt[inodata]);
@@ -1018,7 +1018,7 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
       for(int inodata=0;inodata<nodata_opt.size();++inodata){
         if(!inodata){
           getImage(0)->GDALSetNoDataValue(nodata_opt[0],band_opt[0]);//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
-          getImage(1)->GDALSetNoDataValue(nodata_opt[0]),band_opt[1];//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
+          getImage(1)->GDALSetNoDataValue(nodata_opt[0],band_opt[1]);//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
         }
         getImage(0)->pushNoDataValue(nodata_opt[inodata]);
         getImage(1)->pushNoDataValue(nodata_opt[inodata]);
@@ -1065,7 +1065,7 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
       for(int inodata=0;inodata<nodata_opt.size();++inodata){
         if(!inodata){
           getImage(0)->GDALSetNoDataValue(nodata_opt[0],band_opt[0]);//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
-          getImage(1)->GDALSetNoDataValue(nodata_opt[0]),band_opt[1];//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
+          getImage(1)->GDALSetNoDataValue(nodata_opt[0],band_opt[1]);//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
         }
         getImage(0)->pushNoDataValue(nodata_opt[inodata]);
         getImage(1)->pushNoDataValue(nodata_opt[inodata]);
@@ -1104,7 +1104,7 @@ std::multimap<std::string,std::string> JimList::getStats(AppFactory& app){
       for(int inodata=0;inodata<nodata_opt.size();++inodata){
         if(!inodata){
           getImage(0)->GDALSetNoDataValue(nodata_opt[0],band_opt[0]);//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
-          getImage(1)->GDALSetNoDataValue(nodata_opt[0]),band_opt[1];//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
+          getImage(1)->GDALSetNoDataValue(nodata_opt[0],band_opt[1]);//only single no data can be set in GDALRasterBand (used for ComputeStatistics)
         }
         getImage(0)->pushNoDataValue(nodata_opt[inodata]);
         getImage(1)->pushNoDataValue(nodata_opt[inodata]);

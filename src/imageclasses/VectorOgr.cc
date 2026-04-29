@@ -564,7 +564,7 @@ std::shared_ptr<VectorOgr> VectorOgr::intersect(OGRPolygon *pGeom, app::AppFacto
     std::ostringstream errorStream;
     errorStream << "Error: failed to intersect" << std::endl;
     std::cerr << errorStream.str() << std::endl;
-    throw(errorStream);
+    throw(errorStream.str());
   }
   return(ogrWriter);
 }
@@ -575,7 +575,7 @@ std::shared_ptr<VectorOgr> VectorOgr::intersect(const Jim& aJim, app::AppFactory
     std::ostringstream errorStream;
     errorStream << "Error: failed to intersect" << std::endl;
     std::cerr << errorStream.str() << std::endl;
-    throw(errorStream);
+    throw(errorStream.str());
   }
   return(ogrWriter);
 }
