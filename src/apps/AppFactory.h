@@ -32,8 +32,8 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 #include "gdal_priv.h"
 #include "base/typeconversion.h"
 //#include "config.h"
-#include "json/value.h"
-#include "json/json.h"
+#include <json/value.h>
+#include <json/json.h>
 
 namespace app
 {
