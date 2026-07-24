@@ -475,7 +475,7 @@ void VectorOgr::close(void)
 }
 
 ///Create a layer
-OGRErr VectorOgr::pushLayer(const std::string& layername, OGRSpatialReference* theSRS, const OGRwkbGeometryType& geometryType, char** papszOptions){
+OGRErr VectorOgr::pushLayer(const std::string& layername, const OGRSpatialReference* theSRS, const OGRwkbGeometryType& geometryType, char** papszOptions){
   if( !m_gds->TestCapability( ODsCCreateLayer ) ){
     // std::ostringstream errorStream;
     // errorStream << "Error: Test capability to create layer " << layername << " failed (1)" << std::endl;
@@ -485,7 +485,12 @@ OGRErr VectorOgr::pushLayer(const std::string& layername, OGRSpatialReference* t
     throw(errorString);
   }
   //if no constraints on the types geometry to be written: use wkbUnknown
-  m_layer.push_back(m_gds->CreateLayer(layername.c_str(), theSRS, geometryType ,papszOptions));
+  OGRSpatialReference* srsCopy = theSRS ? theSRS->Clone() : nullptr;
+  m_layer.push_back(m_gds->CreateLayer(layername.c_str(), srsCopy, geometryType, papszOptions));
+  if (srsCopy) {
+    srsCopy->Release();
+  }
+
   m_features.resize(m_layer.size());
   if(!m_layer.back()){
     std::string errorString="Open failed";

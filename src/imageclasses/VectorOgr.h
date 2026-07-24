@@ -207,7 +207,7 @@ class VectorOgr : public std::enable_shared_from_this<VectorOgr>
   ///Get the filename of this dataset
   std::string getFileName() const {return m_filename;};
   ///Create a layer
-  OGRErr pushLayer(const std::string& layername, OGRSpatialReference* theSRS, const OGRwkbGeometryType& geometryType=wkbUnknown, char** papszOptions=NULL);
+  OGRErr pushLayer(const std::string& layername, const OGRSpatialReference* theSRS, const OGRwkbGeometryType& geometryType=wkbUnknown, char** papszOptions=NULL);
   ///Create a layer
   OGRErr pushLayer(const std::string& layername, const std::string& theProjection=std::string(), const OGRwkbGeometryType& geometryType=wkbUnknown, char** papszOptions=NULL);
   ///Create a layer
