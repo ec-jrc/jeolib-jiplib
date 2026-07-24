@@ -41,7 +41,7 @@ if(TARGET miallib)
     set(MIALLIB_TARGET miallib)
 else()
     # 2. If building jiplib STANDALONE, try to find it on the system
-    find_package(MIALLIB 1.2.0 QUIET)
+    find_package(MIALLIB 1.2.0 QUIET NO_DEFAULT_PATH)
 
     message(STATUS "Found MIALLIB_LIBRARY: ${MIALLIB_LIBRARIES}")
     get_cmake_property(_vars VARIABLES)
