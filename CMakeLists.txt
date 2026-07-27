@@ -398,22 +398,27 @@ SET(CLASSIF 0 CACHE STRING "set a variable that can be used in Jim.cc")
 SET(ODOITHIN 0 CACHE STRING "set a variable that can be used in Jim.cc")
 SET(MCISRG 1 CACHE STRING "set a variable that can be used in Jim.cc")
 
-SET(BUILD_WITH_LIBLAS FALSE CACHE BOOL "Choose if jiplib is to be built with liblas")
-SET(BUILD_WITH_FANN TRUE CACHE BOOL "Choose if jiplib is to be built with fann")
-SET(BUILD_WITH_PYTHON TRUE CACHE BOOL "Choose if jiplib is to be built with PYTHON support")
-SET(PROCESS_IN_PARALLEL TRUE CACHE BOOL "Choose if jiplib should be run in parallel")
+option(BUILD_WITH_LIBLAS "Choose if jiplib is to be built with liblas" OFF)
+option(BUILD_WITH_FANN "Choose if jiplib is to be built with fann" ON)
+option(BUILD_WITH_PYTHON "Choose if jiplib is to be built with PYTHON support" ON)
+option(PROCESS_IN_PARALLEL "Choose if jiplib should be run in parallel" ON)
+
 #from https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
 #By default if you don't change any RPATH related settings, CMake will
 # link the executables and shared libraries with full RPATH to all used
 # libraries in the build tree. When installing, it will clear the RPATH of
 # these targets so they are installed with an empty RPATH
-set_target_properties(jiplib PROPERTIES INSTALL_RPATH "$ORIGIN")
+if(TARGET jiplib)
+    set_target_properties(jiplib PROPERTIES 
+        INSTALL_RPATH "$ORIGIN"
+        BUILD_WITH_INSTALL_RPATH TRUE
+    )
+endif()
 
-SET(PROJECT_INCLUDE_DIR include/jiplib)
-SET(PROJECT_TEST_DIR test)
+set(PROJECT_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/jiplib")
+set(PROJECT_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/test")
 
 SET(CMAKE_COLOR_MAKEFILE ON)
-
 SET(MIAL_BOOL 1)
 
 option (BUILD_SHARED_LIBS "Build with shared library" ON)
