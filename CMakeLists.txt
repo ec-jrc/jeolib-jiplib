@@ -25,11 +25,12 @@ project(jiplib LANGUAGES CXX)
 # --- 1. Project Metadata ---
 set(JIPLIB_VERSION_MAJOR 1)
 set(JIPLIB_VERSION_MINOR 2)
-set(JIPLIB_VERSION_PATCH 0)
+set(JIPLIB_VERSION_PATCH 1)
 set(JIPLIB_VERSION "${JIPLIB_VERSION_MAJOR}.${JIPLIB_VERSION_MINOR}.${JIPLIB_VERSION_PATCH}")
 set(JIPLIB_SOVERSION "${JIPLIB_VERSION_MAJOR}")
 
 # --- 2. Build Settings ---
+option(STANDALONE_BUILD "Build jiplib as a standalone system library" OFF)
 option(BUILD_SHARED_LIBS "Build with shared library" ON)
 
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
@@ -40,8 +41,11 @@ if(TARGET miallib)
     set(MIALLIB_FOUND TRUE)
     set(MIALLIB_TARGET miallib)
 else()
-    # 2. If building jiplib STANDALONE, try to find it on the system
-    find_package(MIALLIB 1.2.0 QUIET NO_DEFAULT_PATH)
+    if(STANDALONE_BUILD)
+        find_package(MIALLIB 1.2.1 REQUIRED)
+    else()
+        find_package(MIALLIB 1.2.1 QUIET NO_DEFAULT_PATH)
+    endif()
 
     message(STATUS "Found MIALLIB_LIBRARY: ${MIALLIB_LIBRARIES}")
     get_cmake_property(_vars VARIABLES)
@@ -351,7 +355,7 @@ if(NOT JIMLIST_CC_CONTENT MATCHES "${JIMLIST_LINE}")
 endif()
 
 message(STATUS "****** Jim.cc and JimList.cc include lines verified.")
-find_package(Boost REQUIRED CONFIG COMPONENTS filesystem system serialization)
+find_package(Boost REQUIRED CONFIG COMPONENTS filesystem serialization)
 find_package(GDAL 3.00 REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(OpenMP REQUIRED)
@@ -893,7 +897,6 @@ target_link_libraries(${JIPLIB_LIB_NAME}
 	PkgConfig::JSONCPP
         OpenMP::OpenMP_CXX
         Boost::filesystem
-        Boost::system
         Boost::serialization
 )
 
@@ -1016,3 +1019,55 @@ set_target_properties(jiplib PROPERTIES OUTPUT_NAME "jiplib")
 include(GNUInstallDirs)
 
 set_target_properties(jiplib_python PROPERTIES INSTALL_RPATH "$ORIGIN")
+
+if(STANDALONE_BUILD)
+  INSTALL(TARGETS ${JIPLIB_LIB_NAME}
+    LIBRARY
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    COMPONENT libraries
+    PUBLIC_HEADER
+    DESTINATION include/${JIPLIB_LIB_NAME}
+    COMPONENT headers
+  )
+  
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/jiplib.pc
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+  )
+  
+  if(BUILD_WITH_PYTHON)
+    SET(PYTHON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/python)
+    SET(JIPLIB_INIT ${PYTHON_SOURCE_DIR}/__init__.py)
+  
+    if(CREATE_WHEEL)
+      MESSAGE(STATUS "creating python wheel: ${CREATE_WHEEL}")
+      MESSAGE(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
+      MESSAGE(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
+      MESSAGE(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+      MESSAGE(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
+      MESSAGE(STATUS "CMAKE_INSTALL_LIBDIR: ${CMAKE_INSTALL_LIBDIR}")
+      MESSAGE(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+      SET(WHEEL_DIR ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
+  
+      # add_custom_command(TARGET ${JIPLIB_LIB_NAME}
+      add_custom_command(TARGET jiplib_python
+        POST_BUILD
+        COMMAND mkdir -p ${WHEEL_DIR}
+        COMMAND cp ${JIPLIB_INIT} ${WHEEL_DIR}
+        COMMAND cp ${PYTHON_SOURCE_DIR}/setup.py ${CMAKE_CURRENT_BINARY_DIR}
+        COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/README.md ${WHEEL_DIR}
+        COMMAND cp ${CMAKE_BINARY_DIR}/_${JIPLIB_LIB_NAME}.so ${WHEEL_DIR}
+        COMMAND cp ${CMAKE_BINARY_DIR}/lib${JIPLIB_LIB_NAME}.so.${JIPLIB_VERSION_MAJOR} ${WHEEL_DIR}
+        COMMAND cp ${MIALLIB_LIBRARIES}.${MIALLIB_VERSION_MAJOR} ${WHEEL_DIR}
+        COMMAND cp ${CMAKE_BINARY_DIR}/${JIPLIB_LIB_NAME}.py ${WHEEL_DIR}
+        COMMAND cp ${PROJECT_SOURCE_DIR}/README.md ${WHEEL_DIR}
+        COMMAND ${Python_EXECUTABLE} -m pip wheel ${CMAKE_CURRENT_BINARY_DIR}
+        COMMAND rm -rf ${WHEEL_DIR}
+      )
+    endif(CREATE_WHEEL)
+  endif(BUILD_WITH_PYTHON)
+  
+  INSTALL(CODE
+    "execute_process(COMMAND ${Python_EXECUTABLE} -m pip install ${_pip_args} ${CMAKE_CURRENT_BINARY_DIR}/jiplib-${JIPLIB_VERSION}-py3-none-any.whl --force-reinstall)"
+    COMPONENT wheels
+  )    
+endif()
