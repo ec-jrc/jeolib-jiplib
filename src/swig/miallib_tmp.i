@@ -39,8 +39,8 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
     for (i = 0; i < dim; i++) {
       PyObject *o = PySequence_GetItem($input,i);
       // https://docs.python.org/3.5/c-api/long.html
-      if (PyInt_Check(o)) {
-	$1[i] = (int)PyInt_AsLong(o);
+      if (PyLong_Check(o)) {
+	$1[i] = (int)PyLong_AsLong(o);
       }
       else {
 	PyErr_SetString(PyExc_ValueError,"Sequence elements must be integers");
