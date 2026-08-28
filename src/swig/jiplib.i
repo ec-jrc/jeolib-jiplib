@@ -90,11 +90,11 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
     while (PyDict_Next($input, &ppos, &pKey, &pValue)) {
       std::string theKey;
       std::string theValue;
-      if(PyString_Check(pKey)){
-        theKey=PyString_AsString(pKey);
+      if(PyBytes_Check(pKey)){
+        theKey=PyBytes_AsString(pKey);
       }
       else if(PyUnicode_Check(pKey)){
-        theKey=PyString_AsString(PyUnicode_AsUTF8String(pKey));
+        theKey=PyBytes_AsString(PyUnicode_AsUTF8String(pKey));
       }
       else{
         PyErr_SetString(PyExc_TypeError,"Expected a string.");
@@ -106,16 +106,16 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
         for(Py_ssize_t i=0;i<PyList_Size(pValue);++i){
           PyObject *rValue;
           rValue=PyList_GetItem(pValue,i);
-          if (PyString_Check(rValue))
-            theValue=PyString_AsString(rValue);
+          if (PyBytes_Check(rValue))
+            theValue=PyBytes_AsString(rValue);
           else if (PyUnicode_Check(rValue))
-            theValue = PyString_AsString(PyUnicode_AsUTF8String(rValue));
+            theValue = PyBytes_AsString(PyUnicode_AsUTF8String(rValue));
           else if(rValue != Py_None){
             PyObject *tmp_obj = PyObject_Repr(rValue);
-            if (PyString_Check(tmp_obj))
-              theValue=PyString_AsString(tmp_obj);
+            if (PyBytes_Check(tmp_obj))
+              theValue=PyBytes_AsString(tmp_obj);
             else if (PyUnicode_Check(tmp_obj))
-              theValue=PyString_AsString(PyUnicode_AsUTF8String(tmp_obj));
+              theValue=PyBytes_AsString(PyUnicode_AsUTF8String(tmp_obj));
           }
           else{
             PyErr_SetString(PyExc_TypeError,"Expected a string.");
@@ -125,12 +125,12 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
         }
         continue;
       }
-      else if(PyString_Check(pValue)){
-        theValue=PyString_AsString(pValue);
+      else if(PyBytes_Check(pValue)){
+        theValue=PyBytes_AsString(pValue);
         $1->pushLongOption(theKey,theValue);
       }
       else if (PyUnicode_Check(pValue)){
-        theValue = PyString_AsString(PyUnicode_AsUTF8String(pValue));
+        theValue = PyBytes_AsString(PyUnicode_AsUTF8String(pValue));
         $1->pushLongOption(theKey,theValue);
       }
       else if(PyBool_Check(pValue)){
@@ -143,10 +143,10 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
       }
       else if(pValue != Py_None){
         PyObject *tmp_obj = PyObject_Repr(pValue);
-        if (PyString_Check(tmp_obj))
-          theValue=PyString_AsString(tmp_obj);
+        if (PyBytes_Check(tmp_obj))
+          theValue=PyBytes_AsString(tmp_obj);
         else if (PyUnicode_Check(tmp_obj))
-          theValue=PyString_AsString(PyUnicode_AsUTF8String(tmp_obj));
+          theValue=PyBytes_AsString(PyUnicode_AsUTF8String(tmp_obj));
         $1->pushLongOption(theKey,theValue);
       }
     }
@@ -411,7 +411,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
  }
 
 %typemap(argout) unsigned long int* ofs{
-  %append_output(PyInt_FromLong(*$1));
+  %append_output(PyLong_FromLong(*$1));
  }
 
 %typemap(in) double* gt(double temp[6]){
@@ -468,7 +468,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
   pyList=PyList_New(n);
   for (i=0; i<n; i++) {
     std::string theField=(*$1).at(i);
-    PyList_SET_ITEM(pyList, i, PyString_FromString(theField.c_str()));
+    PyList_SET_ITEM(pyList, i, PyUnicode_FromString(theField.c_str()));
   }
   $result = pyList;
 }
@@ -649,11 +649,11 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
           PyList_Append(lh,PyFloat_FromDouble(histValue));
         }
         std::string keyBin="bin";
-        PyDict_SetItem(d, PyString_FromString(keyBin.c_str()), lb);
-        PyDict_SetItem(d, PyString_FromString(key.c_str()), lh);
+        PyDict_SetItem(d, PyUnicode_FromString(keyBin.c_str()), lb);
+        PyDict_SetItem(d, PyUnicode_FromString(key.c_str()), lh);
       }
       else if(val.find("[")==std::string::npos)
-          PyDict_SetItem(d, PyString_FromString(key.c_str()), PyFloat_FromDouble(std::stod(val.c_str())));
+          PyDict_SetItem(d, PyUnicode_FromString(key.c_str()), PyFloat_FromDouble(std::stod(val.c_str())));
       else{
         PyObject *lb = PyList_New(0);
         val.erase(std::remove(val.begin(), val.end(), '['), val.end());
@@ -667,7 +667,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
           if (ss.peek() == ',')
             ss.ignore();
         }
-        PyDict_SetItem(d, PyString_FromString(key.c_str()), lb);
+        PyDict_SetItem(d, PyUnicode_FromString(key.c_str()), lb);
       }
       ++mit;
     }
@@ -676,16 +676,16 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 /* } */
 
 /* %typemap(out) std::string getUniquePixels { */
-/*   $result=PyString_FromString($1.c_str()); */
+/*   $result=PyUnicode_FromString($1.c_str()); */
 /*  } */
 /* %typemap(out) std::map<std::vector<unsigned short>,unsigned short>& getUniquePixels { */
-/*     $result=PyString_FromString("hello"); */
+/*     $result=PyUnicode_FromString("hello"); */
 /* } */
 /* %typemap(out) std::map<unsigned short,unsigned short> getUniquePixels { */
-/*     $result=PyString_FromString("hello"); */
+/*     $result=PyUnicode_FromString("hello"); */
 /* } */
 /* %typemap(out) std::vector<unsigned short> getUniquePixels { */
-/*   $result=PyString_FromString("hello"); */
+/*   $result=PyUnicode_FromString("hello"); */
 /* } */
 //convert map to PyDict
 /* %typemap(out) std::map<std::vector<unsigned short>,std::vector<std::pair<unsigned short,unsigned short> > > getUniquePixels { */
@@ -695,15 +695,15 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 /*     std::vector<unsigned short> pv=mit->first; */
 /*     PyObject *pyv = PyList_New(mit->first.size()); */
 /*     for(int index=0;index<mit->first.size();++index) */
-/*       PyList_SetItem(pyv, index,PyInt_FromLong(mit->first[index])); */
+/*       PyList_SetItem(pyv, index,PyLong_FromLong(mit->first[index])); */
 /*     PyObject *coordinates = PyList_New(mit->second.size()); */
 /*     //construct dictionary as list of values */
 /*     for(int icoord=0;icoord<mit->second.size();++icoord){ */
 /*       PyObject *lc = PyList_New(2); */
 /*       unsigned int xcoord=mit->second[icoord].first; */
 /*       unsigned int ycoord=mit->second[icoord].second; */
-/*       PyList_SetItem(lc,0,PyInt_FromLong(xcoord)); */
-/*       PyList_SetItem(lc,1,PyInt_FromLong(ycoord)); */
+/*       PyList_SetItem(lc,0,PyLong_FromLong(xcoord)); */
+/*       PyList_SetItem(lc,1,PyLong_FromLong(ycoord)); */
 /*       PyList_SetItem(coordinates,icoord,lc); */
 /*     } */
 /*     PyDict_SetItem(d, pyv, coordinates); */
@@ -973,7 +973,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
           PyList_SET_ITEM(pyListVector[ifield], ifeature, PyFloat_FromDouble(thisFeature->GetFieldAsDouble(*fit)));
           break;
         case(OFTString):
-          PyList_SET_ITEM(pyListVector[ifield], ifeature, PyString_FromString(thisFeature->GetFieldAsString(*fit)));
+          PyList_SET_ITEM(pyListVector[ifield], ifeature, PyUnicode_FromString(thisFeature->GetFieldAsString(*fit)));
           break;
         case(OFTInteger):
         case(OFTInteger64):
@@ -1005,7 +1005,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
     PyObject *returnDict = PyDict_New();
     for(std::vector<size_t>::const_iterator fit=fieldindexes.begin();fit!=fieldindexes.end();++fit){
       std::string key = fields[*fit]->GetNameRef();
-      PyDict_SetItem(returnDict, PyString_FromString(key.c_str()), pyListVector[ifield]);
+      PyDict_SetItem(returnDict, PyUnicode_FromString(key.c_str()), pyListVector[ifield]);
       ++ifield;
     }
     if(returnDict)
