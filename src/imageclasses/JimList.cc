@@ -184,7 +184,7 @@ std::string JimList::jl2json() {
 
     // 5. Handle StreamWriterBuilder specifically
     Json::StreamWriterBuilder builder;
-    builder[Json::String("indentation")] = "";
+    builder["indentation"] = "";
 
     return Json::writeString(builder, custom);
 }

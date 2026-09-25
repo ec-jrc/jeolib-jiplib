@@ -3386,7 +3386,7 @@ std::string Jim::jim2json() {
     // 2. Handle StreamWriterBuilder
     // This is the specific source of your StreamWriterBuilderixERKSs error.
     Json::StreamWriterBuilder builder;
-    builder[Json::String("indentation")] = "";
+    builder["indentation"] = "";
     return Json::writeString(builder, custom);
 }
 

@@ -24,6 +24,7 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 #include <vector>
 #include <queue>
 #include <limits>
+#include <cstdint>
 #include "Jim.h"
 
 /* #define  FICT_PIX  1 */
