@@ -309,6 +309,9 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
 %typemap(in,numinputs=0) double& lrx (double temp) "$1 = &temp;"
 %typemap(in,numinputs=0) double& lry (double temp) "$1 = &temp;"
 
+ /* for sqedt function in efedt.c */
+%typemap(in, numinputs=0) int out_type "$1 = t_UINT32;"
+
 %typemap(argout) double& ulx {
   %append_output(PyFloat_FromDouble(*$1));
  }
