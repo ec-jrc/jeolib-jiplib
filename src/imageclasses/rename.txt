@@ -36,7 +36,7 @@ miallib_dist.h:extern ERROR_TYPE dst2d4(IMAGE *im); distance2d4
 miallib_dist.h:extern ERROR_TYPE dst2dchamfer(IMAGE *im); distance2dChamfer57
 miallib_dist.h:extern ERROR_TYPE chamfer2d(IMAGE *im, int type); distance2dChamfer
 miallib_dist.h:extern IMAGE *edistfifo2d(IMAGE *im, int graph); distance2dEuclideanFifo
-miallib_dist.h:extern IMAGE *sqedt(IMAGE *im); distance2dEuclideanSquared
+miallib_dist.h:extern IMAGE *sqedt(IMAGE *im, int out_type); distance2dEuclideanSquared
 miallib_dist.h:extern IMAGE *iz(IMAGE *im); distanceInfluenceZones2dEuclidean
 miallib_dist.h:extern ERROR_TYPE oiiz(IMAGE *im); distanceInfluenceZones2dOrderedIndependent
 miallib_dist.h:extern ERROR_TYPE geodist(IMAGE *im_m, IMAGE *im_r, int graph); distanceGeodesic
@@ -245,7 +245,7 @@ miallib_segment.h:extern ERROR_TYPE IsPartitionFiner(IMAGE *im1, IMAGE *im2, int
 miallib_segment.h:extern IMAGE **imgc(IMAGE *imlbl); imgc
 miallib_segment.h:extern ERROR_TYPE dendro(IMAGE **imap, int nc, char *fn); dendrogram
 miallib_segment.h:extern IMAGE **PartitionSimilarity(IMAGE *part1, IMAGE *part2, int graph); partitionSimilarity
-miallib_segment.h:extern IMAGE *segmentBinaryPatterns(IMAGE *imin, float size, int graphfg, int transition, int internal); segmentBinaryPatterns
+miallib_segment.h:extern IMAGE *segmentBinaryPatterns(IMAGE *imin, float size, int graphfg, int transition, int internal, int sqedt_type); segmentBinaryPatterns
 
 miallib_stats.h:extern IMAGE *histo1d(IMAGE *im); histo1d
 miallib_stats.h:extern IMAGE *histo2d(IMAGE *im1, IMAGE *im2); histo2d

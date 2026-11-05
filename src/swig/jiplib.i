@@ -312,6 +312,9 @@ along with jiplib.  If not, see <https://www.gnu.org/licenses/>.
  /* for sqedt function in efedt.c */
 %typemap(in, numinputs=0) int out_type "$1 = t_UINT32;"
 
+ /* for segmentBinaryPatterns (MSPA) in mspa.c: hide sqedt_type from Python */
+%typemap(in, numinputs=0) int sqedt_type "$1 = t_UINT32;"
+
 %typemap(argout) double& ulx {
   %append_output(PyFloat_FromDouble(*$1));
  }
